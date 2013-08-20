@@ -1,6 +1,11 @@
 #pragma once
 
 #include "ofMain.h"
+#include "ofxOsc.h"
+
+// listen to blobserver on port 9000
+#define PORT 9000
+#define NUM_MSG_STRINGS 20
 
 class testApp : public ofBaseApp{
 
@@ -18,5 +23,15 @@ class testApp : public ofBaseApp{
 		void windowResized(int w, int h);
 		void dragEvent(ofDragInfo dragInfo);
 		void gotMessage(ofMessage msg);
+
+		ofTrueTypeFont font;
+		ofxOscReceiver receiver;
+
+		int current_msg_string;
+		string msg_strings[NUM_MSG_STRINGS];
+		float timers[NUM_MSG_STRINGS];
+
+		int mouseX, mouseY;
+		string mouseButtonState;
 		
 };
