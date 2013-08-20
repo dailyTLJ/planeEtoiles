@@ -1,3 +1,4 @@
+*.cbp
 *.workspace
 /bin/
 /obj/

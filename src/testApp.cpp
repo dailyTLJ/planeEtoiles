@@ -51,7 +51,7 @@ void testApp::update(){
 		//// check for hog
 		//else if(m.getAddress() == "/blobserver/hog"){
 		//	// ignore
-		//}
+		}
 		else{
 			// unrecognized message: display on the bottom of the screen
 			string msg_string;
