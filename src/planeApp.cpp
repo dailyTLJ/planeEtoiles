@@ -32,14 +32,13 @@ void planeApp::update(){
 		receiver.getNextMessage(&m);
 
 		// check for startFrame
-		if(m.getAddress() == "/blobserver/foo"){
-		//if(m.getAddress() == "/blobserver/startFrame"){
+		if(m.getAddress() == "/blobserver/startFrame"){
 
-		//}
-		//// check for endFrame
-		//else if(m.getAddress() == "/blobserver/endFrame"){
+		}
+		// check for endFrame
+		else if(m.getAddress() == "/blobserver/endFrame"){
 
-		//}
+		}
 		//// check for bgsubtractor
 		//else if(m.getAddress() == "/blobserver/bgsubtractor"){
 
@@ -51,7 +50,7 @@ void planeApp::update(){
 		//// check for hog
 		//else if(m.getAddress() == "/blobserver/hog"){
 		//	// ignore
-		}
+		// }
 		else{
 			// unrecognized message: display on the bottom of the screen
 			string msg_string;

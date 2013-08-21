@@ -3,6 +3,9 @@
 #include "ofMain.h"
 #include "ofxOsc.h"
 
+#include <map>
+#include "Blob.h"
+
 // listen to blobserver on port 9000
 #define PORT 9000
 #define NUM_MSG_STRINGS 20
@@ -33,5 +36,8 @@ class planeApp : public ofBaseApp{
 
 		int mouseX, mouseY;
 		string mouseButtonState;
+
+
+		std::map<int, Blob> blobs;
 		
 };
