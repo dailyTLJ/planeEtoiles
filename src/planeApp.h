@@ -7,7 +7,7 @@
 #define PORT 9000
 #define NUM_MSG_STRINGS 20
 
-class testApp : public ofBaseApp{
+class planeApp : public ofBaseApp{
 
 	public:
 		void setup();
