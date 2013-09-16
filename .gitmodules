@@ -1,0 +1,3 @@
+[submodule "blobserver_tools"]
+	path = blobserver_tools
+	url = git@github.com:evsc/blobserver_tools.git

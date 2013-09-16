@@ -32,14 +32,15 @@ void testApp::update(){
 		receiver.getNextMessage(&m);
 
 		// check for startFrame
-		if(m.getAddress() == "/blobserver/foo"){
-		//if(m.getAddress() == "/blobserver/startFrame"){
-
-		//}
-		//// check for endFrame
-		//else if(m.getAddress() == "/blobserver/endFrame"){
-
-		//}
+		if(m.getAddress() == "/blobserver/startFrame"){
+			// ignore
+			cout << "start Frame " << "\n";
+		}
+		// check for endFrame
+		else if(m.getAddress() == "/blobserver/endFrame"){
+			// ignore
+			cout << "end Frame " << "\n";
+		}
 		//// check for bgsubtractor
 		//else if(m.getAddress() == "/blobserver/bgsubtractor"){
 
@@ -51,11 +52,12 @@ void testApp::update(){
 		//// check for hog
 		//else if(m.getAddress() == "/blobserver/hog"){
 		//	// ignore
-		}
+		// }
 		else{
 			// unrecognized message: display on the bottom of the screen
 			string msg_string;
 			msg_string = m.getAddress();
+			cout << "MSG "
 			msg_string += ": ";
 			for(int i = 0; i < m.getNumArgs(); i++){
 				// get the argument type
