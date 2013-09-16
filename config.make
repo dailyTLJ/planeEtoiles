@@ -61,7 +61,7 @@
 #
 #   Note: Leave a leading space when adding list items with the += operator
 ################################################################################
-# PROJECT_EXCLUSIONS =
+PROJECT_EXCLUSIONS ="bin,.xcodeproj,obj,blobserver_tools"
 
 ################################################################################
 # PROJECT LINKER FLAGS

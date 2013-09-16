@@ -1,4 +1,4 @@
-# RUN BgSubtractor on Basler camera
+# RUN HOG on Basler camera
 # 
 # necessary steps: 
 # ./switcherBasler.sh  ... to run camera with switcher

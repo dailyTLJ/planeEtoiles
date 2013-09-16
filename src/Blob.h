@@ -3,7 +3,7 @@
 #define MAX_HISTORY 100
 
 class TimedPoint {
-	vofVec2f point;
+	ofVec2f point;
 	int time;
 
 	void set(int x, int y) {
@@ -16,12 +16,12 @@ class Blob {
 
 	int id;
 
-	vofVec2f _rawPos;
-	vofVec2f position;
-	vofVec2f velocity;
+	ofVec2f _rawPos;
+	ofVec2f position;
+	ofVec2f velocity;
 	float size;
 	float age;
-	float lostDuration
+	float lostDuration;
 
 	TimedPoint history[MAX_HISTORY];
 

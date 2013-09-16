@@ -27,7 +27,7 @@ server.handle_timeout = types.MethodType(handle_timeout, server)
 
 
 def startMessage(path, tags, args, source):
-    print "- - - - - - - - - - - - "
+    print "\n- - - - - - - - - - - - "
 
 def stopMessage(path, tags, args, source):
     pass
@@ -40,7 +40,7 @@ def ignore(path, tags, args, source):
 # args = loc_x, loc_y, size, vel_x, vel_y, id
 # 
 def printBlob(path, tags, args, source):
-    print " ", 'id', args[5], "\tloc", args[0], "|", args[1], "\tsize", args[2], "\tvel", int(args[3]), "|", int(args[4]), "\tage", args[6], "\tlost", args[7]
+    print "\n ", 'id', args[5], "\tloc", args[0], "|", args[1], "\tsize", args[2], "\tvel", int(args[3]), "|", int(args[4]), "\tage", args[6], "\tlost", args[7]
 
 def printMsg(path, tags, args, source):
     text = ''.join(path.split("/"))
@@ -60,8 +60,8 @@ server.addMsgHandler( "/blobserver/bgsubtractor", printBlob )
 # server.addMsgHandler( "/blobserver/bgsubtractor", printMsg )
 server.addMsgHandler( "/blobserver/stitch", ignore )
 #server.addMsgHandler( "/blobserver/stitch", printMsg )
-
-
+server.addMsgHandler( "/blobserver/hog", printBlob )
+server.addMsgHandler( "/blobserver/nop", ignore )
 
 
 

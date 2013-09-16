@@ -27,30 +27,49 @@ void planeApp::update(){
 
 	// check for waiting messages
 	while(receiver.hasWaitingMessages()){
+
 		// get the next message
 		ofxOscMessage m;
 		receiver.getNextMessage(&m);
 
 		// check for startFrame
 		if(m.getAddress() == "/blobserver/startFrame"){
-
+			cout << "\n";
 		}
 		// check for endFrame
 		else if(m.getAddress() == "/blobserver/endFrame"){
 
 		}
-		//// check for bgsubtractor
-		//else if(m.getAddress() == "/blobserver/bgsubtractor"){
+		// check for bgsubtractor
+		else if(m.getAddress() == "/blobserver/bgsubtractor"){
 
-		//}
-		//// check for stitch
-		//else if(m.getAddress() == "/blobserver/stitch"){
-		//	// ignore
-		//}
-		//// check for hog
-		//else if(m.getAddress() == "/blobserver/hog"){
-		//	// ignore
-		// }
+		}
+		// check for stitch
+		else if(m.getAddress() == "/blobserver/stitch"){
+
+		}
+		// check for stitch
+		else if(m.getAddress() == "/blobserver/nop"){
+
+		}
+		// check for hog
+		else if(m.getAddress() == "/blobserver/hog"){
+			// ignore
+			int posx = m.getArgAsInt32(0);
+			int posy = m.getArgAsInt32(1);
+			float velx = m.getArgAsFloat(2);
+			float vely = m.getArgAsFloat(3);
+			int blobid = m.getArgAsInt32(4);
+			int age = m.getArgAsInt32(5);
+			int lost = m.getArgAsInt32(6);
+
+			Blob b = new Blob();
+			b.id = blobid;
+
+			blobs[blobid] = b;
+
+			cout << "blob " << blobid << "   " << posx << "|" << posy << "\n";
+		}
 		else{
 			// unrecognized message: display on the bottom of the screen
 			string msg_string;
@@ -83,6 +102,10 @@ void planeApp::update(){
 		}
 
 	}
+
+	// check for dead blobs, and delete them from list
+	// for (std::map<int,Blob>::iterator it=blobs.begin(); it!=blobs.end(); ++it)
+ //    	it->id
 
 }
 
