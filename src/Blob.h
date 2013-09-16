@@ -16,6 +16,7 @@ class Blob {
 
 	int id;
 
+	// information coming from blobserver
 	ofVec2f _rawPos;
 	ofVec2f position;
 	ofVec2f velocity;
@@ -24,6 +25,14 @@ class Blob {
 	float lostDuration;
 
 	TimedPoint history[MAX_HISTORY];
+
+	// internal information
+	int lifetime;
+	int maxLifetime = 10;
+	bool updated;	// updated by last sample ? 
+
+	// trail analysis
+
 
 	Blob() {}
 	void init();
