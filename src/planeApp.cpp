@@ -26,28 +26,17 @@ void planeApp::update(){
 		ofxOscMessage m;
 		receiver.getNextMessage(&m);
 
-		// check for startFrame
 		if(m.getAddress() == "/blobserver/startFrame"){
 			cout << "\n";
-		}
-		// check for endFrame
-		else if(m.getAddress() == "/blobserver/endFrame"){
+		} else if(m.getAddress() == "/blobserver/endFrame"){
 
-		}
-		// check for bgsubtractor
-		else if(m.getAddress() == "/blobserver/bgsubtractor"){
+		} else if(m.getAddress() == "/blobserver/bgsubtractor"){
 
-		}
-		// check for stitch
-		else if(m.getAddress() == "/blobserver/stitch"){
+		} else if(m.getAddress() == "/blobserver/stitch"){
 
-		}
-		// check for stitch
-		else if(m.getAddress() == "/blobserver/nop"){
+		} else if(m.getAddress() == "/blobserver/nop"){
 
-		}
-		// check for hog
-		else if(m.getAddress() == "/blobserver/hog"){
+		} else if(m.getAddress() == "/blobserver/hog"){
 			// parse incoming elements:  iiffiii: x y vx vy id age lost
 			int blobid = m.getArgAsInt32(4);
 			int posx = m.getArgAsInt32(0);
@@ -68,12 +57,12 @@ void planeApp::update(){
 			}
 
 			// update blob with new values
-			Blob b = blobs.find(blobid)->second;
+			Blob *b = blobs.find(blobid)->second;
 
-            b.follow(posx, posy);
-            b.velocity.set(velx, vely);
-            b.age = age;
-            b.lostDuration = lost;
+            b->follow(posx, posy);
+            b->velocity.set(velx, vely);
+            b->age = age;
+            b->lostDuration = lost;
 
 			cout << "blob " << blobid << "   " << posx << "|" << posy << "   - lifetime: " << b.lifetime << "\n";
 		}
@@ -87,6 +76,7 @@ void planeApp::update(){
     std::map<int,Blob>::iterator it = blobs.begin();
     while (it != blobs.end()) {
     	it->second.update();
+    	cout << "update " << it->second.position.x << " | " << it->second.position.y << "\n";
     	if( !it->second.isAlive() ) {
 //            cout << "delete blob " << it->second.id << "\n";
     		blobs.erase(it++);
@@ -101,6 +91,21 @@ void planeApp::update(){
 
 //--------------------------------------------------------------
 void planeApp::draw(){
+    ofBackground(0,50,150);
+
+    // draw frame
+    ofNoFill(); ofSetColor(255);
+    ofRect(10,10,640,480);
+
+    //
+    int offsx = 10;
+    int offsy = 10;
+    ofFill(); ofSetColor(255);
+    for(std::map<int, Blob>::iterator it = blobs.begin(); it != blobs.end(); ++it){
+        Blob b = it->second;
+        ofCircle( offsx + b.velocity.x, offsy + b.velocity.y, 20);
+    }
+    cout << "\n";
 
 }
 

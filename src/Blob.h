@@ -12,7 +12,6 @@ class TimedPoint {
         void set(int x, int y) {
             this->point.set( x, y );
             this->time = ofGetUnixTime();
-            cout << "timed point " << this->time << "\n";
         }
 };
 
