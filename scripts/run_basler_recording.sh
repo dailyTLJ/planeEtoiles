@@ -11,7 +11,7 @@
 source helpers.sh
 
 # cd ../data
-blobserver -C basler_rec.xml
+blobserver -C basler_rec_ip9.xml
 # $@ &
 #sleep 5
 
