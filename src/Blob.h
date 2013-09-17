@@ -1,44 +1,48 @@
 #pragma once
 
+#include "ofMain.h"
+
 #define MAX_HISTORY 100
 
 class TimedPoint {
-	ofVec2f point;
-	int time;
+    public:
+        ofVec2f point;
+        int time;
 
-	void set(int x, int y) {
-		point.set( x, y );
-		// set time to current time
-	}
+        void set(int x, int y) {
+            this->point.set( x, y );
+            this->time = ofGetUnixTime();
+            cout << "timed point " << this->time << "\n";
+        }
 };
 
 class Blob {
+    public:
+        int id;
 
-	int id;
+        // information coming from blobserver
+    	ofVec2f _rawPos;
+    	ofVec2f position;
+    	ofVec2f velocity;
+        float size;
+        float age;
+        float lostDuration;
 
-	// information coming from blobserver
-	ofVec2f _rawPos;
-	ofVec2f position;
-	ofVec2f velocity;
-	float size;
-	float age;
-	float lostDuration;
+    	vector<TimedPoint> history;    // array length of MAX_HISTORY
 
-	TimedPoint history[MAX_HISTORY];
+        // internal information
+        int lifetime;
+        int maxLifetime;
+        bool updated;	// updated by last sample ?
 
-	// internal information
-	int lifetime;
-	int maxLifetime = 10;
-	bool updated;	// updated by last sample ? 
-
-	// trail analysis
+        // trail analysis
 
 
-	Blob() {}
-	void init();
-	void follow();
-	void transformPerspective();
-	void update();
-	bool isAlive();
+        Blob();
+        void init();
+        void follow(int x, int y);
+        ofVec2f transformPerspective(ofVec2f& v);
+        void update();
+        bool isAlive();
 
 };
