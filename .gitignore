@@ -1,27 +1,30 @@
 scripts/models/*
+notes
+tmp
+icon.rc
 
 #################  
 ## openFrameworks  
 #################  
   
-[Bb]in/* 
-![Bb]in/data/ 
-[Bb]uild/ 
-[Oo]bj/ 
-*.o 
-[Dd]ebug*/  
-[Rr]elease*/  
-*.mode*  
-*.app/  
-*.pyc  
-*.log  
+[Bb]in/*
+![Bb]in/data/
+[Bb]uild/
+[Oo]bj/
+*.o
+[Dd]ebug*/
+[Rr]elease*/
+*.mode*
+*.app/
+*.pyc
+*.log
   
 #################  
 ## Code::Blocks  
 #################  
   
-*.depend  
-*.layout  
+*.depend
+*.layout
 *.cbp
 *.workspace
 
@@ -30,7 +33,7 @@ scripts/models/*
 ############  
   
 # Windows image file caches  
-Thumbs.db  
+Thumbs.db
   
 # Folder config file  
-Desktop.ini  
+Desktop.ini

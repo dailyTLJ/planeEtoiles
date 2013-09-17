@@ -3,7 +3,7 @@
 	<FileVersion major="1" minor="6" />
 	<Project>
 		<Option title="planeEtoiles" />
-		<Option makefile_is_custom="1" />
+		<Option makefile="makefile" />
 		<Option pch_mode="2" />
 		<Option compiler="gcc" />
 		<Option virtualFolders="addons\;src\;build config\;addons\ofxOsc\libs\oscpack\src\ip\posix\;addons\ofxOpenCv\libs\opencv\include\opencv2\ts\;addons\ofxOpenCv\src\;addons\ofxOpenCv\libs\opencv\include\opencv2\core\;addons\ofxOsc\libs\oscpack\src\osc\;addons\ofxOpenCv\libs\opencv\include\opencv2\gpu\;addons\ofxOpenCv\libs\opencv\include\opencv\;addons\ofxXmlSettings\libs\;addons\ofxOpenCv\libs\opencv\include\opencv2\legacy\;addons\ofxNetwork\src\;addons\ofxOpenCv\libs\opencv\include\opencv2\contrib\;addons\ofxOpenCv\libs\opencv\include\opencv2\imgproc\;addons\ofxOpenCv\libs\opencv\include\opencv2\;addons\ofxThreadedImageLoader\src\;addons\ofxOpenCv\libs\opencv\include\opencv2\flann\;addons\ofxOpenCv\libs\opencv\include\opencv2\video\;addons\ofxOpenCv\libs\opencv\include\opencv2\objdetect\;addons\ofxOpenCv\libs\opencv\include\opencv2\ml\;addons\ofxOsc\src\;addons\ofxOpenCv\libs\opencv\include\opencv2\highgui\;addons\ofxGui\src\;addons\ofxOsc\libs\oscpack\src\ip\;addons\ofxOsc\libs\oscpack\src\ip\win32\;addons\ofxXmlSettings\src\;addons\ofxOpenCv\libs\opencv\include\opencv2\features2d\;addons\ofxOpenCv\libs\opencv\include\opencv2\calib3d\;" />
@@ -27,6 +27,9 @@
 				<Option projectLinkerOptionsRelation="2" />
 			</Target>
 		</Build>
+		<Linker>
+			<Add option="../../../libs/openFrameworksCompiled/lib/win_cb/openFrameworks.lib" />
+		</Linker>
 		<Unit filename="../../../addons/ofxGui/src/ofxBaseGui.cpp">
 			<Option virtualFolder="addons/ofxGui/src" />
 		</Unit>
@@ -537,13 +540,19 @@
 		<Unit filename="config.make">
 			<Option virtualFolder="build config" />
 		</Unit>
+		<Unit filename="src/Blob.cpp">
+			<Option virtualFolder="src/" />
+		</Unit>
+		<Unit filename="src/Blob.h">
+			<Option virtualFolder="src/" />
+		</Unit>
 		<Unit filename="src/main.cpp">
 			<Option virtualFolder="src/" />
 		</Unit>
-		<Unit filename="src/testApp.cpp">
+		<Unit filename="src/planeApp.cpp">
 			<Option virtualFolder="src/" />
 		</Unit>
-		<Unit filename="src/testApp.h">
+		<Unit filename="src/planeApp.h">
 			<Option virtualFolder="src/" />
 		</Unit>
 		<Extensions>
