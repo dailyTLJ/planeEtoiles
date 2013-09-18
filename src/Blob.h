@@ -6,7 +6,7 @@
 
 class TimedPoint {
     public:
-        ofVec2f point;
+        ofPoint point;
         int time;
 
         void set(int x, int y) {
@@ -20,9 +20,10 @@ class Blob {
         int id;
 
         // information coming from blobserver
-    	ofVec2f _rawPos;
-    	ofVec2f position;
-    	ofVec2f velocity;
+        // ofVec2f
+    	ofPoint _rawPos;
+    	ofPoint position;
+    	ofPoint velocity;
         float size;
         float age;
         float lostDuration;
@@ -40,7 +41,7 @@ class Blob {
         Blob();
         void init();
         void follow(int x, int y);
-        ofVec2f transformPerspective(ofVec2f& v);
+        ofPoint transformPerspective(ofPoint& v);
         void update();
         bool isAlive();
 

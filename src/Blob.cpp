@@ -16,7 +16,6 @@ void Blob::init(){
 void Blob::follow(int x, int y){
     this->_rawPos.set(x, y);
     this->position = transformPerspective(this->_rawPos);
-    cout << "follow " << this->position.x << " | " << this->position.y << "\n";
 
     TimedPoint tPoint;
     tPoint.set(this->position.x, this->position.y);
@@ -31,9 +30,9 @@ void Blob::follow(int x, int y){
 }
 
 //--------------------------------------------------------------
-ofVec2f Blob::transformPerspective(ofVec2f& v){
+ofPoint Blob::transformPerspective(ofPoint& v){
     // TODO: cv-perspectiveTransform
-    ofVec2f newV;
+    ofPoint newV;
     newV.set( v.x, v.y );
     return newV;
 }

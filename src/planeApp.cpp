@@ -11,7 +11,9 @@ void planeApp::setup(){
 	mouseY = 0;
 	mouseButtonState = "";
 
-	ofBackground(30, 30, 130);
+//	perspectiveMat = getPerspectiveTransform
+
+	ofBackground(255);
 
 }
 
@@ -27,7 +29,7 @@ void planeApp::update(){
 		receiver.getNextMessage(&m);
 
 		if(m.getAddress() == "/blobserver/startFrame"){
-			cout << "\n";
+//			cout << "\n";
 		} else if(m.getAddress() == "/blobserver/endFrame"){
 
 		} else if(m.getAddress() == "/blobserver/bgsubtractor"){
@@ -57,14 +59,14 @@ void planeApp::update(){
 			}
 
 			// update blob with new values
-			Blob *b = blobs.find(blobid)->second;
+			Blob* b = &blobs.find(blobid)->second;
 
             b->follow(posx, posy);
             b->velocity.set(velx, vely);
             b->age = age;
             b->lostDuration = lost;
 
-			cout << "blob " << blobid << "   " << posx << "|" << posy << "   - lifetime: " << b.lifetime << "\n";
+//			cout << "blob " << blobid << "   " << posx << "|" << posy << "   - lifetime: " << b->lifetime << "\n";
 		}
 		else{
 			// unrecognized message
@@ -76,7 +78,6 @@ void planeApp::update(){
     std::map<int,Blob>::iterator it = blobs.begin();
     while (it != blobs.end()) {
     	it->second.update();
-    	cout << "update " << it->second.position.x << " | " << it->second.position.y << "\n";
     	if( !it->second.isAlive() ) {
 //            cout << "delete blob " << it->second.id << "\n";
     		blobs.erase(it++);
@@ -103,9 +104,8 @@ void planeApp::draw(){
     ofFill(); ofSetColor(255);
     for(std::map<int, Blob>::iterator it = blobs.begin(); it != blobs.end(); ++it){
         Blob b = it->second;
-        ofCircle( offsx + b.velocity.x, offsy + b.velocity.y, 20);
+        ofCircle( offsx + b.position.x, offsy + b.position.y, 20);
     }
-    cout << "\n";
 
 }
 
