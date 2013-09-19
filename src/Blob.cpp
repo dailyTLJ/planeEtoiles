@@ -13,14 +13,22 @@ void Blob::init(){
 }
 
 //--------------------------------------------------------------
-void Blob::follow(int x, int y){
+void Blob::follow(float x, float y){
     this->_rawPos.set(x, y);
     this->position = transformPerspective(this->_rawPos);
+
+    TimedPoint rawPoint;
+    rawPoint.set(x,y);
+    rawHistory.push_back(rawPoint);
 
     TimedPoint tPoint;
     tPoint.set(this->position.x, this->position.y);
 
     history.push_back(tPoint);
+
+    while( rawHistory.size() > MAX_HISTORY ) {
+        rawHistory.erase( rawHistory.begin() );
+    }
 
     while( history.size() > MAX_HISTORY ) {
         history.erase( history.begin() );
@@ -31,23 +39,17 @@ void Blob::follow(int x, int y){
 
 //--------------------------------------------------------------
 ofPoint Blob::transformPerspective(ofPoint& v){
-    // TODO: cv-perspectiveTransform
-//    float destp[1][2] = {{0,0}};
+
     CvMat *pt_src = cvCreateMat(1,1, CV_32FC2);
     CvMat *pt_dst = cvCreateMat(1,1, CV_32FC2);
-    float src[2] = {v.x*1, v.y*1};
-    float dst[2] = {0,0};
-    cvSetData(pt_src, src, 2*sizeof(float));
-    cvSetData(pt_dst, dst, 2*sizeof(float));
+    cvSet1D(pt_src, 0, cvScalar(v.x, v.y));
 
     cvPerspectiveTransform(pt_src, pt_dst, perspectiveMat);
+    CvScalar s = cvGet1D(pt_dst, 0);
 
-    CvScalar s;
-    s = cvGet2D(pt_dst,0,0);
-    cout << "transform " << v << " into " << s.val[0] << " | " << s.val[1] << endl;
+//    cout << this->id << " transform " << v.x << " | " << v.y << " into " << cvRound(s.val[0]) << " | " << cvRound(s.val[1]) << endl;
 
     ofPoint newV;
-//    newV.set( pt_dst->at<CV_32FC2>(0,0)[0], pt_dst->at<CV_32FC2>(0,0)[1] );
     newV.set( s.val[0], s.val[1] );
     return newV;
 }

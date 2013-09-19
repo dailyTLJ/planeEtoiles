@@ -11,20 +11,28 @@ void planeApp::setup(){
 	mouseY = 0;
 	mouseButtonState = "";
 
-    float proj_in_points[8] = {0,0,640,0,640,480,480,0};
-    float proj_out_points[8] = {0,0,640,0,640,480,480,0};
+
+    float in[] = {0,0,150,0,150,30,0,30};
+    float out[] = {0,0,640,0,590,480,50,480};
 
     CvMat *proj_in = cvCreateMat(4,2, CV_32FC1);
     CvMat *proj_out = cvCreateMat(4,2, CV_32FC1);
+
+    cvSetData(proj_in, in, 2*sizeof(float));
+    cvSetData(proj_out, out, 2*sizeof(float));
+
     perspectiveMat = cvCreateMat(3,3, CV_32FC1);
-
-    cvSetData(proj_in, proj_in_points, 2*sizeof(float));
-    cvSetData(proj_out, proj_out_points, 2*sizeof(float));
-
     cvFindHomography(proj_in, proj_out, perspectiveMat);
 
     cvReleaseMat(&proj_in);
     cvReleaseMat(&proj_out);
+
+    testBlob.perspectiveMat = perspectiveMat;
+
+    for( int i=0; i<50; i++ ) {
+        testBlob.follow( i*3, i * 3.0/5.0 );
+        testBlob.follow(150-i*3,i * 3.0/5.0);
+    }
 
 //    cout << perspectiveMat << endl;
 
@@ -121,6 +129,18 @@ void planeApp::draw(){
     for(std::map<int, Blob>::iterator it = blobs.begin(); it != blobs.end(); ++it){
         Blob b = it->second;
         ofCircle( offsx + b.position.x, offsy + b.position.y, 20);
+    }
+
+    // testBlob - draw raw history
+    ofSetColor(200,200,200);
+    for (vector<TimedPoint>::iterator it = testBlob.rawHistory.begin() ; it != testBlob.rawHistory.end(); ++it) {
+        ofCircle( offsx + (*it).point.x, offsy + (*it).point.y, 2);
+    }
+
+    // testBlob - draw transformed history
+    ofSetColor(200,0,0);
+    for (vector<TimedPoint>::iterator it = testBlob.history.begin() ; it != testBlob.history.end(); ++it) {
+        ofCircle( offsx + (*it).point.x, offsy + (*it).point.y, 2);
     }
 
 }

@@ -29,6 +29,7 @@ class Blob {
         float age;
         float lostDuration;
 
+        vector<TimedPoint> rawHistory;
     	vector<TimedPoint> history;    // array length of MAX_HISTORY
 
         // internal information
@@ -41,7 +42,7 @@ class Blob {
 
         Blob();
         void init();
-        void follow(int x, int y);
+        void follow(float x, float y);
         ofPoint transformPerspective(ofPoint& v);
         void update();
         bool isAlive();

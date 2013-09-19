@@ -40,6 +40,7 @@ class planeApp : public ofBaseApp{
 
 
 		std::map<int, Blob> blobs;
+		Blob testBlob;
 
 		CvMat* perspectiveMat;
 
