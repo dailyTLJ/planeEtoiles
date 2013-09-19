@@ -1,6 +1,7 @@
 #pragma once
 
 #include "ofMain.h"
+#include "ofxOpenCv.h"
 
 #define MAX_HISTORY 100
 
@@ -44,5 +45,7 @@ class Blob {
         ofPoint transformPerspective(ofPoint& v);
         void update();
         bool isAlive();
+
+        CvMat* perspectiveMat;
 
 };

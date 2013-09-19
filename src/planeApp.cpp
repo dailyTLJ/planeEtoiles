@@ -11,7 +11,22 @@ void planeApp::setup(){
 	mouseY = 0;
 	mouseButtonState = "";
 
-//	perspectiveMat = getPerspectiveTransform
+    float proj_in_points[8] = {0,0,640,0,640,480,480,0};
+    float proj_out_points[8] = {0,0,640,0,640,480,480,0};
+
+    CvMat *proj_in = cvCreateMat(4,2, CV_32FC1);
+    CvMat *proj_out = cvCreateMat(4,2, CV_32FC1);
+    perspectiveMat = cvCreateMat(3,3, CV_32FC1);
+
+    cvSetData(proj_in, proj_in_points, 2*sizeof(float));
+    cvSetData(proj_out, proj_out_points, 2*sizeof(float));
+
+    cvFindHomography(proj_in, proj_out, perspectiveMat);
+
+    cvReleaseMat(&proj_in);
+    cvReleaseMat(&proj_out);
+
+//    cout << perspectiveMat << endl;
 
 	ofBackground(255);
 
@@ -55,6 +70,7 @@ void planeApp::update(){
 			    Blob newb;
 				blobs[blobid] = newb;
 				blobs[blobid].id = blobid;
+                blobs[blobid].perspectiveMat = this->perspectiveMat;
 //				cout << "NEW ";
 			}
 

@@ -2,6 +2,7 @@
 
 #include "ofMain.h"
 #include "ofxOsc.h"
+#include "ofxOpenCv.h"
 
 #include <map>
 #include "Blob.h"
@@ -40,6 +41,6 @@ class planeApp : public ofBaseApp{
 
 		std::map<int, Blob> blobs;
 
-		CvMat perspectiveMat;
+		CvMat* perspectiveMat;
 
 };
