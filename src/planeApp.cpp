@@ -117,31 +117,47 @@ void planeApp::update(){
 //--------------------------------------------------------------
 void planeApp::draw(){
     ofBackground(0,50,150);
-
-    // draw frame
-    ofNoFill(); ofSetColor(255);
-    ofRect(10,10,640,480);
-
-    //
     int offsx = 10;
     int offsy = 10;
+
+    // draw raw data / small display
+    //--------------------------------------------------------------
+    ofNoFill(); ofSetColor(255); ofRect(offsx,offsy,220,174);
+    for(std::map<int, Blob>::iterator it = blobs.begin(); it != blobs.end(); ++it){
+        Blob b = it->second;
+        ofRect( offsx + b._rawPos.x, offsy + b._rawPos.y, 96, 160);
+    }
+
+    // draw top down view
+    //--------------------------------------------------------------
+    offsy += 174 + 10;
+    ofNoFill(); ofSetColor(255); ofRect(offsx,offsy,640,480);
+
+    // draw history
+    ofFill(); ofSetColor(150);
+    for(std::map<int, Blob>::iterator it = blobs.begin(); it != blobs.end(); ++it){
+        Blob b = it->second;
+        for (vector<TimedPoint>::iterator it = b.history.begin() ; it != b.history.end(); ++it) {
+            ofCircle( offsx + (*it).point.x, offsy + (*it).point.y, 2);
+        }
+    }
     ofFill(); ofSetColor(255);
     for(std::map<int, Blob>::iterator it = blobs.begin(); it != blobs.end(); ++it){
         Blob b = it->second;
         ofCircle( offsx + b.position.x, offsy + b.position.y, 20);
     }
 
-    // testBlob - draw raw history
-    ofSetColor(200,200,200);
-    for (vector<TimedPoint>::iterator it = testBlob.rawHistory.begin() ; it != testBlob.rawHistory.end(); ++it) {
-        ofCircle( offsx + (*it).point.x, offsy + (*it).point.y, 2);
-    }
-
-    // testBlob - draw transformed history
-    ofSetColor(200,0,0);
-    for (vector<TimedPoint>::iterator it = testBlob.history.begin() ; it != testBlob.history.end(); ++it) {
-        ofCircle( offsx + (*it).point.x, offsy + (*it).point.y, 2);
-    }
+//    // testBlob - draw raw history
+//    ofSetColor(200,200,200);
+//    for (vector<TimedPoint>::iterator it = testBlob.rawHistory.begin() ; it != testBlob.rawHistory.end(); ++it) {
+//        ofCircle( offsx + (*it).point.x, offsy + (*it).point.y, 2);
+//    }
+//
+//    // testBlob - draw transformed history
+//    ofSetColor(200,0,0);
+//    for (vector<TimedPoint>::iterator it = testBlob.history.begin() ; it != testBlob.history.end(); ++it) {
+//        ofCircle( offsx + (*it).point.x, offsy + (*it).point.y, 2);
+//    }
 
 }
 
