@@ -47,6 +47,6 @@ class Blob {
         void update();
         bool isAlive();
 
-        CvMat* perspectiveMat;
+        cv::Mat* perspectiveMat;
 
 };

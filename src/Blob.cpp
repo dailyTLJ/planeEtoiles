@@ -40,17 +40,15 @@ void Blob::follow(float x, float y){
 //--------------------------------------------------------------
 ofPoint Blob::transformPerspective(ofPoint& v){
 
-    CvMat *pt_src = cvCreateMat(1,1, CV_32FC2);
-    CvMat *pt_dst = cvCreateMat(1,1, CV_32FC2);
-    cvSet1D(pt_src, 0, cvScalar(v.x, v.y));
+    float pv[2] = {v.x, v.y};
 
-    cvPerspectiveTransform(pt_src, pt_dst, perspectiveMat);
-    CvScalar s = cvGet1D(pt_dst, 0);
+    vector<cv::Point2f> pre, post;
+    pre.push_back(cv::Point2f(v.x, v.y));
 
-//    cout << this->id << " transform " << v.x << " | " << v.y << " into " << cvRound(s.val[0]) << " | " << cvRound(s.val[1]) << endl;
+    cv::perspectiveTransform(pre, post, *perspectiveMat);
 
     ofPoint newV;
-    newV.set( s.val[0], s.val[1] );
+    newV.set( post[0].x, post[0].y );
     return newV;
 }
 

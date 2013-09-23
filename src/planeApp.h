@@ -31,9 +31,6 @@ class planeApp : public ofBaseApp{
 		ofTrueTypeFont font;
 		ofxOscReceiver receiver;
 
-		int current_msg_string;
-		string msg_strings[NUM_MSG_STRINGS];
-		float timers[NUM_MSG_STRINGS];
 
 		int mouseX, mouseY;
 		string mouseButtonState;
@@ -42,6 +39,6 @@ class planeApp : public ofBaseApp{
 		std::map<int, Blob> blobs;
 		Blob testBlob;
 
-		CvMat* perspectiveMat;
+		cv::Mat* perspectiveMat;
 
 };

@@ -6,7 +6,6 @@ void planeApp::setup(){
 	cout << "listening for osc messages on port " << PORT << "\n";
 	receiver.setup(PORT);
 
-	current_msg_string = 0;
 	mouseX = 0;
 	mouseY = 0;
 	mouseButtonState = "";
@@ -15,17 +14,13 @@ void planeApp::setup(){
     float in[] = {0,0,150,0,150,30,0,30};
     float out[] = {0,0,640,0,590,480,50,480};
 
-    CvMat *proj_in = cvCreateMat(4,2, CV_32FC1);
-    CvMat *proj_out = cvCreateMat(4,2, CV_32FC1);
+    cv::Mat proj_in(4,2, CV_32FC1, in);
+    cv::Mat proj_out(4,2, CV_32FC1, out);
 
-    cvSetData(proj_in, in, 2*sizeof(float));
-    cvSetData(proj_out, out, 2*sizeof(float));
+    *perspectiveMat = cv::findHomography(proj_in, proj_out);
 
-    perspectiveMat = cvCreateMat(3,3, CV_32FC1);
-    cvFindHomography(proj_in, proj_out, perspectiveMat);
-
-    cvReleaseMat(&proj_in);
-    cvReleaseMat(&proj_out);
+    proj_in.release();
+    proj_out.release();
 
     testBlob.perspectiveMat = perspectiveMat;
 
