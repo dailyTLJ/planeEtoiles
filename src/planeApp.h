@@ -39,6 +39,6 @@ class planeApp : public ofBaseApp{
 		std::map<int, Blob> blobs;
 		Blob testBlob;
 
-		cv::Mat* perspectiveMat;
+		cv::Mat perspectiveMat;
 
 };

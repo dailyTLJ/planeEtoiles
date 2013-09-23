@@ -10,26 +10,23 @@ void planeApp::setup(){
 	mouseY = 0;
 	mouseButtonState = "";
 
-
     float in[] = {0,0,150,0,150,30,0,30};
     float out[] = {0,0,640,0,590,480,50,480};
 
     cv::Mat proj_in(4,2, CV_32FC1, in);
     cv::Mat proj_out(4,2, CV_32FC1, out);
 
-    *perspectiveMat = cv::findHomography(proj_in, proj_out);
+    perspectiveMat = cv::findHomography(proj_in, proj_out);
 
     proj_in.release();
     proj_out.release();
 
-    testBlob.perspectiveMat = perspectiveMat;
+    testBlob.perspectiveMat = &perspectiveMat;
 
     for( int i=0; i<50; i++ ) {
         testBlob.follow( i*3, i * 3.0/5.0 );
         testBlob.follow(150-i*3,i * 3.0/5.0);
     }
-
-//    cout << perspectiveMat << endl;
 
 	ofBackground(255);
 
@@ -73,7 +70,7 @@ void planeApp::update(){
 			    Blob newb;
 				blobs[blobid] = newb;
 				blobs[blobid].id = blobid;
-                blobs[blobid].perspectiveMat = this->perspectiveMat;
+                blobs[blobid].perspectiveMat = &this->perspectiveMat;
 //				cout << "NEW ";
 			}
 
