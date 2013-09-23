@@ -39,7 +39,7 @@ void planeApp::setup(){
 //--------------------------------------------------------------
 void planeApp::update(){
 
-    receiveOsc();
+    this->receiveOsc();
 
 	// check for dead blobs, and delete them from list
     std::map<int,Blob>::iterator it = blobs.begin();
@@ -53,6 +53,11 @@ void planeApp::update(){
     }
 
     // analysis
+    if (scene==0) {
+        if (segment==0) {
+
+        }
+    }
 
 }
 

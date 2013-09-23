@@ -38,6 +38,8 @@ class Blob {
         bool updated;	// updated by last sample ?
 
         // trail analysis
+        bool frozen;
+        int frozenTimer;
 
 
         Blob();

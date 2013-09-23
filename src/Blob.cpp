@@ -10,6 +10,9 @@ void Blob::init(){
     this->maxLifetime = 20;
 	this->lifetime = this->maxLifetime;
 	this->updated = true;
+
+	this->frozen = false;
+	this->frozenTimer = 0;
 }
 
 //--------------------------------------------------------------
