@@ -13,7 +13,7 @@
             </Param>
         </Source>
         <Detector>
-            <Type>Detector_Nop</Type>
+            <Type>Actuator_Nop</Type>
         </Detector>
         <Client>
             <Address>localhost</Address>

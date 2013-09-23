@@ -36,7 +36,7 @@
             </Param>
         </Detector> -->
         <Detector>
-            <Type>Detector_Hog</Type>
+            <Type>Actuator_Hog</Type>
             <Param>
                 <Name>verbose</Name>
                 <Value>0</Value>
