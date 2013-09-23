@@ -37,11 +37,11 @@ def ignore(path, tags, args, source):
     pass
 
 
-# tags = iiiffi
-# args = loc_x, loc_y, size, vel_x, vel_y, id
+# tags = iiffiii  << hog
+# args = loc_x, loc_y, vel_x, vel_y, id, age, lost
 # 
 def printBlob(path, tags, args, source):
-    print "\n ", 'id', args[5], "\tloc", args[0], "|", args[1], "\tsize", args[2], "\tvel", int(args[3]), "|", int(args[4]), "\tage", args[6], "\tlost", args[7]
+    print "\n ", 'id', args[4], "\tloc", args[0], "|", args[1], "\tvel", int(args[2]), "|", int(args[3]), "\tage", args[5], "\tlost", args[6]
 
 def printMsg(path, tags, args, source):
     text = ''.join(path.split("/"))

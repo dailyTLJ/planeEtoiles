@@ -1,4 +1,5 @@
 #include "planeApp.h"
+#include "ofBitmapFont.h"
 
 //--------------------------------------------------------------
 void planeApp::setup(){
@@ -95,14 +96,11 @@ void planeApp::update(){
     while (it != blobs.end()) {
     	it->second.update();
     	if( !it->second.isAlive() ) {
-//            cout << "delete blob " << it->second.id << "\n";
     		blobs.erase(it++);
     	} else {
     		++it;
     	}
     }
-
-//    cout << " . ";
 
 }
 
@@ -126,17 +124,27 @@ void planeApp::draw(){
     ofNoFill(); ofSetColor(255); ofRect(offsx,offsy,640,480);
 
     // draw history
-    ofFill(); ofSetColor(150);
+    ofNoFill(); ofSetColor(150);
     for(std::map<int, Blob>::iterator it = blobs.begin(); it != blobs.end(); ++it){
         Blob b = it->second;
+        ofBeginShape();
         for (vector<TimedPoint>::iterator it = b.history.begin() ; it != b.history.end(); ++it) {
-            ofCircle( offsx + (*it).point.x, offsy + (*it).point.y, 2);
+            ofVertex( offsx + (*it).point.x, offsy + (*it).point.y );
         }
+        ofEndShape();
     }
-    ofFill(); ofSetColor(255);
+    ofFill();
     for(std::map<int, Blob>::iterator it = blobs.begin(); it != blobs.end(); ++it){
+        ofSetColor(255);
         Blob b = it->second;
         ofCircle( offsx + b.position.x, offsy + b.position.y, 20);
+
+        int x = offsx + b.position.x;
+        int y = offsy + b.position.y;
+        string textStr = "id: " + ofToString(b.id);
+        textStr += "\nvel:" + ofToString(b.velocity.x, 1) + "/" + ofToString(b.velocity.y, 1);
+        textStr += "\nage: "+ofToString(b.age) + "\nlost: " + ofToString(b.lostDuration);
+        ofDrawBitmapStringHighlight(textStr, x, y);
     }
 
 //    // testBlob - draw raw history
