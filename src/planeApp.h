@@ -17,6 +17,7 @@ class planeApp : public ofBaseApp{
 		void setup();
 		void update();
 		void draw();
+		void receiveOsc();
 
 		void keyPressed(int key);
 		void keyReleased(int key);
@@ -31,14 +32,15 @@ class planeApp : public ofBaseApp{
 		ofTrueTypeFont font;
 		ofxOscReceiver receiver;
 
-
 		int mouseX, mouseY;
 		string mouseButtonState;
 
-
 		std::map<int, Blob> blobs;
 		Blob testBlob;
-
 		cv::Mat perspectiveMat;
+
+		int scene;
+		int segment;
+		int masterClock;
 
 };

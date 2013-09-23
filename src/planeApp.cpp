@@ -11,19 +11,22 @@ void planeApp::setup(){
 	mouseY = 0;
 	mouseButtonState = "";
 
+	scene = 0;
+	segment = 0;
+	masterClock = 0;
+
+    // compute the perspectiveTransformation
+    // to map from blob-coordinates to the top-down view
     float in[] = {0,0,150,0,150,30,0,30};
     float out[] = {0,0,640,0,590,480,50,480};
-
     cv::Mat proj_in(4,2, CV_32FC1, in);
     cv::Mat proj_out(4,2, CV_32FC1, out);
-
     perspectiveMat = cv::findHomography(proj_in, proj_out);
-
     proj_in.release();
     proj_out.release();
 
+    // test blob to verify perspective Mat
     testBlob.perspectiveMat = &perspectiveMat;
-
     for( int i=0; i<50; i++ ) {
         testBlob.follow( i*3, i * 3.0/5.0 );
         testBlob.follow(150-i*3,i * 3.0/5.0);
@@ -36,6 +39,27 @@ void planeApp::setup(){
 //--------------------------------------------------------------
 void planeApp::update(){
 
+    receiveOsc();
+
+	// check for dead blobs, and delete them from list
+    std::map<int,Blob>::iterator it = blobs.begin();
+    while (it != blobs.end()) {
+    	it->second.update();
+    	if( !it->second.isAlive() ) {
+    		blobs.erase(it++);
+    	} else {
+    		++it;
+    	}
+    }
+
+    // analysis
+
+}
+
+// check for incoming OSC messages
+// add new blobs, or update blobs with new data
+//--------------------------------------------------------------
+void planeApp::receiveOsc(){
 
 	// check for waiting messages
 	while(receiver.hasWaitingMessages()){
@@ -89,30 +113,18 @@ void planeApp::update(){
 			// unrecognized message
 		}
 
-	}
-
-	// check for dead blobs, and delete them from list
-    std::map<int,Blob>::iterator it = blobs.begin();
-    while (it != blobs.end()) {
-    	it->second.update();
-    	if( !it->second.isAlive() ) {
-    		blobs.erase(it++);
-    	} else {
-    		++it;
-    	}
-    }
-
-}
+	}}
 
 //--------------------------------------------------------------
 void planeApp::draw(){
     ofBackground(0,50,150);
-    int offsx = 10;
-    int offsy = 10;
+    int offsx = 10; int offsy = 10;
 
     // draw raw data / small display
     //--------------------------------------------------------------
-    ofNoFill(); ofSetColor(255); ofRect(offsx,offsy,220,174);
+    ofNoFill(); ofSetColor(255); ofRect(offsx,offsy,240,180);
+    string rawInfo = "port: " + ofToString(PORT) + "\nrate:";
+    ofDrawBitmapStringHighlight(rawInfo, offsx + 240 + 4, offsy + 13);
     for(std::map<int, Blob>::iterator it = blobs.begin(); it != blobs.end(); ++it){
         Blob b = it->second;
         ofRect( offsx + b._rawPos.x, offsy + b._rawPos.y, 96, 160);
@@ -120,8 +132,11 @@ void planeApp::draw(){
 
     // draw top down view
     //--------------------------------------------------------------
-    offsy += 174 + 10;
-    ofNoFill(); ofSetColor(255); ofRect(offsx,offsy,640,480);
+    float md = 0.5; // multiplay display size
+    offsy += 190 + 10;
+    ofNoFill(); ofSetColor(255); ofRect(offsx,offsy,640*md,480*md);
+    string basicInfo = "blobs: " + ofToString(blobs.size());
+    ofDrawBitmapStringHighlight(basicInfo, offsx + 640*md + 4, offsy + 13);
 
     // draw history
     ofNoFill(); ofSetColor(150);
@@ -129,7 +144,7 @@ void planeApp::draw(){
         Blob b = it->second;
         ofBeginShape();
         for (vector<TimedPoint>::iterator it = b.history.begin() ; it != b.history.end(); ++it) {
-            ofVertex( offsx + (*it).point.x, offsy + (*it).point.y );
+            ofVertex( offsx + (*it).point.x*md, offsy + (*it).point.y*md );
         }
         ofEndShape();
     }
@@ -137,14 +152,15 @@ void planeApp::draw(){
     for(std::map<int, Blob>::iterator it = blobs.begin(); it != blobs.end(); ++it){
         ofSetColor(255);
         Blob b = it->second;
-        ofCircle( offsx + b.position.x, offsy + b.position.y, 20);
+        ofCircle( offsx + b.position.x*md, offsy + b.position.y*md, 20);
 
-        int x = offsx + b.position.x;
-        int y = offsy + b.position.y;
+        int x = offsx + b.position.x*md;
+        int y = offsy + b.position.y*md;
         string textStr = "id: " + ofToString(b.id);
         textStr += "\nvel:" + ofToString(b.velocity.x, 1) + "/" + ofToString(b.velocity.y, 1);
-        textStr += "\nage: "+ofToString(b.age) + "\nlost: " + ofToString(b.lostDuration);
-        ofDrawBitmapStringHighlight(textStr, x, y);
+        textStr += "\nage: "+ofToString(b.age);
+        textStr += "\nlost: " + ofToString(b.lostDuration);
+        ofDrawBitmapStringHighlight(textStr, x, y + 10);
     }
 
 //    // testBlob - draw raw history
