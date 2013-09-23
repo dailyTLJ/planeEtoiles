@@ -6,8 +6,8 @@ from time import sleep
 import time
 
 
-server = OSCServer( ("192.168.2.9", 9000) )
-# server = OSCServer( ("localhost", 9000) )
+# server = OSCServer( ("192.168.2.9", 9000) )
+server = OSCServer( ("localhost", 9000) )
 blob_flow_id = 2
 server.timeout = 0
 run = True
