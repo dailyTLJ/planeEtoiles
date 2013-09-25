@@ -2,6 +2,7 @@ scripts/models/*
 notes
 tmp
 icon.rc
+Makefile
 
 #################  
 ## openFrameworks  
