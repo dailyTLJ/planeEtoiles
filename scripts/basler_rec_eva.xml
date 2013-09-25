@@ -35,7 +35,7 @@
                 <Value>20</Value>
             </Param>
         </Detector> -->
-        <Detector>
+        <Actuator>
             <Type>Actuator_Hog</Type>
             <Param>
                 <Name>verbose</Name>
@@ -106,9 +106,9 @@
                 <Name>saveSamplesAge</Name>
                 <Value>120</Value>
             </Param>
-        </Detector>
+        </Actuator>
         <Client>
-            <Address>192.168.2.18</Address>
+            <Address>192.168.2.29</Address>
             <Port>9000</Port>
         </Client>
         <Server>
