@@ -12,5 +12,9 @@ killall switcher
 switcher -d &
 sleep 1
 
+# switcher-ctrl -C uridecodebin video
+# switcher-ctrl -i video to_shmdata 'http://192.168.2.102:9079/cgi-bin/mjpeg'
+
 switcher-ctrl -C uridecodebin video
-switcher-ctrl -i video to_shmdata 'http://192.168.2.102:9079/cgi-bin/mjpeg'
+switcher-ctrl -s video uri 'http://192.168.2.102:9079/cgi-bin/mjpeg'
+switcher-ctrl -s video started true

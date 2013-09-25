@@ -12,7 +12,7 @@
 source helpers.sh
 
 # cd ../data
-blobserver -C basler_ip9.xml $@ &
+blobserver -C basler_eva.xml $@ &
 sleep 5
 shmvid /tmp/blobserver_output_1
 killall blobserver
