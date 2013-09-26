@@ -11,16 +11,17 @@
 source helpers.sh
 
 # cd ../data
-blobserver -C basler_rec_eva.xml
-# $@ &
-#sleep 5
+blobserver -C basler_rec.xml $@ &
+# blobserver -C basler_rec_eva.xml $@ &
+sleep 5
+# shmvid /tmp/blobserver_output_1
 
 #gst-launch-0.10 shmsrc socket-path=/tmp/blobserver_output_2 ! \
 #	gdpdepay ! decodebin2 ! ffmpegcolorspace ! \
 #	fpsdisplaysink sync=false force-aspect-ratio=true &
-#gst-launch-0.10 shmsrc socket-path=/tmp/blobserver_output_1 ! \
-#	gdpdepay ! decodebin2 ! ffmpegcolorspace ! \
-#	fpsdisplaysink sync=false force-aspect-ratio=true 
+gst-launch-0.10 shmsrc socket-path=/tmp/blobserver_output_1 ! \
+	gdpdepay ! decodebin2 ! ffmpegcolorspace ! \
+	fpsdisplaysink sync=false force-aspect-ratio=true 
 # disp-width=640 disp-height=480
 # shmvid /tmp/blobserver_output_2 &
 # shmvid /tmp/blobserver_output_1
