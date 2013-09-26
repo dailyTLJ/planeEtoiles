@@ -11,9 +11,8 @@ void planeApp::setup(){
 	mouseY = 0;
 	mouseButtonState = "";
 
-	scene = 0;
-	segment = 0;
-	masterClock = 0;
+    // init
+	this->initScenes();
 
     // compute the perspectiveTransformation
     // to map from blob-coordinates to the top-down view
@@ -37,6 +36,40 @@ void planeApp::setup(){
 }
 
 //--------------------------------------------------------------
+void planeApp::initScenes(){
+
+    globalStart = ofGetUnixTime();
+    segmentStart = ofGetUnixTime();
+    scene = 0;
+	segment = 0;
+	segmentClock = 0;
+	masterClock = 0;
+
+    sceneInfo idle;
+    idle.name = "Idle";
+    idle.no = 0;
+    idle.segments = 1;
+    idle.instructions[0] = "Come closer!";
+    idle.length[0] = -1;
+    scenes[0] = idle;
+
+    sceneInfo stars;
+    stars.name = "Star Links";
+    stars.no = 1;
+    stars.segments = 4;
+    stars.instructions[0] = "Stand still.";
+    stars.length[0] = 20;
+    stars.instructions[0] = "Try new spots to \nlight up  more stars.";
+    stars.length[0] = 20;
+    stars.instructions[0] = "Walk with someone. \nKeep the same distance \nbetween you.";
+    stars.length[0] = 30;
+    stars.instructions[0] = "Walk with someone. \nMake eye contact. \nKeep the distance.";
+    stars.length[0] = 30;
+    scenes[1] = stars;
+
+}
+
+//--------------------------------------------------------------
 void planeApp::update(){
 
     this->receiveOsc();
@@ -52,12 +85,30 @@ void planeApp::update(){
     	}
     }
 
+    masterClock = ofGetUnixTime() - globalStart;
+    segmentClock = ofGetUnixTime() - segmentStart;
+
+    // move on to next segment?
+    if(segmentClock > 10){
+        segment++;
+        segmentStart = ofGetUnixTime();
+        if(segment >= scenes[scene].segments) {
+            scene++;
+            segment = 0;
+            if(scene >= scenes.size()) {
+                scene = 0;
+            }
+        }
+    }
+
     // analysis
     if (scene==0) {
         if (segment==0) {
 
         }
     }
+
+
 
 }
 
@@ -127,12 +178,12 @@ void planeApp::draw(){
 
     // draw raw data / small display
     //--------------------------------------------------------------
-    ofNoFill(); ofSetColor(255); ofRect(offsx,offsy,240,180);
+    ofNoFill(); ofSetColor(255); ofRect(offsx,offsy,192,144);
     string rawInfo = "port: " + ofToString(PORT) + "\nrate:";
-    ofDrawBitmapStringHighlight(rawInfo, offsx + 240 + 4, offsy + 13);
+    ofDrawBitmapStringHighlight(rawInfo, offsx + 192 + 4, offsy + 13);
     for(std::map<int, Blob>::iterator it = blobs.begin(); it != blobs.end(); ++it){
         Blob b = it->second;
-        ofRect( offsx + b._rawPos.x, offsy + b._rawPos.y, 96, 160);
+        ofRect( offsx + b._rawPos.x, offsy + b._rawPos.y, 64, 128);
     }
 
     // draw top down view
@@ -153,6 +204,7 @@ void planeApp::draw(){
         }
         ofEndShape();
     }
+    // draw blobs
     ofFill();
     for(std::map<int, Blob>::iterator it = blobs.begin(); it != blobs.end(); ++it){
         ofSetColor(255);
@@ -167,6 +219,21 @@ void planeApp::draw(){
         textStr += "\nlost: " + ofToString(b.lostDuration);
         ofDrawBitmapStringHighlight(textStr, x, y + 10);
     }
+
+
+    // draw scene control
+    offsy = 10;
+    ofNoFill(); ofSetColor(255); ofRect(offsx+400,offsy,360,640);
+
+    ofFill(); ofSetColor(255);
+
+
+    ofDrawBitmapString("SCENE ID\t" + ofToString(scene) +
+                       "\nSCENE NAME\t" + scenes[scene].name +
+                       "\nSEGMENT\t\t" + ofToString(segment) +
+                       "\n\n" + scenes[scene].instructions[segment] +
+                       "\n\nGLOBAL TIME\t" + ofToString(masterClock) +
+                       "\nSEGMENT TIME\t" + ofToString(segmentClock), offsx+400+360+3,offsy + 10 );
 
 //    // testBlob - draw raw history
 //    ofSetColor(200,200,200);

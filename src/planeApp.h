@@ -11,12 +11,23 @@
 #define PORT 9000
 #define NUM_MSG_STRINGS 20
 
+
+class sceneInfo {
+    public:
+        string name;
+        int no;
+        int segments;
+        int length[6];
+        string instructions[6];
+};
+
 class planeApp : public ofBaseApp{
 
 	public:
 		void setup();
 		void update();
 		void draw();
+		void initScenes();
 		void receiveOsc();
 
 		void keyPressed(int key);
@@ -42,5 +53,10 @@ class planeApp : public ofBaseApp{
 		int scene;
 		int segment;
 		int masterClock;
+		int segmentClock;
+		int segmentStart;
+		int globalStart;
+
+		std::map<int, sceneInfo> scenes;
 
 };
