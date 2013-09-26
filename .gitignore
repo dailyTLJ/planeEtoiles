@@ -2,11 +2,13 @@ scripts/models/*
 notes
 tmp
 icon.rc
+Makefile
 
 #################  
 ## openFrameworks  
 #################  
   
+[Bb]in/
 [Bb]in/*
 ![Bb]in/data/
 [Bb]uild/

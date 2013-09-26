@@ -84,12 +84,12 @@ void planeApp::receiveOsc(){
 		} else if(m.getAddress() == "/blobserver/nop"){
 
 		} else if(m.getAddress() == "/blobserver/hog"){
-			// parse incoming elements:  iiffiii: x y vx vy id age lost
-			int blobid = m.getArgAsInt32(4);
-			int posx = m.getArgAsInt32(0);
-			int posy = m.getArgAsInt32(1);
-			float velx = m.getArgAsFloat(2);
-			float vely = m.getArgAsFloat(3);
+			// parse incoming elements:  iiiffii: id x y vx vy age lost
+			int blobid = m.getArgAsInt32(0);
+			int posx = m.getArgAsInt32(1);
+			int posy = m.getArgAsInt32(2);
+			float velx = m.getArgAsFloat(3);
+			float vely = m.getArgAsFloat(4);
 			int age = m.getArgAsInt32(5);
 			int lost = m.getArgAsInt32(6);
 
