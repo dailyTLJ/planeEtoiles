@@ -11,7 +11,9 @@ void Blob::init(){
 	this->lifetime = this->maxLifetime;
 	this->updated = true;
 
+    this->vel = 0;
 	this->frozen = false;
+	this->frozenStart = 0;
 	this->frozenTimer = 0;
 }
 
@@ -38,6 +40,29 @@ void Blob::follow(float x, float y){
     }
 
 	this->updated = true;
+}
+
+//--------------------------------------------------------------
+void Blob::setVelocity(float dx, float dy){
+    this->velocity.set(dx, dy);
+    this->vel = sqrt( pow(dx,2) + pow(dy,2) );
+}
+
+void Blob::analyze(float freezeMinVel){
+    if(this->vel < freezeMinVel) {
+        if(!frozen) {
+            frozen = true;
+            frozenStart = ofGetUnixTime();
+            frozenTimer = 0;
+        } else {
+            frozenTimer = ofGetUnixTime() - frozenStart;
+        }
+    } else {
+        if(frozen) {
+            frozen = false;
+            frozenTimer = 0;
+        }
+    }
 }
 
 //--------------------------------------------------------------

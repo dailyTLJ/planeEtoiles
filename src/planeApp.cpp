@@ -16,7 +16,11 @@ void planeApp::setup(){
 	mouseY = 0;
 	mouseButtonState = "";
 
+    autoplay = false;
 	drawBlobDetail = true;
+	freezeMinVel = 0.1;
+	freezeMinTime = 0;
+	freezeMaxTime = 10;
 
     // init
 	this->initScenes();
@@ -71,11 +75,11 @@ void planeApp::initScenes(){
     stars.segments = 4;
     stars.instructions[0] = "Stand still.";
     stars.length[0] = 20;
-    stars.instructions[1] = "Try new spots to \nlight up  more stars.";
+    stars.instructions[1] = "Try new spots \nto light up \nmore stars.";
     stars.length[1] = 20;
-    stars.instructions[2] = "Walk with someone. \nKeep the same distance \nbetween you.";
+    stars.instructions[2] = "Walk with \nsomeone. Keep the \nsame distance \nbetween you.";
     stars.length[2] = 30;
-    stars.instructions[3] = "Walk with someone. \nMake eye contact. \nKeep the distance.";
+    stars.instructions[3] = "Walk with \nsomeone. Make eye \ncontact. Keep \nthe distance.";
     stars.length[3] = 30;
     scenes[1] = stars;
 
@@ -102,17 +106,8 @@ void planeApp::update(){
 
     // move on to next segment?
     // simply based on time for now
-    if(segmentClock >= 5){
-        segment++;
-        segmentStart = ofGetUnixTime();
-        if(segment >= scenes[scene].segments) {
-            scene++;
-            segment = 0;
-            if(scene >= scenes.size()) {
-                scene = 0;
-                globalStart = ofGetUnixTime();
-            }
-        }
+    if(autoplay && segmentClock >= 5){
+        nextSegment(1);
     }
 
     // analysis
@@ -124,6 +119,26 @@ void planeApp::update(){
 
 
 
+}
+
+
+void planeApp::nextSegment(int direction){
+    segment+=direction;
+    segmentStart = ofGetUnixTime();
+    if(segment >= scenes[scene].segments) {
+        scene++;
+        segment = 0;
+        if(scene >= scenes.size()) {
+            scene = 0;
+            globalStart = ofGetUnixTime();
+        }
+    } else if (segment < 0){
+        scene--;
+        if(scene < 0){
+            scene = scenes.size()-1;
+        }
+        segment = scenes[scene].segments -1;
+    }
 }
 
 // check for incoming OSC messages
@@ -173,7 +188,8 @@ void planeApp::receiveOsc(){
 			Blob* b = &blobs.find(blobid)->second;
 
             b->follow(posx, posy);
-            b->velocity.set(velx, vely);
+            b->setVelocity(velx, vely);
+            b->analyze(freezeMinVel);
             b->age = age;
             b->lostDuration = lost;
 
@@ -220,6 +236,37 @@ void planeApp::drawScreen(int x, int y, float scale){
     string instruction = scenes[scene].instructions[segment];
     ofFill(); ofSetColor(255);
     font.drawString(instruction, x+20, y+projectionH*scale*0.1);
+
+    if( scene==1 ){
+        if( segment==0 ) {
+
+            // STAND STILL
+            // draw circle for each blob, and display frozen, frozentimer
+            int bx = x + 100; int by = y + 250;
+            ofFill();
+            for(std::map<int, Blob>::iterator it = blobs.begin(); it != blobs.end(); ++it){
+                Blob b = it->second;
+                int add = b.frozenTimer < 10 ? b.frozenTimer*5 : 50;
+                if(b.frozen) ofSetColor(200+add,0,200+add); else ofSetColor(100);
+                ofCircle(bx, by, 65);
+
+                string textStr = "id: " + ofToString(b.id);
+                textStr += "\nvel:" + ofToString(b.vel, 2);
+                textStr += "\nfrozen: "+ ofToString(b.frozen);
+                textStr += "\nfrozenTimer: " + ofToString(b.frozenTimer);
+                ofDrawBitmapStringHighlight(textStr, bx-60, by + 80);
+
+                bx += 150;
+                if(bx > x + projectionW*scale - 70) {
+                    bx = x + 100; by += 240;
+                }
+            }
+
+        }
+    }
+
+
+
 }
 
 //  FOR TESTING WARPING MATH
@@ -315,7 +362,7 @@ void planeApp::drawTopDown(int x, int y, float scale, bool detailed) {
             ofDrawBitmapStringHighlight(textStr, bx, by + 10);
         } else {
             ofFill(); ofSetColor(0);
-            ofDrawBitmapString( ofToString(b.id, 4, '0'), bx-20, by+5);
+            ofDrawBitmapString( ofToString(b.id, 4, '0'), bx-15, by+5);
         }
 
     }}
@@ -330,6 +377,10 @@ void planeApp::keyPressed(int key){
 void planeApp::keyReleased(int key){
     if( key == 'd' ) {
         drawBlobDetail = !drawBlobDetail;
+    } else if (key == OF_KEY_LEFT){
+        nextSegment(-1);
+    } else if (key == OF_KEY_RIGHT){
+        nextSegment(1);
     }
 }
 

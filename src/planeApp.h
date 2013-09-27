@@ -44,8 +44,7 @@ class planeApp : public ofBaseApp{
 		void drawTopDown(int x, int y, float scale, bool detailed = false);
 		void drawScreen(int x, int y, float scale);
 		void drawControlInfo(int x, int y);
-
-		bool drawBlobDetail;
+		void nextSegment(int direction);
 
 		ofTrueTypeFont font;
 		ofxOscReceiver receiver;
@@ -57,6 +56,7 @@ class planeApp : public ofBaseApp{
 		Blob testBlob;
 		cv::Mat perspectiveMat;
 
+        bool autoplay;  // advance to next segment by itself
 		int scene;
 		int segment;
 		int masterClock;
@@ -65,5 +65,11 @@ class planeApp : public ofBaseApp{
 		int globalStart;
 
 		std::map<int, sceneInfo> scenes;
+
+		bool drawBlobDetail;
+
+		float freezeMinVel;
+		int freezeMinTime;
+		int freezeMaxTime;
 
 };

@@ -28,6 +28,7 @@ class Blob {
         float size;
         float age;
         float lostDuration;
+        float vel;
 
         vector<TimedPoint> rawHistory;
     	vector<TimedPoint> history;    // array length of MAX_HISTORY
@@ -39,15 +40,19 @@ class Blob {
 
         // trail analysis
         bool frozen;
+        int frozenStart;
         int frozenTimer;
 
 
         Blob();
         void init();
         void follow(float x, float y);
+        void setVelocity(float dx, float dy);
+        void analyze(float freezeMinVel);
         ofPoint transformPerspective(ofPoint& v);
         void update();
         bool isAlive();
+
 
         cv::Mat* perspectiveMat;
 
