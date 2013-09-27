@@ -3,13 +3,20 @@
 
 //--------------------------------------------------------------
 void planeApp::setup(){
-	// listen on the given port
-	cout << "listening for osc messages on port " << PORT << "\n";
-	receiver.setup(PORT);
+
+    //old OF default is 96 - but this results in fonts looking
+    // larger than in other programs.
+	ofTrueTypeFont::setGlobalDpi(72);
+
+    font.loadFont("Mercury Bold.otf", 36, true, true);
+	font.setLineHeight(30.0f);
+	font.setLetterSpacing(1.037);
 
 	mouseX = 0;
 	mouseY = 0;
 	mouseButtonState = "";
+
+	drawBlobDetail = true;
 
     // init
 	this->initScenes();
@@ -30,6 +37,11 @@ void planeApp::setup(){
         testBlob.follow( i*3, i * 3.0/5.0 );
         testBlob.follow(150-i*3,i * 3.0/5.0);
     }
+
+
+    // listen on the given port
+	cout << "listening for osc messages on port " << PORT << "\n";
+	receiver.setup(PORT);
 
 	ofBackground(255);
 
@@ -59,12 +71,12 @@ void planeApp::initScenes(){
     stars.segments = 4;
     stars.instructions[0] = "Stand still.";
     stars.length[0] = 20;
-    stars.instructions[0] = "Try new spots to \nlight up  more stars.";
-    stars.length[0] = 20;
-    stars.instructions[0] = "Walk with someone. \nKeep the same distance \nbetween you.";
-    stars.length[0] = 30;
-    stars.instructions[0] = "Walk with someone. \nMake eye contact. \nKeep the distance.";
-    stars.length[0] = 30;
+    stars.instructions[1] = "Try new spots to \nlight up  more stars.";
+    stars.length[1] = 20;
+    stars.instructions[2] = "Walk with someone. \nKeep the same distance \nbetween you.";
+    stars.length[2] = 30;
+    stars.instructions[3] = "Walk with someone. \nMake eye contact. \nKeep the distance.";
+    stars.length[3] = 30;
     scenes[1] = stars;
 
 }
@@ -89,7 +101,8 @@ void planeApp::update(){
     segmentClock = ofGetUnixTime() - segmentStart;
 
     // move on to next segment?
-    if(segmentClock > 10){
+    // simply based on time for now
+    if(segmentClock >= 5){
         segment++;
         segmentStart = ofGetUnixTime();
         if(segment >= scenes[scene].segments) {
@@ -97,6 +110,7 @@ void planeApp::update(){
             segment = 0;
             if(scene >= scenes.size()) {
                 scene = 0;
+                globalStart = ofGetUnixTime();
             }
         }
     }
@@ -176,65 +190,39 @@ void planeApp::draw(){
     ofBackground(0,50,150);
     int offsx = 10; int offsy = 10;
 
-    // draw raw data / small display
-    //--------------------------------------------------------------
-    ofNoFill(); ofSetColor(255); ofRect(offsx,offsy,192,144);
-    string rawInfo = "port: " + ofToString(PORT) + "\nrate:";
-    ofDrawBitmapStringHighlight(rawInfo, offsx + 192 + 4, offsy + 13);
-    for(std::map<int, Blob>::iterator it = blobs.begin(); it != blobs.end(); ++it){
-        Blob b = it->second;
-        ofRect( offsx + b._rawPos.x, offsy + b._rawPos.y, 64, 128);
-    }
+    this->drawRawData(offsx, offsy, 1.0);
 
-    // draw top down view
-    //--------------------------------------------------------------
-    float md = 0.5; // multiplay display size
     offsy += 190 + 10;
-    ofNoFill(); ofSetColor(255); ofRect(offsx,offsy,640*md,480*md);
-    string basicInfo = "blobs: " + ofToString(blobs.size());
-    ofDrawBitmapStringHighlight(basicInfo, offsx + 640*md + 4, offsy + 13);
+    this->drawTopDown(offsx, offsy, 0.5, drawBlobDetail);
 
-    // draw history
-    ofNoFill(); ofSetColor(150);
-    for(std::map<int, Blob>::iterator it = blobs.begin(); it != blobs.end(); ++it){
-        Blob b = it->second;
-        ofBeginShape();
-        for (vector<TimedPoint>::iterator it = b.history.begin() ; it != b.history.end(); ++it) {
-            ofVertex( offsx + (*it).point.x*md, offsy + (*it).point.y*md );
-        }
-        ofEndShape();
-    }
-    // draw blobs
-    ofFill();
-    for(std::map<int, Blob>::iterator it = blobs.begin(); it != blobs.end(); ++it){
-        ofSetColor(255);
-        Blob b = it->second;
-        ofCircle( offsx + b.position.x*md, offsy + b.position.y*md, 20);
-
-        int x = offsx + b.position.x*md;
-        int y = offsy + b.position.y*md;
-        string textStr = "id: " + ofToString(b.id);
-        textStr += "\nvel:" + ofToString(b.velocity.x, 1) + "/" + ofToString(b.velocity.y, 1);
-        textStr += "\nage: "+ofToString(b.age);
-        textStr += "\nlost: " + ofToString(b.lostDuration);
-        ofDrawBitmapStringHighlight(textStr, x, y + 10);
-    }
-
-
-    // draw scene control
     offsy = 10;
-    ofNoFill(); ofSetColor(255); ofRect(offsx+400,offsy,360,640);
+    offsx += 380;
+    this->drawScreen(offsx, offsy, 0.35);
 
+    offsx += 380;
+    this->drawControlInfo(offsx, offsy);
+
+
+}
+
+
+//--------------------------------------------------------------
+void planeApp::drawScreen(int x, int y, float scale){
+
+    int projectionW = 1080;
+    int projectionH = 1920;
+
+    // frame first
+    ofNoFill(); ofSetColor(255);
+    ofRect(x,y,projectionW*scale,projectionH*scale);
+
+    // display  instructions big
+    string instruction = scenes[scene].instructions[segment];
     ofFill(); ofSetColor(255);
+    font.drawString(instruction, x+20, y+projectionH*scale*0.1);
+}
 
-
-    ofDrawBitmapString("SCENE ID\t" + ofToString(scene) +
-                       "\nSCENE NAME\t" + scenes[scene].name +
-                       "\nSEGMENT\t\t" + ofToString(segment) +
-                       "\n\n" + scenes[scene].instructions[segment] +
-                       "\n\nGLOBAL TIME\t" + ofToString(masterClock) +
-                       "\nSEGMENT TIME\t" + ofToString(segmentClock), offsx+400+360+3,offsy + 10 );
-
+//  FOR TESTING WARPING MATH
 //    // testBlob - draw raw history
 //    ofSetColor(200,200,200);
 //    for (vector<TimedPoint>::iterator it = testBlob.rawHistory.begin() ; it != testBlob.rawHistory.end(); ++it) {
@@ -247,7 +235,91 @@ void planeApp::draw(){
 //        ofCircle( offsx + (*it).point.x, offsy + (*it).point.y, 2);
 //    }
 
+
+void planeApp::drawControlInfo(int x, int y){
+    ofFill(); ofSetColor(255);
+
+    string instruction = scenes[scene].instructions[segment];
+    ofDrawBitmapString("SCENE ID\t" + ofToString(scene) +
+                       "\nSCENE NAME\t" + scenes[scene].name +
+                       "\nSEGMENT\t\t" + ofToString(segment) +
+                       "\n\n" + instruction +
+                       "\n\nGLOBAL TIME\t" + ofToString(masterClock) +
+                       "\nSEGMENT TIME\t" + ofToString(segmentClock), x+3, y+10 );
 }
+
+
+// draw raw data / small display
+//--------------------------------------------------------------
+void planeApp::drawRawData(int x, int y, float scale){
+
+    int blobserverW = 192;
+    int blobserverH = 144;
+
+    // frame first
+    ofNoFill(); ofSetColor(255);
+    ofRect(x,y,blobserverW*scale,blobserverH*scale);
+
+    // write information
+    string rawInfo = "port: " + ofToString(PORT) + "\nrate:";
+    ofDrawBitmapStringHighlight(rawInfo, x + 3, y + blobserverH*scale + 15);
+
+    // draw frame for each blob. blobserver frame size = 64 x 128 px
+    for(std::map<int, Blob>::iterator it = blobs.begin(); it != blobs.end(); ++it){
+        Blob b = it->second;
+        ofRect( x + b._rawPos.x*scale, y + b._rawPos.y*scale, 64, 128);
+    }
+
+}
+
+//--------------------------------------------------------------
+void planeApp::drawTopDown(int x, int y, float scale, bool detailed) {
+
+    int frameW = 640;
+    int frameH = 480;
+
+    // frame
+    ofNoFill(); ofSetColor(255);
+    ofRect(x,y,frameW*scale,frameH*scale);
+
+    // write information
+    string basicInfo = "blobs: " + ofToString(blobs.size());
+    ofDrawBitmapStringHighlight(basicInfo, x + 3, y +frameH*scale+ 15);
+
+    // draw history
+    ofNoFill(); ofSetColor(150);
+    for(std::map<int, Blob>::iterator it = blobs.begin(); it != blobs.end(); ++it){
+        Blob b = it->second;
+        ofBeginShape();
+        for (vector<TimedPoint>::iterator it = b.history.begin() ; it != b.history.end(); ++it) {
+            ofVertex( x + (*it).point.x*scale, y + (*it).point.y*scale );
+        }
+        ofEndShape();
+    }
+
+    // draw blobs as circles
+    ofFill();
+    for(std::map<int, Blob>::iterator it = blobs.begin(); it != blobs.end(); ++it){
+        ofSetColor(255);
+        Blob b = it->second;
+        int bx = x + b.position.x*scale;
+        int by = y + b.position.y*scale;
+        ofCircle( bx, by, 20);
+
+        // display blob details
+        if(detailed) {
+            string textStr = "id: " + ofToString(b.id);
+            textStr += "\nvel:" + ofToString(b.velocity.x, 1) + "/" + ofToString(b.velocity.y, 1);
+            textStr += "\nage: "+ofToString(b.age);
+            textStr += "\nlost: " + ofToString(b.lostDuration);
+            ofDrawBitmapStringHighlight(textStr, bx, by + 10);
+        } else {
+            ofFill(); ofSetColor(0);
+            ofDrawBitmapString( ofToString(b.id, 4, '0'), bx-20, by+5);
+        }
+
+    }}
+
 
 //--------------------------------------------------------------
 void planeApp::keyPressed(int key){
@@ -256,7 +328,9 @@ void planeApp::keyPressed(int key){
 
 //--------------------------------------------------------------
 void planeApp::keyReleased(int key){
-
+    if( key == 'd' ) {
+        drawBlobDetail = !drawBlobDetail;
+    }
 }
 
 //--------------------------------------------------------------

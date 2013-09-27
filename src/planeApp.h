@@ -40,6 +40,13 @@ class planeApp : public ofBaseApp{
 		void dragEvent(ofDragInfo dragInfo);
 		void gotMessage(ofMessage msg);
 
+		void drawRawData(int x, int y, float scale);
+		void drawTopDown(int x, int y, float scale, bool detailed = false);
+		void drawScreen(int x, int y, float scale);
+		void drawControlInfo(int x, int y);
+
+		bool drawBlobDetail;
+
 		ofTrueTypeFont font;
 		ofxOscReceiver receiver;
 
