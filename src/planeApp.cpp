@@ -19,8 +19,12 @@ void planeApp::setup(){
     autoplay = false;
 	drawBlobDetail = true;
 
-	gui.setup("panel", "settings.xml", 800,400);
-	gui.add(freezeMinVel.set( "Freeze Minimum Velocity",0.1, 0, 5.0 ));
+	gui.setup("panel", "settings.xml", 774,250);
+//	gui.setDefaultWidth(400);
+//	gui.setWidthElements(400);
+	gui.setSize(250,50);
+	gui.setDefaultBackgroundColor( ofColor(0,0,50) );
+	gui.add(freezeMinVel.set( "Freeze Minimum Velocity",0.1, 0, 1.0 ));
 	gui.add(freezeMinTime.set( "Freeze Minimum Time",0, 0, 30 ));
 	gui.add(freezeMaxTime.set( "Freeze Maximum Time",10, 0, 30 ));
 
@@ -79,9 +83,9 @@ void planeApp::initScenes(){
     stars.length[0] = 20;
     stars.instructions[1] = "Try new spots \nto light up \nmore stars.";
     stars.length[1] = 20;
-    stars.instructions[2] = "Walk with \nsomeone. Keep the \nsame distance \nbetween you.";
+    stars.instructions[2] = "Walk with \nsomeone. \nKeep the \nsame distance \nbetween you.";
     stars.length[2] = 30;
-    stars.instructions[3] = "Walk with \nsomeone. Make eye \ncontact. Keep \nthe distance.";
+    stars.instructions[3] = "Walk with \nsomeone. \nMake eye \ncontact. \nKeep the \ndistance.";
     stars.length[3] = 30;
     scenes[1] = stars;
 
@@ -113,12 +117,17 @@ void planeApp::update(){
     }
 
     // analysis
-    if (scene==0) {
-        if (segment==0) {
+    // send position information of blobs to blobs individually to enble neighbor-distance comparison
 
-        }
+    std::map<int, ofPoint> blobPositions;
+    for(std::map<int, Blob>::iterator it = blobs.begin(); it != blobs.end(); ++it){
+        Blob b = it->second;
+        blobPositions[b.id] = b.position;
     }
-
+    for(std::map<int, Blob>::iterator it = blobs.begin(); it != blobs.end(); ++it){
+        Blob* b = &it->second;
+        b->analyzeNeighbors(blobPositions);
+    }
 
 
 }
@@ -240,7 +249,7 @@ void planeApp::drawScreen(int x, int y, float scale){
     font.drawString(instruction, x+20, y+projectionH*scale*0.1);
 
     if( scene==1 ){
-        if( segment==0 ) {
+        if( segment==0 || segment==1 ) {
 
             // STAND STILL
             // draw circle for each blob, and display frozen, frozentimer
@@ -248,22 +257,44 @@ void planeApp::drawScreen(int x, int y, float scale){
             ofFill();
             for(std::map<int, Blob>::iterator it = blobs.begin(); it != blobs.end(); ++it){
                 Blob b = it->second;
-                int add = b.frozenTimer < 10 ? b.frozenTimer*5 : 50;
-                if(b.frozen) ofSetColor(200+add,0,200+add); else ofSetColor(100);
-                ofCircle(bx, by, 65);
+//                int add = b.frozenTimer < 10 ? b.frozenTimer*5 : 50;
+//                if(b.frozen) ofSetColor(200+add,0,200+add); else ofSetColor(100);
+                if(b.frozen && b.frozenTimer >= freezeMinTime) {
+                    if(segment==1 && b.frozenTimer > freezeMaxTime) {
+                        ofSetColor(50);
+                    } else ofSetColor(255);
+                } else if(b.frozen) ofSetColor(100);
+                else ofSetColor(50);
 
-                string textStr = "id: " + ofToString(b.id);
-                textStr += "\nvel:" + ofToString(b.vel, 2);
-                textStr += "\nfrozen: "+ ofToString(b.frozen);
-                textStr += "\nfrozenTimer: " + ofToString(b.frozenTimer);
-                ofDrawBitmapStringHighlight(textStr, bx-60, by + 80);
+                ofCircle(bx, by, 50);
 
-                bx += 150;
-                if(bx > x + projectionW*scale - 70) {
-                    bx = x + 100; by += 240;
-                }
+                string textStr = "id\t: " + ofToString(b.id);
+                textStr += "\nvel\t: " + ofToString(b.vel, 2);
+                textStr += "\nfrozen\t: "+ ofToString(b.frozen);
+                textStr += "\nfrozenTimer : " + ofToString(b.frozenTimer);
+                ofDrawBitmapStringHighlight(textStr, bx+70, by -20);
+
+                by += 110;
             }
 
+        } else if( segment==2 || segment==3 ) {
+
+            // KEEP THE DISTANCE
+            int bx = x + 100; int by = y + 250;
+            ofFill();
+            for(std::map<int, Blob>::iterator it = blobs.begin(); it != blobs.end(); ++it){
+                Blob b = it->second;
+
+                ofSetColor(255);
+
+                ofCircle(bx, by, 50);
+
+                string textStr = "id\t: " + ofToString(b.id);
+                textStr += "\nneighbors : "+ ofToString(b.neighbors.size());
+                ofDrawBitmapStringHighlight(textStr, bx+70, by -40);
+
+                by += 110;
+            }
         }
     }
 

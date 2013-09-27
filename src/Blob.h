@@ -4,6 +4,7 @@
 #include "ofxOpenCv.h"
 
 #define MAX_HISTORY 100
+#define NEIGHBOR_HISTORY 10
 
 class TimedPoint {
     public:
@@ -14,6 +15,14 @@ class TimedPoint {
             this->point.set( x, y );
             this->time = ofGetUnixTime();
         }
+};
+
+class Neighbor {
+    public:
+        int id;
+        bool updated;
+        vector<float> distance;
+        bool sameDistance;
 };
 
 class Blob {
@@ -42,6 +51,7 @@ class Blob {
         bool frozen;
         int frozenStart;
         int frozenTimer;
+        std::map<int, Neighbor> neighbors;
 
 
         Blob();
@@ -49,6 +59,7 @@ class Blob {
         void follow(float x, float y);
         void setVelocity(float dx, float dy);
         void analyze(float freezeMinVel);
+        void analyzeNeighbors(std::map<int, ofPoint> neighborLocation);
         ofPoint transformPerspective(ofPoint& v);
         void update();
         bool isAlive();

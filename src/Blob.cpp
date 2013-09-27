@@ -48,6 +48,7 @@ void Blob::setVelocity(float dx, float dy){
     this->vel = sqrt( pow(dx,2) + pow(dy,2) );
 }
 
+//--------------------------------------------------------------
 void Blob::analyze(float freezeMinVel){
     if(this->vel < freezeMinVel) {
         if(!frozen) {
@@ -63,6 +64,53 @@ void Blob::analyze(float freezeMinVel){
             frozenTimer = 0;
         }
     }
+}
+
+//--------------------------------------------------------------
+void Blob::analyzeNeighbors(std::map<int, ofPoint> neighborLocation){
+
+    // set all neighbor-updates to false, to be able to delete inactive ones after
+    for(std::map<int, Neighbor>::iterator it = neighbors.begin(); it != neighbors.end(); ++it){
+        Neighbor* n = &it->second;
+        n->updated = false;
+    }
+
+    // update with new location data
+    for(std::map<int, ofPoint>::iterator it = neighborLocation.begin(); it != neighborLocation.end(); ++it){
+        int nid = it->first;
+        if(nid != this-> id) {
+            ofPoint p = it->second;
+
+            // check if neighbor already exists in history
+            std::map<int, Neighbor>::iterator iter = neighbors.find(nid);
+            if( iter == neighbors.end() ) {
+                Neighbor newN;
+                neighbors[nid] = newN;
+                neighbors[nid].id = nid;
+            }
+
+            // update neighbor with new location data
+            Neighbor* n = &neighbors.find(nid)->second;
+            float distance = ofVec2f(this->position.x, this->position.y).distance( ofVec2f(p.x, p.y) );
+            n->distance.push_back(distance);
+            while( n->distance.size() > NEIGHBOR_HISTORY ) {
+                n->distance.erase( n->distance.begin() );
+            }
+            n->updated = true;
+        }
+    }
+
+
+    // delete not updated neighbors, because they are gone!
+    std::map<int,Neighbor>::iterator it = neighbors.begin();
+    while (it != neighbors.end()) {
+    	if( !it->second.updated ) {
+    		neighbors.erase(it++);
+    	} else {
+    		++it;
+    	}
+    }
+
 }
 
 //--------------------------------------------------------------
