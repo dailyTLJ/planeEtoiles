@@ -1,0 +1,6 @@
+<panel>
+	<Freeze_Minimum_Velocity>0.1</Freeze_Minimum_Velocity>
+	<Freeze_Minimum_Time>0</Freeze_Minimum_Time>
+	<Freeze_Maximum_Time>10</Freeze_Maximum_Time>
+<panel/>
+</panel>

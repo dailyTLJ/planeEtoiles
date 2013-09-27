@@ -3,6 +3,7 @@
 #include "ofMain.h"
 #include "ofxOsc.h"
 #include "ofxOpenCv.h"
+#include "ofxGui.h"
 
 #include <map>
 #include "Blob.h"
@@ -47,6 +48,7 @@ class planeApp : public ofBaseApp{
 		void nextSegment(int direction);
 
 		ofTrueTypeFont font;
+		ofxPanel gui;
 		ofxOscReceiver receiver;
 
 		int mouseX, mouseY;
@@ -68,8 +70,8 @@ class planeApp : public ofBaseApp{
 
 		bool drawBlobDetail;
 
-		float freezeMinVel;
-		int freezeMinTime;
-		int freezeMaxTime;
+		ofParameter<float> freezeMinVel;
+		ofParameter<int> freezeMinTime;
+		ofParameter<int> freezeMaxTime;
 
 };

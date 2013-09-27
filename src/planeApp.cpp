@@ -18,9 +18,11 @@ void planeApp::setup(){
 
     autoplay = false;
 	drawBlobDetail = true;
-	freezeMinVel = 0.1;
-	freezeMinTime = 0;
-	freezeMaxTime = 10;
+
+	gui.setup("panel", "settings.xml", 800,400);
+	gui.add(freezeMinVel.set( "Freeze Minimum Velocity",0.1, 0, 5.0 ));
+	gui.add(freezeMinTime.set( "Freeze Minimum Time",0, 0, 30 ));
+	gui.add(freezeMaxTime.set( "Freeze Maximum Time",10, 0, 30 ));
 
     // init
 	this->initScenes();
@@ -218,7 +220,7 @@ void planeApp::draw(){
     offsx += 380;
     this->drawControlInfo(offsx, offsy);
 
-
+    gui.draw();
 }
 
 
@@ -375,13 +377,23 @@ void planeApp::keyPressed(int key){
 
 //--------------------------------------------------------------
 void planeApp::keyReleased(int key){
+
     if( key == 'd' ) {
         drawBlobDetail = !drawBlobDetail;
-    } else if (key == OF_KEY_LEFT){
+    }
+
+    if (key == OF_KEY_LEFT){
         nextSegment(-1);
     } else if (key == OF_KEY_RIGHT){
         nextSegment(1);
     }
+
+    if(key == 's') {
+		gui.saveToFile("settings.xml");
+	}
+	if(key == 'l') {
+		gui.loadFromFile("settings.xml");
+	}
 }
 
 //--------------------------------------------------------------
