@@ -15,6 +15,8 @@ void Blob::init(){
 	this->frozen = false;
 	this->frozenStart = 0;
 	this->frozenTimer = 0;
+
+	this->moving = false;
 }
 
 //--------------------------------------------------------------
@@ -43,9 +45,23 @@ void Blob::follow(float x, float y){
 }
 
 //--------------------------------------------------------------
-void Blob::setVelocity(float dx, float dy){
+void Blob::setVelocity(float dx, float dy, float movingThr){
     this->velocity.set(dx, dy);
     this->vel = sqrt( pow(dx,2) + pow(dy,2) );
+    this->velHistory.push_back(this->vel);
+    while( this->velHistory.size() > VELOCITY_HISTORY ) {
+        this->velHistory.erase( this->velHistory.begin() );
+    }
+
+    // compute mean of velocity history
+    if(this->velHistory.size() >= VELOCITY_HISTORY ) {
+        float sum = 0;
+        for (std::vector<float>::iterator it = this->velHistory.begin(); it != this->velHistory.end(); ++it) {
+            sum += *it;
+        }
+        if (sum / this->velHistory.size() >= movingThr) this->moving = true;
+        else this->moving = false;
+    }
 }
 
 //--------------------------------------------------------------
@@ -67,7 +83,7 @@ void Blob::analyze(float freezeMinVel){
 }
 
 //--------------------------------------------------------------
-void Blob::analyzeNeighbors(std::map<int, ofPoint> neighborLocation){
+void Blob::analyzeNeighbors(std::map<int, ofPoint> neighborLocation, float keepDistanceThr){
 
     // set all neighbor-updates to false, to be able to delete inactive ones after
     for(std::map<int, Neighbor>::iterator it = neighbors.begin(); it != neighbors.end(); ++it){
@@ -91,12 +107,36 @@ void Blob::analyzeNeighbors(std::map<int, ofPoint> neighborLocation){
 
             // update neighbor with new location data
             Neighbor* n = &neighbors.find(nid)->second;
-            float distance = ofVec2f(this->position.x, this->position.y).distance( ofVec2f(p.x, p.y) );
+            float distance = ofDist(this->position.x, this->position.y, p.x, p.y);
+//            float distance = ofVec2f(this->position.x, this->position.y).distance( ofVec2f(p.x, p.y) );
             n->distance.push_back(distance);
             while( n->distance.size() > NEIGHBOR_HISTORY ) {
                 n->distance.erase( n->distance.begin() );
             }
             n->updated = true;
+
+            // compute steadyDistance
+//            cout << this->id << " : neighbor " << n->id << "\t";
+//            for (std::vector<float>::iterator dit = n->distance.begin(); dit != n->distance.end(); ++dit) {
+//                cout << " " << *dit;
+//            }
+//            cout << endl;
+//            // mean
+//            cout << this->id << " : neighbor " << n->id << "\t mean = \t" << n->getMean() << endl;
+//            // median
+//            cout << this->id << " : neighbor " << n->id << "\t median = \t" << n->getMedian() << endl;
+//            // variance
+//            cout << this->id << " : neighbor " << n->id << "\t variance = \t" << n->getVariance() << endl;
+//            // standard deviation .. how far the data values lie from the mean
+//            cout << this->id << " : neighbor " << n->id << "\t std dev = \t" << n->getStdDev() << endl;
+
+            if (n->distance.size() >= NEIGHBOR_HISTORY && n->getStdDev() < keepDistanceThr) {
+                n->steadyDistance = true;
+            } else {
+                n->steadyDistance = false;
+            }
+
+
         }
     }
 

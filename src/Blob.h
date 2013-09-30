@@ -5,6 +5,7 @@
 
 #define MAX_HISTORY 100
 #define NEIGHBOR_HISTORY 10
+#define VELOCITY_HISTORY 10
 
 class TimedPoint {
     public:
@@ -22,7 +23,38 @@ class Neighbor {
         int id;
         bool updated;
         vector<float> distance;
-        bool sameDistance;
+        bool steadyDistance;
+
+        float getMean() {
+            float sum = 0;
+            for (std::vector<float>::iterator it = distance.begin(); it != distance.end(); ++it) {
+                sum += *it;
+            }
+            return sum / distance.size();
+        }
+
+        float getVariance() {
+            float mean = getMean();
+            float tmp = 0;
+            for (std::vector<float>::iterator it = distance.begin(); it != distance.end(); ++it) {
+                tmp += (mean - *it) * (mean - *it);
+            }
+            return tmp / distance.size();
+        }
+
+        float getStdDev() {
+            return sqrtf( getVariance() );
+        }
+
+        float getMedian() {
+            std::vector<float> distArray = std::vector<float>(distance);
+            std::sort(distArray.begin(), distArray.end());
+            if (distArray.size() % 2 == 0) {
+                return (distArray[(distArray.size()/2)-1] + distArray[distArray.size()/2] ) / 2.0;
+            } else {
+                return distArray[distArray.size()/2];
+            }
+        }
 };
 
 class Blob {
@@ -38,6 +70,8 @@ class Blob {
         float age;
         float lostDuration;
         float vel;
+        bool moving;
+        vector<float> velHistory;
 
         vector<TimedPoint> rawHistory;
     	vector<TimedPoint> history;    // array length of MAX_HISTORY
@@ -57,9 +91,9 @@ class Blob {
         Blob();
         void init();
         void follow(float x, float y);
-        void setVelocity(float dx, float dy);
+        void setVelocity(float dx, float dy, float movingThr);
         void analyze(float freezeMinVel);
-        void analyzeNeighbors(std::map<int, ofPoint> neighborLocation);
+        void analyzeNeighbors(std::map<int, ofPoint> neighborLocation, float keepDistanceThr);
         ofPoint transformPerspective(ofPoint& v);
         void update();
         bool isAlive();

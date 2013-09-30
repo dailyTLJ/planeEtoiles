@@ -10,8 +10,6 @@
 
 // listen to blobserver on port 9000
 #define PORT 9000
-#define NUM_MSG_STRINGS 20
-
 
 class sceneInfo {
     public:
@@ -73,5 +71,8 @@ class planeApp : public ofBaseApp{
 		ofParameter<float> freezeMinVel;
 		ofParameter<int> freezeMinTime;
 		ofParameter<int> freezeMaxTime;
+
+		ofParameter<float> keepDistanceThr;
+		ofParameter<float> movingThr;
 
 };

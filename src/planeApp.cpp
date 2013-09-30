@@ -27,6 +27,8 @@ void planeApp::setup(){
 	gui.add(freezeMinVel.set( "Freeze Minimum Velocity",0.1, 0, 1.0 ));
 	gui.add(freezeMinTime.set( "Freeze Minimum Time",0, 0, 30 ));
 	gui.add(freezeMaxTime.set( "Freeze Maximum Time",10, 0, 30 ));
+	gui.add(keepDistanceThr.set( "Distance Std.Dev. Threshold", 5, 0, 20));
+	gui.add(movingThr.set( "Movement Threshold", 0.5, 0, 20));
 
     // init
 	this->initScenes();
@@ -126,7 +128,7 @@ void planeApp::update(){
     }
     for(std::map<int, Blob>::iterator it = blobs.begin(); it != blobs.end(); ++it){
         Blob* b = &it->second;
-        b->analyzeNeighbors(blobPositions);
+        b->analyzeNeighbors(blobPositions, keepDistanceThr);
     }
 
 
@@ -199,7 +201,7 @@ void planeApp::receiveOsc(){
 			Blob* b = &blobs.find(blobid)->second;
 
             b->follow(posx, posy);
-            b->setVelocity(velx, vely);
+            b->setVelocity(velx, vely, movingThr);
             b->analyze(freezeMinVel);
             b->age = age;
             b->lostDuration = lost;
@@ -291,7 +293,16 @@ void planeApp::drawScreen(int x, int y, float scale){
 
                 string textStr = "id\t: " + ofToString(b.id);
                 textStr += "\nneighbors : "+ ofToString(b.neighbors.size());
+                textStr += "\nmoving : " + ofToString(b.moving);
                 ofDrawBitmapStringHighlight(textStr, bx+70, by -40);
+
+                for(std::map<int, Neighbor>::iterator iter = b.neighbors.begin(); iter != b.neighbors.end(); ++iter){
+                    Neighbor nb = iter->second;
+                    ofDrawBitmapString(ofToString(nb.id), bx+70, by);
+                    if (nb.steadyDistance) ofSetColor(255); else ofSetColor(0);
+                    ofRect(bx+100, by, nb.distance[0]*0.2, -10);
+                    by += 20;
+                }
 
                 by += 110;
             }
