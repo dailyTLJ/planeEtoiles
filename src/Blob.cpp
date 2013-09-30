@@ -15,8 +15,7 @@ void Blob::init(){
 	this->frozen = false;
 	this->frozenStart = 0;
 	this->frozenTimer = 0;
-
-	this->moving = false;
+	this->movingMean = false;
 }
 
 //--------------------------------------------------------------
@@ -45,27 +44,17 @@ void Blob::follow(float x, float y){
 }
 
 //--------------------------------------------------------------
-void Blob::setVelocity(float dx, float dy, float movingThr){
+void Blob::setVelocity(float dx, float dy){
     this->velocity.set(dx, dy);
     this->vel = sqrt( pow(dx,2) + pow(dy,2) );
     this->velHistory.push_back(this->vel);
     while( this->velHistory.size() > VELOCITY_HISTORY ) {
         this->velHistory.erase( this->velHistory.begin() );
     }
-
-    // compute mean of velocity history
-    if(this->velHistory.size() >= VELOCITY_HISTORY ) {
-        float sum = 0;
-        for (std::vector<float>::iterator it = this->velHistory.begin(); it != this->velHistory.end(); ++it) {
-            sum += *it;
-        }
-        if (sum / this->velHistory.size() >= movingThr) this->moving = true;
-        else this->moving = false;
-    }
 }
 
 //--------------------------------------------------------------
-void Blob::analyze(float freezeMinVel){
+void Blob::analyze(float freezeMinVel, float movingThr){
     if(this->vel < freezeMinVel) {
         if(!frozen) {
             frozen = true;
@@ -79,6 +68,16 @@ void Blob::analyze(float freezeMinVel){
             frozen = false;
             frozenTimer = 0;
         }
+    }
+
+    // compute mean of velocity history
+    if(this->velHistory.size() >= VELOCITY_HISTORY ) {
+        float sum = 0;
+        for (std::vector<float>::iterator it = this->velHistory.begin(); it != this->velHistory.end(); ++it) {
+            sum += *it;
+        }
+        if (sum / this->velHistory.size() >= movingThr) this->movingMean = true;
+        else this->movingMean = false;
     }
 }
 

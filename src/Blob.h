@@ -70,7 +70,6 @@ class Blob {
         float age;
         float lostDuration;
         float vel;
-        bool moving;
         vector<float> velHistory;
 
         vector<TimedPoint> rawHistory;
@@ -85,14 +84,15 @@ class Blob {
         bool frozen;
         int frozenStart;
         int frozenTimer;
+        bool movingMean;
         std::map<int, Neighbor> neighbors;
 
 
         Blob();
         void init();
         void follow(float x, float y);
-        void setVelocity(float dx, float dy, float movingThr);
-        void analyze(float freezeMinVel);
+        void setVelocity(float dx, float dy);
+        void analyze(float freezeMinVel, float movingThr);
         void analyzeNeighbors(std::map<int, ofPoint> neighborLocation, float keepDistanceThr);
         ofPoint transformPerspective(ofPoint& v);
         void update();

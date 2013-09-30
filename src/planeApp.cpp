@@ -35,8 +35,14 @@ void planeApp::setup(){
 
     // compute the perspectiveTransformation
     // to map from blob-coordinates to the top-down view
-    float in[] = {0,0,150,0,150,30,0,30};
-    float out[] = {0,0,640,0,590,480,50,480};
+
+    // values for
+//    float in[] = {0,0,150,0,150,30,0,30};
+//    float out[] = {0,0,640,0,590,480,50,480};
+
+    float in[] = {0,0,800,0,800,600,0,600};
+    float out[] = {0,0,500,0,500,500,0,500};
+
     cv::Mat proj_in(4,2, CV_32FC1, in);
     cv::Mat proj_out(4,2, CV_32FC1, out);
     perspectiveMat = cv::findHomography(proj_in, proj_out);
@@ -201,8 +207,8 @@ void planeApp::receiveOsc(){
 			Blob* b = &blobs.find(blobid)->second;
 
             b->follow(posx, posy);
-            b->setVelocity(velx, vely, movingThr);
-            b->analyze(freezeMinVel);
+            b->setVelocity(velx, vely);
+            b->analyze(freezeMinVel, movingThr);
             b->age = age;
             b->lostDuration = lost;
 
@@ -219,9 +225,9 @@ void planeApp::draw(){
     ofBackground(0,50,150);
     int offsx = 10; int offsy = 10;
 
-    this->drawRawData(offsx, offsy, 1.0);
+    this->drawRawData(offsx, offsy, 0.25);
 
-    offsy += 190 + 10;
+    offsy += 220 + 10;
     this->drawTopDown(offsx, offsy, 0.5, drawBlobDetail);
 
     offsy = 10;
@@ -293,14 +299,14 @@ void planeApp::drawScreen(int x, int y, float scale){
 
                 string textStr = "id\t: " + ofToString(b.id);
                 textStr += "\nneighbors : "+ ofToString(b.neighbors.size());
-                textStr += "\nmoving : " + ofToString(b.moving);
+                textStr += "\nmovingMean : " + ofToString(b.movingMean);
                 ofDrawBitmapStringHighlight(textStr, bx+70, by -40);
 
                 for(std::map<int, Neighbor>::iterator iter = b.neighbors.begin(); iter != b.neighbors.end(); ++iter){
                     Neighbor nb = iter->second;
-                    ofDrawBitmapString(ofToString(nb.id), bx+70, by);
+                    ofDrawBitmapString(ofToString(nb.id), bx+70, by+20);
                     if (nb.steadyDistance) ofSetColor(255); else ofSetColor(0);
-                    ofRect(bx+100, by, nb.distance[0]*0.2, -10);
+                    ofRect(bx+100, by+20, nb.distance[0]*0.2, -10);
                     by += 20;
                 }
 
@@ -344,21 +350,25 @@ void planeApp::drawControlInfo(int x, int y){
 //--------------------------------------------------------------
 void planeApp::drawRawData(int x, int y, float scale){
 
-    int blobserverW = 192;
-    int blobserverH = 144;
+    int blobserverW = 800;
+    int blobserverH = 600;
+//    int blobserverW = 192;
+//    int blobserverH = 144;
 
     // frame first
     ofNoFill(); ofSetColor(255);
     ofRect(x,y,blobserverW*scale,blobserverH*scale);
 
     // write information
-    string rawInfo = "port: " + ofToString(PORT) + "\nrate:";
+    string rawInfo = "port: \t" + ofToString(PORT);
+    rawInfo += "\nframerate: \t" + ofToString(28);
+    rawInfo += "\nexposure: \t" + ofToString(0.4333,2);
     ofDrawBitmapStringHighlight(rawInfo, x + 3, y + blobserverH*scale + 15);
 
     // draw frame for each blob. blobserver frame size = 64 x 128 px
     for(std::map<int, Blob>::iterator it = blobs.begin(); it != blobs.end(); ++it){
         Blob b = it->second;
-        ofRect( x + b._rawPos.x*scale, y + b._rawPos.y*scale, 64, 128);
+        ofRect( x + b._rawPos.x*scale, y + b._rawPos.y*scale, 64*scale, 128*scale);
     }
 
 }
@@ -366,8 +376,11 @@ void planeApp::drawRawData(int x, int y, float scale){
 //--------------------------------------------------------------
 void planeApp::drawTopDown(int x, int y, float scale, bool detailed) {
 
-    int frameW = 640;
-    int frameH = 480;
+//    int frameW = 640;
+//    int frameH = 480;
+
+    int frameW = 500;
+    int frameH = 500;
 
     // frame
     ofNoFill(); ofSetColor(255);
