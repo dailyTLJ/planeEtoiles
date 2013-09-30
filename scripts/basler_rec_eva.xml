@@ -1,6 +1,6 @@
 <Blobserver>
     <Flow>
-        <Source>
+<!--         <Source>
             <Type>Source_2D_Shmdata</Type>
             <Subsource>0</Subsource>
             <Param>
@@ -14,6 +14,42 @@
             <Param>
                 <Name>rotation</Name>
                 <Value>0.0</Value>
+            </Param>
+        </Source> -->
+        <Source>
+            <Type>Source_2D_Gige</Type>
+            <Subsource>0</Subsource>
+            <Param>
+                <Name>raw</Name>
+                <Value>1</Value>
+            </Param>
+            <Param>
+                <Name>binning</Name>
+                <Value>2</Value>
+            </Param>
+            <Param>
+                <Name>width</Name>
+                <Value>800</Value>
+            </Param>
+            <Param>
+                <Name>height</Name>
+                <Value>600</Value>
+            </Param>
+<!--             <Param>
+                <Name>autoExposure</Name>
+                <Value>300 200 200 200 64 32 0.05</Value>
+            </Param> -->
+            <Param>
+                <Name>gain</Name>
+                <Value>220</Value>
+            </Param>
+            <Param>
+                <Name>invertRGB</Name>
+                <Value>1</Value>
+            </Param>
+            <Param>
+                <Name>framerate</Name>
+                <Value>15</Value>
             </Param>
         </Source>
         <Actuator>
@@ -36,7 +72,7 @@
             </Param>
             <Param>
                 <Name>mergeDistance</Name>
-                <Value>24</Value>
+                <Value>60</Value>
             </Param>
             <Param>
                 <Name>filterSize</Name>
@@ -60,7 +96,7 @@
             </Param>
             <Param>
                 <Name>margin</Name>
-                <Value>0.8</Value>
+                <Value>0.99</Value>
             </Param>
             <Param>
                 <Name>lifetime</Name>
@@ -102,7 +138,7 @@
             <Type>Actuator_Nop</Type>
         </Actuator>
         <Client>
-            <Address>192.168.2.29</Address>
+            <Address>192.168.2.38</Address>
             <Port>9000</Port>
         </Client>
         <Server>

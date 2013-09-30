@@ -11,8 +11,8 @@
 source helpers.sh
 
 # cd ../data
-blobserver -C basler_rec.xml $@ &
-# blobserver -C basler_rec_eva.xml $@ &
+# blobserver -C basler_rec.xml $@ &
+blobserver -C basler_rec_eva.xml $@ &
 sleep 5
 # shmvid /tmp/blobserver_output_1
 
