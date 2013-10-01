@@ -11,6 +11,7 @@ Makefile
 
 [Bb]in/*
 ![Bb]in/data/
+[Bb]in/data/video/*
 [Bb]uild/
 [Oo]bj/
 *.o

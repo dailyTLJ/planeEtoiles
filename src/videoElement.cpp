@@ -6,10 +6,19 @@ videoElement::videoElement() {
     this->scale = 1.0;
 }
 
+videoElement::videoElement(string filename) {
+    this->hide = true;
+    this->position.set(0,0);
+    this->scale = 1.0;
+    this->loadMovie(filename);
+}
+
 void videoElement::loadMovie(string filename) {
     movie.loadMovie(filename);
     this->w = movie.getWidth();
     this->h = movie.getHeight();
+    cout << "video : loadMovie " << filename << "   (" << this->w << "|" << this->h << ")" << endl;
+    movie.play();
 }
 
 void videoElement::play(bool loop) {
@@ -22,6 +31,7 @@ void videoElement::pause() {
 }
 
 void videoElement::update() {
+//    cout << "video update" << endl;
     movie.update();
 }
 
@@ -29,6 +39,13 @@ void videoElement::update() {
 void videoElement::draw() {
     if (scale!=1.0) movie.draw(position, w * scale, h * scale);
     else movie.draw(position, w, h);
+
+}
+
+void videoElement::draw(int x, int y, float scale) {
+//    cout << "video draw" << endl;
+    if (scale!=1.0) movie.draw(x, y, w * scale, h * scale);
+    else movie.draw(x, y, w, h);
 }
 
 
