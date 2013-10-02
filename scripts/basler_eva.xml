@@ -18,26 +18,30 @@
         </Source> -->
         <Source>
             <Type>Source_2D_Gige</Type>
-            <Subsource>0</Subsource>
+            <Subsource>Basler-21369007</Subsource>
             <Param>
                 <Name>raw</Name>
                 <Value>1</Value>
             </Param>
             <Param>
                 <Name>binning</Name>
-                <Value>2</Value>
+                <Value>3</Value>
             </Param>
             <Param>
                 <Name>width</Name>
-                <Value>800</Value>
+                <Value>520</Value>
             </Param>
             <Param>
                 <Name>height</Name>
-                <Value>600</Value>
+                <Value>390</Value>
+            </Param>
+            <Param>
+                <Name>scale</Name>
+                <Value>0.7</Value>
             </Param>
             <Param>
                 <Name>autoExposure</Name>
-                <Value>300 200 200 200 64 32 0.05</Value>
+                <Value>150 130 200 100 64 32 0.05</Value>
             </Param>
             <Param>
                 <Name>gain</Name>
@@ -72,7 +76,7 @@
             </Param>
             <Param>
                 <Name>mergeDistance</Name>
-                <Value>24</Value>
+                <Value>45</Value>
             </Param>
             <Param>
                 <Name>filterSize</Name>
@@ -138,7 +142,7 @@
             <Type>Actuator_Nop</Type>
         </Actuator>
         <Client>
-            <Address>192.168.2.38</Address>
+            <Address>192.168.2.25</Address>
             <Port>9000</Port>
         </Client>
         <Server>

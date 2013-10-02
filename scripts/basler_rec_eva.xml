@@ -35,10 +35,10 @@
                 <Name>height</Name>
                 <Value>600</Value>
             </Param>
-<!--             <Param>
+            <Param>
                 <Name>autoExposure</Name>
                 <Value>300 200 200 200 64 32 0.05</Value>
-            </Param> -->
+            </Param>
             <Param>
                 <Name>gain</Name>
                 <Value>220</Value>
@@ -96,7 +96,7 @@
             </Param>
             <Param>
                 <Name>margin</Name>
-                <Value>0.99</Value>
+                <Value>0.8</Value>
             </Param>
             <Param>
                 <Name>lifetime</Name>
