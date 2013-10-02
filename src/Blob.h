@@ -87,10 +87,12 @@ class Blob {
         bool movingMean;
         std::map<int, Neighbor> neighbors;
 
+        bool onEdge;    // if blob disappears, most likely bc it escaped the frame
+
 
         Blob();
         void init();
-        void follow(float x, float y);
+        void follow(float x, float y, float frameW = 800, float frameH = 600, float margin = 0);
         void setVelocity(float dx, float dy);
         void analyze(float freezeMinVel, float movingThr);
         void analyzeNeighbors(std::map<int, ofPoint> neighborLocation, float keepDistanceThr);

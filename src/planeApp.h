@@ -40,8 +40,14 @@ class planeApp : public ofBaseApp{
 		void dragEvent(ofDragInfo dragInfo);
 		void gotMessage(ofMessage msg);
 
+//        int siteW;
+//        int siteH;
 		int projectionW;
         int projectionH;
+        int blobserverW;
+        int blobserverH;
+        int blobW;
+        int blobH;
 
 		void drawRawData(int x, int y, float scale);
 		void drawTopDown(int x, int y, float scale, bool detailed = false);
@@ -49,6 +55,8 @@ class planeApp : public ofBaseApp{
 		void drawAnalysis(int x, int y, float scale);
 		void drawControlInfo(int x, int y);
 		void nextSegment(int direction);
+		void setPerspective();
+		void recalculatePerspective(int & v);
 
 		ofTrueTypeFont font;
 		ofxPanel gui;
@@ -79,6 +87,11 @@ class planeApp : public ofBaseApp{
 
 		ofParameter<float> keepDistanceThr;
 		ofParameter<float> movingThr;
+		ofParameter<int> edgeMargin;
+		ofParameter<int> hopLength;
+
+		ofParameter<int> siteW;
+		ofParameter<int> siteH;
 
 		std::map<int, std::vector<videoElement> > bgVideos;
 		std::map<int, std::vector<videoElement> > fgVideos;

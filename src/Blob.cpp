@@ -16,11 +16,18 @@ void Blob::init(){
 	this->frozenStart = 0;
 	this->frozenTimer = 0;
 	this->movingMean = false;
+	this->onEdge = false;
 }
 
 //--------------------------------------------------------------
-void Blob::follow(float x, float y){
+void Blob::follow(float x, float y, float frameW, float frameH, float margin){
     this->_rawPos.set(x, y);
+
+    // on Edge?
+    if (x<margin || x>frameW-margin || y<margin || y>frameH-margin) {
+        this->onEdge = true;
+    } else this->onEdge = false;
+
     this->position = transformPerspective(this->_rawPos);
 
     TimedPoint rawPoint;
@@ -35,7 +42,6 @@ void Blob::follow(float x, float y){
     while( rawHistory.size() > MAX_HISTORY ) {
         rawHistory.erase( rawHistory.begin() );
     }
-
     while( history.size() > MAX_HISTORY ) {
         history.erase( history.begin() );
     }

@@ -19,19 +19,30 @@ void planeApp::setup(){
     autoplay = false;
 	drawBlobDetail = true;
 
+//    siteW = 500;
+//    siteH = 500;
     projectionW = 1080;
     projectionH = 1920;
+    blobserverW = 320;
+    blobserverH = 240;
+    blobW = 64;
+    blobH = 128;
+
+    siteW.addListener(this,&planeApp::recalculatePerspective);
+	siteH.addListener(this,&planeApp::recalculatePerspective);
 
 	gui.setup("panel", "settings.xml", 1164,250);
-//	gui.setDefaultWidth(400);
-//	gui.setWidthElements(400);
 	gui.setSize(250,50);
 	gui.setDefaultBackgroundColor( ofColor(0,0,50) );
+	gui.add(siteW.set( "Site Width", 500, 0, 1000));
+	gui.add(siteH.set( "Site Length", 700, 0, 1000));
 	gui.add(freezeMinVel.set( "Freeze Minimum Velocity",0.1, 0, 1.0 ));
 	gui.add(freezeMinTime.set( "Freeze Minimum Time",0, 0, 30 ));
 	gui.add(freezeMaxTime.set( "Freeze Maximum Time",10, 0, 30 ));
 	gui.add(keepDistanceThr.set( "Distance Std.Dev. Threshold", 5, 0, 20));
 	gui.add(movingThr.set( "Movement Threshold", 0.5, 0, 20));
+	gui.add(edgeMargin.set( "Edge Margin", 50, 0, 150));
+	gui.add(hopLength.set( "Hop Length", 5, 0, 35));
 
     // init
 	this->initScenes();
@@ -43,14 +54,7 @@ void planeApp::setup(){
 //    float in[] = {0,0,150,0,150,30,0,30};
 //    float out[] = {0,0,640,0,590,480,50,480};
 
-    float in[] = {0,0,800,0,800,600,0,600};
-    float out[] = {0,0,500,0,500,500,0,500};
-
-    cv::Mat proj_in(4,2, CV_32FC1, in);
-    cv::Mat proj_out(4,2, CV_32FC1, out);
-    perspectiveMat = cv::findHomography(proj_in, proj_out);
-    proj_in.release();
-    proj_out.release();
+    this->setPerspective();
 
     // test blob to verify perspective Mat
     testBlob.perspectiveMat = &perspectiveMat;
@@ -66,6 +70,28 @@ void planeApp::setup(){
 
 	ofBackground(255);
 
+}
+
+void planeApp::recalculatePerspective(int & v) {
+    cout << "recalculatePerspective" << endl;
+    cout << "value " << v << endl;
+    cout << "siteW " << siteW << "   siteH " << siteH << endl;
+    this->setPerspective();
+}
+
+void planeApp::setPerspective() {
+    int skew = 0;
+    // 800x600  scale 0.4 >> 320x240   mninus 64x128
+    float in[] = {skew,0,blobserverW-skew,0,blobserverW,blobserverH,0,blobserverH};
+    float out[] = {0,0,siteW,0,siteW,siteH,0,siteH};
+
+    cv::Mat proj_in(4,2, CV_32FC1, in);
+    cv::Mat proj_out(4,2, CV_32FC1, out);
+    perspectiveMat = cv::findHomography(proj_in, proj_out);
+    proj_in.release();
+    proj_out.release();
+
+    // if there are already blobs?
 }
 
 //--------------------------------------------------------------
@@ -146,6 +172,7 @@ void planeApp::initScenes(){
 
     bgVideos[n].push_back(videoElement("video/BACKGROUND 2 loop-H264-10mbps.mp4"));
 
+    n++;
 
     sceneInfo eclipse;
     eclipse.name = "Alignment";
@@ -161,8 +188,9 @@ void planeApp::initScenes(){
     eclipse.length[3] = 30;
     scenes[n] = eclipse;
 
-    bgVideos[n].push_back(videoElement("video/HAND animation-H264-10mbps.mp4", 2.5));
+    bgVideos[n].push_back(videoElement("video/BACKGROUND 2 loop-H264-10mbps.mp4"));
 
+    n++;
 
     sceneInfo shooting;
     shooting.name = "Combustion";
@@ -178,8 +206,9 @@ void planeApp::initScenes(){
     shooting.length[3] = 30;
     scenes[n] = shooting;
 
-    bgVideos[n].push_back(videoElement("video/HAND animation-H264-10mbps.mp4", 2.5));
+    bgVideos[n].push_back(videoElement("video/BACKGROUND 2 loop-H264-10mbps.mp4"));
 
+    cout << "there are " << scenes.size() << " scenes" << endl;
 
     nextSegment(1);
 
@@ -235,10 +264,13 @@ void planeApp::nextSegment(int direction){
 
     segment+=direction;
     segmentStart = ofGetUnixTime();
-    if(segment >= scenes[scene].segments) {
+
+    if(scene == -1 || segment >= scenes[scene].segments) {
         scene++;
         segment = 0;
+        cout << "scene " << scene << " / " << scenes.size() << endl;
         if(scene >= scenes.size()) {
+            cout << "last scene" << endl;
             scene = 0;
             globalStart = ofGetUnixTime();
         }
@@ -304,7 +336,7 @@ void planeApp::receiveOsc(){
 			// update blob with new values
 			Blob* b = &blobs.find(blobid)->second;
 
-            b->follow(posx, posy);
+            b->follow(posx + blobW/2.0, posy + blobH/2.0, blobserverW, blobserverH, edgeMargin);
             b->setVelocity(velx, vely);
             b->analyze(freezeMinVel, movingThr);
             b->age = age;
@@ -328,7 +360,7 @@ void planeApp::draw(){
 
     offsy += 20;
 
-    this->drawRawData(offsx, offsy, 0.25);
+    this->drawRawData(offsx, offsy, 0.7);
 
     offsy += 220 + 10;
     this->drawTopDown(offsx, offsy, 0.5, drawBlobDetail);
@@ -374,7 +406,7 @@ void planeApp::drawAnalysis(int x, int y, float scale){
     ofFill(); ofSetColor(255);
     font.drawString(instruction, x+20, y+projectionH*scale*0.1);
 
-    if( scene==1 ){
+    if (scene==1) {
         if( segment==0 || segment==1 ) {
 
             // STAND STILL
@@ -431,6 +463,31 @@ void planeApp::drawAnalysis(int x, int y, float scale){
                 by += 110;
             }
         }
+    } else if (scene==3) {
+        if (segment==1 || segment==2) {
+
+            // HOP
+            int bx = x + 100; int by = y + 250;
+            ofFill();
+            for(std::map<int, Blob>::iterator it = blobs.begin(); it != blobs.end(); ++it){
+                Blob b = it->second;
+
+
+                if(b.lostDuration > 0 && b.lostDuration < hopLength && !b.onEdge) ofSetColor(255);
+                else ofSetColor(100);
+
+                ofCircle(bx, by, 40);
+
+                string textStr = "id\t: " + ofToString(b.id);
+                textStr += "\nonEdge\t: " + ofToString(b.onEdge);
+                textStr += "\nlost\t: "+ ofToString(b.lostDuration);
+                ofDrawBitmapStringHighlight(textStr, bx+70, by -20);
+
+                by += 90;
+            }
+
+        }
+
     }
 
 
@@ -468,8 +525,6 @@ void planeApp::drawControlInfo(int x, int y){
 //--------------------------------------------------------------
 void planeApp::drawRawData(int x, int y, float scale){
 
-    int blobserverW = 800;
-    int blobserverH = 600;
 //    int blobserverW = 192;
 //    int blobserverH = 144;
 
@@ -486,7 +541,7 @@ void planeApp::drawRawData(int x, int y, float scale){
     // draw frame for each blob. blobserver frame size = 64 x 128 px
     for(std::map<int, Blob>::iterator it = blobs.begin(); it != blobs.end(); ++it){
         Blob b = it->second;
-        ofRect( x + b._rawPos.x*scale, y + b._rawPos.y*scale, 64*scale, 128*scale);
+        ofRect( x + b._rawPos.x*scale - blobW*scale/2.0, y + b._rawPos.y*scale - blobH*scale/2.0, blobW*scale, blobH*scale);
     }
 
 }
@@ -494,19 +549,13 @@ void planeApp::drawRawData(int x, int y, float scale){
 //--------------------------------------------------------------
 void planeApp::drawTopDown(int x, int y, float scale, bool detailed) {
 
-//    int frameW = 640;
-//    int frameH = 480;
-
-    int frameW = 500;
-    int frameH = 500;
-
     // frame
     ofNoFill(); ofSetColor(255);
-    ofRect(x,y,frameW*scale,frameH*scale);
+    ofRect(x,y,siteW*scale,siteH*scale);
 
     // write information
     string basicInfo = "blobs: " + ofToString(blobs.size());
-    ofDrawBitmapStringHighlight(basicInfo, x + 3, y +frameH*scale+ 15);
+    ofDrawBitmapStringHighlight(basicInfo, x + 3, y +siteH*scale+ 15);
 
     // draw history
     ofNoFill(); ofSetColor(150);
