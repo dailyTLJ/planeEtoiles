@@ -7,6 +7,7 @@
 
 #include <map>
 #include "Blob.h"
+#include "videoElement.h"
 
 // listen to blobserver on port 9000
 #define PORT 9000
@@ -39,9 +40,13 @@ class planeApp : public ofBaseApp{
 		void dragEvent(ofDragInfo dragInfo);
 		void gotMessage(ofMessage msg);
 
+		int projectionW;
+        int projectionH;
+
 		void drawRawData(int x, int y, float scale);
 		void drawTopDown(int x, int y, float scale, bool detailed = false);
 		void drawScreen(int x, int y, float scale);
+		void drawAnalysis(int x, int y, float scale);
 		void drawControlInfo(int x, int y);
 		void nextSegment(int direction);
 
@@ -74,5 +79,8 @@ class planeApp : public ofBaseApp{
 
 		ofParameter<float> keepDistanceThr;
 		ofParameter<float> movingThr;
+
+		std::map<int, std::vector<videoElement> > bgVideos;
+		std::map<int, std::vector<videoElement> > fgVideos;
 
 };

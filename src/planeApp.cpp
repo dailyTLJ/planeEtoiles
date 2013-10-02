@@ -19,7 +19,10 @@ void planeApp::setup(){
     autoplay = false;
 	drawBlobDetail = true;
 
-	gui.setup("panel", "settings.xml", 774,250);
+    projectionW = 1080;
+    projectionH = 1920;
+
+	gui.setup("panel", "settings.xml", 1164,250);
 //	gui.setDefaultWidth(400);
 //	gui.setWidthElements(400);
 	gui.setSize(250,50);
@@ -70,7 +73,7 @@ void planeApp::initScenes(){
 
     globalStart = ofGetUnixTime();
     segmentStart = ofGetUnixTime();
-    scene = 0;
+    scene = -1;
 	segment = 0;
 	segmentClock = 0;
 	masterClock = 0;
@@ -82,6 +85,8 @@ void planeApp::initScenes(){
     idle.instructions[0] = "Come closer!";
     idle.length[0] = -1;
     scenes[0] = idle;
+
+    bgVideos[0].push_back(videoElement("video/BACKGROUND 2 loop-H264-10mbps.mp4"));
 
     sceneInfo stars;
     stars.name = "Star Links";
@@ -96,6 +101,10 @@ void planeApp::initScenes(){
     stars.instructions[3] = "Walk with \nsomeone. \nMake eye \ncontact. \nKeep the \ndistance.";
     stars.length[3] = 30;
     scenes[1] = stars;
+
+    bgVideos[1].push_back(videoElement("video/HAND animation-H264-10mbps.mp4", 2.5));
+
+    nextSegment(1);
 
 }
 
@@ -125,8 +134,6 @@ void planeApp::update(){
     }
 
     // analysis
-    // send position information of blobs to blobs individually to enble neighbor-distance comparison
-
     std::map<int, ofPoint> blobPositions;
     for(std::map<int, Blob>::iterator it = blobs.begin(); it != blobs.end(); ++it){
         Blob b = it->second;
@@ -137,11 +144,18 @@ void planeApp::update(){
         b->analyzeNeighbors(blobPositions, keepDistanceThr);
     }
 
+    // videos. only update the ones currently on display ?
+    for (vector<videoElement>::iterator it = bgVideos[scene].begin() ; it != bgVideos[scene].end(); ++it) {
+        videoElement* v = &(*it);
+        v->update();
+    }
+
 
 }
 
 
 void planeApp::nextSegment(int direction){
+
     segment+=direction;
     segmentStart = ofGetUnixTime();
     if(segment >= scenes[scene].segments) {
@@ -158,6 +172,13 @@ void planeApp::nextSegment(int direction){
         }
         segment = scenes[scene].segments -1;
     }
+
+    // reset all videos of the scene
+    for (vector<videoElement>::iterator it = bgVideos[scene].begin() ; it != bgVideos[scene].end(); ++it) {
+        videoElement* v = &(*it);
+        v->reset();
+    }
+
 }
 
 // check for incoming OSC messages
@@ -225,6 +246,11 @@ void planeApp::draw(){
     ofBackground(0,50,150);
     int offsx = 10; int offsy = 10;
 
+    ofFill(); ofSetColor(255);
+    ofDrawBitmapString(ofToString(ofGetFrameRate()), offsx, offsy);
+
+    offsy += 20;
+
     this->drawRawData(offsx, offsy, 0.25);
 
     offsy += 220 + 10;
@@ -232,9 +258,13 @@ void planeApp::draw(){
 
     offsy = 10;
     offsx += 380;
+    this->drawAnalysis(offsx, offsy, 0.35);
+
+    offsy = 10;
+    offsx += 390;
     this->drawScreen(offsx, offsy, 0.35);
 
-    offsx += 380;
+    offsx += 400;
     this->drawControlInfo(offsx, offsy);
 
     gui.draw();
@@ -244,8 +274,19 @@ void planeApp::draw(){
 //--------------------------------------------------------------
 void planeApp::drawScreen(int x, int y, float scale){
 
-    int projectionW = 1080;
-    int projectionH = 1920;
+    // frame first
+    ofNoFill(); ofSetColor(255);
+    ofRect(x,y,projectionW*scale,projectionH*scale);
+
+    // videos
+    for (vector<videoElement>::iterator it = bgVideos[scene].begin() ; it != bgVideos[scene].end(); ++it) {
+        videoElement* v = &(*it);
+        v->draw(x, y, scale);
+    }
+}
+
+//--------------------------------------------------------------
+void planeApp::drawAnalysis(int x, int y, float scale){
 
     // frame first
     ofNoFill(); ofSetColor(255);
