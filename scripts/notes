@@ -1,3 +1,13 @@
----
-make video from images:
 
+
+IMAGE SEQUENCE > VIDEO
+=============================================
+
+
+sudo gst-launch multifilesrc location=grab_%05d.png caps="image/png, framerate=10/1" ! pngdec ! ffmpegcolorspace ! jpegenc ! avimux ! filesink location=video.avi sync=false
+
+
+switcher -d &
+switcher-ctrl -C uridecodebin video
+switcher-ctrl -s video loop true
+switcher-ctrl -i video to_shmdata 'path/to/the/file'

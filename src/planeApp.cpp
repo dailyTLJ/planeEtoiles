@@ -71,6 +71,8 @@ void planeApp::setup(){
 //--------------------------------------------------------------
 void planeApp::initScenes(){
 
+    int n = 0;
+
     globalStart = ofGetUnixTime();
     segmentStart = ofGetUnixTime();
     scene = -1;
@@ -80,17 +82,19 @@ void planeApp::initScenes(){
 
     sceneInfo idle;
     idle.name = "Idle";
-    idle.no = 0;
+    idle.no = n;
     idle.segments = 1;
     idle.instructions[0] = "Come closer!";
     idle.length[0] = -1;
-    scenes[0] = idle;
+    scenes[n] = idle;
 
-    bgVideos[0].push_back(videoElement("video/BACKGROUND 2 loop-H264-10mbps.mp4"));
+    bgVideos[n].push_back(videoElement("video/BACKGROUND 2 loop-H264-10mbps.mp4"));
+
+    n++;
 
     sceneInfo stars;
     stars.name = "Star Links";
-    stars.no = 1;
+    stars.no = n;
     stars.segments = 4;
     stars.instructions[0] = "Stand still.";
     stars.length[0] = 20;
@@ -100,9 +104,82 @@ void planeApp::initScenes(){
     stars.length[2] = 30;
     stars.instructions[3] = "Walk with \nsomeone. \nMake eye \ncontact. \nKeep the \ndistance.";
     stars.length[3] = 30;
-    scenes[1] = stars;
+    scenes[n] = stars;
 
-    bgVideos[1].push_back(videoElement("video/HAND animation-H264-10mbps.mp4", 2.5));
+    bgVideos[n].push_back(videoElement("video/HAND animation-H264-10mbps.mp4", 2.5));
+
+
+    n++;
+
+    sceneInfo revolution;
+    revolution.name = "Revolution";
+    revolution.no = n;
+    revolution.segments = 2;
+    revolution.instructions[0] = "Take someone's \nhand. \nSpin and lean \nout as far as \npossible.";
+    revolution.length[0] = 20;
+    revolution.instructions[1] = "Let go.";
+    revolution.length[1] = 20;
+    scenes[n] = revolution;
+
+    bgVideos[n].push_back(videoElement("video/BACKGROUND 2 loop-H264-10mbps.mp4"));
+
+
+    n++;
+
+    sceneInfo sun;
+    sun.name = "Explosion";
+    sun.no = n;
+    sun.segments = 6;
+    sun.instructions[0] = "Stand on one leg.";
+    sun.length[0] = 20;
+    sun.instructions[1] = "Hope from one \nspot to the other.";
+    sun.length[1] = 20;
+    sun.instructions[2] = "Hope from one \nspot to the other.\nEveryone in unison.";
+    sun.length[2] = 20;
+    sun.instructions[3] = "FREEZE!";
+    sun.length[3] = 20;
+    sun.instructions[4] = "Run in every \ndirection at once.";
+    sun.length[4] = 20;
+    sun.instructions[5] = "FREEZE!";
+    sun.length[5] = 20;
+    scenes[n] = sun;
+
+    bgVideos[n].push_back(videoElement("video/BACKGROUND 2 loop-H264-10mbps.mp4"));
+
+
+    sceneInfo eclipse;
+    eclipse.name = "Alignment";
+    eclipse.no = n;
+    eclipse.segments = 4;
+    eclipse.instructions[0] = "Now align \nyourself in \nfront of me.\nAnd follow me.";
+    eclipse.length[0] = 20;
+    eclipse.instructions[1] = "Step out \nof the line.";
+    eclipse.length[1] = 20;
+    eclipse.instructions[2] = "Step into \nthe line.";
+    eclipse.length[2] = 30;
+    eclipse.instructions[3] = "Disperse very \nslowly towards \nthe edges.";
+    eclipse.length[3] = 30;
+    scenes[n] = eclipse;
+
+    bgVideos[n].push_back(videoElement("video/HAND animation-H264-10mbps.mp4", 2.5));
+
+
+    sceneInfo shooting;
+    shooting.name = "Combustion";
+    shooting.no = n;
+    shooting.segments = 4;
+    shooting.instructions[0] = "Move like a \nshooting star.";
+    shooting.length[0] = 20;
+    shooting.instructions[1] = "Drop to the \nground!";
+    shooting.length[1] = 20;
+    shooting.instructions[2] = "Exhale.\nLook at the sky.";
+    shooting.length[2] = 30;
+    shooting.instructions[3] = "Stand up.";
+    shooting.length[3] = 30;
+    scenes[n] = shooting;
+
+    bgVideos[n].push_back(videoElement("video/HAND animation-H264-10mbps.mp4", 2.5));
+
 
     nextSegment(1);
 
