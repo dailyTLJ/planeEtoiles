@@ -73,7 +73,7 @@ void planeApp::initScenes(){
 
     globalStart = ofGetUnixTime();
     segmentStart = ofGetUnixTime();
-    scene = 0;
+    scene = -1;
 	segment = 0;
 	segmentClock = 0;
 	masterClock = 0;
@@ -102,7 +102,9 @@ void planeApp::initScenes(){
     stars.length[3] = 30;
     scenes[1] = stars;
 
-    bgVideos[1].push_back(videoElement("video/HAND animation-H264-10mbps.mp4"));
+    bgVideos[1].push_back(videoElement("video/HAND animation-H264-10mbps.mp4", 2.5));
+
+    nextSegment(1);
 
 }
 
@@ -142,7 +144,7 @@ void planeApp::update(){
         b->analyzeNeighbors(blobPositions, keepDistanceThr);
     }
 
-    // videos
+    // videos. only update the ones currently on display ?
     for (vector<videoElement>::iterator it = bgVideos[scene].begin() ; it != bgVideos[scene].end(); ++it) {
         videoElement* v = &(*it);
         v->update();
@@ -153,6 +155,7 @@ void planeApp::update(){
 
 
 void planeApp::nextSegment(int direction){
+
     segment+=direction;
     segmentStart = ofGetUnixTime();
     if(segment >= scenes[scene].segments) {
@@ -169,6 +172,13 @@ void planeApp::nextSegment(int direction){
         }
         segment = scenes[scene].segments -1;
     }
+
+    // reset all videos of the scene
+    for (vector<videoElement>::iterator it = bgVideos[scene].begin() ; it != bgVideos[scene].end(); ++it) {
+        videoElement* v = &(*it);
+        v->reset();
+    }
+
 }
 
 // check for incoming OSC messages
