@@ -20,6 +20,9 @@ class TimedPoint {
 
 class Neighbor {
     public:
+
+//        Neighbor() { cout << "neighbor" << endl; };
+//        ~Neighbor() { cout << "~neighbor" << endl; };
         int id;
         bool updated;
         vector<float> distance;
@@ -91,6 +94,7 @@ class Blob {
 
 
         Blob();
+        ~Blob();
         void init();
         void follow(float x, float y, float frameW = 800, float frameH = 600, float margin = 0);
         void setVelocity(float dx, float dy);
@@ -99,6 +103,10 @@ class Blob {
         ofPoint transformPerspective(ofPoint& v);
         void update();
         bool isAlive();
+
+
+        ofEvent<Blob> onFreeze;
+        ofEvent<float> newFloatEvent;
 
 
         cv::Mat* perspectiveMat;

@@ -27,6 +27,8 @@ class planeApp : public ofBaseApp{
 		void setup();
 		void update();
 		void draw();
+		void exit();
+
 		void initScenes();
 		void receiveOsc();
 
@@ -40,15 +42,6 @@ class planeApp : public ofBaseApp{
 		void dragEvent(ofDragInfo dragInfo);
 		void gotMessage(ofMessage msg);
 
-//        int siteW;
-//        int siteH;
-		int projectionW;
-        int projectionH;
-        int blobserverW;
-        int blobserverH;
-        int blobW;
-        int blobH;
-
 		void drawRawData(int x, int y, float scale);
 		void drawTopDown(int x, int y, float scale, bool detailed = false);
 		void drawScreen(int x, int y, float scale);
@@ -57,6 +50,16 @@ class planeApp : public ofBaseApp{
 		void nextSegment(int direction);
 		void setPerspective();
 		void recalculatePerspective(int & v);
+
+		void blobOnFreeze(Blob & b);
+		void newFloat(float & f);
+
+		int projectionW;
+        int projectionH;
+        int blobserverW;
+        int blobserverH;
+        int blobW;
+        int blobH;
 
 		ofTrueTypeFont font;
 		ofxPanel gui;

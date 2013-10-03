@@ -63,6 +63,7 @@ void planeApp::setup(){
         testBlob.follow(150-i*3,i * 3.0/5.0);
     }
 
+//    ofAddListener(Blob::onFreeze, this, &planeApp::blobOnFreeze);
 
     // listen on the given port
 	cout << "listening for osc messages on port " << PORT << "\n";
@@ -135,7 +136,6 @@ void planeApp::initScenes(){
     scenes[n] = stars;
 
     bgVideos[n].push_back(videoElement("video/2_stars/HAND animation-PhotoJPEG.mov"));
-
 
     n++;
 
@@ -226,6 +226,7 @@ void planeApp::update(){
     while (it != blobs.end()) {
     	it->second.update();
     	if( !it->second.isAlive() ) {
+            cout << "erase blob " << it->second.id << endl;
     		blobs.erase(it++);
     	} else {
     		++it;
@@ -244,8 +245,8 @@ void planeApp::update(){
     // analysis
     std::map<int, ofPoint> blobPositions;
     for(std::map<int, Blob>::iterator it = blobs.begin(); it != blobs.end(); ++it){
-        Blob b = it->second;
-        blobPositions[b.id] = b.position;
+        Blob* b = &it->second;
+        blobPositions[b->id] = b->position;
     }
     for(std::map<int, Blob>::iterator it = blobs.begin(); it != blobs.end(); ++it){
         Blob* b = &it->second;
@@ -259,10 +260,38 @@ void planeApp::update(){
     }
 
 
+    if (scene==1) {
+        if (segment==0 || segment==1) {
+            // fgVideos[n].push_back(videoElement("video/2_stars/INDIV STAR 2 loop-H264-10mbps.mp4"));
+
+            for(std::map<int, Blob>::iterator it = blobs.begin(); it != blobs.end(); ++it){
+                Blob* b = &it->second;
+//                int add = b.frozenTimer < 10 ? b.frozenTimer*5 : 50;
+//                if(b.frozen) ofSetColor(200+add,0,200+add); else ofSetColor(100);
+                if(b->frozen && b->frozenTimer >= freezeMinTime) {
+                    if(segment==1 && b->frozenTimer > freezeMaxTime) {
+                    }
+                }
+            }
+
+        }
+    }
+
 }
 
 
+void planeApp::blobOnFreeze(Blob &b) {
+    cout << "BLOB " << b.id << " froze!" << endl;
+}
+
+void planeApp::newFloat(float & f){
+	floatMsg 	= "newFloat event:  " + ofToString(f);
+}
+
 void planeApp::nextSegment(int direction){
+
+    // delete all foreground videos
+    fgVideos[scene].clear();
 
     segment+=direction;
     segmentStart = ofGetUnixTime();
@@ -328,22 +357,17 @@ void planeApp::receiveOsc(){
 			if( iter != blobs.end() ) {		// blob instance already exists
 
 			} else {					// create new blob instance
-			    Blob newb;
-				blobs[blobid] = newb;
 				blobs[blobid].id = blobid;
                 blobs[blobid].perspectiveMat = &this->perspectiveMat;
-//				cout << "NEW ";
+                ofAddListener(blobs[blobid].newFloatEvent,this,&planeApp::newFloat);
 			}
-
 			// update blob with new values
 			Blob* b = &blobs.find(blobid)->second;
-
             b->follow(posx + blobW/2.0, posy + blobH/2.0, blobserverW, blobserverH, edgeMargin);
             b->setVelocity(velx, vely);
-            b->analyze(freezeMinVel, movingThr);
+            b->analyze(freezeMinVel, movingThr);    //
             b->age = age;
             b->lostDuration = lost;
-
 //			cout << "blob " << blobid << "   " << posx << "|" << posy << "   - lifetime: " << b->lifetime << "\n";
 		}
 		else{
@@ -385,11 +409,13 @@ void planeApp::draw(){
 //--------------------------------------------------------------
 void planeApp::drawScreen(int x, int y, float scale){
 
-    // frame first
+    // black frame first
+    ofFill(); ofSetColor(0);
+    ofRect(x,y,projectionW*scale,projectionH*scale);
     ofNoFill(); ofSetColor(255);
     ofRect(x,y,projectionW*scale,projectionH*scale);
 
-    // videos
+    // background videos
     for (vector<videoElement>::iterator it = bgVideos[scene].begin() ; it != bgVideos[scene].end(); ++it) {
         videoElement* v = &(*it);
         v->draw(x, y, scale);
@@ -416,22 +442,22 @@ void planeApp::drawAnalysis(int x, int y, float scale){
             int bx = x + 100; int by = y + 250;
             ofFill();
             for(std::map<int, Blob>::iterator it = blobs.begin(); it != blobs.end(); ++it){
-                Blob b = it->second;
+                Blob* b = &it->second;
 //                int add = b.frozenTimer < 10 ? b.frozenTimer*5 : 50;
 //                if(b.frozen) ofSetColor(200+add,0,200+add); else ofSetColor(100);
-                if(b.frozen && b.frozenTimer >= freezeMinTime) {
-                    if(segment==1 && b.frozenTimer > freezeMaxTime) {
+                if(b->frozen && b->frozenTimer >= freezeMinTime) {
+                    if(segment==1 && b->frozenTimer > freezeMaxTime) {
                         ofSetColor(50);
                     } else ofSetColor(255);
-                } else if(b.frozen) ofSetColor(100);
+                } else if(b->frozen) ofSetColor(100);
                 else ofSetColor(50);
 
                 ofCircle(bx, by, 50);
 
-                string textStr = "id\t: " + ofToString(b.id);
-                textStr += "\nvel\t: " + ofToString(b.vel, 2);
-                textStr += "\nfrozen\t: "+ ofToString(b.frozen);
-                textStr += "\nfrozenTimer : " + ofToString(b.frozenTimer);
+                string textStr = "id\t: " + ofToString(b->id);
+                textStr += "\nvel\t: " + ofToString(b->vel, 2);
+                textStr += "\nfrozen\t: "+ ofToString(b->frozen);
+                textStr += "\nfrozenTimer : " + ofToString(b->frozenTimer);
                 ofDrawBitmapStringHighlight(textStr, bx+70, by -20);
 
                 by += 110;
@@ -443,22 +469,22 @@ void planeApp::drawAnalysis(int x, int y, float scale){
             int bx = x + 100; int by = y + 250;
             ofFill();
             for(std::map<int, Blob>::iterator it = blobs.begin(); it != blobs.end(); ++it){
-                Blob b = it->second;
+                Blob* b = &it->second;
 
                 ofSetColor(255);
 
                 ofCircle(bx, by, 50);
 
-                string textStr = "id\t: " + ofToString(b.id);
-                textStr += "\nneighbors : "+ ofToString(b.neighbors.size());
-                textStr += "\nmovingMean : " + ofToString(b.movingMean);
+                string textStr = "id\t: " + ofToString(b->id);
+                textStr += "\nneighbors : "+ ofToString(b->neighbors.size());
+                textStr += "\nmovingMean : " + ofToString(b->movingMean);
                 ofDrawBitmapStringHighlight(textStr, bx+70, by -40);
 
-                for(std::map<int, Neighbor>::iterator iter = b.neighbors.begin(); iter != b.neighbors.end(); ++iter){
-                    Neighbor nb = iter->second;
-                    ofDrawBitmapString(ofToString(nb.id), bx+70, by+20);
-                    if (nb.steadyDistance) ofSetColor(255); else ofSetColor(0);
-                    ofRect(bx+100, by+20, nb.distance[0]*0.2, -10);
+                for(std::map<int, Neighbor>::iterator iter = b->neighbors.begin(); iter != b->neighbors.end(); ++iter){
+                    Neighbor* nb = &iter->second;
+                    ofDrawBitmapString(ofToString(nb->id), bx+70, by+20);
+                    if (nb->steadyDistance) ofSetColor(255); else ofSetColor(0);
+                    ofRect(bx+100, by+20, nb->distance[0]*0.2, -10);
                     by += 20;
                 }
 
@@ -472,17 +498,17 @@ void planeApp::drawAnalysis(int x, int y, float scale){
             int bx = x + 100; int by = y + 250;
             ofFill();
             for(std::map<int, Blob>::iterator it = blobs.begin(); it != blobs.end(); ++it){
-                Blob b = it->second;
+                Blob* b = &it->second;
 
 
-                if(b.lostDuration > 0 && b.lostDuration < hopLength && !b.onEdge) ofSetColor(255);
+                if(b->lostDuration > 0 && b->lostDuration < hopLength && !b->onEdge) ofSetColor(255);
                 else ofSetColor(100);
 
                 ofCircle(bx, by, 40);
 
-                string textStr = "id\t: " + ofToString(b.id);
-                textStr += "\nonEdge\t: " + ofToString(b.onEdge);
-                textStr += "\nlost\t: "+ ofToString(b.lostDuration);
+                string textStr = "id\t: " + ofToString(b->id);
+                textStr += "\nonEdge\t: " + ofToString(b->onEdge);
+                textStr += "\nlost\t: "+ ofToString(b->lostDuration);
                 ofDrawBitmapStringHighlight(textStr, bx+70, by -20);
 
                 by += 90;
@@ -542,8 +568,8 @@ void planeApp::drawRawData(int x, int y, float scale){
 
     // draw frame for each blob. blobserver frame size = 64 x 128 px
     for(std::map<int, Blob>::iterator it = blobs.begin(); it != blobs.end(); ++it){
-        Blob b = it->second;
-        ofRect( x + b._rawPos.x*scale - blobW*scale/2.0, y + b._rawPos.y*scale - blobH*scale/2.0, blobW*scale, blobH*scale);
+        Blob* b = &it->second;
+        ofRect( x + b->_rawPos.x*scale - blobW*scale/2.0, y + b->_rawPos.y*scale - blobH*scale/2.0, blobW*scale, blobH*scale);
     }
 
 }
@@ -562,9 +588,9 @@ void planeApp::drawTopDown(int x, int y, float scale, bool detailed) {
     // draw history
     ofNoFill(); ofSetColor(150);
     for(std::map<int, Blob>::iterator it = blobs.begin(); it != blobs.end(); ++it){
-        Blob b = it->second;
+        Blob* b = &it->second;
         ofBeginShape();
-        for (vector<TimedPoint>::iterator it = b.history.begin() ; it != b.history.end(); ++it) {
+        for (vector<TimedPoint>::iterator it = b->history.begin() ; it != b->history.end(); ++it) {
             ofVertex( x + (*it).point.x*scale, y + (*it).point.y*scale );
         }
         ofEndShape();
@@ -574,24 +600,31 @@ void planeApp::drawTopDown(int x, int y, float scale, bool detailed) {
     ofFill();
     for(std::map<int, Blob>::iterator it = blobs.begin(); it != blobs.end(); ++it){
         ofSetColor(255);
-        Blob b = it->second;
-        int bx = x + b.position.x*scale;
-        int by = y + b.position.y*scale;
+        Blob* b = &it->second;
+        int bx = x + b->position.x*scale;
+        int by = y + b->position.y*scale;
         ofCircle( bx, by, 20);
 
         // display blob details
         if(detailed) {
-            string textStr = "id: " + ofToString(b.id);
-            textStr += "\nvel:" + ofToString(b.velocity.x, 1) + "/" + ofToString(b.velocity.y, 1);
-            textStr += "\nage: "+ofToString(b.age);
-            textStr += "\nlost: " + ofToString(b.lostDuration);
+            string textStr = "id: " + ofToString(b->id);
+            textStr += "\nvel:" + ofToString(b->velocity.x, 1) + "/" + ofToString(b->velocity.y, 1);
+            textStr += "\nage: "+ofToString(b->age);
+            textStr += "\nlost: " + ofToString(b->lostDuration);
             ofDrawBitmapStringHighlight(textStr, bx, by + 10);
         } else {
             ofFill(); ofSetColor(0);
-            ofDrawBitmapString( ofToString(b.id, 4, '0'), bx-15, by+5);
+            ofDrawBitmapString( ofToString(b->id, 4, '0'), bx-15, by+5);
         }
 
-    }}
+    }
+}
+
+
+void planeApp::exit() {
+    // do some destructing here
+    cout << "goodbye" << endl;
+}
 
 
 //--------------------------------------------------------------

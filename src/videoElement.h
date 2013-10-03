@@ -7,6 +7,8 @@ class videoElement
     public:
         videoElement();
         videoElement(string filename, float speed = 1.0);
+        ~videoElement() { cout << "kill video " << this->file << endl; };
+
         void update();
         void loadMovie(string filename);
         void play(bool loop = true);
