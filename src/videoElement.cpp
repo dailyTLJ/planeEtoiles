@@ -22,7 +22,7 @@ void videoElement::loadMovie(string filename) {
     this->w = movie.getWidth();
     this->h = movie.getHeight();
     cout << "video : loadMovie " << filename << "   (" << this->w << "|" << this->h << ")" << endl;
-//    this->play(true);
+    this->play(true);
     this->pause(true);
 }
 
@@ -47,9 +47,10 @@ void videoElement::update() {
 }
 
 void videoElement::reset() {
-//    this->pause(false);
-//    movie.setSpeed(this->speed);
-//    movie.firstFrame();
+    this->pause(false);
+    movie.setSpeed(this->speed);
+    movie.firstFrame();
+    cout << "video reset " << file << endl;
 }
 
 

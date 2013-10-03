@@ -106,6 +106,8 @@ void planeApp::initScenes(){
 	segmentClock = 0;
 	masterClock = 0;
 
+
+
     sceneInfo idle;
     idle.name = "Idle";
     idle.no = n;
@@ -114,7 +116,7 @@ void planeApp::initScenes(){
     idle.length[0] = -1;
     scenes[n] = idle;
 
-    bgVideos[n].push_back(videoElement("video/BACKGROUND 2 loop-H264-10mbps.mp4"));
+    bgVideos[n].push_back(videoElement("video/2_stars/HAND animation-H264-10mbps.mp4"));
 
     n++;
 
@@ -132,7 +134,7 @@ void planeApp::initScenes(){
     stars.length[3] = 30;
     scenes[n] = stars;
 
-    bgVideos[n].push_back(videoElement("video/HAND animation-H264-10mbps.mp4", 2.5));
+    bgVideos[n].push_back(videoElement("video/2_stars/HAND animation-PhotoJPEG.mov"));
 
 
     n++;
@@ -147,7 +149,7 @@ void planeApp::initScenes(){
     revolution.length[1] = 20;
     scenes[n] = revolution;
 
-    bgVideos[n].push_back(videoElement("video/BACKGROUND 2 loop-H264-10mbps.mp4"));
+    bgVideos[n].push_back(videoElement("video/2_stars/HAND animation-QTAnimation.mov"));
 
 
     n++;
@@ -170,7 +172,7 @@ void planeApp::initScenes(){
     sun.length[5] = 20;
     scenes[n] = sun;
 
-    bgVideos[n].push_back(videoElement("video/BACKGROUND 2 loop-H264-10mbps.mp4"));
+    bgVideos[n].push_back(videoElement("video/2_stars/BACKGROUND 2 loop-H264-10mbps.mp4"));
 
     n++;
 
@@ -188,7 +190,7 @@ void planeApp::initScenes(){
     eclipse.length[3] = 30;
     scenes[n] = eclipse;
 
-    bgVideos[n].push_back(videoElement("video/BACKGROUND 2 loop-H264-10mbps.mp4"));
+    bgVideos[n].push_back(videoElement("video/2_stars/BACKGROUND 1 loop-PhotoJPEG.mov"));
 
     n++;
 
@@ -206,7 +208,7 @@ void planeApp::initScenes(){
     shooting.length[3] = 30;
     scenes[n] = shooting;
 
-    bgVideos[n].push_back(videoElement("video/BACKGROUND 2 loop-H264-10mbps.mp4"));
+    bgVideos[n].push_back(videoElement("video/2_stars/BACKGROUND 1 loop-QTAnimation.mov"));
 
     cout << "there are " << scenes.size() << " scenes" << endl;
 
