@@ -54,6 +54,7 @@ class planeApp : public ofBaseApp{
 
 		void blobOnFreeze(int & blobID);
 		void blobUnFreeze(int & blobID);
+		void blobUnlink(int & blobID);
 
 		int projectionW;
         int projectionH;
@@ -97,7 +98,8 @@ class planeApp : public ofBaseApp{
 		ofParameter<int> siteW;
 		ofParameter<int> siteH;
 
+		std::vector< ofPtr<videoElement> > fgVideos;
+//		std::map<int, std::vector<videoElement> > fgVideos;
 		std::map<int, std::vector<videoElement> > bgVideos;
-		std::map<int, std::vector<videoElement> > fgVideos;
 
 };

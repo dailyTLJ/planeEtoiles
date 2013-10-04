@@ -37,7 +37,7 @@ void planeApp::setup(){
 	gui.add(siteW.set( "Site Width", 500, 0, 1000));
 	gui.add(siteH.set( "Site Length", 700, 0, 1000));
 	gui.add(freezeMinVel.set( "Freeze Minimum Velocity",0.1, 0, 1.0 ));
-	gui.add(freezeMinTime.set( "Freeze Minimum Time",0, 0, 30 ));
+	gui.add(freezeMinTime.set( "Freeze Minimum Time",2, 0, 5 ));
 	gui.add(freezeMaxTime.set( "Freeze Maximum Time",10, 0, 30 ));
 	gui.add(keepDistanceThr.set( "Distance Std.Dev. Threshold", 5, 0, 20));
 	gui.add(movingThr.set( "Movement Threshold", 0.5, 0, 20));
@@ -110,7 +110,8 @@ void planeApp::initScenes(){
     idle.length[0] = -1;
     scenes[n] = idle;
 
-    bgVideos[n].push_back(videoElement("video/2_stars/HAND animation-H264-10mbps.mp4"));
+//    bgVideos[n].push_back(videoElement("video/2_stars/HAND animation-QTAnimation.mov"));
+//    bgVideos[n][bgVideos[n].size()-1].setDisplay(200,0);
 
     n++;
 
@@ -128,7 +129,7 @@ void planeApp::initScenes(){
     stars.length[3] = 30;
     scenes[n] = stars;
 
-    bgVideos[n].push_back(videoElement("video/2_stars/HAND animation-PhotoJPEG.mov"));
+//    bgVideos[n].push_back(videoElement("video/2_stars/HAND animation-PhotoJPEG.mov"));
 
     n++;
 
@@ -142,7 +143,7 @@ void planeApp::initScenes(){
     revolution.length[1] = 20;
     scenes[n] = revolution;
 
-    bgVideos[n].push_back(videoElement("video/2_stars/HAND animation-QTAnimation.mov"));
+//    bgVideos[n].push_back(videoElement("video/2_stars/HAND animation-QTAnimation.mov"));
 
 
     n++;
@@ -165,7 +166,7 @@ void planeApp::initScenes(){
     sun.length[5] = 20;
     scenes[n] = sun;
 
-    bgVideos[n].push_back(videoElement("video/2_stars/BACKGROUND 2 loop-H264-10mbps.mp4"));
+//    bgVideos[n].push_back(videoElement("video/2_stars/BACKGROUND 2 loop-H264-10mbps.mp4"));
 
     n++;
 
@@ -183,7 +184,7 @@ void planeApp::initScenes(){
     eclipse.length[3] = 30;
     scenes[n] = eclipse;
 
-    bgVideos[n].push_back(videoElement("video/2_stars/BACKGROUND 1 loop-PhotoJPEG.mov"));
+//    bgVideos[n].push_back(videoElement("video/2_stars/BACKGROUND 1 loop-PhotoJPEG.mov"));
 
     n++;
 
@@ -217,9 +218,11 @@ void planeApp::update(){
 	// check for dead blobs, and delete them from list
     std::map<int,Blob>::iterator it = blobs.begin();
     while (it != blobs.end()) {
-    	it->second.update();
-    	if( !it->second.isAlive() ) {
-            cout << "erase blob " << it->second.id << endl;
+        Blob* b = &it->second;
+    	b->update();
+    	if( !b->isAlive() ) {
+//            cout << "erase blob " << b->id << endl;
+            ofNotifyEvent(b->prepareToDie,b->id,b);
     		blobs.erase(it++);
     	} else {
     		++it;
@@ -252,20 +255,15 @@ void planeApp::update(){
         v->update();
     }
 
+    for (vector<ofPtr<videoElement> >::iterator it = fgVideos.begin(); it != fgVideos.end(); ++it) {
+        (**it).update();
+    }
+
 
     if (scene==1) {
         if (segment==0 || segment==1) {
-            // fgVideos[n].push_back(videoElement("video/2_stars/INDIV STAR 2 loop-H264-10mbps.mp4"));
 
-            for(std::map<int, Blob>::iterator it = blobs.begin(); it != blobs.end(); ++it){
-                Blob* b = &it->second;
-//                int add = b.frozenTimer < 10 ? b.frozenTimer*5 : 50;
-//                if(b.frozen) ofSetColor(200+add,0,200+add); else ofSetColor(100);
-                if(b->frozen && b->frozenTimer >= freezeMinTime) {
-                    if(segment==1 && b->frozenTimer > freezeMaxTime) {
-                    }
-                }
-            }
+            // STAND STILL
 
         }
     }
@@ -274,17 +272,58 @@ void planeApp::update(){
 
 
 void planeApp::blobOnFreeze(int & blobID) {
-    cout << "BLOB " << blobID << " froze!" << endl;
+//    cout << "BLOB " << blobID << " froze!" << endl;
+
+    if (scene==1) {
+        if (segment==0 || segment==1) {
+
+            // STAND STILL
+            // create new video element
+//            cout << "blob " << blobID << " \t\tfreeze ! " << endl;
+            fgVideos.push_back(ofPtr<videoElement>( new videoElement("video/2_stars/INDIV STAR 2 loop-H264-10mbps.mp4")));
+
+            blobs[blobID].videoLink = fgVideos[fgVideos.size()-1];
+            (*fgVideos[fgVideos.size()-1]).setDisplay(ofRandom(projectionW-50), ofRandom(projectionH-50)); // blobs[blobID].position.x, blobs[blobID].position.y);
+            (*fgVideos[fgVideos.size()-1]).reset();
+//            cout << "blob " << blobID << " \t\tvideolink " << blobs[blobID].videoLink << endl;
+        }
+    }
 }
 
 void planeApp::blobUnFreeze(int & blobID) {
-    cout << "BLOB " << blobID << " moved again!" << endl;
+
+    if (scene==1) {
+        if (segment==0 || segment==1) {
+//            cout << "BLOB " << blobID << " moved again!  videoLink = " << blobs[blobID].videoLink << endl;
+            // STAND STILL
+            for (vector<ofPtr<videoElement> >::iterator it = fgVideos.begin(); it != fgVideos.end(); it++) {
+                if (*it == blobs[blobID].videoLink) {
+//                    cout << "BLOB " << blobID << " unlinked" << endl;
+                    fgVideos.erase(it);
+                    break;
+                }
+            }
+//            cout << "dropped videoElement, fgVideos " << fgVideos.size() << endl;
+        }
+    }
+}
+
+void planeApp::blobUnlink(int & blobID) {
+    // making sure, a blob goes to die and untethers all connections
+//    cout << "BLOB " << blobID << " release!  videoLink = " << blobs[blobID].videoLink << endl;
+    for (vector<ofPtr<videoElement> >::iterator it = fgVideos.begin(); it != fgVideos.end(); it++) {
+        if (*it == blobs[blobID].videoLink) {
+//            cout << "BLOB " << blobID << " unlinked" << endl;
+            fgVideos.erase(it);
+            break;
+        }
+    }
 }
 
 void planeApp::nextSegment(int direction){
 
     // delete all foreground videos
-    fgVideos[scene].clear();
+    fgVideos.clear();
 
     segment+=direction;
     segmentStart = ofGetUnixTime();
@@ -355,6 +394,7 @@ void planeApp::receiveOsc(){
                 // add Events, so blobs can report back to planeApp
                 ofAddListener( blobs[blobid].onFreeze, this, &planeApp::blobOnFreeze );
                 ofAddListener( blobs[blobid].unFreeze, this, &planeApp::blobUnFreeze );
+                ofAddListener( blobs[blobid].prepareToDie, this, &planeApp::blobUnlink );
 			}
 			// update blob with new values
 			Blob* b = &blobs.find(blobid)->second;
@@ -415,6 +455,10 @@ void planeApp::drawScreen(int x, int y, float scale){
         videoElement* v = &(*it);
         v->draw(x, y, scale);
     }
+
+    for (vector<ofPtr<videoElement> >::iterator it = fgVideos.begin(); it != fgVideos.end(); ++it) {
+        (**it).draw(x, y, scale);
+    }
 }
 
 //--------------------------------------------------------------
@@ -440,7 +484,7 @@ void planeApp::drawAnalysis(int x, int y, float scale){
                 Blob* b = &it->second;
 //                int add = b.frozenTimer < 10 ? b.frozenTimer*5 : 50;
 //                if(b.frozen) ofSetColor(200+add,0,200+add); else ofSetColor(100);
-                if(b->frozen && b->frozenTimer >= freezeMinTime) {
+                if(b->properFreeze) {
                     if(segment==1 && b->frozenTimer > freezeMaxTime) {
                         ofSetColor(50);
                     } else ofSetColor(255);
@@ -452,6 +496,7 @@ void planeApp::drawAnalysis(int x, int y, float scale){
                 string textStr = "id\t: " + ofToString(b->id);
                 textStr += "\nvel\t: " + ofToString(b->vel, 2);
                 textStr += "\nfrozen\t: "+ ofToString(b->frozen);
+                textStr += "\nproperFreeze : "+ ofToString(b->properFreeze);
                 textStr += "\nfrozenTimer : " + ofToString(b->frozenTimer);
                 ofDrawBitmapStringHighlight(textStr, bx+70, by -20);
 

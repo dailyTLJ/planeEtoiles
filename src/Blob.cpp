@@ -2,11 +2,10 @@
 
 Blob::Blob() {
 	this->init();
-	cout << "Blob() init" << this->id << endl;
+//	cout << "Blob() init " << this->id << endl;
 }
 
 Blob::~Blob() {
-//    cout << "~Blob() " << this->id << endl;
 }
 
 //--------------------------------------------------------------

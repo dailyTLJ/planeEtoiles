@@ -3,6 +3,7 @@
 #include "ofMain.h"
 #include "ofxOpenCv.h"
 #include "ofEvents.h"
+#include "videoElement.h"
 
 #define MAX_HISTORY 100
 #define NEIGHBOR_HISTORY 10
@@ -91,6 +92,7 @@ class Blob {
         int frozenTimer;
         ofEvent<int> onFreeze;
         ofEvent<int> unFreeze;
+        ofEvent<int> prepareToDie;
 
         bool movingMean;
         std::map<int, Neighbor> neighbors;
@@ -109,9 +111,8 @@ class Blob {
         void update();
         bool isAlive();
 
-
-
-
         cv::Mat* perspectiveMat;
+
+        ofPtr<videoElement> videoLink;
 
 };
