@@ -1,6 +1,5 @@
 #include "Blob.h"
 
-
 Blob::Blob() {
 	this->init();
 	cout << "Blob() init" << this->id << endl;
@@ -18,6 +17,7 @@ void Blob::init(){
 
     this->vel = 0;
 	this->frozen = false;
+	this->properFreeze = false;
 	this->frozenStart = 0;
 	this->frozenTimer = 0;
 	this->movingMean = false;
@@ -64,25 +64,30 @@ void Blob::setVelocity(float dx, float dy){
     }
 }
 
-//void Blob::onFreeze() {
-//    cout << "Blob.onFreeze " << this->id << endl;
-//}
+
 
 //--------------------------------------------------------------
-void Blob::analyze(float freezeMinVel, float movingThr) {
+void Blob::analyze(float freezeMinVel, float freezeMinTime, float movingThr) {
     if(this->vel < freezeMinVel) {
         if(!frozen) {
-            ofNotifyEvent(newFloatEvent,this->id,this);
             frozen = true;
             frozenStart = ofGetUnixTime();
             frozenTimer = 0;
         } else {
             frozenTimer = ofGetUnixTime() - frozenStart;
+            if (frozenTimer >= freezeMinTime && !properFreeze) {
+                properFreeze = true;
+                ofNotifyEvent(onFreeze,this->id,this);
+            }
         }
     } else {
         if(frozen) {
             frozen = false;
             frozenTimer = 0;
+        }
+        if(properFreeze) {
+            properFreeze = false;
+            ofNotifyEvent(unFreeze,this->id,this);
         }
     }
 

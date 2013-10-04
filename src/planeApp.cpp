@@ -49,21 +49,14 @@ void planeApp::setup(){
 
     // compute the perspectiveTransformation
     // to map from blob-coordinates to the top-down view
-
-    // values for
-//    float in[] = {0,0,150,0,150,30,0,30};
-//    float out[] = {0,0,640,0,590,480,50,480};
-
     this->setPerspective();
 
     // test blob to verify perspective Mat
-    testBlob.perspectiveMat = &perspectiveMat;
-    for( int i=0; i<50; i++ ) {
-        testBlob.follow( i*3, i * 3.0/5.0 );
-        testBlob.follow(150-i*3,i * 3.0/5.0);
-    }
-
-//    ofAddListener(Blob::onFreeze, this, &planeApp::blobOnFreeze);
+//    testBlob.perspectiveMat = &perspectiveMat;
+//    for( int i=0; i<50; i++ ) {
+//        testBlob.follow( i*3, i * 3.0/5.0 );
+//        testBlob.follow(150-i*3,i * 3.0/5.0);
+//    }
 
     // listen on the given port
 	cout << "listening for osc messages on port " << PORT << "\n";
@@ -280,12 +273,12 @@ void planeApp::update(){
 }
 
 
-void planeApp::blobOnFreeze(Blob &b) {
-    cout << "BLOB " << b.id << " froze!" << endl;
+void planeApp::blobOnFreeze(int & blobID) {
+    cout << "BLOB " << blobID << " froze!" << endl;
 }
 
-void planeApp::newFloat(float & f){
-	floatMsg 	= "newFloat event:  " + ofToString(f);
+void planeApp::blobUnFreeze(int & blobID) {
+    cout << "BLOB " << blobID << " moved again!" << endl;
 }
 
 void planeApp::nextSegment(int direction){
@@ -359,13 +352,15 @@ void planeApp::receiveOsc(){
 			} else {					// create new blob instance
 				blobs[blobid].id = blobid;
                 blobs[blobid].perspectiveMat = &this->perspectiveMat;
-                ofAddListener(blobs[blobid].newFloatEvent,this,&planeApp::newFloat);
+                // add Events, so blobs can report back to planeApp
+                ofAddListener( blobs[blobid].onFreeze, this, &planeApp::blobOnFreeze );
+                ofAddListener( blobs[blobid].unFreeze, this, &planeApp::blobUnFreeze );
 			}
 			// update blob with new values
 			Blob* b = &blobs.find(blobid)->second;
             b->follow(posx + blobW/2.0, posy + blobH/2.0, blobserverW, blobserverH, edgeMargin);
             b->setVelocity(velx, vely);
-            b->analyze(freezeMinVel, movingThr);    //
+            b->analyze(freezeMinVel, freezeMinTime, movingThr);    //
             b->age = age;
             b->lostDuration = lost;
 //			cout << "blob " << blobid << "   " << posx << "|" << posy << "   - lifetime: " << b->lifetime << "\n";

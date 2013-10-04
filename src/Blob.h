@@ -2,6 +2,7 @@
 
 #include "ofMain.h"
 #include "ofxOpenCv.h"
+#include "ofEvents.h"
 
 #define MAX_HISTORY 100
 #define NEIGHBOR_HISTORY 10
@@ -84,9 +85,13 @@ class Blob {
         bool updated;	// updated by last sample ?
 
         // trail analysis
-        bool frozen;
+        bool frozen;            //
+        bool properFreeze;      // after a threshold of time
         int frozenStart;
         int frozenTimer;
+        ofEvent<int> onFreeze;
+        ofEvent<int> unFreeze;
+
         bool movingMean;
         std::map<int, Neighbor> neighbors;
 
@@ -98,15 +103,13 @@ class Blob {
         void init();
         void follow(float x, float y, float frameW = 800, float frameH = 600, float margin = 0);
         void setVelocity(float dx, float dy);
-        void analyze(float freezeMinVel, float movingThr);
+        void analyze(float freezeMinVel, float freezeMinTime, float movingThr);
         void analyzeNeighbors(std::map<int, ofPoint> neighborLocation, float keepDistanceThr);
         ofPoint transformPerspective(ofPoint& v);
         void update();
         bool isAlive();
 
 
-        ofEvent<Blob> onFreeze;
-        ofEvent<float> newFloatEvent;
 
 
         cv::Mat* perspectiveMat;

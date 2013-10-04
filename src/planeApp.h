@@ -4,6 +4,7 @@
 #include "ofxOsc.h"
 #include "ofxOpenCv.h"
 #include "ofxGui.h"
+#include "ofEvents.h"
 
 #include <map>
 #include "Blob.h"
@@ -51,8 +52,8 @@ class planeApp : public ofBaseApp{
 		void setPerspective();
 		void recalculatePerspective(int & v);
 
-		void blobOnFreeze(Blob & b);
-		void newFloat(float & f);
+		void blobOnFreeze(int & blobID);
+		void blobUnFreeze(int & blobID);
 
 		int projectionW;
         int projectionH;
