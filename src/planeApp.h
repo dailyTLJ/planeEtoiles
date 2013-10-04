@@ -54,6 +54,7 @@ class planeApp : public ofBaseApp{
 
 		void blobOnFreeze(int & blobID);
 		void blobUnFreeze(int & blobID);
+		void blobOverFreeze(int & blobID);
 		void blobUnlink(int & blobID);
 
 		int projectionW;

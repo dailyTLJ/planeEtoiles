@@ -17,6 +17,7 @@ void Blob::init(){
     this->vel = 0;
 	this->frozen = false;
 	this->properFreeze = false;
+	this->overFrozen = false;
 	this->frozenStart = 0;
 	this->frozenTimer = 0;
 	this->movingMean = false;
@@ -66,7 +67,7 @@ void Blob::setVelocity(float dx, float dy){
 
 
 //--------------------------------------------------------------
-void Blob::analyze(float freezeMinVel, float freezeMinTime, float movingThr) {
+void Blob::analyze(float freezeMinVel, float freezeMinTime, float freezeMaxTime, float movingThr) {
     if(this->vel < freezeMinVel) {
         if(!frozen) {
             frozen = true;
@@ -77,6 +78,11 @@ void Blob::analyze(float freezeMinVel, float freezeMinTime, float movingThr) {
             if (frozenTimer >= freezeMinTime && !properFreeze) {
                 properFreeze = true;
                 ofNotifyEvent(onFreeze,this->id,this);
+
+            }
+            if (frozenTimer >= freezeMaxTime && !overFrozen) {
+                overFrozen = true;
+                ofNotifyEvent(overFreeze, this->id, this);
             }
         }
     } else {
@@ -87,6 +93,9 @@ void Blob::analyze(float freezeMinVel, float freezeMinTime, float movingThr) {
         if(properFreeze) {
             properFreeze = false;
             ofNotifyEvent(unFreeze,this->id,this);
+        }
+        if(overFrozen) {
+            overFrozen = false;
         }
     }
 

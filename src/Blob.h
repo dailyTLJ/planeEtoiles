@@ -88,10 +88,12 @@ class Blob {
         // trail analysis
         bool frozen;            //
         bool properFreeze;      // after a threshold of time
+        bool overFrozen;
         int frozenStart;
         int frozenTimer;
         ofEvent<int> onFreeze;
         ofEvent<int> unFreeze;
+        ofEvent<int> overFreeze;
         ofEvent<int> prepareToDie;
 
         bool movingMean;
@@ -105,7 +107,7 @@ class Blob {
         void init();
         void follow(float x, float y, float frameW = 800, float frameH = 600, float margin = 0);
         void setVelocity(float dx, float dy);
-        void analyze(float freezeMinVel, float freezeMinTime, float movingThr);
+        void analyze(float freezeMinVel, float freezeMinTime, float freezeMaxTime, float movingThr);
         void analyzeNeighbors(std::map<int, ofPoint> neighborLocation, float keepDistanceThr);
         ofPoint transformPerspective(ofPoint& v);
         void update();

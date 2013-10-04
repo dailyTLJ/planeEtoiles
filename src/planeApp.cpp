@@ -281,11 +281,9 @@ void planeApp::blobOnFreeze(int & blobID) {
             // create new video element
 //            cout << "blob " << blobID << " \t\tfreeze ! " << endl;
             fgVideos.push_back(ofPtr<videoElement>( new videoElement("video/2_stars/INDIV STAR 2 loop-H264-10mbps.mp4")));
-
             blobs[blobID].videoLink = fgVideos[fgVideos.size()-1];
-            (*fgVideos[fgVideos.size()-1]).setDisplay(ofRandom(projectionW-50), ofRandom(projectionH-50)); // blobs[blobID].position.x, blobs[blobID].position.y);
+            (*fgVideos[fgVideos.size()-1]).setDisplay(ofRandom(projectionW-100), ofRandom(projectionH-100));
             (*fgVideos[fgVideos.size()-1]).reset();
-//            cout << "blob " << blobID << " \t\tvideolink " << blobs[blobID].videoLink << endl;
         }
     }
 }
@@ -296,24 +294,31 @@ void planeApp::blobUnFreeze(int & blobID) {
         if (segment==0 || segment==1) {
 //            cout << "BLOB " << blobID << " moved again!  videoLink = " << blobs[blobID].videoLink << endl;
             // STAND STILL
-            for (vector<ofPtr<videoElement> >::iterator it = fgVideos.begin(); it != fgVideos.end(); it++) {
-                if (*it == blobs[blobID].videoLink) {
-//                    cout << "BLOB " << blobID << " unlinked" << endl;
-                    fgVideos.erase(it);
-                    break;
-                }
-            }
-//            cout << "dropped videoElement, fgVideos " << fgVideos.size() << endl;
+            this->blobUnlink(blobID);
+//            for (vector<ofPtr<videoElement> >::iterator it = fgVideos.begin(); it != fgVideos.end(); it++) {
+//                if (*it == blobs[blobID].videoLink) {
+//                    fgVideos.erase(it);
+//                    break;
+//                }
+//            }
+        }
+    }
+}
+
+void planeApp::blobOverFreeze(int & blobID) {
+    if (scene==1) {
+        if (segment==1) {
+            // no more video, been frozen too long!
+            this->blobUnlink(blobID);
         }
     }
 }
 
 void planeApp::blobUnlink(int & blobID) {
     // making sure, a blob goes to die and untethers all connections
-//    cout << "BLOB " << blobID << " release!  videoLink = " << blobs[blobID].videoLink << endl;
     for (vector<ofPtr<videoElement> >::iterator it = fgVideos.begin(); it != fgVideos.end(); it++) {
         if (*it == blobs[blobID].videoLink) {
-//            cout << "BLOB " << blobID << " unlinked" << endl;
+            cout << "unlinked blob " << blobID << endl;
             fgVideos.erase(it);
             break;
         }
@@ -394,13 +399,14 @@ void planeApp::receiveOsc(){
                 // add Events, so blobs can report back to planeApp
                 ofAddListener( blobs[blobid].onFreeze, this, &planeApp::blobOnFreeze );
                 ofAddListener( blobs[blobid].unFreeze, this, &planeApp::blobUnFreeze );
+                ofAddListener( blobs[blobid].overFreeze, this, &planeApp::blobOverFreeze );
                 ofAddListener( blobs[blobid].prepareToDie, this, &planeApp::blobUnlink );
 			}
 			// update blob with new values
 			Blob* b = &blobs.find(blobid)->second;
             b->follow(posx + blobW/2.0, posy + blobH/2.0, blobserverW, blobserverH, edgeMargin);
             b->setVelocity(velx, vely);
-            b->analyze(freezeMinVel, freezeMinTime, movingThr);    //
+            b->analyze(freezeMinVel, freezeMinTime, freezeMaxTime, movingThr);    //
             b->age = age;
             b->lostDuration = lost;
 //			cout << "blob " << blobid << "   " << posx << "|" << posy << "   - lifetime: " << b->lifetime << "\n";
@@ -497,6 +503,7 @@ void planeApp::drawAnalysis(int x, int y, float scale){
                 textStr += "\nvel\t: " + ofToString(b->vel, 2);
                 textStr += "\nfrozen\t: "+ ofToString(b->frozen);
                 textStr += "\nproperFreeze : "+ ofToString(b->properFreeze);
+                textStr += "\noverFrozen : "+ ofToString(b->overFrozen);
                 textStr += "\nfrozenTimer : " + ofToString(b->frozenTimer);
                 ofDrawBitmapStringHighlight(textStr, bx+70, by -20);
 
