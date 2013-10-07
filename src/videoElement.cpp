@@ -1,19 +1,12 @@
 #include "videoElement.h"
 
 videoElement::videoElement() {
-    this->hide = true;
-    this->position.set(0,0);
-    this->scale = 1.0;
-    this->speed = 1.0;
+
 }
 
 videoElement::videoElement(string filename, float speed) {
-    this->hide = true;
-    this->position.set(0,0);
-    this->scale = 1.0;
     this->speed = speed;
     this->loadMovie(filename);
-    this->file = filename;
 }
 
 void videoElement::loadMovie(string filename) {
@@ -36,13 +29,6 @@ void videoElement::pause(bool v) {
 }
 
 void videoElement::update() {
-    // // cout << "video update " << this->file << "  frame " << movie.getCurrentFrame() << endl;
-    // if (ofGetFrameNum() % 2 == 0) movie.nextFrame();
-    // if (movie.getCurrentFrame() == movie.getTotalNumFrames()) {
-    //     // cout << "done" << endl;
-    //     movie.setFrame(0);
-    //     // movie.nextFrame();
-    // }
     movie.update();
 }
 
@@ -65,16 +51,3 @@ void videoElement::draw(int x, int y, float scale) {
     else movie.draw(x + position.x, y + position.y, w, h);
 }
 
-
-void videoElement::setDisplay(int x, int y, float scale) {
-//    cout << "setDisplay " << x << " | " << y << "   * " << scale << endl;
-    this->position.set(x, y);
-    this->scale = scale;
-}
-
-void videoElement::setDisplay(int x, int y, int w, int h) {
-    this->position.set(x, y);
-    this->w = w;
-    this->h = h;
-    this->scale = 1.0;
-}

@@ -3,6 +3,7 @@
 Blob::Blob() {
 	this->init();
 //	cout << "Blob() init " << this->id << endl;
+    ofNotifyEvent(onCreate,this->id,this);
 }
 
 Blob::~Blob() {
@@ -22,6 +23,7 @@ void Blob::init(){
 	this->frozenTimer = 0;
 	this->movingMean = false;
 	this->onEdge = false;
+    this->videoTrace = false;
 }
 
 //--------------------------------------------------------------
@@ -52,6 +54,7 @@ void Blob::follow(float x, float y, float frameW, float frameH, float margin){
     }
 
 	this->updated = true;
+    if (videoTrace) ofNotifyEvent(updatePosition, this->id, this);
 }
 
 //--------------------------------------------------------------

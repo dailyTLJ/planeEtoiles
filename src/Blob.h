@@ -91,10 +91,12 @@ class Blob {
         bool overFrozen;
         int frozenStart;
         int frozenTimer;
+        ofEvent<int> onCreate;
         ofEvent<int> onFreeze;
         ofEvent<int> unFreeze;
         ofEvent<int> overFreeze;
         ofEvent<int> prepareToDie;
+        ofEvent<int> updatePosition;
 
         bool movingMean;
         std::map<int, Neighbor> neighbors;
@@ -116,5 +118,6 @@ class Blob {
         cv::Mat* perspectiveMat;
 
         ofPtr<videoElement> videoLink;
+        bool videoTrace;
 
 };

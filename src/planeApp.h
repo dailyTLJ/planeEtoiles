@@ -10,6 +10,7 @@
 #include "Blob.h"
 #include "videoElement.h"
 
+
 // listen to blobserver on port 9000
 #define PORT 9000
 
@@ -56,6 +57,8 @@ class planeApp : public ofBaseApp{
 		void blobUnFreeze(int & blobID);
 		void blobOverFreeze(int & blobID);
 		void blobUnlink(int & blobID);
+		void blobOnCreate(int & blobID);
+		void videoFollowBlob(int & blobID);
 
 		int projectionW;
         int projectionH;
@@ -98,6 +101,10 @@ class planeApp : public ofBaseApp{
 
 		ofParameter<int> siteW;
 		ofParameter<int> siteH;
+		ofParameter<float> mapSiteW;
+		ofParameter<float> mapSiteH;
+		ofParameter<int> offsetX;
+		ofParameter<int> offsetY;
 
 		std::vector< ofPtr<videoElement> > fgVideos;
 //		std::map<int, std::vector<videoElement> > fgVideos;
