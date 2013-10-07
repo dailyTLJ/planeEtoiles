@@ -11,6 +11,8 @@ imageElement::imageElement(string filename) {
 void imageElement::loadImage(string filename) {
     this->file = filename;
     img.loadImage(filename);
+    this->w = img.getWidth();
+    this->h = img.getHeight();
 }
 
 void imageElement::update() {

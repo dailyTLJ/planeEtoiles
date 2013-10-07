@@ -19,6 +19,10 @@ void mediaElement::draw(int x, int y, float scale) {
 
 }
 
+void mediaElement::reset() {
+
+}
+
 
 void mediaElement::setDisplay(int x, int y) {
     this->setDisplay(x, y, 1.0f);

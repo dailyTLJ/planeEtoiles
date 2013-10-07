@@ -9,7 +9,7 @@
 #include <map>
 #include "Blob.h"
 #include "videoElement.h"
-
+#include "imageElement.h"
 
 // listen to blobserver on port 9000
 #define PORT 9000
@@ -106,7 +106,7 @@ class planeApp : public ofBaseApp{
 		ofParameter<int> offsetX;
 		ofParameter<int> offsetY;
 
-		std::vector< ofPtr<videoElement> > fgVideos;
+		std::vector< ofPtr<mediaElement> > fgMedia;
 //		std::map<int, std::vector<videoElement> > fgVideos;
 		std::map<int, std::vector<videoElement> > bgVideos;
 

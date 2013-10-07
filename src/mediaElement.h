@@ -8,15 +8,17 @@ class mediaElement
         mediaElement();
         // ~mediaElement();
 
-        void update();
+        virtual void update();
 
-        void draw();
-        void draw(int x, int y, float scale);
+        virtual void draw();
+        virtual void draw(int x, int y, float scale);
         
         void setDisplay(int x, int y);
         void setDisplay(int x, int y, float scale);
         void setDisplay(int x, int y, bool centered);
         void setDisplay(int x, int y, int w, int h);
+
+        virtual void reset();
 
         ofPoint position;
         int w;

@@ -33,6 +33,7 @@ void videoElement::update() {
 }
 
 void videoElement::reset() {
+    // cout << "reset video " << endl;
     this->pause(false);
     movie.setSpeed(this->speed);
     movie.firstFrame();
@@ -46,7 +47,7 @@ void videoElement::draw() {
 }
 
 void videoElement::draw(int x, int y, float scale) {
-//    cout << "draw \t x " << x << "   position.x " << position.x << "  scale " << scale << "   this->scale " << this->scale << endl;
+   // cout << "draw \t x " << x << "   position.x " << position.x << "  scale " << scale << "   this->scale " << this->scale << endl;
     if (scale!=1.0) movie.draw(x + position.x * scale, y + position.y * scale, w * scale, h * scale);
     else movie.draw(x + position.x, y + position.y, w, h);
 }

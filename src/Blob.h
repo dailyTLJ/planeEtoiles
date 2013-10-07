@@ -117,7 +117,7 @@ class Blob {
 
         cv::Mat* perspectiveMat;
 
-        ofPtr<videoElement> videoLink;
+        ofPtr<mediaElement> mediaLink;
         bool videoTrace;
 
 };

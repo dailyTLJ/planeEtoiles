@@ -4,6 +4,8 @@
 //--------------------------------------------------------------
 void planeApp::setup(){
 
+    
+
     //old OF default is 96 - but this results in fonts looking
     // larger than in other programs.
 	ofTrueTypeFont::setGlobalDpi(72);
@@ -44,8 +46,8 @@ void planeApp::setup(){
 	gui.add(freezeMinVel.set( "Freeze Minimum Velocity",0.1, 0, 1.0 ));
 	gui.add(freezeMinTime.set( "Freeze Minimum Time",2, 0, 5 ));
 	gui.add(freezeMaxTime.set( "Freeze Maximum Time",10, 0, 30 ));
-	gui.add(keepDistanceThr.set( "Distance Std.Dev. Threshold", 5, 0, 20));
-	gui.add(movingThr.set( "Movement Threshold", 0.2, 0, 5));
+	gui.add(keepDistanceThr.set( "Distance Std.Dev. Threshold", 10, 0, 20));
+	gui.add(movingThr.set( "Movement Threshold", 0.1, 0, 2));
 	gui.add(edgeMargin.set( "Edge Margin", 50, 0, 150));
 	gui.add(hopLength.set( "Hop Length", 5, 0, 35));
 
@@ -260,7 +262,7 @@ void planeApp::update(){
         v->update();
     }
 
-    for (vector<ofPtr<videoElement> >::iterator it = fgVideos.begin(); it != fgVideos.end(); ++it) {
+    for (vector<ofPtr<mediaElement> >::iterator it = fgMedia.begin(); it != fgMedia.end(); ++it) {
         (**it).update();
     }
 
@@ -285,10 +287,10 @@ void planeApp::blobOnFreeze(int & blobID) {
             // STAND STILL
             // create new video element
 //            cout << "blob " << blobID << " \t\tfreeze ! " << endl;
-            fgVideos.push_back(ofPtr<videoElement>( new videoElement("video/2_stars/INDIV STAR 2 loop-H264-10mbps.mp4")));
-            blobs[blobID].videoLink = fgVideos[fgVideos.size()-1];
-            (*fgVideos[fgVideos.size()-1]).setDisplay(ofRandom(projectionW-100), ofRandom(projectionH-100));
-            (*fgVideos[fgVideos.size()-1]).reset();
+            fgMedia.push_back(ofPtr<mediaElement>( new videoElement("video/2_stars/INDIV STAR 2 loop-H264-10mbps.mp4")));
+            blobs[blobID].mediaLink = fgMedia[fgMedia.size()-1];
+            (*fgMedia[fgMedia.size()-1]).setDisplay(ofRandom(projectionW-100), ofRandom(projectionH-100));
+            (*fgMedia[fgMedia.size()-1]).reset();
         }
     }
 }
@@ -297,12 +299,12 @@ void planeApp::blobUnFreeze(int & blobID) {
 
     if (scene==1) {
         if (segment==0 || segment==1) {
-//            cout << "BLOB " << blobID << " moved again!  videoLink = " << blobs[blobID].videoLink << endl;
+//            cout << "BLOB " << blobID << " moved again!  mediaLink = " << blobs[blobID].mediaLink << endl;
             // STAND STILL
             this->blobUnlink(blobID);
-//            for (vector<ofPtr<videoElement> >::iterator it = fgVideos.begin(); it != fgVideos.end(); it++) {
-//                if (*it == blobs[blobID].videoLink) {
-//                    fgVideos.erase(it);
+//            for (vector<ofPtr<videoElement> >::iterator it = fgMedia.begin(); it != fgMedia.end(); it++) {
+//                if (*it == blobs[blobID].mediaLink) {
+//                    fgMedia.erase(it);
 //                    break;
 //                }
 //            }
@@ -326,7 +328,7 @@ void planeApp::blobOnCreate(int & blobID) {
     // first clean up, all related blob settings
     this->blobUnlink(blobID);
     blobs[blobID].videoTrace = false;
-    // blobs[blobID].videoLink = NULL;  // TODO how to release ofPtr ? 
+    // blobs[blobID].mediaLink = NULL;  // TODO how to release ofPtr ? 
 
     // then assign the appropriate ones
     if (scene==1) {
@@ -335,21 +337,27 @@ void planeApp::blobOnCreate(int & blobID) {
             // KEEP THE DISTANCE
             // create new video element
 //            cout << "blob " << blobID << " \t\tfreeze ! " << endl;
-            fgVideos.push_back(ofPtr<videoElement>( new videoElement("video/2_stars/INDIV STAR 2 loop-H264-10mbps.mp4")));
-            blobs[blobID].videoLink = fgVideos[fgVideos.size()-1];
+            fgMedia.push_back(ofPtr<mediaElement>( new videoElement("video/2_stars/INDIV STAR 2 loop-H264-10mbps.mp4")));
+            blobs[blobID].mediaLink = fgMedia[fgMedia.size()-1];
             blobs[blobID].videoTrace = true;
-            // (*fgVideos[fgVideos.size()-1]).setDisplay(ofRandom(projectionW-100), ofRandom(projectionH-100));
-            (*fgVideos[fgVideos.size()-1]).reset();
+            // (*fgMedia[fgMedia.size()-1]).setDisplay(ofRandom(projectionW-100), ofRandom(projectionH-100));
+            (*fgMedia[fgMedia.size()-1]).reset();
         }
+    } else if (scene==4) {
+        // PLANETS
+        int randomPlanet = ofRandom(24) + 1;
+        fgMedia.push_back(ofPtr<mediaElement>( new imageElement("video/5_eclipse/PLANET_" + ofToString(randomPlanet)+".png")));
+        blobs[blobID].mediaLink = fgMedia[fgMedia.size()-1];
+        blobs[blobID].videoTrace = true;
     }
 }
 
 void planeApp::videoFollowBlob(int & blobID) {
     // cout << "blob " << blobID << " \t\tvideoFollowBlob" << endl;
     // find videoElement
-    ofPtr<videoElement> vid; 
-    for (vector<ofPtr<videoElement> >::iterator it = fgVideos.begin(); it != fgVideos.end(); it++) {
-        if (*it == blobs[blobID].videoLink) {
+    ofPtr<mediaElement> vid; 
+    for (vector<ofPtr<mediaElement> >::iterator it = fgMedia.begin(); it != fgMedia.end(); it++) {
+        if (*it == blobs[blobID].mediaLink) {
             vid = *it;
             break;
         }
@@ -363,10 +371,10 @@ void planeApp::videoFollowBlob(int & blobID) {
 
 void planeApp::blobUnlink(int & blobID) {
     // making sure, a blob goes to die and untethers all connections
-    for (vector<ofPtr<videoElement> >::iterator it = fgVideos.begin(); it != fgVideos.end(); it++) {
-        if (*it == blobs[blobID].videoLink) {
+    for (vector<ofPtr<mediaElement> >::iterator it = fgMedia.begin(); it != fgMedia.end(); it++) {
+        if (*it == blobs[blobID].mediaLink) {
             cout << "unlinked blob " << blobID << endl;
-            fgVideos.erase(it);
+            fgMedia.erase(it);
             break;
         }
     }
@@ -375,7 +383,7 @@ void planeApp::blobUnlink(int & blobID) {
 void planeApp::nextSegment(int direction){
 
     int oldScene = scene;
-    fgVideos.clear();   // delete all foreground videos
+    fgMedia.clear();   // delete all foreground videos
 
     segment+=direction;
     segmentStart = ofGetUnixTime();
@@ -480,6 +488,7 @@ void planeApp::receiveOsc(){
 //--------------------------------------------------------------
 void planeApp::draw(){
     ofBackground(0,50,150);
+    // ofBackground(0);
     int offsx = 10; int offsy = 10;
 
     ofFill(); ofSetColor(255);
@@ -510,11 +519,15 @@ void planeApp::draw(){
 //--------------------------------------------------------------
 void planeApp::drawScreen(int x, int y, float scale){
 
+
     // black frame first
     ofFill(); ofSetColor(0);
     ofRect(x,y,projectionW*scale,projectionH*scale);
     ofNoFill(); ofSetColor(255);
     ofRect(x,y,projectionW*scale,projectionH*scale);
+
+    // ofEnableAlphaBlending();
+    ofEnableBlendMode(OF_BLENDMODE_ADD);
 
     // background videos
     for (vector<videoElement>::iterator it = bgVideos[scene].begin() ; it != bgVideos[scene].end(); ++it) {
@@ -522,7 +535,7 @@ void planeApp::drawScreen(int x, int y, float scale){
         v->draw(x, y, scale);
     }
 
-    for (vector<ofPtr<videoElement> >::iterator it = fgVideos.begin(); it != fgVideos.end(); ++it) {
+    for (vector<ofPtr<mediaElement> >::iterator it = fgMedia.begin(); it != fgMedia.end(); ++it) {
         (**it).draw(x, y, scale);
     }
 
@@ -552,6 +565,8 @@ void planeApp::drawScreen(int x, int y, float scale){
 
         }
     }
+    ofDisableBlendMode();
+    // ofDisableAlphaBlending();
 }
 
 //--------------------------------------------------------------

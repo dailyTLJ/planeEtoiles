@@ -3,7 +3,7 @@
 Blob::Blob() {
 	this->init();
 //	cout << "Blob() init " << this->id << endl;
-    ofNotifyEvent(onCreate,this->id,this);
+    // ofNotifyEvent(onCreate,this->id,this);
 }
 
 Blob::~Blob() {
