@@ -4,10 +4,6 @@
 //--------------------------------------------------------------
 void planeApp::setup(){
 
-    
-
-    //old OF default is 96 - but this results in fonts looking
-    // larger than in other programs.
 	ofTrueTypeFont::setGlobalDpi(72);
 
     font.loadFont("Mercury Bold.otf", 36, true, true);
@@ -116,8 +112,8 @@ void planeApp::initScenes(){
     idle.instructions[0] = "Come closer!";
     idle.length[0] = -1;
     scenes[n] = idle;
-
-//    bgVideos[n].push_back(videoElement("video/2_stars/HAND animation-QTAnimation.mov"));
+ 
+    bgVideos[n].push_back(videoElement("video/2_stars/BACKGROUND 1 loop-QTAnimation.mov"));
 //    bgVideos[n][bgVideos[n].size()-1].setDisplay(200,0);
 
     n++;
@@ -136,7 +132,7 @@ void planeApp::initScenes(){
     stars.length[3] = 30;
     scenes[n] = stars;
 
-//    bgVideos[n].push_back(videoElement("video/2_stars/HAND animation-PhotoJPEG.mov"));
+    bgVideos[n].push_back(videoElement("video/2_stars/BACKGROUND 1 loop-QTAnimation.mov"));
 
     n++;
 
@@ -150,7 +146,7 @@ void planeApp::initScenes(){
     revolution.length[1] = 20;
     scenes[n] = revolution;
 
-//    bgVideos[n].push_back(videoElement("video/2_stars/HAND animation-QTAnimation.mov"));
+    bgVideos[n].push_back(videoElement("video/2_stars/BACKGROUND 1 loop-QTAnimation.mov"));
 
 
     n++;
@@ -173,7 +169,7 @@ void planeApp::initScenes(){
     sun.length[5] = 20;
     scenes[n] = sun;
 
-//    bgVideos[n].push_back(videoElement("video/2_stars/BACKGROUND 2 loop-H264-10mbps.mp4"));
+    bgVideos[n].push_back(videoElement("video/2_stars/BACKGROUND 1 loop-QTAnimation.mov"));
 
     n++;
 
@@ -191,7 +187,7 @@ void planeApp::initScenes(){
     eclipse.length[3] = 30;
     scenes[n] = eclipse;
 
-//    bgVideos[n].push_back(videoElement("video/2_stars/BACKGROUND 1 loop-PhotoJPEG.mov"));
+    bgVideos[n].push_back(videoElement("video/2_stars/BACKGROUND 1 loop-QTAnimation.mov"));
 
     n++;
 
