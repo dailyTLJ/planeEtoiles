@@ -14,6 +14,7 @@ void planeApp::setup(){
 	mouseY = 0;
 	mouseButtonState = "";
 
+    fullscreen = false;
     autoplay = false;
 	drawBlobDetail = true;
 
@@ -483,32 +484,51 @@ void planeApp::receiveOsc(){
 
 //--------------------------------------------------------------
 void planeApp::draw(){
-    ofBackground(0,50,150);
-    // ofBackground(0);
-    int offsx = 10; int offsy = 10;
 
-    ofFill(); ofSetColor(255);
-    ofDrawBitmapString(ofToString(ofGetFrameRate()), offsx, offsy);
+    if (fullscreen) {
 
-    offsy += 20;
+        ofBackground(0);
+        ofPushMatrix();
+        ofTranslate(0, 700);
+        ofRotateZ(-90);
 
-    this->drawRawData(offsx, offsy, 0.7);
+        this->drawScreen(0, 0, 1);
 
-    offsy += 220 + 10;
-    this->drawTopDown(offsx, offsy, 0.5, drawBlobDetail);
+        ofPopMatrix();
 
-    offsy = 10;
-    offsx += 380;
-    this->drawAnalysis(offsx, offsy, 0.35);
+        ofFill(); ofSetColor(255);
+        ofDrawBitmapString(ofToString(ofGetFrameRate()), 10, 10);
 
-    offsy = 10;
-    offsx += 390;
-    this->drawScreen(offsx, offsy, 0.35);
+    } else {
 
-    offsx += 400;
-    this->drawControlInfo(offsx, offsy);
+        ofBackground(0,50,150);
+        // ofBackground(0);
+        int offsx = 10; int offsy = 10;
 
-    gui.draw();
+        ofFill(); ofSetColor(255);
+        ofDrawBitmapString(ofToString(ofGetFrameRate()), offsx, offsy);
+
+        offsy += 20;
+
+        this->drawRawData(offsx, offsy, 0.7);
+
+        offsy += 220 + 10;
+        this->drawTopDown(offsx, offsy, 0.5, drawBlobDetail);
+
+        offsy = 10;
+        offsx += 380;
+        this->drawAnalysis(offsx, offsy, 0.35);
+
+        offsy = 10;
+        offsx += 390;
+        this->drawScreen(offsx, offsy, 0.35);
+
+        offsx += 400;
+        this->drawControlInfo(offsx, offsy);
+
+        gui.draw();
+
+    }
 }
 
 
@@ -520,7 +540,9 @@ void planeApp::drawScreen(int x, int y, float scale){
     ofFill(); ofSetColor(0);
     ofRect(x,y,projectionW*scale,projectionH*scale);
     ofNoFill(); ofSetColor(255);
-    ofRect(x,y,projectionW*scale,projectionH*scale);
+    if (scale<1.0) {
+        ofRect(x,y,projectionW*scale,projectionH*scale);
+    }
 
     // ofEnableAlphaBlending();
     ofEnableBlendMode(OF_BLENDMODE_ADD);
@@ -796,6 +818,9 @@ void planeApp::keyReleased(int key){
 	if(key == 'l') {
 		gui.loadFromFile("settings.xml");
 	}
+    if (key=='f') {
+        fullscreen = !fullscreen;
+    }
 }
 
 //--------------------------------------------------------------

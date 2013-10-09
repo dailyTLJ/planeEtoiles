@@ -78,7 +78,8 @@ class planeApp : public ofBaseApp{
 		Blob testBlob;
 		cv::Mat perspectiveMat;
 
-        bool autoplay;  // advance to next segment by itself
+		bool fullscreen;		 
+        bool autoplay; 			 // advance to next segment by itself
 		int scene;
 		int segment;
 		int masterClock;
