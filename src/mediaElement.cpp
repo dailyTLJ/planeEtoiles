@@ -17,12 +17,12 @@ void mediaElement::draw() {
 
 }
 
-void mediaElement::draw(int x, int y, float scale) {
+void mediaElement::draw(int x, int y, float _scale) {
     // cout << " draw at " << x << " px " << position.x << "  scale " << scale << "  width " << this->w << endl;
     ofPushMatrix();
-    ofTranslate(x + position.x * scale + w*scale*0.5, y + position.y * scale + h*scale*0.5);
+    ofTranslate(x + position.x * _scale + w*_scale*0.5, y + position.y * _scale + h*_scale*0.5);
     ofFill(); ofSetColor(155, 70, 0);
-    ofCircle(0, 0, this->w/2);
+    ofCircle(0, 0, this->w * _scale * 0.5);
     ofPopMatrix();
 }
 
@@ -53,10 +53,10 @@ void mediaElement::setDisplay(int x, int y, bool centered) {
     }
 }
 
-void mediaElement::setDisplay(int x, int y, float scale) {
+void mediaElement::setDisplay(int x, int y, float _scale) {
 //    cout << "setDisplay " << x << " | " << y << "   * " << scale << endl;
     this->position.set(x, y);
-    this->scale = scale;
+    this->scale = _scale;
 }
 
 void mediaElement::setDisplay(int x, int y, int w, int h) {

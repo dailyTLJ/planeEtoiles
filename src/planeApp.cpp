@@ -367,13 +367,14 @@ void planeApp::blobOnCreate(int & blobID) {
             fgMedia.push_back(ofPtr<mediaElement>( new videoElement("video/2_stars/INDIV STAR 2 loop-H264-10mbps.mp4")));
             blobs[blobID].mediaLink = fgMedia[fgMedia.size()-1];
             blobs[blobID].videoTrace = true;
+            (*fgMedia[fgMedia.size()-1]).setDisplay(0, 0, 200, 200, true);
             // (*fgMedia[fgMedia.size()-1]).setDisplay(ofRandom(projectionW-100), ofRandom(projectionH-100));
             (*fgMedia[fgMedia.size()-1]).reset();
         }
     } else if (scene==4) {
         // PLANETS
         int randomPlanet = ofRandom(24) + 1;
-        fgMedia.push_back(ofPtr<mediaElement>( new imageElement("video/5_eclipse/PLANET_" + ofToString(randomPlanet)+".png")));
+        fgMedia.push_back(ofPtr<mediaElement>( new imageElement("video/5_eclipse/PLANET_" + ofToString(randomPlanet)+".png", 0.5f)));
         blobs[blobID].mediaLink = fgMedia[fgMedia.size()-1];
         blobs[blobID].videoTrace = true;
     }
@@ -454,7 +455,7 @@ void planeApp::nextSegment(int direction){
     if (scene==3) {
         cout << "scene 3 add FG circle " << endl;
         fgMedia.push_back(ofPtr<mediaElement>( new mediaElement()));
-        (*fgMedia[fgMedia.size()-1]).setDisplay( projectionW/2, projectionH/2, 300, 300, true );
+        (*fgMedia[fgMedia.size()-1]).setDisplay( projectionW/2, projectionH/2, 600, 600, true );
         (*fgMedia[fgMedia.size()-1]).reset();
     }
 
@@ -534,6 +535,10 @@ void planeApp::draw(){
         ofRotateZ(-90);
 
         this->drawScreen(0, 0, 1);
+
+        string instruction = scenes[scene].instructions[segment];
+        ofFill(); ofSetColor(255);
+        font.drawString(instruction, 50, 50);
 
         ofPopMatrix();
 

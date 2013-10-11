@@ -64,13 +64,13 @@ void videoElement::draw() {
 }
 
 // being able to translate the drawing with the function
-void videoElement::draw(int x, int y, float scale) {
-   // cout << "draw \t x " << x << "   position.x " << position.x << "  scale " << scale << "   this->scale " << this->scale << endl;
+void videoElement::draw(int x, int y, float _scale) {
+   // cout << "draw \t x " << x << "   position.x " << position.x << "  scale " << _scale << "   this->scale " << this->scale << endl;
     ofPushMatrix();
-    ofTranslate(x + position.x * scale, y + position.y * scale);
+    ofTranslate(x + position.x * _scale, y + position.y * _scale);
     ofRotateZ(this->rotation);
-    if (scale!=1.0) movie.draw(0, 0, w * scale, h * scale);
-    else movie.draw(0, 0, w, h);
+    if (scale!=1.0) movie.draw(0, 0, w * scale * _scale, h * scale * _scale);
+    else movie.draw(0, 0, w * _scale, h * _scale);
     ofPopMatrix();
 }
 

@@ -18,7 +18,7 @@ class videoElement: public mediaElement
         void reset();
 
         void draw();
-        void draw(int x, int y, float scale);
+        void draw(int x, int y, float _scale);
 
         void moveAcross(float v, int maxw, int maxh, bool destr);
         void moveAcross(float vx, float vy, int maxw, bool destr);
