@@ -77,3 +77,7 @@ void mediaElement::setDisplay(int x, int y, int w, int h, bool centered) {
     }
     this->scale = 1.0;
 }
+
+void mediaElement::autoDestroy(bool v) {
+
+}

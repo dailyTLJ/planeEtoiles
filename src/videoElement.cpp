@@ -39,8 +39,8 @@ void videoElement::update() {
     }
 
     if (movie.getIsMovieDone()) {
+            // cout << "movie " << file << " ended " << this->selfdestroy << endl;
         if (this->selfdestroy) {
-            // cout << "movie " << file << " ended " << endl;
             this->dead = true;
         }
     }
@@ -81,11 +81,8 @@ void videoElement::moveAcross(float v, int maxw, int maxh, bool destr) {
     int maxRadius = max(maxw/2, maxh/2);
     this->position.set( maxw/2 - maxRadius*1.5 * sin(ofDegToRad(rotation)), maxh/2 + maxRadius*1.5 * cos(ofDegToRad(rotation)) );
     this->velocity.set( v * sin(ofDegToRad(rotation)), -v * cos(ofDegToRad(rotation)) );
-    this->selfdestroy = destr;
     rotation -= 90;
-    if (destr) {
-        movie.setLoopState(OF_LOOP_NONE);
-    }
+    autoDestroy(destr);
 }
 
 // set at what speed a moving star should shoot across the screen, top down
@@ -93,9 +90,16 @@ void videoElement::moveAcross(float vx, float vy, int maxw, bool destr) {
     this->moveElement = true;
     this->velocity.set(vx,vy);
     this->position.set( ofRandom(maxw), -500 - ofRandom(300) );
-    this->selfdestroy = destr;
     rotation = 90 - ofRadToDeg(atan2(vx, vy));
-    if (destr) {
+    autoDestroy(destr);
+}
+
+
+void videoElement::autoDestroy(bool v) {
+    this->selfdestroy = v;
+    if (v) {
         movie.setLoopState(OF_LOOP_NONE);
+    } else {
+        movie.setLoopState(OF_LOOP_NORMAL);
     }
 }

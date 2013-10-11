@@ -23,6 +23,8 @@ class videoElement: public mediaElement
         void moveAcross(float v, int maxw, int maxh, bool destr);
         void moveAcross(float vx, float vy, int maxw, bool destr);
 
+        void autoDestroy(bool v);
+
         ofVideoPlayer movie;
         float displaySpeed;
 

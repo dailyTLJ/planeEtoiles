@@ -23,6 +23,8 @@ class mediaElement
         void setDisplay(int x, int y, int w, int h);
         void setDisplay(int x, int y, int w, int h, bool centered);
 
+        virtual void autoDestroy(bool v);
+
         virtual void reset();
 
         ofPoint position;
