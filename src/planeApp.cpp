@@ -280,7 +280,7 @@ void planeApp::update(){
 }
 
 void planeApp::blobOnLost(int & blobID) {
-    // cout << "BLOB " << blobID << " just got lost" << endl;
+    cout << "BLOB " << blobID << " just got lost" << endl;
 
     if (scene==3) {
         if (segment==1 || segment==2) {
