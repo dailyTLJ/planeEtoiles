@@ -16,12 +16,20 @@ class videoElement: public mediaElement
         void play(bool loop = true);
         void pause(bool v = true);
         void reset();
-        
+
         void draw();
         void draw(int x, int y, float scale);
 
+        void moveAcross(float v, int maxw, int maxh, bool destr);
+        void moveAcross(float vx, float vy, int maxw, bool destr);
+
         ofVideoPlayer movie;
-        float speed;
+        float displaySpeed;
+
+        ofPoint velocity;
+        int rotation;
+        bool moveElement;
+
 
     protected:
     private:

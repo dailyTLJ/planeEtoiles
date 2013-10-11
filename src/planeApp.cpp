@@ -259,9 +259,16 @@ void planeApp::update(){
         v->update();
     }
 
-    for (vector<ofPtr<mediaElement> >::iterator it = fgMedia.begin(); it != fgMedia.end(); ++it) {
+    for (vector<ofPtr<mediaElement> >::iterator it = fgMedia.begin(); it != fgMedia.end(); ) {
         (**it).update();
+        if ((**it).dead) {
+            cout << "delete video " << (**it).file << "  size " << fgMedia.size() << endl;
+            it = fgMedia.erase(it);
+        } else {
+            ++it;
+        }
     }
+
 
 
     if (scene==1) {
@@ -272,6 +279,29 @@ void planeApp::update(){
         }
     }
 
+}
+
+void planeApp::blobOnLost(int & blobID) {
+    // cout << "BLOB " << blobID << " just got lost" << endl;
+
+    if (scene==5) {
+        if (segment==0) {
+            int randomShooter = ofRandom(6) + 1;
+            fgMedia.push_back(ofPtr<mediaElement>( new videoElement("video/6_shooting/SSTAR_0" + ofToString(randomShooter) + "-H264-10mbps.mp4")));
+            (*fgMedia[fgMedia.size()-1]).setDisplay(ofRandom(projectionW-100), ofRandom(projectionH-100), true);
+            (*fgMedia[fgMedia.size()-1]).moveAcross( 45.f, projectionW, projectionH, true);
+            (*fgMedia[fgMedia.size()-1]).reset();
+        } else if (segment==1) {
+            float randdeg = ofRandom(-5.f, 5.f);
+            for (int i=0; i<10; i++) {
+                int randomShooter = ofRandom(6) + 1;
+                fgMedia.push_back(ofPtr<mediaElement>( new videoElement("video/6_shooting/SSTAR_0" + ofToString(randomShooter) + "-H264-10mbps.mp4")));
+                (*fgMedia[fgMedia.size()-1]).setDisplay(ofRandom(projectionW-100), ofRandom(projectionH-100), true);
+                (*fgMedia[fgMedia.size()-1]).moveAcross( randdeg, 45.f, projectionW, true);
+                (*fgMedia[fgMedia.size()-1]).reset();
+            }
+        }
+    }
 }
 
 
@@ -299,12 +329,6 @@ void planeApp::blobUnFreeze(int & blobID) {
 //            cout << "BLOB " << blobID << " moved again!  mediaLink = " << blobs[blobID].mediaLink << endl;
             // STAND STILL
             this->blobUnlink(blobID);
-//            for (vector<ofPtr<videoElement> >::iterator it = fgMedia.begin(); it != fgMedia.end(); it++) {
-//                if (*it == blobs[blobID].mediaLink) {
-//                    fgMedia.erase(it);
-//                    break;
-//                }
-//            }
         }
     }
 }
@@ -459,6 +483,7 @@ void planeApp::receiveOsc(){
 				blobs[blobid].id = blobid;
                 blobs[blobid].perspectiveMat = &this->perspectiveMat;
                 // add Events, so blobs can report back to planeApp
+                ofAddListener( blobs[blobid].onLost, this, &planeApp::blobOnLost );
                 ofAddListener( blobs[blobid].onFreeze, this, &planeApp::blobOnFreeze );
                 ofAddListener( blobs[blobid].unFreeze, this, &planeApp::blobUnFreeze );
                 ofAddListener( blobs[blobid].overFreeze, this, &planeApp::blobOverFreeze );
@@ -820,6 +845,15 @@ void planeApp::keyReleased(int key){
 	}
     if (key=='f') {
         fullscreen = !fullscreen;
+    }
+
+    if (key=='p') {
+        cout << "make screenshot" << endl;
+        ofImage img;
+        img.grabScreen(0,0,1425,700);
+        string fileName = "plane_"+ofGetTimestampString()+".png";
+        img.saveImage(fileName);
+        cout << "saved screenshot " << fileName.c_str() << endl;
     }
 }
 

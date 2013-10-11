@@ -4,6 +4,8 @@ mediaElement::mediaElement() {
     this->hide = true;
     this->position.set(0,0);
     this->scale = 1.0;
+    this->selfdestroy = false;
+    this->dead = false;
 }
 
 
@@ -22,6 +24,15 @@ void mediaElement::draw(int x, int y, float scale) {
 void mediaElement::reset() {
 
 }
+
+void mediaElement::moveAcross(float v, int maxw, int maxh, bool destr) {
+
+}
+
+void mediaElement::moveAcross(float vx, float vy, int maxw, bool destr) {
+
+}
+
 
 
 void mediaElement::setDisplay(int x, int y) {

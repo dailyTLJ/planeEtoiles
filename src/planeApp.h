@@ -59,6 +59,7 @@ class planeApp : public ofBaseApp{
 		void blobUnlink(int & blobID);
 		void blobOnCreate(int & blobID);
 		void videoFollowBlob(int & blobID);
+		void blobOnLost(int & blobID);
 
 		int projectionW;
         int projectionH;

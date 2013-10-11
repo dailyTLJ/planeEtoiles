@@ -91,6 +91,9 @@ class Blob {
         bool overFrozen;
         int frozenStart;
         int frozenTimer;
+        bool lost; 
+        
+        ofEvent<int> onLost;
         ofEvent<int> onCreate;
         ofEvent<int> onFreeze;
         ofEvent<int> unFreeze;

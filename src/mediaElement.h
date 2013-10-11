@@ -1,6 +1,7 @@
 #pragma once
 
 #include "ofMain.h"
+#include "ofEvents.h"
 
 class mediaElement
 {
@@ -12,6 +13,9 @@ class mediaElement
 
         virtual void draw();
         virtual void draw(int x, int y, float scale);
+
+        virtual void moveAcross(float v, int maxw, int maxh, bool destr);
+        virtual void moveAcross(float vx, float vy, int maxw, bool destr);
         
         void setDisplay(int x, int y);
         void setDisplay(int x, int y, float scale);
@@ -25,7 +29,10 @@ class mediaElement
         int h;
         bool hide;
         float scale;
-        string file;
+        string file;     
+
+        bool selfdestroy;
+        bool dead;
 
     protected:
     private:

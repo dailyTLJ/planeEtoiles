@@ -208,6 +208,14 @@ void Blob::update(){
     this->lifetime = this->maxLifetime;
 	this->updated = false;
 	// now do analysis
+    if(this->lostDuration > 0) {
+        if (!lost) {
+            lost = true;
+            ofNotifyEvent(onLost,this->id,this);
+        }
+    } else {
+        lost = false;
+    }
 }
 
 //--------------------------------------------------------------
