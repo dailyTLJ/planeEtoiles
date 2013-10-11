@@ -282,7 +282,14 @@ void planeApp::update(){
 void planeApp::blobOnLost(int & blobID) {
     // cout << "BLOB " << blobID << " just got lost" << endl;
 
-    if (scene==5) {
+    if (scene==3) {
+        if (segment==1 || segment==2) {
+            int randomShooter = ofRandom(6) + 1;
+            fgMedia.push_back(ofPtr<mediaElement>( new videoElement("video/6_shooting/SSTAR_0" + ofToString(randomShooter) + "-H264-10mbps.mp4")));
+            (*fgMedia[fgMedia.size()-1]).setDisplay(projectionW/2 + ofRandom(-200,200), projectionH/2 + ofRandom(-200,200), true);
+            (*fgMedia[fgMedia.size()-1]).reset();
+        }
+    } else if (scene==5) {
         if (segment==0) {
             int randomShooter = ofRandom(6) + 1;
             fgMedia.push_back(ofPtr<mediaElement>( new videoElement("video/6_shooting/SSTAR_0" + ofToString(randomShooter) + "-H264-10mbps.mp4")));
