@@ -21,6 +21,7 @@ class mediaElement
         void setDisplay(int x, int y, float scale);
         void setDisplay(int x, int y, bool centered);
         void setDisplay(int x, int y, int w, int h);
+        void setDisplay(int x, int y, int w, int h, bool centered);
 
         virtual void reset();
 

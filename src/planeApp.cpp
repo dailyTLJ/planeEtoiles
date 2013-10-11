@@ -16,10 +16,8 @@ void planeApp::setup(){
 
     fullscreen = false;
     autoplay = false;
-	drawBlobDetail = true;
+	drawBlobDetail = false;
 
-//    siteW = 500;
-//    siteH = 500;
     projectionW = 1080;
     projectionH = 1920;
     blobserverW = 320;
@@ -253,7 +251,7 @@ void planeApp::update(){
         b->analyzeNeighbors(blobPositions, keepDistanceThr);
     }
 
-    // videos. only update the ones currently on display ?
+    // videos update
     for (vector<videoElement>::iterator it = bgVideos[scene].begin() ; it != bgVideos[scene].end(); ++it) {
         videoElement* v = &(*it);
         v->update();
@@ -442,6 +440,16 @@ void planeApp::nextSegment(int direction){
 
     cout << "segment " << scenes[scene].instructions[segment] << endl;
 
+
+    // add FG videos
+
+    if (scene==3) {
+        cout << "scene 3 add FG circle " << endl;
+        fgMedia.push_back(ofPtr<mediaElement>( new mediaElement()));
+        (*fgMedia[fgMedia.size()-1]).setDisplay( projectionW/2, projectionH/2, 300, 300, true );
+        (*fgMedia[fgMedia.size()-1]).reset();
+    }
+
 }
 
 // check for incoming OSC messages
@@ -577,7 +585,7 @@ void planeApp::drawScreen(int x, int y, float scale){
         videoElement* v = &(*it);
         v->draw(x, y, scale);
     }
-
+    // foreground videos
     for (vector<ofPtr<mediaElement> >::iterator it = fgMedia.begin(); it != fgMedia.end(); ++it) {
         (**it).draw(x, y, scale);
     }
