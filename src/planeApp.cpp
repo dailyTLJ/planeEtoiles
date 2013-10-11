@@ -284,6 +284,7 @@ void planeApp::blobOnLost(int & blobID) {
 
     if (scene==3) {
         if (segment==1 || segment==2) {
+            cout << "hop" << endl;
             int randomShooter = ofRandom(6) + 1;
             fgMedia.push_back(ofPtr<mediaElement>( new videoElement("video/6_shooting/SSTAR_0" + ofToString(randomShooter) + "-H264-10mbps.mp4")));
             (*fgMedia[fgMedia.size()-1]).setDisplay(projectionW/2 + ofRandom(-200,200), projectionH/2 + ofRandom(-200,200), true);
