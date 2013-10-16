@@ -39,7 +39,7 @@ void videoElement::update() {
     }
 
     if (movie.getIsMovieDone()) {
-            // cout << "movie " << file << " ended " << this->selfdestroy << endl;
+            cout << "movie " << file << " ended,  destroy: " << this->selfdestroy << endl;
         if (this->selfdestroy) {
             this->dead = true;
         }

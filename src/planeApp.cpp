@@ -112,8 +112,7 @@ void planeApp::initScenes(){
     idle.length[0] = -1;
     scenes[n] = idle;
  
-    bgVideos[n].push_back(videoElement("video/2_stars/BACKGROUND 1 loop-QTAnimation.mov"));
-//    bgVideos[n][bgVideos[n].size()-1].setDisplay(200,0);
+    bgVideos[n].push_back(videoElement("video/1_idle/IDLE_MODE_5-animation.mov"));
 
     n++;
 
@@ -168,7 +167,8 @@ void planeApp::initScenes(){
     sun.length[5] = 20;
     scenes[n] = sun;
 
-    bgVideos[n].push_back(videoElement("video/2_stars/BACKGROUND 1 loop-QTAnimation.mov"));
+    bgVideos[n].push_back(videoElement("video/4_sun/SUN_8-ASSET-animation.mov"));
+    bgVideos[n][bgVideos[n].size()-1].setDisplay(projectionW/2,projectionH/2, true);
 
     n++;
 
@@ -262,6 +262,7 @@ void planeApp::update(){
         if ((**it).dead) {
             cout << "delete video " << (**it).file << "  size " << fgMedia.size() << endl;
             it = fgMedia.erase(it);
+            cout << "erased video               " << "  size " << fgMedia.size() << endl;
         } else {
             ++it;
         }
@@ -283,14 +284,21 @@ void planeApp::blobOnLost(int & blobID) {
     // cout << "BLOB " << blobID << " just got lost" << endl;
 
     if (scene==3) {
+        // SUN explosions
         if (segment==1 || segment==2) {
-            int randomShooter = ofRandom(6) + 1;
-            fgMedia.push_back(ofPtr<mediaElement>( new videoElement("video/6_shooting/SSTAR_0" + ofToString(randomShooter) + "-H264-10mbps.mp4")));
+            int randomShooter = ofRandom(12) + 1;
+            string newVideoName = "video/4_sun/SUN_explosion-" + ofToString(randomShooter,2,'0') + "-animation.mov";
+            newVideoName = "video/4_sun/SUN_explosion-11-animation.mov";
+            newVideoName = "video/4_sun/SSTAR_01-H264-10mbps.mp4";
+            // cout << "new video explosions " << newVideoName << endl;
+            fgMedia.push_back(ofPtr<mediaElement>( new videoElement(newVideoName)));
+            // fgMedia.push_back(ofPtr<mediaElement>( new videoElement("video/4_sun/SUN_explosion-01-animation.mov")));
             (*fgMedia[fgMedia.size()-1]).setDisplay(projectionW/2 + ofRandom(-200,200), projectionH/2 + ofRandom(-200,200), true);
             (*fgMedia[fgMedia.size()-1]).autoDestroy(true);
             (*fgMedia[fgMedia.size()-1]).reset();
         }
     } else if (scene==5) {
+        // SHOOTING STARS
         if (segment==0) {
             int randomShooter = ofRandom(6) + 1;
             fgMedia.push_back(ofPtr<mediaElement>( new videoElement("video/6_shooting/SSTAR_0" + ofToString(randomShooter) + "-H264-10mbps.mp4")));
@@ -355,7 +363,7 @@ void planeApp::blobOnCreate(int & blobID) {
     // first clean up, all related blob settings
     this->blobUnlink(blobID);
     blobs[blobID].videoTrace = false;
-    // blobs[blobID].mediaLink = NULL;  // TODO how to release ofPtr ? 
+    blobs[blobID].mediaLink = ofPtr<mediaElement>();  // TODO how to release ofPtr ? 
 
     // then assign the appropriate ones
     if (scene==1) {
@@ -401,6 +409,7 @@ void planeApp::blobUnlink(int & blobID) {
     // making sure, a blob goes to die and untethers all connections
     for (vector<ofPtr<mediaElement> >::iterator it = fgMedia.begin(); it != fgMedia.end(); it++) {
         if (*it == blobs[blobID].mediaLink) {
+            blobs[blobID].mediaLink = ofPtr<mediaElement>();
             cout << "unlinked blob " << blobID << endl;
             fgMedia.erase(it);
             break;
@@ -453,10 +462,10 @@ void planeApp::nextSegment(int direction){
     // add FG videos
 
     if (scene==3) {
-        cout << "scene 3 add FG circle " << endl;
-        fgMedia.push_back(ofPtr<mediaElement>( new mediaElement()));
-        (*fgMedia[fgMedia.size()-1]).setDisplay( projectionW/2, projectionH/2, 600, 600, true );
-        (*fgMedia[fgMedia.size()-1]).reset();
+        // cout << "scene 3 add FG circle " << endl;
+        // fgMedia.push_back(ofPtr<mediaElement>( new mediaElement()));
+        // (*fgMedia[fgMedia.size()-1]).setDisplay( projectionW/2, projectionH/2, 600, 600, true );
+        // (*fgMedia[fgMedia.size()-1]).reset();
     }
 
 }

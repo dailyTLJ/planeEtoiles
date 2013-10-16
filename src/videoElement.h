@@ -8,7 +8,7 @@ class videoElement: public mediaElement
     public:
         videoElement();
         videoElement(string filename, float speed = 1.0);
-        // ~videoElement() { cout << "kill video " << this->file << endl; };
+        ~videoElement() { cout << "kill video " << this->file << endl; };
 
         void update();
 
