@@ -261,7 +261,7 @@ void planeApp::update(){
         (**it).update();
         if ((**it).dead) {
             cout << "delete video " << (**it).file << "  size " << fgMedia.size() << endl;
-            it = fgMedia.erase(it);
+            it = fgMedia.erase(it++);
             cout << "erased video               " << "  size " << fgMedia.size() << endl;
         } else {
             ++it;
