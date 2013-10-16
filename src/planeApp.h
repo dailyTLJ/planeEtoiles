@@ -110,6 +110,6 @@ class planeApp : public ofBaseApp{
 
 		std::vector< ofPtr<mediaElement> > fgMedia;
 //		std::map<int, std::vector<videoElement> > fgVideos;
-		std::map<int, std::vector<videoElement> > bgVideos;
+		std::map<int, std::vector<ofPtr<mediaElement> > > bgVideos;
 
 };

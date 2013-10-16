@@ -112,7 +112,8 @@ void planeApp::initScenes(){
     idle.length[0] = -1;
     scenes[n] = idle;
  
-    bgVideos[n].push_back(videoElement("video/1_idle/IDLE_MODE_5-animation.mov"));
+    // bgVideos[n].push_back(videoElement("video/1_idle/IDLE_MODE_5-animation.mov"));
+    bgVideos[n].push_back(ofPtr<mediaElement>( new videoElement("video/1_idle/IDLE_MODE_5-animation.mov")));
 
     n++;
 
@@ -130,7 +131,8 @@ void planeApp::initScenes(){
     stars.length[3] = 30;
     scenes[n] = stars;
 
-    bgVideos[n].push_back(videoElement("video/2_stars/BACKGROUND 1 loop-QTAnimation.mov"));
+    // bgVideos[n].push_back(videoElement("video/2_stars/BACKGROUND 1 loop-QTAnimation.mov"));
+    bgVideos[n].push_back(ofPtr<mediaElement>( new videoElement("video/2_stars/BACKGROUND 1 loop-QTAnimation.mov")));
 
     n++;
 
@@ -144,8 +146,8 @@ void planeApp::initScenes(){
     revolution.length[1] = 20;
     scenes[n] = revolution;
 
-    bgVideos[n].push_back(videoElement("video/2_stars/BACKGROUND 1 loop-QTAnimation.mov"));
-
+    // bgVideos[n].push_back(videoElement("video/2_stars/BACKGROUND 1 loop-QTAnimation.mov"));
+    bgVideos[n].push_back(ofPtr<mediaElement>( new videoElement("video/2_stars/BACKGROUND 1 loop-QTAnimation.mov")));
 
     n++;
 
@@ -167,9 +169,11 @@ void planeApp::initScenes(){
     sun.length[5] = 20;
     scenes[n] = sun;
 
-    bgVideos[n].push_back(videoElement("video/4_sun/SUN_8-ASSET-animation.mov"));
-    bgVideos[n][bgVideos[n].size()-1].setDisplay(projectionW/2,projectionH/2, true);
+    // bgVideos[n].push_back(videoElement("video/4_sun/SUN_8-ASSET-animation.mov"));
+    // bgVideos[n][bgVideos[n].size()-1].setDisplay(projectionW/2,projectionH/2, true);
 
+    bgVideos[n].push_back(ofPtr<mediaElement>( new videoElement("video/4_sun/SUN_8-ASSET-animation.mov")));
+    (*bgVideos[n][bgVideos[n].size()-1]).setDisplay(projectionW/2,projectionH/2, true);
     n++;
 
     sceneInfo eclipse;
@@ -186,7 +190,8 @@ void planeApp::initScenes(){
     eclipse.length[3] = 30;
     scenes[n] = eclipse;
 
-    bgVideos[n].push_back(videoElement("video/2_stars/BACKGROUND 1 loop-QTAnimation.mov"));
+    // bgVideos[n].push_back(videoElement("video/2_stars/BACKGROUND 1 loop-QTAnimation.mov"));
+    bgVideos[n].push_back(ofPtr<mediaElement>( new videoElement("video/2_stars/BACKGROUND 1 loop-QTAnimation.mov")));
 
     n++;
 
@@ -204,7 +209,8 @@ void planeApp::initScenes(){
     shooting.length[3] = 30;
     scenes[n] = shooting;
 
-    bgVideos[n].push_back(videoElement("video/2_stars/BACKGROUND 1 loop-QTAnimation.mov"));
+    // bgVideos[n].push_back(videoElement("video/2_stars/BACKGROUND 1 loop-QTAnimation.mov"));
+    bgVideos[n].push_back(ofPtr<mediaElement>( new videoElement("video/2_stars/BACKGROUND 1 loop-QTAnimation.mov")));
 
     cout << "there are " << scenes.size() << " scenes" << endl;
 
@@ -252,22 +258,21 @@ void planeApp::update(){
     }
 
     // videos update
-    for (vector<videoElement>::iterator it = bgVideos[scene].begin() ; it != bgVideos[scene].end(); ++it) {
-        videoElement* v = &(*it);
-        v->update();
+    for (vector<ofPtr<mediaElement> >::iterator it = bgVideos[scene].begin() ; it != bgVideos[scene].end(); ++it) {
+        (**it).update();
     }
 
-    for (vector<ofPtr<mediaElement> >::iterator it = fgMedia.begin(); it != fgMedia.end(); ) {
-        (**it).update();
-        if ((**it).dead) {
-            cout << "delete video " << (**it).file << "  size " << fgMedia.size() << endl;
-            it = fgMedia.erase(it++);
-            cout << "erased video               " << "  size " << fgMedia.size() << endl;
+
+    vector<ofPtr<mediaElement> >::iterator iter = fgMedia.begin();
+    while (iter != fgMedia.end()) {
+        (**iter).update();
+        if ((**iter).dead) {
+            // cout << "delete video " << (**iter).file << "  size " << fgMedia.size() << endl;
+            iter = fgMedia.erase(iter);
         } else {
-            ++it;
+            ++iter;
         }
     }
-
 
 
     if (scene==1) {
@@ -289,10 +294,8 @@ void planeApp::blobOnLost(int & blobID) {
             int randomShooter = ofRandom(12) + 1;
             string newVideoName = "video/4_sun/SUN_explosion-" + ofToString(randomShooter,2,'0') + "-animation.mov";
             newVideoName = "video/4_sun/SUN_explosion-11-animation.mov";
-            newVideoName = "video/4_sun/SSTAR_01-H264-10mbps.mp4";
-            // cout << "new video explosions " << newVideoName << endl;
+            // newVideoName = "video/4_sun/SSTAR_01-H264-10mbps.mp4";
             fgMedia.push_back(ofPtr<mediaElement>( new videoElement(newVideoName)));
-            // fgMedia.push_back(ofPtr<mediaElement>( new videoElement("video/4_sun/SUN_explosion-01-animation.mov")));
             (*fgMedia[fgMedia.size()-1]).setDisplay(projectionW/2 + ofRandom(-200,200), projectionH/2 + ofRandom(-200,200), true);
             (*fgMedia[fgMedia.size()-1]).autoDestroy(true);
             (*fgMedia[fgMedia.size()-1]).reset();
@@ -450,9 +453,8 @@ void planeApp::nextSegment(int direction){
 
     if (oldScene != scene) {
         // reset all BGvideos of the scene
-        for (vector<videoElement>::iterator it = bgVideos[scene].begin() ; it != bgVideos[scene].end(); ++it) {
-            videoElement* v = &(*it);
-            v->reset();
+        for (vector<ofPtr<mediaElement> >::iterator it = bgVideos[scene].begin() ; it != bgVideos[scene].end(); ++it) {
+            (**it).reset();
         }
     }
 
@@ -603,9 +605,8 @@ void planeApp::drawScreen(int x, int y, float scale){
     ofEnableBlendMode(OF_BLENDMODE_ADD);
 
     // background videos
-    for (vector<videoElement>::iterator it = bgVideos[scene].begin() ; it != bgVideos[scene].end(); ++it) {
-        videoElement* v = &(*it);
-        v->draw(x, y, scale);
+    for (vector<ofPtr<mediaElement> >::iterator it = bgVideos[scene].begin() ; it != bgVideos[scene].end(); ++it) {
+        (**it).draw(x, y, scale);
     }
     // foreground videos
     for (vector<ofPtr<mediaElement> >::iterator it = fgMedia.begin(); it != fgMedia.end(); ++it) {

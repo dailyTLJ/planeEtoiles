@@ -8,7 +8,7 @@ class videoElement: public mediaElement
     public:
         videoElement();
         videoElement(string filename, float speed = 1.0);
-        ~videoElement() { cout << "kill video " << this->file << endl; };
+        ~videoElement();
 
         void update();
 
@@ -25,7 +25,7 @@ class videoElement: public mediaElement
 
         void autoDestroy(bool v);
 
-        ofVideoPlayer movie;
+        ofPtr<ofVideoPlayer> movie;
         float displaySpeed;
 
         ofPoint velocity;

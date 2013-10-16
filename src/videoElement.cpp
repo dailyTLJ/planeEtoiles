@@ -1,10 +1,11 @@
 #include "videoElement.h"
 
 videoElement::videoElement() {
-
+    movie = ofPtr<ofVideoPlayer>( new ofVideoPlayer() );
 }
 
 videoElement::videoElement(string filename, float speed) {
+    movie = ofPtr<ofVideoPlayer>( new ofVideoPlayer() );
     this->displaySpeed = speed;
     this->velocity.set(0,0);
     this->rotation = 0;
@@ -12,33 +13,38 @@ videoElement::videoElement(string filename, float speed) {
     this->loadMovie(filename);
 }
 
+videoElement::~videoElement() {
+    // cout << "~videoElement() " << endl;
+    // cout << "~videoElement() : kill video " << this->file << endl;
+}
+
 void videoElement::loadMovie(string filename) {
+    cout << "video : loadMovie " << filename << endl;
     this->file = filename;
-    movie.loadMovie(filename);
-    this->w = movie.getWidth();
-    this->h = movie.getHeight();
-//    cout << "video : loadMovie " << filename << "   (" << this->w << "|" << this->h << ")" << endl;
+    movie->loadMovie(filename);
+    this->w = movie->getWidth();
+    this->h = movie->getHeight();
     this->play(true);
     this->pause(true);
 }
 
 void videoElement::play(bool loop) {
-    movie.play();
-    movie.setLoopState( loop ? OF_LOOP_NORMAL : OF_LOOP_NONE );
+    movie->play();
+    movie->setLoopState( loop ? OF_LOOP_NORMAL : OF_LOOP_NONE );
 }
 
 void videoElement::pause(bool v) {
-    movie.setPaused(v);
+    movie->setPaused(v);
 }
 
 void videoElement::update() {
-    movie.update();
+    movie->update();
     if (this->moveElement) {
         position.x += velocity.x;
         position.y += velocity.y;
     }
 
-    if (movie.getIsMovieDone()) {
+    if (movie->getIsMovieDone()) {
             cout << "movie " << file << " ended,  destroy: " << this->selfdestroy << endl;
         if (this->selfdestroy) {
             this->dead = true;
@@ -49,8 +55,8 @@ void videoElement::update() {
 void videoElement::reset() {
     // cout << "reset video " << endl;
     this->pause(false);
-    movie.setSpeed(this->displaySpeed);
-    movie.firstFrame();
+    movie->setSpeed(this->displaySpeed);
+    movie->firstFrame();
 }
 
 
@@ -58,8 +64,8 @@ void videoElement::draw() {
     ofPushMatrix();
     ofTranslate(position.x * scale, position.y * scale);
     ofRotateZ(this->rotation);
-    if (scale!=1.0) movie.draw(0, 0, w * scale, h * scale);
-    else movie.draw(0, 0, w, h);
+    if (scale!=1.0) movie->draw(0, 0, w * scale, h * scale);
+    else movie->draw(0, 0, w, h);
     ofPopMatrix();
 }
 
@@ -69,8 +75,8 @@ void videoElement::draw(int x, int y, float _scale) {
     ofPushMatrix();
     ofTranslate(x + position.x * _scale, y + position.y * _scale);
     ofRotateZ(this->rotation);
-    if (scale!=1.0) movie.draw(0, 0, w * scale * _scale, h * scale * _scale);
-    else movie.draw(0, 0, w * _scale, h * _scale);
+    if (scale!=1.0) movie->draw(0, 0, w * scale * _scale, h * scale * _scale);
+    else movie->draw(0, 0, w * _scale, h * _scale);
     ofPopMatrix();
 }
 
@@ -98,8 +104,8 @@ void videoElement::moveAcross(float vx, float vy, int maxw, bool destr) {
 void videoElement::autoDestroy(bool v) {
     this->selfdestroy = v;
     if (v) {
-        movie.setLoopState(OF_LOOP_NONE);
+        movie->setLoopState(OF_LOOP_NONE);
     } else {
-        movie.setLoopState(OF_LOOP_NORMAL);
+        movie->setLoopState(OF_LOOP_NORMAL);
     }
 }
