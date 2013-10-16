@@ -19,7 +19,7 @@ videoElement::~videoElement() {
 }
 
 void videoElement::loadMovie(string filename) {
-    cout << "video : loadMovie " << filename << endl;
+    // cout << "video : loadMovie " << filename << endl;
     this->file = filename;
     movie->loadMovie(filename);
     this->w = movie->getWidth();

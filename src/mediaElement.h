@@ -7,7 +7,7 @@ class mediaElement
 {
     public:
         mediaElement();
-        ~mediaElement()  { cout << "kill media " << this->file << endl; };
+        ~mediaElement()  { /*cout << "kill media " << this->file << endl;*/ };
 
         virtual void update();
 
