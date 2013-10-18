@@ -174,6 +174,7 @@ void planeApp::initScenes(){
 
     bgVideos[n].push_back(ofPtr<mediaElement>( new videoElement("video/4_sun/SUN_8-ASSET-animation.mov")));
     (*bgVideos[n][bgVideos[n].size()-1]).setDisplay(projectionW/2,projectionH/2, true);
+
     n++;
 
     sceneInfo eclipse;
@@ -232,6 +233,7 @@ void planeApp::update(){
 //            cout << "erase blob " << b->id << endl;
             ofNotifyEvent(b->prepareToDie,b->id,b);
     		blobs.erase(it++);
+            blobCountChange();
     	} else {
     		++it;
     	}
@@ -291,10 +293,12 @@ void planeApp::blobOnLost(int & blobID) {
     if (scene==3) {
         // SUN explosions
         if (segment==1 || segment==2) {
-            int randomShooter = ofRandom(12) + 1;
-            string newVideoName = "video/4_sun/SUN_explosion-" + ofToString(randomShooter,2,'0') + "-animation.mov";
-            newVideoName = "video/4_sun/SUN_explosion-11-animation.mov";
-            // newVideoName = "video/4_sun/SSTAR_01-H264-10mbps.mp4";
+            int randomShooter = ofRandom(6) + 1;
+            // string newVideoName = "video/4_sun/SUN_explosion-" + ofToString(randomShooter,2,'0') + "-animation.mov";
+            string newVideoName = "video/4_sun/SUN_explosion-" + ofToString(randomShooter,2,'0') + "-animation.mp4";
+            // newVideoName = "video/4_sun/SUN_explosion-01-H264-10mbps.mp4";
+            // newVideoName = "video/4_sun/SUN_explosion-01-photoJPEG.mov";
+            newVideoName = "video/4_sun/SUN_explosion-01-animation.mov";
             fgMedia.push_back(ofPtr<mediaElement>( new videoElement(newVideoName)));
             (*fgMedia[fgMedia.size()-1]).setDisplay(projectionW/2 + ofRandom(-200,200), projectionH/2 + ofRandom(-200,200), true);
             (*fgMedia[fgMedia.size()-1]).autoDestroy(true);
@@ -361,17 +365,17 @@ void planeApp::blobOverFreeze(int & blobID) {
 
 void planeApp::blobOnCreate(int & blobID) {
    
-
-
     // first clean up, all related blob settings
     this->blobUnlink(blobID);
     blobs[blobID].videoTrace = false;
     blobs[blobID].mediaLink = ofPtr<mediaElement>();  // TODO how to release ofPtr ? 
+    
+
+    cout << "BLOB " << blobID << " blobOnCreate!" << endl;
 
     // then assign the appropriate ones
     if (scene==1) {
         if (segment==2 || segment==3) {
-            cout << "BLOB " << blobID << " blobOnCreate!" << endl;
             // KEEP THE DISTANCE
             // create new video element
 //            cout << "blob " << blobID << " \t\tfreeze ! " << endl;
@@ -389,6 +393,71 @@ void planeApp::blobOnCreate(int & blobID) {
         blobs[blobID].mediaLink = fgMedia[fgMedia.size()-1];
         blobs[blobID].videoTrace = true;
     }
+
+    blobCountChange();
+}
+
+// triggered when a blob is added or erased
+void planeApp::blobCountChange() {
+
+    if ( scene==2 && fgMedia.size()>=5 ) {
+        // REVOLUTION
+
+        if (segment==0) {
+            for (int i=0; i<fgMedia.size(); i++) {
+                int videoPick = i+1;
+                (*fgMedia[i]).loadMovie("video/3_revolution/REV_0"+ofToString(videoPick)+"-animation.mov");
+                (*fgMedia[i]).reset();
+            }
+        } else if (segment==1) {
+            for (int i=0; i<fgMedia.size(); i++) {
+                int videoPick = (i==4||i==2) ? 4 : i+1;
+                (*fgMedia[i]).loadMovie("video/3_revolution/REV_0"+ofToString(videoPick)+"-out-animation.mov");
+                (*fgMedia[i]).reset();
+            }
+        }
+
+        // cout << "blobCountChange()  REVOLUTIONS > " << blobs.size() << endl;
+
+        // there should only be 5 fgMedia elements
+        for (int i=0; i<fgMedia.size(); i++) {
+            (*fgMedia[i]).hide = true;
+            if (i < blobs.size()+3) (*fgMedia[i]).hide = false;
+            (*fgMedia[i]).rotation = 0;
+        }
+
+
+
+        // positioning
+        switch (blobs.size()+3) {
+            case 1:     (*fgMedia[0]).setDisplay(projectionW/2, projectionH/2, true);
+                        break;
+            case 2:     (*fgMedia[0]).setDisplay(projectionW/2, projectionH/2 - 350, true);
+                        (*fgMedia[1]).setDisplay(projectionW/2, projectionH/2 + 350, true);
+                        break;
+            case 3:     (*fgMedia[0]).setDisplay(projectionW/2, projectionH/2 - 550, true);
+                        (*fgMedia[1]).setDisplay(projectionW/2, projectionH/2, true);
+                        (*fgMedia[2]).setDisplay(projectionW/2, projectionH/2 + 550, true);
+                        break;
+            case 4:     (*fgMedia[0]).setDisplay(projectionW/2-100, projectionH/2 - 550, true);
+                        (*fgMedia[1]).setDisplay(projectionW/2+100, projectionH/2 - 200, true);
+                        (*fgMedia[2]).setDisplay(projectionW/2-100, projectionH/2 + 200, true);
+                        (*fgMedia[3]).setDisplay(projectionW/2+100, projectionH/2 + 550, true);
+                        break;
+            default:
+            case 5:     (*fgMedia[0]).setDisplay(projectionW/2, projectionH/2, true);
+                        (*fgMedia[1]).setDisplay(projectionW/2-200, projectionH/2 - 350, true);
+                        (*fgMedia[1]).rotation = -45;
+                        (*fgMedia[2]).setDisplay(projectionW/2+200, projectionH/2 - 350, true);
+                        (*fgMedia[2]).rotation = 45;
+                        (*fgMedia[3]).setDisplay(projectionW/2-200, projectionH/2 + 350, true);
+                        (*fgMedia[3]).rotation = 45;
+                        (*fgMedia[4]).setDisplay(projectionW/2+200, projectionH/2 + 350, true);
+                        (*fgMedia[4]).rotation = -45;
+                        break;
+        }
+    }
+
 }
 
 void planeApp::videoFollowBlob(int & blobID) {
@@ -463,11 +532,16 @@ void planeApp::nextSegment(int direction){
 
     // add FG videos
 
-    if (scene==3) {
-        // cout << "scene 3 add FG circle " << endl;
-        // fgMedia.push_back(ofPtr<mediaElement>( new mediaElement()));
-        // (*fgMedia[fgMedia.size()-1]).setDisplay( projectionW/2, projectionH/2, 600, 600, true );
-        // (*fgMedia[fgMedia.size()-1]).reset();
+    if (scene==2) {
+        // REVOLUTIONS
+        for (int i=0; i<5; i++) {
+            int videoPick = i+1; // (i==1) ? 4 : i+1;
+            fgMedia.push_back(ofPtr<mediaElement>( new videoElement("video/3_revolution/REV_0"+ofToString(videoPick)+"-animation.mov")));
+            // fgMedia.push_back(ofPtr<mediaElement>( new videoElement("video/3_revolution/REV_06-animation.mov")));
+            (*fgMedia[fgMedia.size()-1]).hide = true;
+            (*fgMedia[fgMedia.size()-1]).reset();
+        }
+        blobCountChange();
     }
 
 }

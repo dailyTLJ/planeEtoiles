@@ -29,7 +29,6 @@ class videoElement: public mediaElement
         float displaySpeed;
 
         ofPoint velocity;
-        int rotation;
         bool moveElement;
 
 

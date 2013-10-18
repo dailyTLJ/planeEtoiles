@@ -1,7 +1,7 @@
 #include "mediaElement.h"
 
 mediaElement::mediaElement() {
-    this->hide = true;
+    this->hide = false;
     this->position.set(0,0);
     this->scale = 1.0;
     this->selfdestroy = false;
@@ -19,11 +19,13 @@ void mediaElement::draw() {
 
 void mediaElement::draw(int x, int y, float _scale) {
     // cout << " draw at " << x << " px " << position.x << "  scale " << scale << "  width " << this->w << endl;
-    ofPushMatrix();
-    ofTranslate(x + position.x * _scale + w*_scale*0.5, y + position.y * _scale + h*_scale*0.5);
-    ofFill(); ofSetColor(155, 70, 0);
-    ofCircle(0, 0, this->w * _scale * 0.5);
-    ofPopMatrix();
+    if (!hide) {
+        ofPushMatrix();
+        ofTranslate(x + position.x * _scale + w*_scale*0.5, y + position.y * _scale + h*_scale*0.5);
+        ofFill(); ofSetColor(155, 70, 0);
+        ofCircle(0, 0, this->w * _scale * 0.5);
+        ofPopMatrix();
+    }
 }
 
 void mediaElement::reset() {
@@ -79,5 +81,10 @@ void mediaElement::setDisplay(int x, int y, int w, int h, bool centered) {
 }
 
 void mediaElement::autoDestroy(bool v) {
+
+}
+
+
+void mediaElement::loadMovie(string filename) {
 
 }

@@ -61,6 +61,8 @@ class planeApp : public ofBaseApp{
 		void videoFollowBlob(int & blobID);
 		void blobOnLost(int & blobID);
 
+		void blobCountChange();
+
 		int projectionW;
         int projectionH;
         int blobserverW;

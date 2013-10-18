@@ -45,7 +45,7 @@ void videoElement::update() {
     }
 
     if (movie->getIsMovieDone()) {
-            cout << "movie " << file << " ended,  destroy: " << this->selfdestroy << endl;
+        // cout << "movie " << file << " ended,  destroy: " << this->selfdestroy << endl;
         if (this->selfdestroy) {
             this->dead = true;
         }
@@ -61,23 +61,39 @@ void videoElement::reset() {
 
 
 void videoElement::draw() {
-    ofPushMatrix();
-    ofTranslate(position.x * scale, position.y * scale);
-    ofRotateZ(this->rotation);
-    if (scale!=1.0) movie->draw(0, 0, w * scale, h * scale);
-    else movie->draw(0, 0, w, h);
-    ofPopMatrix();
+    if (!hide) {
+        ofPushMatrix();
+        ofTranslate(position.x * scale, position.y * scale);
+        if(rotation!=0) {
+            ofPushMatrix();
+            ofTranslate( this->w* scale*0.5, this->h* scale*0. );
+            ofRotateZ(this->rotation);
+            ofTranslate( -this->w* scale*0., -this->h* scale*0. );
+        }
+        if (scale!=1.0) movie->draw(0, 0, w * scale, h * scale);
+        else movie->draw(0, 0, w, h);
+        ofPopMatrix();
+        if(rotation!=0) ofPopMatrix();
+    }
 }
 
 // being able to translate the drawing with the function
 void videoElement::draw(int x, int y, float _scale) {
-   // cout << "draw \t x " << x << "   position.x " << position.x << "  scale " << _scale << "   this->scale " << this->scale << endl;
-    ofPushMatrix();
-    ofTranslate(x + position.x * _scale, y + position.y * _scale);
-    ofRotateZ(this->rotation);
-    if (scale!=1.0) movie->draw(0, 0, w * scale * _scale, h * scale * _scale);
-    else movie->draw(0, 0, w * _scale, h * _scale);
-    ofPopMatrix();
+    if (!hide) {
+       // cout << "draw \t x " << x << "   position.x " << position.x << "  scale " << _scale << "   this->scale " << this->scale << endl;
+        ofPushMatrix();
+        ofTranslate(x + position.x * _scale, y + position.y * _scale);
+        if(rotation!=0) {
+            ofPushMatrix();
+            ofTranslate( this->w* scale* _scale*0.5, this->h* scale* _scale*0.5 );
+            ofRotateZ(this->rotation);
+            ofTranslate( -this->w* scale* _scale*0.5, -this->h* scale* _scale*0.5 );
+        }
+        if (scale!=1.0) movie->draw(0, 0, w * scale * _scale, h * scale * _scale);
+        else movie->draw(0, 0, w * _scale, h * _scale);
+        ofPopMatrix();
+        if(rotation!=0) ofPopMatrix();
+    }
 }
 
 // set at what speed a moving star should shoot across the screen, in all directions

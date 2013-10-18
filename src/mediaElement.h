@@ -24,12 +24,14 @@ class mediaElement
         void setDisplay(int x, int y, int w, int h, bool centered);
 
         virtual void autoDestroy(bool v);
+        virtual void loadMovie(string filename);
 
         virtual void reset();
 
         ofPoint position;
         int w;
         int h;
+        int rotation;
         bool hide;
         float scale;
         string file;     
