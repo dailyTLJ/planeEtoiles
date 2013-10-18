@@ -34,7 +34,8 @@ class mediaElement
         int rotation;
         bool hide;
         float scale;
-        string file;     
+        string file; 
+        ofColor clr;    
 
         bool selfdestroy;
         bool dead;

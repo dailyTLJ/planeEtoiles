@@ -6,6 +6,7 @@ mediaElement::mediaElement() {
     this->scale = 1.0;
     this->selfdestroy = false;
     this->dead = false;
+    this->clr = ofColor(255, 255, 255);
 }
 
 
@@ -22,7 +23,7 @@ void mediaElement::draw(int x, int y, float _scale) {
     if (!hide) {
         ofPushMatrix();
         ofTranslate(x + position.x * _scale + w*_scale*0.5, y + position.y * _scale + h*_scale*0.5);
-        ofFill(); ofSetColor(155, 70, 0);
+        ofFill(); ofSetColor(clr);
         ofCircle(0, 0, this->w * _scale * 0.5);
         ofPopMatrix();
     }

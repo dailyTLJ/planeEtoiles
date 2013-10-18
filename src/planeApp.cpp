@@ -388,10 +388,13 @@ void planeApp::blobOnCreate(int & blobID) {
         }
     } else if (scene==4) {
         // PLANETS
-        int randomPlanet = ofRandom(24) + 1;
-        fgMedia.push_back(ofPtr<mediaElement>( new imageElement("video/5_eclipse/PLANET_" + ofToString(randomPlanet)+".png", 0.5f)));
+        int randomPlanet = ofRandom(3) + 18;
+        // fgMedia.push_back(ofPtr<mediaElement>( new imageElement("video/5_eclipse/PLANET_" + ofToString(randomPlanet)+".png", 0.5f)));
+        fgMedia.push_back(ofPtr<mediaElement>( new videoElement("video/5_eclipse/PLANET_"+ofToString(randomPlanet)+".mov")));
+        (*fgMedia[fgMedia.size()-1]).setDisplay(0, 0, 500, 500, true);
         blobs[blobID].mediaLink = fgMedia[fgMedia.size()-1];
         blobs[blobID].videoTrace = true;
+        (*fgMedia[fgMedia.size()-1]).reset();
     }
 
     blobCountChange();
@@ -542,6 +545,14 @@ void planeApp::nextSegment(int direction){
             (*fgMedia[fgMedia.size()-1]).reset();
         }
         blobCountChange();
+    } else if (scene==4) {
+        // ECLIPSE
+        fgMedia.push_back(ofPtr<mediaElement>( new mediaElement()));
+        (*fgMedia[fgMedia.size()-1]).setDisplay( projectionW/2, projectionH/2, 400, 400, true );
+        (*fgMedia[fgMedia.size()-1]).reset();
+        if (segment > 0) {
+            (*fgMedia[fgMedia.size()-1]).clr = ofColor(0,0,0);
+        }
     }
 
 }
