@@ -59,12 +59,15 @@ void videoElement::update() {
 
 void videoElement::reset() {
     // cout << "reset video " << endl;
+    opacity = 1.f;
+    displaySpeed = 1.f;
     this->pause(false);
     movie->setSpeed(this->displaySpeed);
     movie->firstFrame();
 }
 
 void videoElement::endTransformation() {
+    cout << "endTransformation" << endl;
     endFade = true;
     movie->setLoopState(OF_LOOP_NONE);
     this->displaySpeed = 5.0f;

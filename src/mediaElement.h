@@ -47,7 +47,8 @@ class mediaElement
         bool selfdestroy;
         bool dead;
 
-        ofEvent<int> transitionEnd;
+        ofEvent<int> fadeOutEnd;
+        ofEvent<int> fadeInEnd;
 
     protected:
     private:

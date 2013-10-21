@@ -20,6 +20,10 @@ void planeApp::setup(){
 	drawBlobDetail = false;
     transition = false;
     moveOn = false;
+    segmentChange = 1;
+    flash = false;
+    flashCnt = 0;
+    flashMax = 20;
 
     projectionW = 1080;
     projectionH = 1920;
@@ -256,21 +260,26 @@ void planeApp::update(){
     // SCHEDULING
     masterClock = ofGetUnixTime() - globalStart;
     segmentClock = ofGetUnixTime() - segmentStart;
+    if (flash) {
+        flashCnt++;
+        if (flashCnt > flashMax) {
+            flashCnt = 0;
+            flash = false;
+        }
+    }
     if (moveOn) {
-        nextSegment(1);
+        nextSegment(segmentChange);
         moveOn = false;
-    } else if (autoplay && segmentClock >= scenes[scene].length[segment]) {
-        nextSegment(1);
+    } else if (autoplay && scenes[scene].length[segment] > 0 && segmentClock >= scenes[scene].length[segment]) {
+        startTransition(1);
     }
 
     // SCENE SEGMENT RELATED ACTION
     if (scene==0) {
         // fade out idle-mode video, connect fade-End to transition to next Segment
         if(success && !transition) {
-            ofAddListener( (*bgVideos[scene][0]).transitionEnd, this, &planeApp::mediaTransitionEnd );
-            (*bgVideos[scene][0]).endTransformation();
-            // (*bgVideos[scene][0]).fadeOut();
-            transition = true;
+            cout << "scene 0 success" << endl;
+            startTransition(1);
         }
     } else if (scene==1) {
         if (segment==0 || segment==1) {
@@ -298,9 +307,14 @@ void planeApp::update(){
 
 }
 
-void planeApp::mediaTransitionEnd(int & transitionType) {
-    cout << "mediaTransitionEnd" << endl;
+void planeApp::bgMediaFadedOut(int & transitionType) {
+    cout << "bgMediaFadedOut" << endl;
     moveOn = true;
+}
+
+void planeApp::bgMediaFadedIn(int & transitionType) {
+    cout << "bgMediaFadedIn" << endl;
+    transition = false;
 }
 
 void planeApp::blobOnLost(int & blobID) {
@@ -511,6 +525,26 @@ void planeApp::blobUnlink(int & blobID) {
     }
 }
 
+void planeApp::startTransition(int direction) {
+    cout << "startTransition() fade out BG   " << scene << ":" << segment << endl;
+    segmentChange = direction;
+
+    // ONLY DO BG-VIDEO TRANSITIONS IF A SCENE CHANGE IS COMING UP!
+    if (segment+segmentChange >= scenes[scene].segments) {
+        ofAddListener( (*bgVideos[scene][0]).fadeOutEnd, this, &planeApp::bgMediaFadedOut );
+        if (scene==0) {
+            cout << "endTransformation" << endl;
+            (*bgVideos[scene][0]).endTransformation();
+        } else {
+            cout << "fadeout" << endl;
+            (*bgVideos[scene][0]).fadeOut();
+        }
+        transition = true;
+    } else {
+        moveOn = true;
+    }
+}
+
 void planeApp::nextSegment(int direction){
 
     int oldScene = scene;
@@ -518,6 +552,7 @@ void planeApp::nextSegment(int direction){
 
     success = false;
     transition = false;
+    flash = true;
 
     segment+=direction;
     segmentStart = ofGetUnixTime();
@@ -539,22 +574,26 @@ void planeApp::nextSegment(int direction){
         segment = scenes[scene].segments -1;
     }
 
+
+    // IF NEW SCENE
+    if (oldScene != scene) {
+        // reset all BGvideos of the scene
+        for (vector<ofPtr<mediaElement> >::iterator it = bgVideos[scene].begin() ; it != bgVideos[scene].end(); ++it) {
+            cout << "fade in BG video" << endl;
+            ofAddListener( (*bgVideos[scene][0]).fadeInEnd, this, &planeApp::bgMediaFadedIn );
+            (**it).reset();
+            (**it).fadeIn();
+        }
+        transition = true;
+    }
+
+    cout << "segment " << scenes[scene].instructions[segment] << endl;
+
     // make new blob connections
     for(std::map<int, Blob>::iterator it = blobs.begin(); it != blobs.end(); ++it){
         Blob* b = &it->second;
         ofNotifyEvent(b->onCreate,b->id,b);
     }
-
-    if (oldScene != scene) {
-        // reset all BGvideos of the scene
-        for (vector<ofPtr<mediaElement> >::iterator it = bgVideos[scene].begin() ; it != bgVideos[scene].end(); ++it) {
-            cout << "reset BG video" << endl;
-            (**it).reset();
-        }
-    }
-
-    cout << "segment " << scenes[scene].instructions[segment] << endl;
-
 
     // add FG videos
 
@@ -716,39 +755,51 @@ void planeApp::drawScreen(int x, int y, float scale){
     for (vector<ofPtr<mediaElement> >::iterator it = bgVideos[scene].begin() ; it != bgVideos[scene].end(); ++it) {
         (**it).draw(x, y, scale);
     }
-    // foreground videos
-    for (vector<ofPtr<mediaElement> >::iterator it = fgMedia.begin(); it != fgMedia.end(); ++it) {
-        (**it).draw(x, y, scale);
-    }
 
-    // extra things to draw? 
-    if (scene==1) {
-        if (segment==2 || segment==3) {
+    if (!transition) {
+        // foreground videos
+        for (vector<ofPtr<mediaElement> >::iterator it = fgMedia.begin(); it != fgMedia.end(); ++it) {
+            (**it).draw(x, y, scale);
+        }
 
-            for(std::map<int, Blob>::iterator it = blobs.begin(); it != blobs.end(); ++it){
-                Blob* b = &it->second;
+        // extra things to draw? 
+        if (scene==1) {
+            if (segment==2 || segment==3) {
 
-                if (b->movingMean) {
-                    for(std::map<int, Neighbor>::iterator iter = b->neighbors.begin(); iter != b->neighbors.end(); ++iter){
-                        Neighbor* nb = &iter->second;
-                        if (nb->steadyDistance && blobs[nb->id].movingMean) {
-                            // draw a line between blob and steady neighbor
-                            ofNoFill(); ofSetColor(255);
-                            float p1x = x + (offsetX + b->position.x * mapSiteW) * scale;
-                            float p1y = y + (offsetY + b->position.y * mapSiteH) * scale;
-                            float p2x = x + (offsetX + blobs[nb->id].position.x * mapSiteW) * scale;
-                            float p2y = y + (offsetY + blobs[nb->id].position.y * mapSiteH) * scale;
-                            ofLine( p1x, p1y, p2x, p2y );
-                            // ofLine(x + b->position.x*scale, y + b->position.y*scale, x + blobs[nb->id].position.x*scale, y + blobs[nb->id].position.y*scale);
+                for(std::map<int, Blob>::iterator it = blobs.begin(); it != blobs.end(); ++it){
+                    Blob* b = &it->second;
+
+                    if (b->movingMean) {
+                        for(std::map<int, Neighbor>::iterator iter = b->neighbors.begin(); iter != b->neighbors.end(); ++iter){
+                            Neighbor* nb = &iter->second;
+                            if (nb->steadyDistance && blobs[nb->id].movingMean) {
+                                // draw a line between blob and steady neighbor
+                                ofNoFill(); ofSetColor(255);
+                                float p1x = x + (offsetX + b->position.x * mapSiteW) * scale;
+                                float p1y = y + (offsetY + b->position.y * mapSiteH) * scale;
+                                float p2x = x + (offsetX + blobs[nb->id].position.x * mapSiteW) * scale;
+                                float p2y = y + (offsetY + blobs[nb->id].position.y * mapSiteH) * scale;
+                                ofLine( p1x, p1y, p2x, p2y );
+                                // ofLine(x + b->position.x*scale, y + b->position.y*scale, x + blobs[nb->id].position.x*scale, y + blobs[nb->id].position.y*scale);
+                            }
                         }
                     }
                 }
-            }
 
+            }
         }
     }
+    
     ofDisableBlendMode();
     // ofDisableAlphaBlending();
+
+    if (flash) {
+        ofEnableAlphaBlending();
+        int alpha = (flashCnt < flashMax/2) ? 255*(flashCnt/(flashMax/2.f)) : 255*(flashMax - flashCnt)/(flashMax/2.f);
+        ofSetColor(255,0,0,alpha); ofFill();
+        ofRect(x,y,projectionW*scale,projectionH*scale);
+        ofDisableAlphaBlending();
+    }
 }
 
 //--------------------------------------------------------------
@@ -972,9 +1023,9 @@ void planeApp::keyReleased(int key){
     }
 
     if (key == OF_KEY_LEFT){
-        nextSegment(-1);
+        startTransition(-1);
     } else if (key == OF_KEY_RIGHT){
-        nextSegment(1);
+        startTransition(1);
     }
 
     if(key == 's') {

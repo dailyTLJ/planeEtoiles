@@ -19,10 +19,12 @@ void mediaElement::update() {
         // cout << "update opacity > " << opacity << endl;
         if (opacityChange>0 && opacity >= 1.0f) {
             opacity = 1.f;
+            fading = false;
+            ofNotifyEvent(fadeInEnd,this->w,this);
         } else if (opacityChange<0 && opacity <= 0.f) {
             opacity = 0.f;
             fading = false;
-            ofNotifyEvent(transitionEnd,this->w,this);
+            ofNotifyEvent(fadeOutEnd,this->w,this);
         }
     }
 }
@@ -59,7 +61,7 @@ void mediaElement::moveAcross(float vx, float vy, int maxw, bool destr) {
 }
 
 void mediaElement::endTransformation() {
-    
+
 }
 
 void mediaElement::fade(float speed) {

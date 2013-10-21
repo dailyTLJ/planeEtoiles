@@ -49,7 +49,6 @@ class planeApp : public ofBaseApp{
 		void drawScreen(int x, int y, float scale);
 		void drawAnalysis(int x, int y, float scale);
 		void drawControlInfo(int x, int y);
-		void nextSegment(int direction);
 		void setPerspective();
 		void recalculatePerspective(int & v);
 
@@ -60,9 +59,12 @@ class planeApp : public ofBaseApp{
 		void blobOnCreate(int & blobID);
 		void videoFollowBlob(int & blobID);
 		void blobOnLost(int & blobID);
-		void mediaTransitionEnd(int & transitionType);
+		void bgMediaFadedOut(int & transitionType);
+		void bgMediaFadedIn(int & transitionType);
 
 		void blobCountChange();
+		void startTransition(int direction = 1);
+		void nextSegment(int direction = 1);
 
 		int projectionW;
         int projectionH;
@@ -86,6 +88,7 @@ class planeApp : public ofBaseApp{
         bool autoplay; 			 // advance to next segment by itself
 		int scene;
 		int segment;
+		int segmentChange;
 		int masterClock;
 		int segmentClock;
 		int segmentStart;
@@ -93,6 +96,9 @@ class planeApp : public ofBaseApp{
 		bool moveOn;
 		bool transition;
 		bool success;			// if people followed the instructions
+		bool flash;				// in between transitions, catch attention
+		int flashCnt;
+		int flashMax;
 
 		std::map<int, sceneInfo> scenes;
 
