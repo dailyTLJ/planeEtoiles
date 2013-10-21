@@ -9,6 +9,9 @@
 #define NEIGHBOR_HISTORY 10
 #define VELOCITY_HISTORY 10
 
+
+// a blob saves its position history in TimedPoint
+// time parameter not in use right now
 class TimedPoint {
     public:
         ofPoint point;
@@ -20,6 +23,10 @@ class TimedPoint {
         }
 };
 
+
+
+// to compute the distance between a blob and a neighbor blob
+// it keeps a copy of the distance over time, to judge if distance stays the same
 class Neighbor {
     public:
 
@@ -62,6 +69,9 @@ class Neighbor {
         }
 };
 
+
+// Blob represents a detected human
+// information from blobserver software (camera tracking)
 class Blob {
     public:
         int id;

@@ -60,6 +60,7 @@ class planeApp : public ofBaseApp{
 		void blobOnCreate(int & blobID);
 		void videoFollowBlob(int & blobID);
 		void blobOnLost(int & blobID);
+		void mediaTransitionEnd(int & transitionType);
 
 		void blobCountChange();
 
@@ -89,6 +90,9 @@ class planeApp : public ofBaseApp{
 		int segmentClock;
 		int segmentStart;
 		int globalStart;
+		bool moveOn;
+		bool transition;
+		bool success;			// if people followed the instructions
 
 		std::map<int, sceneInfo> scenes;
 

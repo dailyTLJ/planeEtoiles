@@ -16,7 +16,10 @@ void planeApp::setup(){
 
     fullscreen = false;
     autoplay = false;
+    success = false;
 	drawBlobDetail = false;
+    transition = false;
+    moveOn = false;
 
     projectionW = 1080;
     projectionH = 1920;
@@ -224,7 +227,7 @@ void planeApp::update(){
 
     this->receiveOsc();
 
-	// check for dead blobs, and delete them from list
+	// BLOB CLEANUP
     std::map<int,Blob>::iterator it = blobs.begin();
     while (it != blobs.end()) {
         Blob* b = &it->second;
@@ -239,16 +242,7 @@ void planeApp::update(){
     	}
     }
 
-    masterClock = ofGetUnixTime() - globalStart;
-    segmentClock = ofGetUnixTime() - segmentStart;
-
-    // move on to next segment?
-    // simply based on time for now
-    if(autoplay && segmentClock >= 5){
-        nextSegment(1);
-    }
-
-    // analysis
+    // ANALYSIS
     std::map<int, ofPoint> blobPositions;
     for(std::map<int, Blob>::iterator it = blobs.begin(); it != blobs.end(); ++it){
         Blob* b = &it->second;
@@ -259,11 +253,37 @@ void planeApp::update(){
         b->analyzeNeighbors(blobPositions, keepDistanceThr);
     }
 
-    // videos update
+    // SCHEDULING
+    masterClock = ofGetUnixTime() - globalStart;
+    segmentClock = ofGetUnixTime() - segmentStart;
+    if (moveOn) {
+        nextSegment(1);
+        moveOn = false;
+    } else if (autoplay && segmentClock >= scenes[scene].length[segment]) {
+        nextSegment(1);
+    }
+
+    // SCENE SEGMENT RELATED ACTION
+    if (scene==0) {
+        // fade out idle-mode video, connect fade-End to transition to next Segment
+        if(success && !transition) {
+            ofAddListener( (*bgVideos[scene][0]).transitionEnd, this, &planeApp::mediaTransitionEnd );
+            (*bgVideos[scene][0]).endTransformation();
+            // (*bgVideos[scene][0]).fadeOut();
+            transition = true;
+        }
+    } else if (scene==1) {
+        if (segment==0 || segment==1) {
+
+            // STAND STILL
+
+        }
+    }
+
+    // VIDEO UPDATES
     for (vector<ofPtr<mediaElement> >::iterator it = bgVideos[scene].begin() ; it != bgVideos[scene].end(); ++it) {
         (**it).update();
     }
-
 
     vector<ofPtr<mediaElement> >::iterator iter = fgMedia.begin();
     while (iter != fgMedia.end()) {
@@ -276,15 +296,11 @@ void planeApp::update(){
         }
     }
 
+}
 
-    if (scene==1) {
-        if (segment==0 || segment==1) {
-
-            // STAND STILL
-
-        }
-    }
-
+void planeApp::mediaTransitionEnd(int & transitionType) {
+    cout << "mediaTransitionEnd" << endl;
+    moveOn = true;
 }
 
 void planeApp::blobOnLost(int & blobID) {
@@ -374,7 +390,10 @@ void planeApp::blobOnCreate(int & blobID) {
     cout << "BLOB " << blobID << " blobOnCreate!" << endl;
 
     // then assign the appropriate ones
-    if (scene==1) {
+    if (scene==0) {
+        // COME CLOSER, recognition of people == time to move on
+        if (!success) success = true;
+    } else if (scene==1) {
         if (segment==2 || segment==3) {
             // KEEP THE DISTANCE
             // create new video element
@@ -407,13 +426,13 @@ void planeApp::blobCountChange() {
         // REVOLUTION
 
         if (segment==0) {
-            for (int i=0; i<fgMedia.size(); i++) {
+            for (unsigned int i=0; i<fgMedia.size(); i++) {
                 int videoPick = i+1;
                 (*fgMedia[i]).loadMovie("video/3_revolution/REV_0"+ofToString(videoPick)+"-animation.mov");
                 (*fgMedia[i]).reset();
             }
         } else if (segment==1) {
-            for (int i=0; i<fgMedia.size(); i++) {
+            for (unsigned int i=0; i<fgMedia.size(); i++) {
                 int videoPick = (i==4||i==2) ? 4 : i+1;
                 (*fgMedia[i]).loadMovie("video/3_revolution/REV_0"+ofToString(videoPick)+"-out-animation.mov");
                 (*fgMedia[i]).reset();
@@ -423,7 +442,7 @@ void planeApp::blobCountChange() {
         // cout << "blobCountChange()  REVOLUTIONS > " << blobs.size() << endl;
 
         // there should only be 5 fgMedia elements
-        for (int i=0; i<fgMedia.size(); i++) {
+        for (unsigned int i=0; i<fgMedia.size(); i++) {
             (*fgMedia[i]).hide = true;
             if (i < blobs.size()+3) (*fgMedia[i]).hide = false;
             (*fgMedia[i]).rotation = 0;
@@ -497,6 +516,9 @@ void planeApp::nextSegment(int direction){
     int oldScene = scene;
     fgMedia.clear();   // delete all foreground videos
 
+    success = false;
+    transition = false;
+
     segment+=direction;
     segmentStart = ofGetUnixTime();
 
@@ -526,6 +548,7 @@ void planeApp::nextSegment(int direction){
     if (oldScene != scene) {
         // reset all BGvideos of the scene
         for (vector<ofPtr<mediaElement> >::iterator it = bgVideos[scene].begin() ; it != bgVideos[scene].end(); ++it) {
+            cout << "reset BG video" << endl;
             (**it).reset();
         }
     }
@@ -851,6 +874,7 @@ void planeApp::drawControlInfo(int x, int y){
     ofDrawBitmapString("SCENE ID\t" + ofToString(scene) +
                        "\nSCENE NAME\t" + scenes[scene].name +
                        "\nSEGMENT\t\t" + ofToString(segment) +
+                       "\nLENGTH\t\t" + ofToString(scenes[scene].length[scene]) +
                        "\n\n" + instruction +
                        "\n\nGLOBAL TIME\t" + ofToString(masterClock) +
                        "\nSEGMENT TIME\t" + ofToString(segmentClock), x+3, y+10 );
@@ -990,7 +1014,7 @@ void planeApp::mousePressed(int x, int y, int button){
 
 //--------------------------------------------------------------
 void planeApp::mouseReleased(int x, int y, int button){
-
+    
 }
 
 //--------------------------------------------------------------

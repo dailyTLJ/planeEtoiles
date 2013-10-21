@@ -7,11 +7,24 @@ mediaElement::mediaElement() {
     this->selfdestroy = false;
     this->dead = false;
     this->clr = ofColor(255, 255, 255);
+    this->opacityChange = 0.f;
+    this->opacity = 1.f;
+    this->fading = false;
 }
 
 
 void mediaElement::update() {
-
+    if (fading) {
+        opacity += opacityChange;
+        // cout << "update opacity > " << opacity << endl;
+        if (opacityChange>0 && opacity >= 1.0f) {
+            opacity = 1.f;
+        } else if (opacityChange<0 && opacity <= 0.f) {
+            opacity = 0.f;
+            fading = false;
+            ofNotifyEvent(transitionEnd,this->w,this);
+        }
+    }
 }
 
 void mediaElement::draw() {
@@ -29,6 +42,10 @@ void mediaElement::draw(int x, int y, float _scale) {
     }
 }
 
+void mediaElement::drawElement(float _scale) {
+
+}
+
 void mediaElement::reset() {
 
 }
@@ -40,6 +57,27 @@ void mediaElement::moveAcross(float v, int maxw, int maxh, bool destr) {
 void mediaElement::moveAcross(float vx, float vy, int maxw, bool destr) {
 
 }
+
+void mediaElement::endTransformation() {
+    
+}
+
+void mediaElement::fade(float speed) {
+    fading = true;
+    opacityChange = speed;
+    // cout << "fade = true" << endl;
+}
+
+void mediaElement::fadeOut(float speed) {
+    cout << "mediaElement::fadeOut" << endl;
+    fade(-speed);
+}
+
+void mediaElement::fadeIn(float speed) {
+    opacity = 0.0f;
+    fade(speed);
+}
+
 
 
 

@@ -19,11 +19,15 @@ class videoElement: public mediaElement
 
         void draw();
         void draw(int x, int y, float _scale);
+        void drawElement(float _scale);
 
         void moveAcross(float v, int maxw, int maxh, bool destr);
         void moveAcross(float vx, float vy, int maxw, bool destr);
 
         void autoDestroy(bool v);
+        void endTransformation();
+
+        bool endFade;
 
         ofPtr<ofVideoPlayer> movie;
         float displaySpeed;

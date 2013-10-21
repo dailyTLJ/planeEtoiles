@@ -7,6 +7,7 @@ videoElement::videoElement() {
 videoElement::videoElement(string filename, float speed) {
     movie = ofPtr<ofVideoPlayer>( new ofVideoPlayer() );
     this->displaySpeed = speed;
+    this->endFade = false;
     this->velocity.set(0,0);
     this->rotation = 0;
     this->moveElement = false;
@@ -38,6 +39,7 @@ void videoElement::pause(bool v) {
 }
 
 void videoElement::update() {
+    mediaElement::update();
     movie->update();
     if (this->moveElement) {
         position.x += velocity.x;
@@ -49,6 +51,9 @@ void videoElement::update() {
         if (this->selfdestroy) {
             this->dead = true;
         }
+        if (this->endFade && !fading) {
+            fadeOut();
+        }
     }
 }
 
@@ -59,6 +64,12 @@ void videoElement::reset() {
     movie->firstFrame();
 }
 
+void videoElement::endTransformation() {
+    endFade = true;
+    movie->setLoopState(OF_LOOP_NONE);
+    this->displaySpeed = 5.0f;
+    movie->setSpeed(this->displaySpeed);
+}
 
 void videoElement::draw() {
     if (!hide) {
@@ -70,8 +81,7 @@ void videoElement::draw() {
             ofRotateZ(this->rotation);
             ofTranslate( -this->w* scale*0., -this->h* scale*0. );
         }
-        if (scale!=1.0) movie->draw(0, 0, w * scale, h * scale);
-        else movie->draw(0, 0, w, h);
+        drawElement(1.0f);
         ofPopMatrix();
         if(rotation!=0) ofPopMatrix();
     }
@@ -89,11 +99,16 @@ void videoElement::draw(int x, int y, float _scale) {
             ofRotateZ(this->rotation);
             ofTranslate( -this->w* scale* _scale*0.5, -this->h* scale* _scale*0.5 );
         }
-        if (scale!=1.0) movie->draw(0, 0, w * scale * _scale, h * scale * _scale);
-        else movie->draw(0, 0, w * _scale, h * _scale);
+        drawElement(_scale);
         ofPopMatrix();
         if(rotation!=0) ofPopMatrix();
     }
+}
+
+void videoElement::drawElement(float _scale) {
+    ofSetColor(255, 255, 255, int(255*opacity));
+    movie->draw(0, 0, w * scale * _scale, h * scale * _scale);
+    ofSetColor(255, 255, 255, 255);
 }
 
 // set at what speed a moving star should shoot across the screen, in all directions
