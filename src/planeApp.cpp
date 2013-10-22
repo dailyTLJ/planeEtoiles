@@ -330,6 +330,9 @@ void planeApp::bgMediaFadedOut(int & transitionType) {
 void planeApp::bgMediaFadedIn(int & transitionType) {
     cout << "bgMediaFadedIn" << endl;
     transition = false;
+    for (vector<ofPtr<mediaElement> >::iterator it = fgMedia.begin(); it != fgMedia.end(); it++) {
+        (*it).fadeIn();
+    }
 }
 
 void planeApp::blobOnLost(int & blobID) {
@@ -433,6 +436,7 @@ void planeApp::blobOnCreate(int & blobID) {
             (*fgMedia[fgMedia.size()-1]).setDisplay(0, 0, 200, 200, true);
             // (*fgMedia[fgMedia.size()-1]).setDisplay(ofRandom(projectionW-100), ofRandom(projectionH-100));
             (*fgMedia[fgMedia.size()-1]).reset();
+            (*fgMedia[fgMedia.size()-1]).fadeIn();
         }
     } else if (scene==4) {
         // PLANETS
@@ -443,6 +447,7 @@ void planeApp::blobOnCreate(int & blobID) {
         blobs[blobID].mediaLink = fgMedia[fgMedia.size()-1];
         blobs[blobID].videoTrace = true;
         (*fgMedia[fgMedia.size()-1]).reset();
+        (*fgMedia[fgMedia.size()-1]).fadeIn();
     }
 
     blobCountChange();
@@ -546,7 +551,6 @@ void planeApp::beginSegment() {
     if (sceneChange) {
         cout << "beginSegment() fade in BG   " << scene << ":" << segment << endl;
         for (vector<ofPtr<mediaElement> >::iterator it = bgVideos[scene].begin() ; it != bgVideos[scene].end(); ++it) {
-            
             (**it).fadeIn();
         }
         transition = true;
