@@ -20,6 +20,7 @@ void planeApp::setup(){
 	drawBlobDetail = false;
     transition = false;
     moveOn = false;
+    sceneChange = false;
     segmentChange = 1;
     flash = false;
     flashCnt = 0;
@@ -121,6 +122,8 @@ void planeApp::initScenes(){
  
     // bgVideos[n].push_back(videoElement("video/1_idle/IDLE_MODE_5-animation.mov"));
     bgVideos[n].push_back(ofPtr<mediaElement>( new videoElement("video/1_idle/IDLE_MODE_5-animation.mov")));
+    ofAddListener( (*bgVideos[n][bgVideos[n].size()-1]).fadeOutEnd, this, &planeApp::bgMediaFadedOut );
+    ofAddListener( (*bgVideos[n][0]).fadeInEnd, this, &planeApp::bgMediaFadedIn );
 
     n++;
 
@@ -140,6 +143,8 @@ void planeApp::initScenes(){
 
     // bgVideos[n].push_back(videoElement("video/2_stars/BACKGROUND 1 loop-QTAnimation.mov"));
     bgVideos[n].push_back(ofPtr<mediaElement>( new videoElement("video/2_stars/BACKGROUND 1 loop-QTAnimation.mov")));
+    ofAddListener( (*bgVideos[n][bgVideos[n].size()-1]).fadeOutEnd, this, &planeApp::bgMediaFadedOut );
+    ofAddListener( (*bgVideos[n][0]).fadeInEnd, this, &planeApp::bgMediaFadedIn );
 
     n++;
 
@@ -155,6 +160,8 @@ void planeApp::initScenes(){
 
     // bgVideos[n].push_back(videoElement("video/2_stars/BACKGROUND 1 loop-QTAnimation.mov"));
     bgVideos[n].push_back(ofPtr<mediaElement>( new videoElement("video/2_stars/BACKGROUND 1 loop-QTAnimation.mov")));
+    ofAddListener( (*bgVideos[n][bgVideos[n].size()-1]).fadeOutEnd, this, &planeApp::bgMediaFadedOut );
+    ofAddListener( (*bgVideos[n][0]).fadeInEnd, this, &planeApp::bgMediaFadedIn );
 
     n++;
 
@@ -181,6 +188,8 @@ void planeApp::initScenes(){
 
     bgVideos[n].push_back(ofPtr<mediaElement>( new videoElement("video/4_sun/SUN_8-ASSET-animation.mov")));
     (*bgVideos[n][bgVideos[n].size()-1]).setDisplay(projectionW/2,projectionH/2, true);
+    ofAddListener( (*bgVideos[n][bgVideos[n].size()-1]).fadeOutEnd, this, &planeApp::bgMediaFadedOut );
+    ofAddListener( (*bgVideos[n][0]).fadeInEnd, this, &planeApp::bgMediaFadedIn );
 
     n++;
 
@@ -200,6 +209,8 @@ void planeApp::initScenes(){
 
     // bgVideos[n].push_back(videoElement("video/2_stars/BACKGROUND 1 loop-QTAnimation.mov"));
     bgVideos[n].push_back(ofPtr<mediaElement>( new videoElement("video/2_stars/BACKGROUND 1 loop-QTAnimation.mov")));
+    ofAddListener( (*bgVideos[n][bgVideos[n].size()-1]).fadeOutEnd, this, &planeApp::bgMediaFadedOut );
+    ofAddListener( (*bgVideos[n][0]).fadeInEnd, this, &planeApp::bgMediaFadedIn );
 
     n++;
 
@@ -219,9 +230,12 @@ void planeApp::initScenes(){
 
     // bgVideos[n].push_back(videoElement("video/2_stars/BACKGROUND 1 loop-QTAnimation.mov"));
     bgVideos[n].push_back(ofPtr<mediaElement>( new videoElement("video/2_stars/BACKGROUND 1 loop-QTAnimation.mov")));
+    ofAddListener( (*bgVideos[n][bgVideos[n].size()-1]).fadeOutEnd, this, &planeApp::bgMediaFadedOut );
+    ofAddListener( (*bgVideos[n][0]).fadeInEnd, this, &planeApp::bgMediaFadedIn );
 
     cout << "there are " << scenes.size() << " scenes" << endl;
 
+    sceneChange = true;
     nextSegment(1);
 
 }
@@ -263,15 +277,20 @@ void planeApp::update(){
     if (flash) {
         flashCnt++;
         if (flashCnt > flashMax) {
+            cout << "flash done" << endl;
             flashCnt = 0;
             flash = false;
+            beginSegment();
         }
     }
-    if (moveOn) {
+    // TIME TRIGGERS
+    if (autoplay && scenes[scene].length[segment] > 0 && segmentClock >= scenes[scene].length[segment]) {
+        endSegment(1);
+    }
+    // triggered by the end of fading out the bg
+    if (moveOn) {   
         nextSegment(segmentChange);
         moveOn = false;
-    } else if (autoplay && scenes[scene].length[segment] > 0 && segmentClock >= scenes[scene].length[segment]) {
-        startTransition(1);
     }
 
     // SCENE SEGMENT RELATED ACTION
@@ -279,13 +298,7 @@ void planeApp::update(){
         // fade out idle-mode video, connect fade-End to transition to next Segment
         if(success && !transition) {
             cout << "scene 0 success" << endl;
-            startTransition(1);
-        }
-    } else if (scene==1) {
-        if (segment==0 || segment==1) {
-
-            // STAND STILL
-
+            endSegment(1);
         }
     }
 
@@ -309,6 +322,8 @@ void planeApp::update(){
 
 void planeApp::bgMediaFadedOut(int & transitionType) {
     cout << "bgMediaFadedOut" << endl;
+    // set moveOn to true, instead of calling nextSegment()
+    // to avoid conflicting threading
     moveOn = true;
 }
 
@@ -525,44 +540,55 @@ void planeApp::blobUnlink(int & blobID) {
     }
 }
 
-void planeApp::startTransition(int direction) {
-    cout << "startTransition() fade out BG   " << scene << ":" << segment << endl;
+void planeApp::beginSegment() {
+    cout << "beginSegment()" << endl;
+    // ONLY FADE BG IN, IF SCENE CHANGE HAPPENED
+    if (sceneChange) {
+        cout << "beginSegment() fade in BG   " << scene << ":" << segment << endl;
+        for (vector<ofPtr<mediaElement> >::iterator it = bgVideos[scene].begin() ; it != bgVideos[scene].end(); ++it) {
+            
+            (**it).fadeIn();
+        }
+        transition = true;
+    }
+
+}
+
+void planeApp::endSegment(int direction) {
+    cout << "endSegment()   " << scene << ":" << segment << endl;
     segmentChange = direction;
 
     // ONLY DO BG-VIDEO TRANSITIONS IF A SCENE CHANGE IS COMING UP!
-    if (segment+segmentChange >= scenes[scene].segments) {
-        ofAddListener( (*bgVideos[scene][0]).fadeOutEnd, this, &planeApp::bgMediaFadedOut );
+    if (segment+segmentChange >= scenes[scene].segments || segment+segmentChange < 0) {
+        sceneChange = true;
+        
         if (scene==0) {
-            cout << "endTransformation" << endl;
             (*bgVideos[scene][0]).endTransformation();
         } else {
-            cout << "fadeout" << endl;
             (*bgVideos[scene][0]).fadeOut();
         }
         transition = true;
     } else {
+        // if no BG fading is necessary, simply move on to the next segment
+        sceneChange = false;
         moveOn = true;
     }
 }
 
 void planeApp::nextSegment(int direction){
 
-    int oldScene = scene;
-    fgMedia.clear();   // delete all foreground videos
+    segment+=direction;
 
+    fgMedia.clear();   // delete all foreground videos
     success = false;
     transition = false;
-    flash = true;
-
-    segment+=direction;
+    flash = true;       // 
     segmentStart = ofGetUnixTime();
 
     if(scene == -1 || segment >= scenes[scene].segments) {
         scene++;
         segment = 0;
-        cout << "scene " << scene << " / " << scenes.size() << endl;
         if(scene >= scenes.size()) {
-            cout << "last scene" << endl;
             scene = 0;
             globalStart = ofGetUnixTime();
         }
@@ -575,21 +601,18 @@ void planeApp::nextSegment(int direction){
     }
 
 
-    // IF NEW SCENE
-    if (oldScene != scene) {
+    // NEW SCENE
+    if (sceneChange) {
+        cout << "scene " << scene << ": " << scenes[scene].name << endl;
         // reset all BGvideos of the scene
         for (vector<ofPtr<mediaElement> >::iterator it = bgVideos[scene].begin() ; it != bgVideos[scene].end(); ++it) {
-            cout << "fade in BG video" << endl;
-            ofAddListener( (*bgVideos[scene][0]).fadeInEnd, this, &planeApp::bgMediaFadedIn );
-            (**it).reset();
-            (**it).fadeIn();
+            (**it).reset(false);
         }
-        transition = true;
     }
 
-    cout << "segment " << scenes[scene].instructions[segment] << endl;
+    cout << "nextSegment() " << scene << ": segment " << segment << ": " << scenes[scene].instructions[segment] << endl;
 
-    // make new blob connections
+    // make new blob connections, to ensure blobs are connected to video elements, if necessary
     for(std::map<int, Blob>::iterator it = blobs.begin(); it != blobs.end(); ++it){
         Blob* b = &it->second;
         ofNotifyEvent(b->onCreate,b->id,b);
@@ -606,7 +629,8 @@ void planeApp::nextSegment(int direction){
             (*fgMedia[fgMedia.size()-1]).hide = true;
             (*fgMedia[fgMedia.size()-1]).reset();
         }
-        blobCountChange();
+        blobCountChange();  // to position and turn on/off videos
+
     } else if (scene==4) {
         // ECLIPSE
         fgMedia.push_back(ofPtr<mediaElement>( new mediaElement()));
@@ -751,12 +775,12 @@ void planeApp::drawScreen(int x, int y, float scale){
     // ofEnableAlphaBlending();
     ofEnableBlendMode(OF_BLENDMODE_ADD);
 
-    // background videos
+    // background videos`
     for (vector<ofPtr<mediaElement> >::iterator it = bgVideos[scene].begin() ; it != bgVideos[scene].end(); ++it) {
         (**it).draw(x, y, scale);
     }
 
-    if (!transition) {
+    if (!transition && !flash) {
         // foreground videos
         for (vector<ofPtr<mediaElement> >::iterator it = fgMedia.begin(); it != fgMedia.end(); ++it) {
             (**it).draw(x, y, scale);
@@ -1023,9 +1047,9 @@ void planeApp::keyReleased(int key){
     }
 
     if (key == OF_KEY_LEFT){
-        startTransition(-1);
+        endSegment(-1);
     } else if (key == OF_KEY_RIGHT){
-        startTransition(1);
+        endSegment(1);
     }
 
     if(key == 's') {

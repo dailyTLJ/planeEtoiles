@@ -15,7 +15,7 @@ class videoElement: public mediaElement
         void loadMovie(string filename);
         void play(bool loop = true);
         void pause(bool v = true);
-        void reset();
+        void reset(bool visible = true);
 
         void draw();
         void draw(int x, int y, float _scale);

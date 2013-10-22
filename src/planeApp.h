@@ -63,7 +63,8 @@ class planeApp : public ofBaseApp{
 		void bgMediaFadedIn(int & transitionType);
 
 		void blobCountChange();
-		void startTransition(int direction = 1);
+		void endSegment(int direction = 1);
+		void beginSegment();
 		void nextSegment(int direction = 1);
 
 		int projectionW;
@@ -89,6 +90,7 @@ class planeApp : public ofBaseApp{
 		int scene;
 		int segment;
 		int segmentChange;
+		bool sceneChange;
 		int masterClock;
 		int segmentClock;
 		int segmentStart;

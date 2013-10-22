@@ -7,7 +7,7 @@ mediaElement::mediaElement() {
     this->selfdestroy = false;
     this->dead = false;
     this->clr = ofColor(255, 255, 255);
-    this->opacityChange = 0.f;
+    this->opacityChange = 0.01f;
     this->opacity = 1.f;
     this->fading = false;
 }
@@ -48,8 +48,10 @@ void mediaElement::drawElement(float _scale) {
 
 }
 
-void mediaElement::reset() {
-
+void mediaElement::reset(bool visible) {
+    opacity = (visible) ? 1.f : 0.f;
+    opacityChange = 0.01f;
+    fading = false;
 }
 
 void mediaElement::moveAcross(float v, int maxw, int maxh, bool destr) {
@@ -76,6 +78,7 @@ void mediaElement::fadeOut(float speed) {
 }
 
 void mediaElement::fadeIn(float speed) {
+    cout << "mediaElement::fadeIn" << endl;
     opacity = 0.0f;
     fade(speed);
 }

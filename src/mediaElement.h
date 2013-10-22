@@ -18,7 +18,7 @@ class mediaElement
         virtual void moveAcross(float vx, float vy, int maxw, bool destr);
         virtual void autoDestroy(bool v);
         virtual void loadMovie(string filename);
-        virtual void reset();
+        virtual void reset(bool visible = true);
         virtual void endTransformation();
         
         void setDisplay(int x, int y);
