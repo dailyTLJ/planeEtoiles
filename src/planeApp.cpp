@@ -518,19 +518,6 @@ void planeApp::blobCountChange() {
 
     if ( scene==2 && fgMedia.size()>=5 ) {
         // REVOLUTION
-        for (unsigned int i=0; i<fgMedia.size(); i++) {
-            string videoFile;
-            if (segment==0) {
-                int videoPick = i+1;
-                videoFile = "video/3_revolution/REV_0"+ofToString(videoPick)+"-animation.mov";
-            } else if (segment==1)  {
-                int videoPick = (i==4||i==2) ? 4 : i+1;
-                videoFile = "video/3_revolution/REV_0"+ofToString(videoPick)+"-out-animation.mov";
-            }
-            (*fgMedia[i]).loadMovie(videoFile);
-            if (sceneChange) (*fgMedia[i]).reset(false);
-            else (*fgMedia[i]).reset();
-        }
 
         // there should only be 5 fgMedia elements
         for (unsigned int i=0; i<fgMedia.size(); i++) {
@@ -538,8 +525,6 @@ void planeApp::blobCountChange() {
             if (i < blobs.size()+3) (*fgMedia[i]).hide = false;
             (*fgMedia[i]).rotation = 0;
         }
-
-
 
         // positioning
         switch (blobs.size()+3) {
@@ -696,13 +681,22 @@ void planeApp::initSegment(){
     if (scene==2) {
         // REVOLUTIONS
         for (int i=0; i<5; i++) {
-            int videoPick = i+1; // (i==1) ? 4 : i+1;
-            fgMedia.push_back(ofPtr<mediaElement>( new videoElement("video/3_revolution/REV_0"+ofToString(videoPick)+"-animation.mov")));
+            string videoFile;
+            if (segment==0) {
+                int videoPick = i+1;
+                videoFile = "video/3_revolution/REV_0"+ofToString(videoPick)+"-animation.mov";
+            } else if (segment==1)  {
+                int videoPick = (i==4||i==2) ? 4 : i+1;
+                videoFile = "video/3_revolution/REV_0"+ofToString(videoPick)+"-out-animation.mov";
+            }
+            fgMedia.push_back(ofPtr<mediaElement>( new videoElement(videoFile)));
             // fgMedia.push_back(ofPtr<mediaElement>( new videoElement("video/3_revolution/REV_06-animation.mov")));
             (*fgMedia[fgMedia.size()-1]).hide = true;
             (*fgMedia[fgMedia.size()-1]).endTransformation = &mediaElement::scaleAway;
-            (*fgMedia[fgMedia.size()-1]).reset(false);
+            if (sceneChange) (*fgMedia[i]).reset(false);
+            else (*fgMedia[i]).reset();
         }
+
         blobCountChange();  // to position and turn on/off videos
 
     } else if (scene==4) {
