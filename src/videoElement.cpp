@@ -80,15 +80,9 @@ void videoElement::draw() {
     if (!hide) {
         ofPushMatrix();
         ofTranslate(position.x, position.y);
-        if(rotation!=0) {
-            ofPushMatrix();
-            ofTranslate( this->w* scale*0.5, this->h* scale*0. );
-            ofRotateZ(this->rotation);
-            ofTranslate( -this->w* scale*0., -this->h* scale*0. );
-        }
+        ofRotateZ(this->rotation);
         drawElement(1.0f);
         ofPopMatrix();
-        if(rotation!=0) ofPopMatrix();
     }
 }
 
@@ -98,15 +92,9 @@ void videoElement::draw(int x, int y, float _scale) {
        // cout << "draw \t x " << x << "   position.x " << position.x << "  scale " << _scale << "   this->scale " << this->scale << endl;
         ofPushMatrix();
         ofTranslate(x + position.x * _scale, y + position.y * _scale);
-        if(rotation!=0) {
-            ofPushMatrix();
-            ofTranslate( this->w* scale* _scale*0.5, this->h* scale* _scale*0.5 );
-            ofRotateZ(this->rotation);
-            ofTranslate( -this->w* scale* _scale*0.5, -this->h* scale* _scale*0.5 );
-        }
+        ofRotateZ(this->rotation);
         drawElement(_scale);
         ofPopMatrix();
-        if(rotation!=0) ofPopMatrix();
     }
 }
 
