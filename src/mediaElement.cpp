@@ -10,6 +10,9 @@ mediaElement::mediaElement() {
     this->opacityChange = 0.01f;
     this->opacity = 1.f;
     this->fading = false;
+    this->scaling = false;
+    this->centered = false;
+    endTransformation = &mediaElement::fadeOut; 
 }
 
 
@@ -24,6 +27,14 @@ void mediaElement::update() {
         } else if (opacityChange<0 && opacity <= 0.f) {
             opacity = 0.f;
             fading = false;
+            cout << "mediaElement fadedout, call notifyEvent" << endl;
+            ofNotifyEvent(fadeOutEnd,this->w,this);
+        }
+    }
+    if (scaling) {
+        scale *= 0.95;
+        if (scale < 0.05) {
+            cout << "mediaElement scaled away, call notifyEvent" << endl;
             ofNotifyEvent(fadeOutEnd,this->w,this);
         }
     }
@@ -38,8 +49,8 @@ void mediaElement::draw(int x, int y, float _scale) {
     if (!hide) {
         ofPushMatrix();
         ofTranslate(x + position.x * _scale + w*_scale*0.5, y + position.y * _scale + h*_scale*0.5);
-        ofFill(); ofSetColor(clr);
-        ofCircle(0, 0, this->w * _scale * 0.5);
+        ofFill(); ofSetColor(clr.r, clr.g, clr.b, int(255*opacity));
+        ofCircle(0, 0, this->w * scale * _scale * 0.5);
         ofPopMatrix();
     }
 }
@@ -62,8 +73,14 @@ void mediaElement::moveAcross(float vx, float vy, int maxw, bool destr) {
 
 }
 
-void mediaElement::endTransformation() {
+void mediaElement::finishFast() {
+    fadeOut();
+}
 
+void mediaElement::scaleAway() {
+    cout << "mediaElement::scaleAway" << endl;
+    if (hide) scale = 0.01;
+    scaling = true;
 }
 
 void mediaElement::fade(float speed) {
@@ -72,13 +89,19 @@ void mediaElement::fade(float speed) {
     // cout << "fade = true" << endl;
 }
 
+void mediaElement::fadeOut() {
+    if (hide) opacity = 0.01;       // set to low value, so there is at least one procession step
+                                    // else endless feedback loop to event fgMediaFadedOut would be created
+    fadeOut(0.01);
+}
+
 void mediaElement::fadeOut(float speed) {
-    cout << "mediaElement::fadeOut" << endl;
+    cout << "mediaElement::fadeOut  " << file << endl;
     fade(-speed);
 }
 
 void mediaElement::fadeIn(float speed) {
-    cout << "mediaElement::fadeIn" << endl;
+    cout << "mediaElement::fadeIn  " << file << endl;
     opacity = 0.0f;
     fade(speed);
 }
@@ -90,13 +113,10 @@ void mediaElement::setDisplay(int x, int y) {
     this->setDisplay(x, y, 1.0f);
 }
 
-void mediaElement::setDisplay(int x, int y, bool centered) {
-    if (centered) {
-        this->position.set( x - this->w/2, y - this->h/2 );
-        this->scale = 1.0f;
-    } else {
-        this->setDisplay(x, y, 1.0f);
-    }
+void mediaElement::setDisplay(int x, int y, bool _centered) {
+    this->scale = 1.0f;
+    this->setDisplay(x, y, 1.0f);
+    this->centered = _centered;
 }
 
 void mediaElement::setDisplay(int x, int y, float _scale) {
@@ -112,15 +132,12 @@ void mediaElement::setDisplay(int x, int y, int w, int h) {
     this->scale = 1.0;
 }
 
-void mediaElement::setDisplay(int x, int y, int w, int h, bool centered) {
+void mediaElement::setDisplay(int x, int y, int w, int h, bool _centered) {
     // cout << "setDisplay " << x << " | " << y << endl;
     this->w = w;
     this->h = h;
-    if (centered) {
-        this->position.set( x-w/2, y-h/2 );
-    } else {
-        this->position.set(x, y);
-    }
+    this->centered = _centered;
+    this->position.set(x, y);
     this->scale = 1.0;
 }
 

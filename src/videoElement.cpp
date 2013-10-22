@@ -58,7 +58,7 @@ void videoElement::update() {
 }
 
 void videoElement::reset(bool visible) {
-    // cout << "reset video " << endl;
+    // cout << "reset video " << file << "  " << visible << endl;
     mediaElement::reset(visible);
     displaySpeed = 1.f;
     this->pause(false);
@@ -66,8 +66,10 @@ void videoElement::reset(bool visible) {
     movie->firstFrame();
 }
 
-void videoElement::endTransformation() {
-    cout << "videoElement::endTransformation" << endl;
+void videoElement::finishFast() {
+    // end transformation for 0-IDLE video = play fast to end
+    cout << "videoElement::finishFast" << endl;
+    // if (hide) 
     endFade = true;
     movie->setLoopState(OF_LOOP_NONE);
     this->displaySpeed = 5.0f;
@@ -77,7 +79,7 @@ void videoElement::endTransformation() {
 void videoElement::draw() {
     if (!hide) {
         ofPushMatrix();
-        ofTranslate(position.x * scale, position.y * scale);
+        ofTranslate(position.x, position.y);
         if(rotation!=0) {
             ofPushMatrix();
             ofTranslate( this->w* scale*0.5, this->h* scale*0. );
@@ -110,7 +112,11 @@ void videoElement::draw(int x, int y, float _scale) {
 
 void videoElement::drawElement(float _scale) {
     ofSetColor(255, 255, 255, int(255*opacity));
-    movie->draw(0, 0, w * scale * _scale, h * scale * _scale);
+    if (centered) {
+        movie->draw(-w * scale * _scale * 0.5, -h * scale * _scale * 0.5, w * scale * _scale, h * scale * _scale);
+    } else {
+        movie->draw(0, 0, w * scale * _scale, h * scale * _scale);
+    }
     ofSetColor(255, 255, 255, 255);
 }
 

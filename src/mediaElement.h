@@ -19,28 +19,35 @@ class mediaElement
         virtual void autoDestroy(bool v);
         virtual void loadMovie(string filename);
         virtual void reset(bool visible = true);
-        virtual void endTransformation();
+        // virtual void endTransformation();
         
         void setDisplay(int x, int y);
         void setDisplay(int x, int y, float _scale);
-        void setDisplay(int x, int y, bool centered);
+        void setDisplay(int x, int y, bool _centered);
         void setDisplay(int x, int y, int w, int h);
-        void setDisplay(int x, int y, int w, int h, bool centered);
+        void setDisplay(int x, int y, int w, int h, bool _centered);
 
         void fade(float speed);
-        void fadeOut(float speed = 0.01);
+        void fadeOut();
+        void fadeOut(float speed);
         void fadeIn(float speed = 0.01);
+
+        void (mediaElement::*endTransformation)();
+        virtual void finishFast();
+        virtual void scaleAway();
 
 
         ofPoint position;
         int w;
         int h;
+        bool centered;
         int rotation;
         bool hide;
         float scale;
         string file; 
         ofColor clr;    
         bool fading;
+        bool scaling;
         float opacityChange;
         float opacity;
 

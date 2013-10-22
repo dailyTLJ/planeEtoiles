@@ -25,7 +25,7 @@ class videoElement: public mediaElement
         void moveAcross(float vx, float vy, int maxw, bool destr);
 
         void autoDestroy(bool v);
-        void endTransformation();
+        void finishFast();
 
         bool endFade;
 

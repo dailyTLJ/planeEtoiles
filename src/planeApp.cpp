@@ -122,8 +122,9 @@ void planeApp::initScenes(){
  
     // bgVideos[n].push_back(videoElement("video/1_idle/IDLE_MODE_5-animation.mov"));
     bgVideos[n].push_back(ofPtr<mediaElement>( new videoElement("video/1_idle/IDLE_MODE_5-animation.mov")));
-    ofAddListener( (*bgVideos[n][bgVideos[n].size()-1]).fadeOutEnd, this, &planeApp::bgMediaFadedOut );
+    ofAddListener( (*bgVideos[n][0]).fadeOutEnd, this, &planeApp::bgMediaFadedOut );
     ofAddListener( (*bgVideos[n][0]).fadeInEnd, this, &planeApp::bgMediaFadedIn );
+    (*bgVideos[n][0]).endTransformation = &mediaElement::finishFast; 
 
     n++;
 
@@ -311,7 +312,7 @@ void planeApp::update(){
     while (iter != fgMedia.end()) {
         (**iter).update();
         if ((**iter).dead) {
-            // cout << "delete video " << (**iter).file << "  size " << fgMedia.size() << endl;
+            cout << "delete video " << (**iter).file << "  size " << fgMedia.size() << endl;
             iter = fgMedia.erase(iter);
         } else {
             ++iter;
@@ -327,47 +328,90 @@ void planeApp::bgMediaFadedOut(int & transitionType) {
     moveOn = true;
 }
 
+// transitionType -1 : trigger first fade from main-loop and not from faded-event
+void planeApp::fgMediaFadedOut(int & transitionType) {
+    cout << "fgMediaFadedOut  " << transitionType << "  fgmedia size = " << fgMedia.size() << endl;
+    
+    if (fgMedia.size()>0) {
+        
+        if (transitionType == -1) {
+            ofAddListener( (*fgMedia.back()).fadeOutEnd, this, &planeApp::fgMediaFadedOut );
+            cout << "call endTransformation() on fgMedia[" << (fgMedia.size()-1) << "]" << endl;
+            ((*fgMedia.back()).*((*fgMedia.back()).endTransformation))();
+
+        } else {
+            // delete last fgMedia object
+            (*fgMedia.back()).dead = true;
+
+            if (fgMedia.size()>1) {
+                // fade new last fgMedia object
+                ofAddListener( (*fgMedia[fgMedia.size()-2]).fadeOutEnd, this, &planeApp::fgMediaFadedOut );
+                cout << "call endTransformation() on fgMedia[" << (fgMedia.size()-2) << "]" << endl;
+                ((*fgMedia[fgMedia.size()-2]).*((*fgMedia[fgMedia.size()-2]).endTransformation))();
+            } else {
+                // fade BG now
+                if (scene==0) {
+                    ((*bgVideos[scene][0]).*((*bgVideos[scene][0]).endTransformation))();
+                } else {
+                    (*bgVideos[scene][0]).fadeOut();
+                }
+            }
+
+        }
+        
+    } else {
+        // fade BG now
+        if (scene==0) {
+            ((*bgVideos[scene][0]).*((*bgVideos[scene][0]).endTransformation))();
+        } else {
+            (*bgVideos[scene][0]).fadeOut();
+        }
+    }
+    
+}
+
 void planeApp::bgMediaFadedIn(int & transitionType) {
     cout << "bgMediaFadedIn" << endl;
     transition = false;
     for (vector<ofPtr<mediaElement> >::iterator it = fgMedia.begin(); it != fgMedia.end(); it++) {
-        (*it).fadeIn();
+        (**it).fadeIn();
     }
 }
 
 void planeApp::blobOnLost(int & blobID) {
     // cout << "BLOB " << blobID << " just got lost" << endl;
-
-    if (scene==3) {
-        // SUN explosions
-        if (segment==1 || segment==2) {
-            int randomShooter = ofRandom(6) + 1;
-            // string newVideoName = "video/4_sun/SUN_explosion-" + ofToString(randomShooter,2,'0') + "-animation.mov";
-            string newVideoName = "video/4_sun/SUN_explosion-" + ofToString(randomShooter,2,'0') + "-animation.mp4";
-            // newVideoName = "video/4_sun/SUN_explosion-01-H264-10mbps.mp4";
-            // newVideoName = "video/4_sun/SUN_explosion-01-photoJPEG.mov";
-            newVideoName = "video/4_sun/SUN_explosion-01-animation.mov";
-            fgMedia.push_back(ofPtr<mediaElement>( new videoElement(newVideoName)));
-            (*fgMedia[fgMedia.size()-1]).setDisplay(projectionW/2 + ofRandom(-200,200), projectionH/2 + ofRandom(-200,200), true);
-            (*fgMedia[fgMedia.size()-1]).autoDestroy(true);
-            (*fgMedia[fgMedia.size()-1]).reset();
-        }
-    } else if (scene==5) {
-        // SHOOTING STARS
-        if (segment==0) {
-            int randomShooter = ofRandom(6) + 1;
-            fgMedia.push_back(ofPtr<mediaElement>( new videoElement("video/6_shooting/SSTAR_0" + ofToString(randomShooter) + "-H264-10mbps.mp4")));
-            (*fgMedia[fgMedia.size()-1]).setDisplay(ofRandom(projectionW-100), ofRandom(projectionH-100), true);
-            (*fgMedia[fgMedia.size()-1]).moveAcross( 45.f, projectionW, projectionH, true);
-            (*fgMedia[fgMedia.size()-1]).reset();
-        } else if (segment==1) {
-            float randdeg = ofRandom(-5.f, 5.f);
-            for (int i=0; i<10; i++) {
+    if (!transition) {
+        if (scene==3) {
+            // SUN explosions
+            if (segment==1 || segment==2) {
+                int randomShooter = ofRandom(6) + 1;
+                // string newVideoName = "video/4_sun/SUN_explosion-" + ofToString(randomShooter,2,'0') + "-animation.mov";
+                string newVideoName = "video/4_sun/SUN_explosion-" + ofToString(randomShooter,2,'0') + "-animation.mp4";
+                // newVideoName = "video/4_sun/SUN_explosion-01-H264-10mbps.mp4";
+                // newVideoName = "video/4_sun/SUN_explosion-01-photoJPEG.mov";
+                newVideoName = "video/4_sun/SUN_explosion-01-animation.mov";
+                fgMedia.push_back(ofPtr<mediaElement>( new videoElement(newVideoName)));
+                (*fgMedia[fgMedia.size()-1]).setDisplay(projectionW/2 + ofRandom(-200,200), projectionH/2 + ofRandom(-200,200), true);
+                (*fgMedia[fgMedia.size()-1]).autoDestroy(true);
+                (*fgMedia[fgMedia.size()-1]).reset();
+            }
+        } else if (scene==5) {
+            // SHOOTING STARS
+            if (segment==0) {
                 int randomShooter = ofRandom(6) + 1;
                 fgMedia.push_back(ofPtr<mediaElement>( new videoElement("video/6_shooting/SSTAR_0" + ofToString(randomShooter) + "-H264-10mbps.mp4")));
                 (*fgMedia[fgMedia.size()-1]).setDisplay(ofRandom(projectionW-100), ofRandom(projectionH-100), true);
-                (*fgMedia[fgMedia.size()-1]).moveAcross( randdeg, 45.f, projectionW, true);
+                (*fgMedia[fgMedia.size()-1]).moveAcross( 45.f, projectionW, projectionH, true);
                 (*fgMedia[fgMedia.size()-1]).reset();
+            } else if (segment==1) {
+                float randdeg = ofRandom(-5.f, 5.f);
+                for (int i=0; i<10; i++) {
+                    int randomShooter = ofRandom(6) + 1;
+                    fgMedia.push_back(ofPtr<mediaElement>( new videoElement("video/6_shooting/SSTAR_0" + ofToString(randomShooter) + "-H264-10mbps.mp4")));
+                    (*fgMedia[fgMedia.size()-1]).setDisplay(ofRandom(projectionW-100), ofRandom(projectionH-100), true);
+                    (*fgMedia[fgMedia.size()-1]).moveAcross( randdeg, 45.f, projectionW, true);
+                    (*fgMedia[fgMedia.size()-1]).reset();
+                }
             }
         }
     }
@@ -376,21 +420,21 @@ void planeApp::blobOnLost(int & blobID) {
 
 void planeApp::blobOnFreeze(int & blobID) {
 //    cout << "BLOB " << blobID << " froze!" << endl;
+    if (!transition) {
+        if (scene==1) {
+            if (segment==0 || segment==1) {
 
-    if (scene==1) {
-        if (segment==0 || segment==1) {
-
-            // STAND STILL
-            // create new video element
-//            cout << "blob " << blobID << " \t\tfreeze ! " << endl;
-            fgMedia.push_back(ofPtr<mediaElement>( new videoElement("video/2_stars/INDIV STAR 2 loop-H264-10mbps.mp4")));
-            blobs[blobID].mediaLink = fgMedia[fgMedia.size()-1];
-            (*fgMedia[fgMedia.size()-1]).setDisplay(ofRandom(projectionW-100), ofRandom(projectionH-100));
-            (*fgMedia[fgMedia.size()-1]).reset();
+                // STAND STILL
+                // create new video element
+    //            cout << "blob " << blobID << " \t\tfreeze ! " << endl;
+                fgMedia.push_back(ofPtr<mediaElement>( new videoElement("video/2_stars/INDIV STAR 2 loop-H264-10mbps.mp4")));
+                blobs[blobID].mediaLink = fgMedia[fgMedia.size()-1];
+                (*fgMedia[fgMedia.size()-1]).setDisplay(ofRandom(projectionW-100), ofRandom(projectionH-100));
+                (*fgMedia[fgMedia.size()-1]).reset();
+            }
         }
     }
 }
-
 void planeApp::blobUnFreeze(int & blobID) {
 
     if (scene==1) {
@@ -413,44 +457,46 @@ void planeApp::blobOverFreeze(int & blobID) {
 
 void planeApp::blobOnCreate(int & blobID) {
    
-    // first clean up, all related blob settings
-    this->blobUnlink(blobID);
-    blobs[blobID].videoTrace = false;
-    blobs[blobID].mediaLink = ofPtr<mediaElement>();  // TODO how to release ofPtr ? 
-    
+    if (!transition) {
+        // first clean up, all related blob settings
+        this->blobUnlink(blobID);
+        blobs[blobID].videoTrace = false;
+        blobs[blobID].mediaLink = ofPtr<mediaElement>();  // TODO how to release ofPtr ? 
+        
 
-    cout << "BLOB " << blobID << " blobOnCreate!" << endl;
+        cout << "BLOB " << blobID << " blobOnCreate!" << endl;
 
-    // then assign the appropriate ones
-    if (scene==0) {
-        // COME CLOSER, recognition of people == time to move on
-        if (!success) success = true;
-    } else if (scene==1) {
-        if (segment==2 || segment==3) {
-            // KEEP THE DISTANCE
-            // create new video element
-//            cout << "blob " << blobID << " \t\tfreeze ! " << endl;
-            fgMedia.push_back(ofPtr<mediaElement>( new videoElement("video/2_stars/INDIV STAR 2 loop-H264-10mbps.mp4")));
+        // then assign the appropriate ones
+        if (scene==0) {
+            // COME CLOSER, recognition of people == time to move on
+            if (!success) success = true;
+        } else if (scene==1) {
+            if (segment==2 || segment==3) {
+                // KEEP THE DISTANCE
+                // create new video element
+    //            cout << "blob " << blobID << " \t\tfreeze ! " << endl;
+                fgMedia.push_back(ofPtr<mediaElement>( new videoElement("video/2_stars/INDIV STAR 2 loop-H264-10mbps.mp4")));
+                blobs[blobID].mediaLink = fgMedia[fgMedia.size()-1];
+                blobs[blobID].videoTrace = true;
+                (*fgMedia[fgMedia.size()-1]).setDisplay(0, 0, 200, 200, true);
+                // (*fgMedia[fgMedia.size()-1]).setDisplay(ofRandom(projectionW-100), ofRandom(projectionH-100));
+                (*fgMedia[fgMedia.size()-1]).reset();
+                (*fgMedia[fgMedia.size()-1]).fadeIn();
+            }
+        } else if (scene==4) {
+            // PLANETS
+            int randomPlanet = ofRandom(3) + 18;
+            // fgMedia.push_back(ofPtr<mediaElement>( new imageElement("video/5_eclipse/PLANET_" + ofToString(randomPlanet)+".png", 0.5f)));
+            fgMedia.push_back(ofPtr<mediaElement>( new videoElement("video/5_eclipse/PLANET_"+ofToString(randomPlanet)+".mov")));
+            (*fgMedia[fgMedia.size()-1]).setDisplay(0, 0, 500, 500, true);
             blobs[blobID].mediaLink = fgMedia[fgMedia.size()-1];
             blobs[blobID].videoTrace = true;
-            (*fgMedia[fgMedia.size()-1]).setDisplay(0, 0, 200, 200, true);
-            // (*fgMedia[fgMedia.size()-1]).setDisplay(ofRandom(projectionW-100), ofRandom(projectionH-100));
             (*fgMedia[fgMedia.size()-1]).reset();
             (*fgMedia[fgMedia.size()-1]).fadeIn();
         }
-    } else if (scene==4) {
-        // PLANETS
-        int randomPlanet = ofRandom(3) + 18;
-        // fgMedia.push_back(ofPtr<mediaElement>( new imageElement("video/5_eclipse/PLANET_" + ofToString(randomPlanet)+".png", 0.5f)));
-        fgMedia.push_back(ofPtr<mediaElement>( new videoElement("video/5_eclipse/PLANET_"+ofToString(randomPlanet)+".mov")));
-        (*fgMedia[fgMedia.size()-1]).setDisplay(0, 0, 500, 500, true);
-        blobs[blobID].mediaLink = fgMedia[fgMedia.size()-1];
-        blobs[blobID].videoTrace = true;
-        (*fgMedia[fgMedia.size()-1]).reset();
-        (*fgMedia[fgMedia.size()-1]).fadeIn();
-    }
 
-    blobCountChange();
+        blobCountChange();
+    }
 }
 
 // triggered when a blob is added or erased
@@ -458,22 +504,19 @@ void planeApp::blobCountChange() {
 
     if ( scene==2 && fgMedia.size()>=5 ) {
         // REVOLUTION
-
-        if (segment==0) {
-            for (unsigned int i=0; i<fgMedia.size(); i++) {
+        for (unsigned int i=0; i<fgMedia.size(); i++) {
+            string videoFile;
+            if (segment==0) {
                 int videoPick = i+1;
-                (*fgMedia[i]).loadMovie("video/3_revolution/REV_0"+ofToString(videoPick)+"-animation.mov");
-                (*fgMedia[i]).reset();
-            }
-        } else if (segment==1) {
-            for (unsigned int i=0; i<fgMedia.size(); i++) {
+                videoFile = "video/3_revolution/REV_0"+ofToString(videoPick)+"-animation.mov";
+            } else if (segment==1)  {
                 int videoPick = (i==4||i==2) ? 4 : i+1;
-                (*fgMedia[i]).loadMovie("video/3_revolution/REV_0"+ofToString(videoPick)+"-out-animation.mov");
-                (*fgMedia[i]).reset();
+                videoFile = "video/3_revolution/REV_0"+ofToString(videoPick)+"-out-animation.mov";
             }
+            (*fgMedia[i]).loadMovie(videoFile);
+            if (sceneChange) (*fgMedia[i]).reset(false);
+            else (*fgMedia[i]).reset(true);
         }
-
-        // cout << "blobCountChange()  REVOLUTIONS > " << blobs.size() << endl;
 
         // there should only be 5 fgMedia elements
         for (unsigned int i=0; i<fgMedia.size(); i++) {
@@ -566,11 +609,18 @@ void planeApp::endSegment(int direction) {
     if (segment+segmentChange >= scenes[scene].segments || segment+segmentChange < 0) {
         sceneChange = true;
         
-        if (scene==0) {
-            (*bgVideos[scene][0]).endTransformation();
-        } else {
-            (*bgVideos[scene][0]).fadeOut();
-        }
+        // if (scene==0) {
+        //     (*bgVideos[scene][0]).endTransformation();
+        // } else {
+        //     (*bgVideos[scene][0]).fadeOut();
+        // }
+        // for (vector<ofPtr<mediaElement> >::iterator it = fgMedia.begin(); it != fgMedia.end(); it++) {
+        //     (**it).fadeOut();
+        // }
+
+        int tmp = -1;
+        fgMediaFadedOut(tmp);   // TODO clean up, just need to hand back ref. of integer
+
         transition = true;
     } else {
         // if no BG fading is necessary, simply move on to the next segment
@@ -579,15 +629,15 @@ void planeApp::endSegment(int direction) {
     }
 }
 
-void planeApp::nextSegment(int direction){
+void planeApp::jumpToScene(int s) {
+    scene = s;
+    segment = 0;
+    transition = true;
+    initSegment();
+}
 
+void planeApp::nextSegment(int direction) {
     segment+=direction;
-
-    fgMedia.clear();   // delete all foreground videos
-    success = false;
-    transition = false;
-    flash = true;       // 
-    segmentStart = ofGetUnixTime();
 
     if(scene == -1 || segment >= scenes[scene].segments) {
         scene++;
@@ -605,16 +655,26 @@ void planeApp::nextSegment(int direction){
     }
 
 
+    if (sceneChange) cout << "scene " << scene << ": " << scenes[scene].name << endl;
+    cout << "nextSegment() " << scene << ": segment " << segment << ": " << scenes[scene].instructions[segment] << endl;
+
+    initSegment();
+}
+
+void planeApp::initSegment(){
+
+    fgMedia.clear();   // delete all foreground videos
+    success = false;
+    flash = true;       // 
+    segmentStart = ofGetUnixTime();
+
     // NEW SCENE
     if (sceneChange) {
-        cout << "scene " << scene << ": " << scenes[scene].name << endl;
         // reset all BGvideos of the scene
         for (vector<ofPtr<mediaElement> >::iterator it = bgVideos[scene].begin() ; it != bgVideos[scene].end(); ++it) {
             (**it).reset(false);
         }
     }
-
-    cout << "nextSegment() " << scene << ": segment " << segment << ": " << scenes[scene].instructions[segment] << endl;
 
     // make new blob connections, to ensure blobs are connected to video elements, if necessary
     for(std::map<int, Blob>::iterator it = blobs.begin(); it != blobs.end(); ++it){
@@ -623,7 +683,6 @@ void planeApp::nextSegment(int direction){
     }
 
     // add FG videos
-
     if (scene==2) {
         // REVOLUTIONS
         for (int i=0; i<5; i++) {
@@ -631,7 +690,8 @@ void planeApp::nextSegment(int direction){
             fgMedia.push_back(ofPtr<mediaElement>( new videoElement("video/3_revolution/REV_0"+ofToString(videoPick)+"-animation.mov")));
             // fgMedia.push_back(ofPtr<mediaElement>( new videoElement("video/3_revolution/REV_06-animation.mov")));
             (*fgMedia[fgMedia.size()-1]).hide = true;
-            (*fgMedia[fgMedia.size()-1]).reset();
+            (*fgMedia[fgMedia.size()-1]).endTransformation = &mediaElement::scaleAway;
+            (*fgMedia[fgMedia.size()-1]).reset(false);
         }
         blobCountChange();  // to position and turn on/off videos
 
@@ -639,10 +699,9 @@ void planeApp::nextSegment(int direction){
         // ECLIPSE
         fgMedia.push_back(ofPtr<mediaElement>( new mediaElement()));
         (*fgMedia[fgMedia.size()-1]).setDisplay( projectionW/2, projectionH/2, 400, 400, true );
-        (*fgMedia[fgMedia.size()-1]).reset();
-        if (segment > 0) {
-            (*fgMedia[fgMedia.size()-1]).clr = ofColor(0,0,0);
-        }
+        (*fgMedia[fgMedia.size()-1]).endTransformation = &mediaElement::scaleAway;
+        if (sceneChange) (*fgMedia[fgMedia.size()-1]).reset(false);
+        else (*fgMedia[fgMedia.size()-1]).reset(true);
     }
 
 }
@@ -784,42 +843,44 @@ void planeApp::drawScreen(int x, int y, float scale){
         (**it).draw(x, y, scale);
     }
 
-    if (!transition && !flash) {
-        // foreground videos
-        for (vector<ofPtr<mediaElement> >::iterator it = fgMedia.begin(); it != fgMedia.end(); ++it) {
-            (**it).draw(x, y, scale);
-        }
+    // foreground videos
+    for (vector<ofPtr<mediaElement> >::iterator it = fgMedia.begin(); it != fgMedia.end(); ++it) {
+        (**it).draw(x, y, scale);
+    }
 
-        // extra things to draw? 
-        if (scene==1) {
-            if (segment==2 || segment==3) {
+    // extra things to draw? // will become video later on!
+    if (scene==1) {
+        if (segment==2 || segment==3) {
 
-                for(std::map<int, Blob>::iterator it = blobs.begin(); it != blobs.end(); ++it){
-                    Blob* b = &it->second;
+            for(std::map<int, Blob>::iterator it = blobs.begin(); it != blobs.end(); ++it){
+                Blob* b = &it->second;
 
-                    if (b->movingMean) {
-                        for(std::map<int, Neighbor>::iterator iter = b->neighbors.begin(); iter != b->neighbors.end(); ++iter){
-                            Neighbor* nb = &iter->second;
-                            if (nb->steadyDistance && blobs[nb->id].movingMean) {
-                                // draw a line between blob and steady neighbor
-                                ofNoFill(); ofSetColor(255);
-                                float p1x = x + (offsetX + b->position.x * mapSiteW) * scale;
-                                float p1y = y + (offsetY + b->position.y * mapSiteH) * scale;
-                                float p2x = x + (offsetX + blobs[nb->id].position.x * mapSiteW) * scale;
-                                float p2y = y + (offsetY + blobs[nb->id].position.y * mapSiteH) * scale;
-                                ofLine( p1x, p1y, p2x, p2y );
-                                // ofLine(x + b->position.x*scale, y + b->position.y*scale, x + blobs[nb->id].position.x*scale, y + blobs[nb->id].position.y*scale);
-                            }
+                if (b->movingMean) {
+                    for(std::map<int, Neighbor>::iterator iter = b->neighbors.begin(); iter != b->neighbors.end(); ++iter){
+                        Neighbor* nb = &iter->second;
+                        if (nb->steadyDistance && blobs[nb->id].movingMean) {
+                            // draw a line between blob and steady neighbor
+                            ofNoFill(); ofSetColor(255);
+                            float p1x = x + (offsetX + b->position.x * mapSiteW) * scale;
+                            float p1y = y + (offsetY + b->position.y * mapSiteH) * scale;
+                            float p2x = x + (offsetX + blobs[nb->id].position.x * mapSiteW) * scale;
+                            float p2y = y + (offsetY + blobs[nb->id].position.y * mapSiteH) * scale;
+                            ofLine( p1x, p1y, p2x, p2y );
+                            // ofLine(x + b->position.x*scale, y + b->position.y*scale, x + blobs[nb->id].position.x*scale, y + blobs[nb->id].position.y*scale);
                         }
                     }
                 }
-
             }
+
         }
     }
     
     ofDisableBlendMode();
     // ofDisableAlphaBlending();
+
+    string instruction = scenes[scene].instructions[segment];
+    ofFill(); ofSetColor(255);
+    font.drawString(instruction, x+20, y+projectionH*scale*0.8);
 
     if (flash) {
         ofEnableAlphaBlending();
@@ -1073,6 +1134,12 @@ void planeApp::keyReleased(int key){
         string fileName = "plane_"+ofGetTimestampString()+".png";
         img.saveImage(fileName);
         cout << "saved screenshot " << fileName.c_str() << endl;
+    }
+
+    if (key>='0' && key<='5') {
+        int s = int(key) - int('0');
+        cout << "key input = " << key << " scene = " << s << endl;
+        jumpToScene(s);
     }
 }
 

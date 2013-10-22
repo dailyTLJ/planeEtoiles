@@ -61,11 +61,14 @@ class planeApp : public ofBaseApp{
 		void blobOnLost(int & blobID);
 		void bgMediaFadedOut(int & transitionType);
 		void bgMediaFadedIn(int & transitionType);
+		void fgMediaFadedOut(int & transitionType);
 
 		void blobCountChange();
 		void endSegment(int direction = 1);
 		void beginSegment();
 		void nextSegment(int direction = 1);
+		void jumpToScene(int s);
+		void initSegment();
 
 		int projectionW;
         int projectionH;
