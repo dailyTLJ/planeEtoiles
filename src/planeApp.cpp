@@ -695,7 +695,6 @@ void planeApp::initSegment(){
             }
             fgMedia.push_back(ofPtr<mediaElement>( new videoElement(videoFile)));
             // fgMedia.push_back(ofPtr<mediaElement>( new videoElement("video/3_revolution/REV_06-animation.mov")));
-            (*fgMedia[fgMedia.size()-1]).hide = true;
             (*fgMedia[fgMedia.size()-1]).endTransformation = &mediaElement::scaleAway;
             if (sceneChange) (*fgMedia[i]).reset(false);
             else (*fgMedia[i]).reset();
@@ -706,6 +705,9 @@ void planeApp::initSegment(){
         // SUN
         fgMedia.push_back(ofPtr<mediaElement>( new videoElement("video/4_sun/SUN_8-ASSET-animation.mov")));
         (*fgMedia[fgMedia.size()-1]).setDisplay(projectionW/2,projectionH/2, true);
+        (*fgMedia[fgMedia.size()-1]).endTransformation = &mediaElement::scaleAway;
+        if (sceneChange) (*fgMedia[fgMedia.size()-1]).reset(false);
+        else (*fgMedia[fgMedia.size()-1]).reset();
 
     } else if (scene==4) {
         // ECLIPSE
