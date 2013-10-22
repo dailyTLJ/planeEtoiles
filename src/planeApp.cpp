@@ -187,10 +187,14 @@ void planeApp::initScenes(){
     // bgVideos[n].push_back(videoElement("video/4_sun/SUN_8-ASSET-animation.mov"));
     // bgVideos[n][bgVideos[n].size()-1].setDisplay(projectionW/2,projectionH/2, true);
 
-    bgVideos[n].push_back(ofPtr<mediaElement>( new videoElement("video/4_sun/SUN_8-ASSET-animation.mov")));
-    (*bgVideos[n][bgVideos[n].size()-1]).setDisplay(projectionW/2,projectionH/2, true);
+    bgVideos[n].push_back(ofPtr<mediaElement>( new videoElement("video/2_stars/BACKGROUND 1 loop-QTAnimation.mov")));
     ofAddListener( (*bgVideos[n][bgVideos[n].size()-1]).fadeOutEnd, this, &planeApp::bgMediaFadedOut );
     ofAddListener( (*bgVideos[n][0]).fadeInEnd, this, &planeApp::bgMediaFadedIn );
+
+    // bgVideos[n].push_back(ofPtr<mediaElement>( new videoElement("video/4_sun/SUN_8-ASSET-animation.mov")));
+    // (*bgVideos[n][bgVideos[n].size()-1]).setDisplay(projectionW/2,projectionH/2, true);
+    // ofAddListener( (*bgVideos[n][bgVideos[n].size()-1]).fadeOutEnd, this, &planeApp::bgMediaFadedOut );
+    // ofAddListener( (*bgVideos[n][0]).fadeInEnd, this, &planeApp::bgMediaFadedIn );
 
     n++;
 
@@ -698,6 +702,10 @@ void planeApp::initSegment(){
         }
 
         blobCountChange();  // to position and turn on/off videos
+    } else if (scene==3) {
+        // SUN
+        fgMedia.push_back(ofPtr<mediaElement>( new videoElement("video/4_sun/SUN_8-ASSET-animation.mov")));
+        (*fgMedia[fgMedia.size()-1]).setDisplay(projectionW/2,projectionH/2, true);
 
     } else if (scene==4) {
         // ECLIPSE
