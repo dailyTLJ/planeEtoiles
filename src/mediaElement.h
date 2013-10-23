@@ -18,7 +18,7 @@ class mediaElement
         virtual void moveAcross(float vx, float vy, int maxw, bool destr);
         virtual void autoDestroy(bool v);
         virtual void loadMovie(string filename);
-        virtual void reset(bool visible = true);
+        virtual void reset(bool vis = true);
         
         void setDisplay(int x, int y);
         void setDisplay(int x, int y, float _scale);
@@ -37,6 +37,7 @@ class mediaElement
         virtual void finishFast();
         virtual void scaleAway();
         void moveInFromTop();
+        void moveInFromSide(int centerx, int centery);
 
         void bounce();
 
@@ -53,9 +54,11 @@ class mediaElement
         ofColor clr;    
         bool fading;
         bool scaling;
+        bool visible;
         float opacityChange;
         float opacity;
         bool moveElement;
+        float moveSpeed;
         ofPoint velocity;
         ofPoint goal;
         bool goalDefined;

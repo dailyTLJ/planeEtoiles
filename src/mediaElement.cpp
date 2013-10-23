@@ -18,6 +18,8 @@ mediaElement::mediaElement() {
     this->goal.set(0,0);
     this->goalDefined = false;
     this->blend = true;
+    this->visible = false;
+    this->moveSpeed = 1.f;
     outroTransformation = &mediaElement::fadeOut; 
     introTransformation = &mediaElement::fadeIn;
 }
@@ -29,10 +31,17 @@ void mediaElement::update() {
         position.y += velocity.y;
         if (goalDefined) {
             float distance = ofDist(position.x, position.y, goal.x, goal.y);
-            if (distance < 2) {
+            if (distance < moveSpeed) {
+                cout << "mediaElement::update()  arrived at goal" << endl;
                 moveElement = false;
                 goalDefined = false;
+                visible = true;
                 position.set(goal.x, goal.y);
+            } else {
+                // velocity = goal - velocity;
+                float rot = atan2(goal.x-position.x,goal.y-position.y);
+                velocity.set(moveSpeed*sin(rot), moveSpeed*cos(rot));
+                // cout << "adjust velocity   rot: " << rot << " goal: " << goal.x << "/" << goal.y << "   vel: " << velocity.x << "/" << velocity.y << endl;
             }
         }
     }
@@ -46,10 +55,12 @@ void mediaElement::update() {
         if (opacityChange>0 && opacity >= 1.0f) {
             opacity = 1.f;
             fading = false;
+            visible = true;
             ofNotifyEvent(fadeInEnd,this->w,this);
         } else if (opacityChange<0 && opacity <= 0.f) {
             opacity = 0.f;
             fading = false;
+            visible = false;
             ofNotifyEvent(fadeOutEnd,this->w,this);
         }
     }
@@ -57,6 +68,7 @@ void mediaElement::update() {
         scale *= 0.95;
         if (scale < 0.05) {
             cout << "mediaElement scaled away, call notifyEvent" << endl;
+            visible = false;
             ofNotifyEvent(fadeOutEnd,this->w,this);
         }
     }
@@ -85,8 +97,9 @@ void mediaElement::drawElement(float _scale) {
 
 }
 
-void mediaElement::reset(bool visible) {
-    opacity = (visible) ? 1.f : 0.f;
+void mediaElement::reset(bool vis) {
+    opacity = (vis) ? 1.f : 0.f;
+    visible = (vis) ? true : false;
     opacityChange = 0.01f;
     fading = false;
 }
@@ -115,8 +128,21 @@ void mediaElement::moveInFromTop() {
     moveElement = true;
     goal.set(position.x,position.y);
     position.y -= 1200;
-    velocity.set(0,2);
+    // velocity.set(0,2);
     opacity = 1.0f;
+    moveSpeed = 2;
+}
+
+void mediaElement::moveInFromSide(int centerx, int centery) {
+    goalDefined = true;
+    moveElement = true;
+    goal.set(position.x,position.y);
+    float rot = atan2(centerx-position.x,centery-position.y);
+    position.set(centerx - centerx*sin(rot), centery - centery*cos(rot));
+    // velocity.set(-2*sin(rot), -2*cos(rot));
+    opacity = 1.0f;
+    moveSpeed = 7;
+    cout << "mediaElement::moveInFromSide   position: " << position.x << "/" << position.y << "  goal: " << goal.x << "/" << goal.y << "   vel: " << velocity.x << "/" << velocity.y << endl;
 }
 
 void mediaElement::fade(float speed) {
@@ -145,9 +171,6 @@ void mediaElement::fadeIn(float speed) {
     opacity = 0.0f;
     fade(speed);
 }
-
-
-
 
 void mediaElement::setDisplay(int x, int y) {
     this->setDisplay(x, y, 1.0f);

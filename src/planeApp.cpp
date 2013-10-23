@@ -15,7 +15,7 @@ void planeApp::setup(){
 	mouseButtonState = "";
 
     fullscreen = false;
-    autoplay = true;
+    autoplay = false;
     success = false;
 	drawBlobDetail = false;
     transition = false;
@@ -373,9 +373,7 @@ void planeApp::fgMediaFadedOut(int & trans) {
                     (*bgVideos[scene][0]).fadeOut();
                 }
             }
-
         }
-        
     } else {
         // fade BG now
         if (scene==0) {
@@ -384,7 +382,19 @@ void planeApp::fgMediaFadedOut(int & trans) {
             (*bgVideos[scene][0]).fadeOut();
         }
     }
-    
+}
+
+void planeApp::fgMediaFadedIn(int & trans) {
+    cout << "fgMediaFadedIn  " << trans << endl;
+    if (fgMedia.size() > 0) {
+        for (vector<ofPtr<mediaElement> >::iterator it = fgMedia.begin(); it != fgMedia.end(); it++) {
+            if (!(**it).visible) {
+                cout << "fgMediaFadedIn   " << (**it).file << endl;
+                ofAddListener( (**it).fadeInEnd, this, &planeApp::fgMediaFadedIn );
+                ((**it).*((**it).introTransformation))();
+            }
+        }
+    }
 }
 
 void planeApp::bgMediaFadedIn(int & trans) {
@@ -401,6 +411,8 @@ void planeApp::bgMediaFadedIn(int & trans) {
     for (vector<ofPtr<mediaElement> >::iterator it = fgMedia.begin(); it != fgMedia.end(); it++) {
         ((**it).*((**it).introTransformation))();
     }
+    // int tmp = -1;
+    // fgMediaFadedIn(tmp);
 }
 
 void planeApp::blobOnLost(int & blobID) {
@@ -532,11 +544,15 @@ void planeApp::blobOnCreate(int & blobID) {
             int randomPlanet = ofRandom(3) + 18;
             // fgMedia.push_back(ofPtr<mediaElement>( new imageElement("video/5_eclipse/PLANET_" + ofToString(randomPlanet)+".png", 0.5f)));
             fgMedia.push_back(ofPtr<mediaElement>( new videoElement("video/5_eclipse/PLANET_"+ofToString(randomPlanet)+".mov")));
-            (*fgMedia[fgMedia.size()-1]).setDisplay(0, 0, 500, 500, true);
+            float x = offsetX + blobs[blobID].position.x * mapSiteW;
+            float y = offsetY + blobs[blobID].position.y *mapSiteH;
+            cout << "init planet   pos: " << x << "/" << y << endl;
+            (*fgMedia[fgMedia.size()-1]).setDisplay(x, y, 500, 500, true);
+            // (*fgMedia[fgMedia.size()-1]).introTransformation = &mediaElement::moveInFromSide;
             blobs[blobID].mediaLink = fgMedia[fgMedia.size()-1];
             blobs[blobID].videoTrace = true;
             (*fgMedia[fgMedia.size()-1]).reset();
-            (*fgMedia[fgMedia.size()-1]).fadeIn();
+            (*fgMedia[fgMedia.size()-1]).moveInFromSide(projectionW/2,projectionH/2);
         }
 
         blobCountChange();
@@ -602,7 +618,13 @@ void planeApp::videoFollowBlob(int & blobID) {
         // update position
         if (vid != NULL) {
             // cout << "blob " << blobID << " \t\tfound vid" << endl;
-            (*vid).setDisplay( offsetX + blobs[blobID].position.x * mapSiteW, offsetY + blobs[blobID].position.y *mapSiteH, true);
+            float x = offsetX + blobs[blobID].position.x * mapSiteW;
+            float y = offsetY + blobs[blobID].position.y *mapSiteH;
+            if (!(*vid).moveElement) {
+                (*vid).setDisplay( x, y, true);
+            } else {
+                (*vid).goal.set( x, y );
+            }
         }
     }
 }
@@ -654,6 +676,7 @@ void planeApp::endSegment(int direction) {
 void planeApp::jumpToScene(int s) {
     scene = s;
     segment = 0;
+    sceneChange = true;
     transition = true;
     initSegment();
 }
@@ -734,7 +757,7 @@ void planeApp::initSegment(){
         (*fgMedia[fgMedia.size()-1]).outroTransformation = &mediaElement::scaleAway;
         if (sceneChange) (*fgMedia[fgMedia.size()-1]).reset(false);
         else (*fgMedia[fgMedia.size()-1]).reset();
-        (*fgMedia[fgMedia.size()-1]).blend = true;
+        (*fgMedia[fgMedia.size()-1]).blend = false;
         if (segment>0) (*fgMedia[fgMedia.size()-1]).clr = ofColor(0, 0, 0);
     }
 
@@ -773,9 +796,11 @@ void planeApp::receiveOsc(){
 			int lost = m.getArgAsInt32(6);
 
 			std::map<int,Blob>::iterator iter = blobs.find(blobid);
+            bool newBlob = false;
 			if( iter != blobs.end() ) {		// blob instance already exists
 
 			} else {					// create new blob instance
+                newBlob = true;
 				blobs[blobid].id = blobid;
                 blobs[blobid].perspectiveMat = &this->perspectiveMat;
                 // add Events, so blobs can report back to planeApp
@@ -786,15 +811,15 @@ void planeApp::receiveOsc(){
                 ofAddListener( blobs[blobid].prepareToDie, this, &planeApp::blobUnlink );
                 ofAddListener( blobs[blobid].onCreate, this, &planeApp::blobOnCreate );
                 ofAddListener( blobs[blobid].updatePosition, this, &planeApp::videoFollowBlob );
-                ofNotifyEvent( blobs[blobid].onCreate, blobid, &blobs[blobid] );
-			}
-			// update blob with new values
-			Blob* b = &blobs.find(blobid)->second;
+            }
+            // update blob with new values
+            Blob* b = &blobs.find(blobid)->second;
             b->follow(posx + blobW/2.0, posy + blobH/2.0, blobserverW, blobserverH, edgeMargin);
             b->setVelocity(velx, vely);
             b->analyze(freezeMinVel, freezeMinTime, freezeMaxTime, movingThr);    //
             b->age = age;
             b->lostDuration = lost;
+            if (newBlob) ofNotifyEvent( blobs[blobid].onCreate, blobid, &blobs[blobid] );
 //			cout << "blob " << blobid << "   " << posx << "|" << posy << "   - lifetime: " << b->lifetime << "\n";
 		}
 		else{
@@ -913,9 +938,11 @@ void planeApp::drawScreen(int x, int y, float scale){
     // ofDisableAlphaBlending();
 
     // foreground videos, without BLENDING mode
+    ofEnableAlphaBlending();
     for (vector<ofPtr<mediaElement> >::iterator it = fgMedia.begin(); it != fgMedia.end(); ++it) {
         if (!(**it).blend) (**it).draw(x, y, scale);
     }
+    ofDisableAlphaBlending();
 
     string instruction = scenes[scene].instructions[segment];
     ofFill(); ofSetColor(255);
