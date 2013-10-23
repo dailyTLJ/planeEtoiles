@@ -31,8 +31,38 @@ class planeApp : public ofBaseApp{
 		void draw();
 		void exit();
 
-		void initScenes();
 		void receiveOsc();
+
+		void initScenes();
+		void setPerspective();
+		void recalculatePerspective(int & v);
+
+		void drawRawData(int x, int y, float scale);
+		void drawTopDown(int x, int y, float scale, bool detailed = false);
+		void drawScreen(int x, int y, float scale);
+		void drawAnalysis(int x, int y, float scale);
+		void drawControlInfo(int x, int y);
+
+		// to be triggered via blob/media ofEvents
+		void blobOnCreate(int & blobID);
+		void blobOnLost(int & blobID);
+		void blobOnFreeze(int & blobID);
+		void blobUnFreeze(int & blobID);
+		void blobOverFreeze(int & blobID);
+		void blobUnlink(int & blobID);
+		void videoFollowBlob(int & blobID);
+
+		void blobCountChange();
+		void jumpToScene(int s);
+
+		void endSegment(int direction = 1);	// 1. trigger fgMediaFadedOut 
+		void fgMediaFadedOut(int & trans);  // 2. call outroTransformation calls on FG and BG media
+		void bgMediaFadedOut(int & trans);	// 3. all elements faded out, moveOn = true
+		void nextSegment(int direction = 1);// 4. pick the next segment
+		void initSegment();					// 5. initialize the new segment, create new fgvideos
+		void beginSegment();				// 6. after flash, fade in BG
+		void bgMediaFadedIn(int & trans);	// 7. reinit blobs, introtransformation of videos
+
 
 		void keyPressed(int key);
 		void keyReleased(int key);
@@ -44,31 +74,6 @@ class planeApp : public ofBaseApp{
 		void dragEvent(ofDragInfo dragInfo);
 		void gotMessage(ofMessage msg);
 
-		void drawRawData(int x, int y, float scale);
-		void drawTopDown(int x, int y, float scale, bool detailed = false);
-		void drawScreen(int x, int y, float scale);
-		void drawAnalysis(int x, int y, float scale);
-		void drawControlInfo(int x, int y);
-		void setPerspective();
-		void recalculatePerspective(int & v);
-
-		void blobOnFreeze(int & blobID);
-		void blobUnFreeze(int & blobID);
-		void blobOverFreeze(int & blobID);
-		void blobUnlink(int & blobID);
-		void blobOnCreate(int & blobID);
-		void videoFollowBlob(int & blobID);
-		void blobOnLost(int & blobID);
-		void bgMediaFadedOut(int & transitionType);
-		void bgMediaFadedIn(int & transitionType);
-		void fgMediaFadedOut(int & transitionType);
-
-		void blobCountChange();
-		void endSegment(int direction = 1);
-		void beginSegment();
-		void nextSegment(int direction = 1);
-		void jumpToScene(int s);
-		void initSegment();
 
 		int projectionW;
         int projectionH;

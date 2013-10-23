@@ -338,20 +338,20 @@ void planeApp::update(){
 
 }
 
-void planeApp::bgMediaFadedOut(int & transitionType) {
+void planeApp::bgMediaFadedOut(int & trans) {
     cout << "bgMediaFadedOut" << endl;
     // set moveOn to true, instead of calling nextSegment()
     // to avoid conflicting threading
     moveOn = true;
 }
 
-// transitionType -1 : trigger first fade from main-loop and not from faded-event
-void planeApp::fgMediaFadedOut(int & transitionType) {
-    cout << "fgMediaFadedOut  " << transitionType << "  fgmedia size = " << fgMedia.size() << endl;
+// trans -1 : trigger first fade from main-loop and not from faded-event
+void planeApp::fgMediaFadedOut(int & trans) {
+    cout << "fgMediaFadedOut  " << trans << "  fgmedia size = " << fgMedia.size() << endl;
     
     if (fgMedia.size()>0) {
         
-        if (transitionType == -1) {
+        if (trans == -1) {
             ofAddListener( (*fgMedia.back()).fadeOutEnd, this, &planeApp::fgMediaFadedOut );
             cout << "call outroTransformation() on fgMedia[" << (fgMedia.size()-1) << "]" << endl;
             ((*fgMedia.back()).*((*fgMedia.back()).outroTransformation))();
@@ -387,7 +387,7 @@ void planeApp::fgMediaFadedOut(int & transitionType) {
     
 }
 
-void planeApp::bgMediaFadedIn(int & transitionType) {
+void planeApp::bgMediaFadedIn(int & trans) {
     cout << "bgMediaFadedIn" << endl;
     transition = false;
 
@@ -639,15 +639,6 @@ void planeApp::endSegment(int direction) {
     // ONLY DO BG-VIDEO TRANSITIONS IF A SCENE CHANGE IS COMING UP!
     if (segment+segmentChange >= scenes[scene].segments || segment+segmentChange < 0) {
         sceneChange = true;
-        
-        // if (scene==0) {
-        //     (*bgVideos[scene][0]).outroTransformation();
-        // } else {
-        //     (*bgVideos[scene][0]).fadeOut();
-        // }
-        // for (vector<ofPtr<mediaElement> >::iterator it = fgMedia.begin(); it != fgMedia.end(); it++) {
-        //     (**it).fadeOut();
-        // }
 
         int tmp = -1;
         fgMediaFadedOut(tmp);   // TODO clean up, just need to hand back ref. of integer
@@ -737,13 +728,13 @@ void planeApp::initSegment(){
         else (*fgMedia[fgMedia.size()-1]).reset();
 
     } else if (scene==4) {
-        // ECLIPSE
+        // ECLIPSE. create white/black MAIN PLANET
         fgMedia.push_back(ofPtr<mediaElement>( new mediaElement()));
         (*fgMedia[fgMedia.size()-1]).setDisplay( projectionW/2, projectionH/2, 400, 400 );
         (*fgMedia[fgMedia.size()-1]).outroTransformation = &mediaElement::scaleAway;
         if (sceneChange) (*fgMedia[fgMedia.size()-1]).reset(false);
         else (*fgMedia[fgMedia.size()-1]).reset();
-        (*fgMedia[fgMedia.size()-1]).blend = false;
+        (*fgMedia[fgMedia.size()-1]).blend = true;
         if (segment>0) (*fgMedia[fgMedia.size()-1]).clr = ofColor(0, 0, 0);
     }
 
