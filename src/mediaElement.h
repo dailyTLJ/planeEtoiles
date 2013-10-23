@@ -59,6 +59,7 @@ class mediaElement
         ofPoint velocity;
         ofPoint goal;
         bool goalDefined;
+        bool blend;
 
         bool selfdestroy;
         bool dead;

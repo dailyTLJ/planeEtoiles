@@ -298,7 +298,7 @@ void planeApp::update(){
         moveOn = false;
     }
 
-    // SCENE SEGMENT RELATED ACTION
+    // TRANSITIONING BETWEEN SEGMENT RELATED ACTION
     if (scene==0) {
         // fade out idle-mode video, connect fade-End to transition to next Segment
         if(success && !transition) {
@@ -329,6 +329,11 @@ void planeApp::update(){
         } else {
             ++iter;
         }
+    }
+
+    // animation related
+    if (scene==3 && segment==5) {
+        if (ofRandom(100)<2) (*fgMedia[0]).bounce();
     }
 
 }
@@ -738,6 +743,8 @@ void planeApp::initSegment(){
         (*fgMedia[fgMedia.size()-1]).outroTransformation = &mediaElement::scaleAway;
         if (sceneChange) (*fgMedia[fgMedia.size()-1]).reset(false);
         else (*fgMedia[fgMedia.size()-1]).reset();
+        (*fgMedia[fgMedia.size()-1]).blend = false;
+        if (segment>0) (*fgMedia[fgMedia.size()-1]).clr = ofColor(0, 0, 0);
     }
 
 }
@@ -871,17 +878,17 @@ void planeApp::drawScreen(int x, int y, float scale){
         ofRect(x,y,projectionW*scale,projectionH*scale);
     }
 
-    // ofEnableAlphaBlending();
-    ofEnableBlendMode(OF_BLENDMODE_ADD);
-
     // background videos`
     for (vector<ofPtr<mediaElement> >::iterator it = bgVideos[scene].begin() ; it != bgVideos[scene].end(); ++it) {
         (**it).draw(x, y, scale);
     }
 
+    // ofEnableAlphaBlending();
+    ofEnableBlendMode(OF_BLENDMODE_ADD);
+
     // foreground videos
     for (vector<ofPtr<mediaElement> >::iterator it = fgMedia.begin(); it != fgMedia.end(); ++it) {
-        (**it).draw(x, y, scale);
+        (**it).draw(x, y, scale);   // if ((**it).blend) 
     }
 
     // extra things to draw? // will become video later on!
@@ -913,6 +920,11 @@ void planeApp::drawScreen(int x, int y, float scale){
     
     ofDisableBlendMode();
     // ofDisableAlphaBlending();
+
+    // foreground videos, without BLENDING mode
+    for (vector<ofPtr<mediaElement> >::iterator it = fgMedia.begin(); it != fgMedia.end(); ++it) {
+        if (!(**it).blend) (**it).draw(x, y, scale);
+    }
 
     string instruction = scenes[scene].instructions[segment];
     ofFill(); ofSetColor(255);
@@ -1053,7 +1065,8 @@ void planeApp::drawControlInfo(int x, int y){
                        "\nLENGTH\t\t" + ofToString(scenes[scene].length[segment]) +
                        "\nSUCCESS\t\t" + ofToString(success ? "true" : "false") +
                        "\n\n" + instruction +
-                       "\n\nGLOBAL TIME\t" + ofToString(masterClock) +
+                       "\n\nTRANSITION\t" + ofToString(transition ? "true" : "false") +
+                       "\nGLOBAL TIME\t" + ofToString(masterClock) +
                        "\nSEGMENT TIME\t" + ofToString(segmentClock), x+3, y+10 );
 }
 

@@ -17,6 +17,7 @@ mediaElement::mediaElement() {
     this->velocity.set(0,0);
     this->goal.set(0,0);
     this->goalDefined = false;
+    this->blend = true;
     outroTransformation = &mediaElement::fadeOut; 
     introTransformation = &mediaElement::fadeIn;
 }
@@ -73,7 +74,7 @@ void mediaElement::draw(int x, int y, float _scale) {
     // cout << " draw at " << x << " px " << position.x << "  scale " << scale << "  width " << this->w << endl;
     if (!hide) {
         ofPushMatrix();
-        ofTranslate(x + position.x * _scale + w*_scale*0.5, y + position.y * _scale + h*_scale*0.5);
+        ofTranslate(x + position.x * _scale, y + position.y * _scale );
         ofFill(); ofSetColor(clr.r, clr.g, clr.b, int(255*opacity));
         ofCircle(0, 0, this->w * (scale+addSc) * _scale * 0.5);
         ofPopMatrix();
@@ -169,6 +170,7 @@ void mediaElement::setDisplay(int x, int y, int w, int h) {
     this->w = w;
     this->h = h;
     this->scale = 1.0;
+    centered = false;
 }
 
 void mediaElement::setDisplay(int x, int y, int w, int h, bool _centered) {
