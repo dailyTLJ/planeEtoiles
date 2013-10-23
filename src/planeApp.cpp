@@ -116,7 +116,7 @@ void planeApp::initScenes(){
     idle.name = "Idle";
     idle.no = n;
     idle.segments = 1;
-    idle.instructions[0] = "Come closer!";
+    idle.instructions[0] = "Come closer";
     idle.length[0] = -1;
     scenes[n] = idle;
  
@@ -124,7 +124,7 @@ void planeApp::initScenes(){
     bgVideos[n].push_back(ofPtr<mediaElement>( new videoElement("video/1_idle/IDLE_MODE_5-animation.mov")));
     ofAddListener( (*bgVideos[n][0]).fadeOutEnd, this, &planeApp::bgMediaFadedOut );
     ofAddListener( (*bgVideos[n][0]).fadeInEnd, this, &planeApp::bgMediaFadedIn );
-    (*bgVideos[n][0]).endTransformation = &mediaElement::finishFast; 
+    (*bgVideos[n][0]).outroTransformation = &mediaElement::finishFast; 
 
     n++;
 
@@ -132,14 +132,14 @@ void planeApp::initScenes(){
     stars.name = "Star Links";
     stars.no = n;
     stars.segments = 4;
-    stars.instructions[0] = "Stand still.";
+    stars.instructions[0] = "Stand still";
     stars.length[0] = 20;
     stars.instructions[1] = "Try new spots \nto light up \nmore stars.";
-    stars.length[1] = 20;
+    stars.length[1] = 40;
     stars.instructions[2] = "Walk with \nsomeone. \nKeep the \nsame distance \nbetween you.";
-    stars.length[2] = 30;
+    stars.length[2] = 45;
     stars.instructions[3] = "Walk with \nsomeone. \nMake eye \ncontact. \nKeep the \ndistance.";
-    stars.length[3] = 30;
+    stars.length[3] = 60;
     scenes[n] = stars;
 
     // bgVideos[n].push_back(videoElement("video/2_stars/BACKGROUND 1 loop-QTAnimation.mov"));
@@ -155,7 +155,7 @@ void planeApp::initScenes(){
     revolution.segments = 2;
     revolution.instructions[0] = "Take someone's \nhand. \nSpin and lean \nout as far as \npossible.";
     revolution.length[0] = 20;
-    revolution.instructions[1] = "Let go.";
+    revolution.instructions[1] = "Let go...";
     revolution.length[1] = 20;
     scenes[n] = revolution;
 
@@ -171,7 +171,7 @@ void planeApp::initScenes(){
     sun.no = n;
     sun.segments = 6;
     sun.instructions[0] = "Stand on one leg.";
-    sun.length[0] = 20;
+    sun.length[0] = 25;
     sun.instructions[1] = "Hope from one \nspot to the other.";
     sun.length[1] = 20;
     sun.instructions[2] = "Hope from one \nspot to the other.\nEveryone in unison.";
@@ -179,9 +179,9 @@ void planeApp::initScenes(){
     sun.instructions[3] = "FREEZE!";
     sun.length[3] = 20;
     sun.instructions[4] = "Run in every \ndirection at once.";
-    sun.length[4] = 20;
+    sun.length[4] = 40;
     sun.instructions[5] = "FREEZE!";
-    sun.length[5] = 20;
+    sun.length[5] = 13;
     scenes[n] = sun;
 
     // bgVideos[n].push_back(videoElement("video/4_sun/SUN_8-ASSET-animation.mov"));
@@ -203,13 +203,11 @@ void planeApp::initScenes(){
     eclipse.no = n;
     eclipse.segments = 4;
     eclipse.instructions[0] = "Now align \nyourself in \nfront of me.\nAnd follow me.";
-    eclipse.length[0] = 20;
-    eclipse.instructions[1] = "Step out \nof the line.";
+    eclipse.length[0] = 40;
+    eclipse.instructions[1] = "Step out \nof the line.\nStep into \nthe line.";
     eclipse.length[1] = 20;
-    eclipse.instructions[2] = "Step into \nthe line.";
-    eclipse.length[2] = 30;
-    eclipse.instructions[3] = "Disperse very \nslowly towards \nthe edges.";
-    eclipse.length[3] = 30;
+    eclipse.instructions[2] = "Disperse very \nslowly towards \nthe edges.";
+    eclipse.length[2] = 15;
     scenes[n] = eclipse;
 
     // bgVideos[n].push_back(videoElement("video/2_stars/BACKGROUND 1 loop-QTAnimation.mov"));
@@ -224,13 +222,15 @@ void planeApp::initScenes(){
     shooting.no = n;
     shooting.segments = 4;
     shooting.instructions[0] = "Move like a \nshooting star.";
-    shooting.length[0] = 20;
+    shooting.length[0] = 25;
     shooting.instructions[1] = "Drop to the \nground!";
-    shooting.length[1] = 20;
+    shooting.length[1] = 15;
     shooting.instructions[2] = "Exhale.\nLook at the sky.";
-    shooting.length[2] = 30;
-    shooting.instructions[3] = "Stand up.";
-    shooting.length[3] = 30;
+    shooting.length[2] = 15;
+    shooting.instructions[3] = "Stand up";
+    shooting.length[3] = 10;
+    shooting.instructions[4] = "Thank you";
+    shooting.length[4] = 5;
     scenes[n] = shooting;
 
     // bgVideos[n].push_back(videoElement("video/2_stars/BACKGROUND 1 loop-QTAnimation.mov"));
@@ -348,8 +348,8 @@ void planeApp::fgMediaFadedOut(int & transitionType) {
         
         if (transitionType == -1) {
             ofAddListener( (*fgMedia.back()).fadeOutEnd, this, &planeApp::fgMediaFadedOut );
-            cout << "call endTransformation() on fgMedia[" << (fgMedia.size()-1) << "]" << endl;
-            ((*fgMedia.back()).*((*fgMedia.back()).endTransformation))();
+            cout << "call outroTransformation() on fgMedia[" << (fgMedia.size()-1) << "]" << endl;
+            ((*fgMedia.back()).*((*fgMedia.back()).outroTransformation))();
 
         } else {
             // delete last fgMedia object
@@ -358,12 +358,12 @@ void planeApp::fgMediaFadedOut(int & transitionType) {
             if (fgMedia.size()>1) {
                 // fade new last fgMedia object
                 ofAddListener( (*fgMedia[fgMedia.size()-2]).fadeOutEnd, this, &planeApp::fgMediaFadedOut );
-                cout << "call endTransformation() on fgMedia[" << (fgMedia.size()-2) << "]" << endl;
-                ((*fgMedia[fgMedia.size()-2]).*((*fgMedia[fgMedia.size()-2]).endTransformation))();
+                cout << "call outroTransformation() on fgMedia[" << (fgMedia.size()-2) << "]" << endl;
+                ((*fgMedia[fgMedia.size()-2]).*((*fgMedia[fgMedia.size()-2]).outroTransformation))();
             } else {
                 // fade BG now
                 if (scene==0) {
-                    ((*bgVideos[scene][0]).*((*bgVideos[scene][0]).endTransformation))();
+                    ((*bgVideos[scene][0]).*((*bgVideos[scene][0]).outroTransformation))();
                 } else {
                     (*bgVideos[scene][0]).fadeOut();
                 }
@@ -374,7 +374,7 @@ void planeApp::fgMediaFadedOut(int & transitionType) {
     } else {
         // fade BG now
         if (scene==0) {
-            ((*bgVideos[scene][0]).*((*bgVideos[scene][0]).endTransformation))();
+            ((*bgVideos[scene][0]).*((*bgVideos[scene][0]).outroTransformation))();
         } else {
             (*bgVideos[scene][0]).fadeOut();
         }
@@ -394,7 +394,7 @@ void planeApp::bgMediaFadedIn(int & transitionType) {
     }
 
     for (vector<ofPtr<mediaElement> >::iterator it = fgMedia.begin(); it != fgMedia.end(); it++) {
-        (**it).fadeIn();
+        ((**it).*((**it).introTransformation))();
     }
 }
 
@@ -452,7 +452,7 @@ void planeApp::blobOnFreeze(int & blobID) {
                 blobs[blobID].mediaLink = fgMedia[fgMedia.size()-1];
                 (*fgMedia[fgMedia.size()-1]).setDisplay(ofRandom(projectionW-100), ofRandom(projectionH-100));
                 (*fgMedia[fgMedia.size()-1]).reset();
-                (*fgMedia[fgMedia.size()-1]).endTransformation = &mediaElement::scaleAway;
+                (*fgMedia[fgMedia.size()-1]).outroTransformation = &mediaElement::scaleAway;
             }
         } else if (scene==3) {
             if (segment==4 || segment==6 && !success) {
@@ -520,7 +520,7 @@ void planeApp::blobOnCreate(int & blobID) {
                 // (*fgMedia[fgMedia.size()-1]).setDisplay(ofRandom(projectionW-100), ofRandom(projectionH-100));
                 (*fgMedia[fgMedia.size()-1]).reset();
                 (*fgMedia[fgMedia.size()-1]).fadeIn();
-                (*fgMedia[fgMedia.size()-1]).endTransformation = &mediaElement::scaleAway;
+                (*fgMedia[fgMedia.size()-1]).outroTransformation = &mediaElement::scaleAway;
             }
         } else if (scene==4) {
             // PLANETS
@@ -636,7 +636,7 @@ void planeApp::endSegment(int direction) {
         sceneChange = true;
         
         // if (scene==0) {
-        //     (*bgVideos[scene][0]).endTransformation();
+        //     (*bgVideos[scene][0]).outroTransformation();
         // } else {
         //     (*bgVideos[scene][0]).fadeOut();
         // }
@@ -716,7 +716,7 @@ void planeApp::initSegment(){
             }
             fgMedia.push_back(ofPtr<mediaElement>( new videoElement(videoFile)));
             // fgMedia.push_back(ofPtr<mediaElement>( new videoElement("video/3_revolution/REV_06-animation.mov")));
-            (*fgMedia[fgMedia.size()-1]).endTransformation = &mediaElement::scaleAway;
+            (*fgMedia[fgMedia.size()-1]).outroTransformation = &mediaElement::scaleAway;
             if (sceneChange) (*fgMedia[i]).reset(false);
             else (*fgMedia[i]).reset();
         }
@@ -726,7 +726,8 @@ void planeApp::initSegment(){
         // SUN
         fgMedia.push_back(ofPtr<mediaElement>( new videoElement("video/4_sun/SUN_8-ASSET-animation.mov")));
         (*fgMedia[fgMedia.size()-1]).setDisplay(projectionW/2,projectionH/2, true);
-        (*fgMedia[fgMedia.size()-1]).endTransformation = &mediaElement::scaleAway;
+        if (sceneChange) (*fgMedia[fgMedia.size()-1]).introTransformation = &mediaElement::moveInFromTop; 
+        (*fgMedia[fgMedia.size()-1]).outroTransformation = &mediaElement::scaleAway;
         if (sceneChange) (*fgMedia[fgMedia.size()-1]).reset(false);
         else (*fgMedia[fgMedia.size()-1]).reset();
 
@@ -734,7 +735,7 @@ void planeApp::initSegment(){
         // ECLIPSE
         fgMedia.push_back(ofPtr<mediaElement>( new mediaElement()));
         (*fgMedia[fgMedia.size()-1]).setDisplay( projectionW/2, projectionH/2, 400, 400 );
-        (*fgMedia[fgMedia.size()-1]).endTransformation = &mediaElement::scaleAway;
+        (*fgMedia[fgMedia.size()-1]).outroTransformation = &mediaElement::scaleAway;
         if (sceneChange) (*fgMedia[fgMedia.size()-1]).reset(false);
         else (*fgMedia[fgMedia.size()-1]).reset();
     }
@@ -1049,7 +1050,7 @@ void planeApp::drawControlInfo(int x, int y){
     ofDrawBitmapString("SCENE ID\t" + ofToString(scene) +
                        "\nSCENE NAME\t" + scenes[scene].name +
                        "\nSEGMENT\t\t" + ofToString(segment) +
-                       "\nLENGTH\t\t" + ofToString(scenes[scene].length[scene]) +
+                       "\nLENGTH\t\t" + ofToString(scenes[scene].length[segment]) +
                        "\nSUCCESS\t\t" + ofToString(success ? "true" : "false") +
                        "\n\n" + instruction +
                        "\n\nGLOBAL TIME\t" + ofToString(masterClock) +

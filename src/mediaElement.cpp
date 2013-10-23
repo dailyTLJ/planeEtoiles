@@ -13,11 +13,28 @@ mediaElement::mediaElement() {
     this->fading = false;
     this->scaling = false;
     this->centered = false;
-    endTransformation = &mediaElement::fadeOut; 
+    this->moveElement = false;
+    this->velocity.set(0,0);
+    this->goal.set(0,0);
+    this->goalDefined = false;
+    outroTransformation = &mediaElement::fadeOut; 
+    introTransformation = &mediaElement::fadeIn;
 }
 
 
 void mediaElement::update() {
+    if (moveElement) {
+        position.x += velocity.x;
+        position.y += velocity.y;
+        if (goalDefined) {
+            float distance = ofDist(position.x, position.y, goal.x, goal.y);
+            if (distance < 2) {
+                moveElement = false;
+                goalDefined = false;
+                position.set(goal.x, goal.y);
+            }
+        }
+    }
     if (addSc>0) {
         addSc-=0.01;
         if (addSc<0) addSc = 0;
@@ -32,7 +49,6 @@ void mediaElement::update() {
         } else if (opacityChange<0 && opacity <= 0.f) {
             opacity = 0.f;
             fading = false;
-            cout << "mediaElement fadedout, call notifyEvent" << endl;
             ofNotifyEvent(fadeOutEnd,this->w,this);
         }
     }
@@ -92,6 +108,16 @@ void mediaElement::scaleAway() {
     scaling = true;
 }
 
+void mediaElement::moveInFromTop() {
+    cout << "mediaElement::moveInFromTop" << endl;
+    goalDefined = true;
+    moveElement = true;
+    goal.set(position.x,position.y);
+    position.y -= 1200;
+    velocity.set(0,2);
+    opacity = 1.0f;
+}
+
 void mediaElement::fade(float speed) {
     fading = true;
     opacityChange = speed;
@@ -102,6 +128,10 @@ void mediaElement::fadeOut() {
     if (hide) opacity = 0.01;       // set to low value, so there is at least one procession step
                                     // else endless feedback loop to event fgMediaFadedOut would be created
     fadeOut(0.01);
+}
+
+void mediaElement::fadeIn() {
+    fadeIn(0.01);
 }
 
 void mediaElement::fadeOut(float speed) {

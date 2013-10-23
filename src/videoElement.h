@@ -32,8 +32,7 @@ class videoElement: public mediaElement
         ofPtr<ofVideoPlayer> movie;
         float displaySpeed;
 
-        ofPoint velocity;
-        bool moveElement;
+        
 
 
     protected:

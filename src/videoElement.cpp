@@ -8,9 +8,9 @@ videoElement::videoElement(string filename, float speed) {
     movie = ofPtr<ofVideoPlayer>( new ofVideoPlayer() );
     this->displaySpeed = speed;
     this->endFade = false;
-    this->velocity.set(0,0);
+    
     this->rotation = 0;
-    this->moveElement = false;
+    
     this->loadMovie(filename);
 }
 
@@ -41,11 +41,7 @@ void videoElement::pause(bool v) {
 void videoElement::update() {
     mediaElement::update();
     movie->update();
-    if (this->moveElement) {
-        position.x += velocity.x;
-        position.y += velocity.y;
-    }
-
+    
     if (movie->getIsMovieDone()) {
         // cout << "movie " << file << " ended,  destroy: " << this->selfdestroy << endl;
         if (this->selfdestroy) {

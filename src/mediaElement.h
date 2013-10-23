@@ -19,7 +19,6 @@ class mediaElement
         virtual void autoDestroy(bool v);
         virtual void loadMovie(string filename);
         virtual void reset(bool visible = true);
-        // virtual void endTransformation();
         
         void setDisplay(int x, int y);
         void setDisplay(int x, int y, float _scale);
@@ -29,12 +28,15 @@ class mediaElement
 
         void fade(float speed);
         void fadeOut();
+        void fadeIn();
         void fadeOut(float speed);
-        void fadeIn(float speed = 0.01);
+        void fadeIn(float speed);
 
-        void (mediaElement::*endTransformation)();
+        void (mediaElement::*outroTransformation)();
+        void (mediaElement::*introTransformation)();
         virtual void finishFast();
         virtual void scaleAway();
+        void moveInFromTop();
 
         void bounce();
 
@@ -53,6 +55,10 @@ class mediaElement
         bool scaling;
         float opacityChange;
         float opacity;
+        bool moveElement;
+        ofPoint velocity;
+        ofPoint goal;
+        bool goalDefined;
 
         bool selfdestroy;
         bool dead;
