@@ -4,6 +4,7 @@ mediaElement::mediaElement() {
     this->hide = false;
     this->position.set(0,0);
     this->scale = 1.0;
+    this->addSc = 0.0;
     this->selfdestroy = false;
     this->dead = false;
     this->clr = ofColor(255, 255, 255);
@@ -17,6 +18,10 @@ mediaElement::mediaElement() {
 
 
 void mediaElement::update() {
+    if (addSc>0) {
+        addSc-=0.01;
+        if (addSc<0) addSc = 0;
+    }
     if (fading) {
         opacity += opacityChange;
         // cout << "update opacity > " << opacity << endl;
@@ -44,13 +49,17 @@ void mediaElement::draw() {
 
 }
 
+void mediaElement::bounce() {
+    addSc += 0.1;
+}
+
 void mediaElement::draw(int x, int y, float _scale) {
     // cout << " draw at " << x << " px " << position.x << "  scale " << scale << "  width " << this->w << endl;
     if (!hide) {
         ofPushMatrix();
         ofTranslate(x + position.x * _scale + w*_scale*0.5, y + position.y * _scale + h*_scale*0.5);
         ofFill(); ofSetColor(clr.r, clr.g, clr.b, int(255*opacity));
-        ofCircle(0, 0, this->w * scale * _scale * 0.5);
+        ofCircle(0, 0, this->w * (scale+addSc) * _scale * 0.5);
         ofPopMatrix();
     }
 }

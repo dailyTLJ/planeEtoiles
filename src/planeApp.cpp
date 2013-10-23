@@ -15,7 +15,7 @@ void planeApp::setup(){
 	mouseButtonState = "";
 
     fullscreen = false;
-    autoplay = false;
+    autoplay = true;
     success = false;
 	drawBlobDetail = false;
     transition = false;
@@ -305,6 +305,14 @@ void planeApp::update(){
             cout << "scene 0 success" << endl;
             endSegment(1);
         }
+    } else if (scene==3) {
+        if (segment==4 || segment==6 ) {
+            // FREEZE!
+            if(success && !transition) {
+                cout << "FREEZE success" << endl;
+                endSegment(1);
+            }
+        }
     }
 
     // VIDEO UPDATES
@@ -406,6 +414,7 @@ void planeApp::blobOnLost(int & blobID) {
                 (*fgMedia[fgMedia.size()-1]).setDisplay(projectionW/2 + ofRandom(-200,200), projectionH/2 + ofRandom(-200,200), true);
                 (*fgMedia[fgMedia.size()-1]).autoDestroy(true);
                 (*fgMedia[fgMedia.size()-1]).reset();
+                if (segment==2) (*fgMedia[0]).bounce(); // sun video = [0]
             }
         } else if (scene==5) {
             // SHOOTING STARS
@@ -444,6 +453,18 @@ void planeApp::blobOnFreeze(int & blobID) {
                 (*fgMedia[fgMedia.size()-1]).setDisplay(ofRandom(projectionW-100), ofRandom(projectionH-100));
                 (*fgMedia[fgMedia.size()-1]).reset();
                 (*fgMedia[fgMedia.size()-1]).endTransformation = &mediaElement::scaleAway;
+            }
+        } else if (scene==3) {
+            if (segment==4 || segment==6 && !success) {
+                // FREEZE!
+                // check if all blobs are frozen
+                // frozen
+                bool allFrozen = true;
+                for(std::map<int, Blob>::iterator it = blobs.begin(); it != blobs.end(); ++it){
+                    Blob* b = &it->second;
+                    if (!b->frozen) allFrozen = false;
+                }
+                if (allFrozen) success = true;
             }
         }
     }
@@ -1029,6 +1050,7 @@ void planeApp::drawControlInfo(int x, int y){
                        "\nSCENE NAME\t" + scenes[scene].name +
                        "\nSEGMENT\t\t" + ofToString(segment) +
                        "\nLENGTH\t\t" + ofToString(scenes[scene].length[scene]) +
+                       "\nSUCCESS\t\t" + ofToString(success ? "true" : "false") +
                        "\n\n" + instruction +
                        "\n\nGLOBAL TIME\t" + ofToString(masterClock) +
                        "\nSEGMENT TIME\t" + ofToString(segmentClock), x+3, y+10 );

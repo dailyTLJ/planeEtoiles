@@ -100,10 +100,11 @@ void videoElement::draw(int x, int y, float _scale) {
 
 void videoElement::drawElement(float _scale) {
     ofSetColor(255, 255, 255, int(255*opacity));
+    float msc = (scale+addSc) * _scale;
     if (centered) {
-        movie->draw(-w * scale * _scale * 0.5, -h * scale * _scale * 0.5, w * scale * _scale, h * scale * _scale);
+        movie->draw(-w * msc * 0.5, -h * msc * 0.5, w * msc, h * msc);
     } else {
-        movie->draw(0, 0, w * scale * _scale, h * scale * _scale);
+        movie->draw(0, 0, w * msc, h * msc);
     }
     ofSetColor(255, 255, 255, 255);
 }

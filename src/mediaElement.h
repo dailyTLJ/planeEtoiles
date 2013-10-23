@@ -36,6 +36,8 @@ class mediaElement
         virtual void finishFast();
         virtual void scaleAway();
 
+        void bounce();
+
 
         ofPoint position;
         int w;
@@ -44,6 +46,7 @@ class mediaElement
         int rotation;
         bool hide;
         float scale;
+        float addSc;
         string file; 
         ofColor clr;    
         bool fading;
