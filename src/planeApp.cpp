@@ -472,7 +472,7 @@ void planeApp::blobOnFreeze(int & blobID) {
                 (*fgMedia[fgMedia.size()-1]).outroTransformation = &mediaElement::scaleAway;
             }
         } else if (scene==3) {
-            if (segment==4 || segment==6 && !success) {
+            if ((segment==4 || segment==6) && !success) {
                 // FREEZE!
                 // check if all blobs are frozen
                 // frozen
@@ -754,11 +754,16 @@ void planeApp::initSegment(){
         // ECLIPSE. create white/black MAIN PLANET
         fgMedia.push_back(ofPtr<mediaElement>( new mediaElement()));
         (*fgMedia[fgMedia.size()-1]).setDisplay( projectionW/2, projectionH/2, 400, 400 );
-        (*fgMedia[fgMedia.size()-1]).outroTransformation = &mediaElement::scaleAway;
+        // (*fgMedia[fgMedia.size()-1]).outroTransformation = &mediaElement::scaleAway;
         if (sceneChange) (*fgMedia[fgMedia.size()-1]).reset(false);
         else (*fgMedia[fgMedia.size()-1]).reset();
         (*fgMedia[fgMedia.size()-1]).blend = false;
-        if (segment>0) (*fgMedia[fgMedia.size()-1]).clr = ofColor(0, 0, 0);
+        if (segment>0) {
+            (*fgMedia[fgMedia.size()-1]).clr = ofColor(0, 0, 0);
+            (*fgMedia[fgMedia.size()-1]).moveInFromSide(projectionW/2,projectionH/2);
+        } else {
+            
+        }
     }
 
 }
