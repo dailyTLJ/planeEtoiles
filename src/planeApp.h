@@ -83,10 +83,6 @@ class planeApp : public ofBaseApp{
         int blobW;
         int blobH;
 
-		ofTrueTypeFont font;
-		ofxPanel gui;
-		ofxOscReceiver receiver;
-
 		int mouseX, mouseY;
 		string mouseButtonState;
 
@@ -95,7 +91,7 @@ class planeApp : public ofBaseApp{
 		cv::Mat perspectiveMat;
 
 		bool fullscreen;		 
-        bool autoplay; 			 // advance to next segment by itself
+        ofxToggle autoplay; 			 // advance to next segment by itself
 		int scene;
 		int segment;
 		int segmentChange;
@@ -116,6 +112,18 @@ class planeApp : public ofBaseApp{
 
 		bool drawBlobDetail;
 
+		ofTrueTypeFont font;
+		ofxPanel gui;
+		ofParameterGroup paramBasic;
+		ofParameterGroup paramTiming;
+		ofParameterGroup paramSc1;
+		ofParameterGroup paramSc2;
+		ofParameterGroup paramSc3;
+		ofParameterGroup paramSc4;
+		ofParameterGroup paramSc5;
+        ofParameter<ofColor> flashColor;
+		ofxOscReceiver receiver;
+
 		ofParameter<float> freezeMinVel;
 		ofParameter<int> freezeMinTime;
 		ofParameter<int> freezeMaxTime;
@@ -123,7 +131,6 @@ class planeApp : public ofBaseApp{
 		ofParameter<float> keepDistanceThr;
 		ofParameter<float> movingThr;
 		ofParameter<int> edgeMargin;
-		ofParameter<int> hopLength;
 
 		ofParameter<int> siteW;
 		ofParameter<int> siteH;

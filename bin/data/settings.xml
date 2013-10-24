@@ -1,6 +1,19 @@
 <panel>
-	<Freeze_Minimum_Velocity>0.1</Freeze_Minimum_Velocity>
+	<Freeze_Minimum_Velocity>0.496</Freeze_Minimum_Velocity>
 	<Freeze_Minimum_Time>0</Freeze_Minimum_Time>
 	<Freeze_Maximum_Time>10</Freeze_Maximum_Time>
-<panel/>
-</panel>
+<panel/>
+
+<Site_Width>500</Site_Width>
+	<Site_Length>700</Site_Length>
+	<Map_Site_to_Viz_Width>2</Map_Site_to_Viz_Width>
+	<Map_Site_to_Viz_Height>2</Map_Site_to_Viz_Height>
+	<Offset_X>0</Offset_X>
+	<Offset_Y>0</Offset_Y>
+	<Distance_Std.Dev._Threshold>10</Distance_Std.Dev._Threshold>
+	<Movement_Threshold>0.1</Movement_Threshold>
+	<Edge_Margin>50</Edge_Margin>
+	<Hop_Length>5</Hop_Length>
+	<New_Star_Maximum>36</New_Star_Maximum>
+	<Bonus_every_X_Stars>5</Bonus_every_X_Stars>
+</panel>

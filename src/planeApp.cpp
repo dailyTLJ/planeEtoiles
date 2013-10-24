@@ -15,7 +15,7 @@ void planeApp::setup(){
 	mouseButtonState = "";
 
     fullscreen = false;
-    autoplay = false;
+    // autoplay = false;
     success = false;
     successCnt = 0;
 	drawBlobDetail = false;
@@ -37,26 +37,51 @@ void planeApp::setup(){
     siteW.addListener(this,&planeApp::recalculatePerspective);
 	siteH.addListener(this,&planeApp::recalculatePerspective);
 
-	gui.setup("panel", "settings.xml", 1164,250);
-	gui.setSize(250,50);
+
+	gui.setup("CHOREOGRAPHIES FOR\nHUMANS AND PLANETS", "settings.xml", 1084,250);
+	gui.setSize(200,50);
 	gui.setDefaultBackgroundColor( ofColor(0,0,50) );
-	gui.add(siteW.set( "Site Width", 500, 0, 1000));
-    gui.add(siteH.set( "Site Length", 700, 0, 1000));
-    gui.add(mapSiteW.set( "Map Site to Viz Width", 2, 0, 4));
-    gui.add(mapSiteH.set( "Map Site to Viz Height", 2, 0, 4));
-    gui.add(offsetX.set( "Offset X", 0, -500, 500));
-	gui.add(offsetY.set( "Offset Y", 0, -500, 500));
+    gui.add(autoplay.setup("autoplay", false)); 
 
-	gui.add(freezeMinVel.set( "Freeze Minimum Velocity",0.1, 0, 1.0 ));
-	gui.add(freezeMinTime.set( "Freeze Minimum Time",2, 0, 5 ));
-	gui.add(freezeMaxTime.set( "Freeze Maximum Time",10, 0, 30 ));
-	gui.add(keepDistanceThr.set( "Distance Std.Dev. Threshold", 10, 0, 20));
-	gui.add(movingThr.set( "Movement Threshold", 0.1, 0, 2));
-	gui.add(edgeMargin.set( "Edge Margin", 50, 0, 150));
-	gui.add(hopLength.set( "Hop Length", 5, 0, 35));
+    paramBasic.setName("Global"); 
+	paramBasic.add(siteW.set( "Site Width", 500, 0, 1000));
+    paramBasic.add(siteH.set( "Site Length", 700, 0, 1000));
+    paramBasic.add(mapSiteW.set( "Map Site to Viz Width", 2, 0, 4));
+    paramBasic.add(mapSiteH.set( "Map Site to Viz Height", 2, 0, 4));
+    paramBasic.add(offsetX.set( "Offset X", 0, -500, 500));
+	paramBasic.add(offsetY.set( "Offset Y", 0, -500, 500));
+    gui.add(flashColor.set("Transition Flash Color",ofColor(255,0,0),ofColor(0,0,0),ofColor(255,255,255)));
+    gui.add(paramBasic);
 
-    gui.add(newStarMax.set( "New Star Maximum", 30, 5, 80));
-    gui.add(newStarBonus.set( "Bonus every X Stars", 5, 1, 15));
+    paramTiming.setName("Timing");
+    gui.add(paramTiming);
+
+    paramSc1.setName("Sc.1 - Stars");
+	paramSc1.add(freezeMinVel.set( "Freeze Minimum Velocity",0.1, 0, 1.0 ));
+	paramSc1.add(freezeMinTime.set( "Freeze Minimum Time",2, 0, 5 ));
+	paramSc1.add(freezeMaxTime.set( "Freeze Maximum Time",10, 0, 30 ));
+	paramSc1.add(keepDistanceThr.set( "Distance Std.Dev. Threshold", 10, 0, 20));
+	paramSc1.add(movingThr.set( "Movement Threshold", 0.1, 0, 2));
+    paramSc1.add(newStarMax.set( "New Star Maximum", 30, 5, 80));
+    paramSc1.add(newStarBonus.set( "Bonus every X Stars", 5, 1, 15));
+    gui.add(paramSc1);
+
+
+    paramSc2.setName("Sc.2 - Revolutions");
+    gui.add(paramSc2);
+
+    paramSc3.setName("Sc.3 - Sun");
+    paramSc3.add(edgeMargin.set( "Edge Margin", 50, 0, 150));
+    gui.add(paramSc3);
+
+    paramSc4.setName("Sc.4 - Alignment");
+    gui.add(paramSc4);
+
+    paramSc5.setName("Sc.5 - Combustion");
+    gui.add(paramSc5);
+
+
+    gui.loadFromFile("settings.xml");
 
     // init
 	this->initScenes();
@@ -890,7 +915,7 @@ void planeApp::draw(){
         this->drawTopDown(offsx, offsy, 0.5, drawBlobDetail);
 
         offsy = 10;
-        offsx += 380;
+        offsx += 300;
         this->drawAnalysis(offsx, offsy, 0.35);
 
         offsy = 10;
@@ -1062,7 +1087,7 @@ void planeApp::drawAnalysis(int x, int y, float scale){
                 Blob* b = &it->second;
 
 
-                if(b->lostDuration > 0 && b->lostDuration < hopLength && !b->onEdge) ofSetColor(255);
+                if(b->lostDuration > 0 && !b->onEdge) ofSetColor(255);  // b->lostDuration < hopLength 
                 else ofSetColor(100);
 
                 ofCircle(bx, by, 40);
