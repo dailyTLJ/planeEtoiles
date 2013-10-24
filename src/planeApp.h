@@ -124,7 +124,7 @@ class planeApp : public ofBaseApp{
         ofParameter<ofColor> flashColor;
 		ofxOscReceiver receiver;
 
-		ofParameter<float> freezeMinVel;
+		ofParameter<float> freezeMaxVel;
 		ofParameter<int> freezeMinTime;
 		ofParameter<int> freezeMaxTime;
 

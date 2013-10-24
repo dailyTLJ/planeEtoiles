@@ -15,7 +15,6 @@ void planeApp::setup(){
 	mouseButtonState = "";
 
     fullscreen = false;
-    // autoplay = false;
     success = false;
     successCnt = 0;
 	drawBlobDetail = false;
@@ -38,53 +37,53 @@ void planeApp::setup(){
 	siteH.addListener(this,&planeApp::recalculatePerspective);
 
 
-	gui.setup("CHOREOGRAPHIES FOR\nHUMANS AND PLANETS", "settings.xml", 1084,250);
-	gui.setSize(200,50);
-	gui.setDefaultBackgroundColor( ofColor(0,0,50) );
+	gui.setup("HUMANS AND PLANETS", "planets01.xml", 1084,250);
+    gui.setDefaultBackgroundColor( ofColor(0,0,50) );
     gui.add(autoplay.setup("autoplay", false)); 
+    gui.add(flashColor.set("Transition Flash Color",ofColor(255,200,100),ofColor(0,0),ofColor(255,255)));
 
-    paramBasic.setName("Global"); 
-	paramBasic.add(siteW.set( "Site Width", 500, 0, 1000));
+    paramBasic.setName("Dimension"); 
+    paramBasic.add(siteW.set( "Site Width", 500, 0, 1000));
     paramBasic.add(siteH.set( "Site Length", 700, 0, 1000));
-    paramBasic.add(mapSiteW.set( "Map Site to Viz Width", 2, 0, 4));
-    paramBasic.add(mapSiteH.set( "Map Site to Viz Height", 2, 0, 4));
+    paramBasic.add(mapSiteW.set( "Map Width", 2, 0, 4));
+    paramBasic.add(mapSiteH.set( "Map Height", 2, 0, 4));
     paramBasic.add(offsetX.set( "Offset X", 0, -500, 500));
-	paramBasic.add(offsetY.set( "Offset Y", 0, -500, 500));
-    gui.add(flashColor.set("Transition Flash Color",ofColor(255,0,0),ofColor(0,0,0),ofColor(255,255,255)));
+    paramBasic.add(offsetY.set( "Offset Y", 0, -500, 500));
     gui.add(paramBasic);
 
-    paramTiming.setName("Timing");
-    gui.add(paramTiming);
+    // paramTiming.setName("Timing");
+    // gui.add(paramTiming);
 
-    paramSc1.setName("Sc.1 - Stars");
-	paramSc1.add(freezeMinVel.set( "Freeze Minimum Velocity",0.1, 0, 1.0 ));
-	paramSc1.add(freezeMinTime.set( "Freeze Minimum Time",2, 0, 5 ));
-	paramSc1.add(freezeMaxTime.set( "Freeze Maximum Time",10, 0, 30 ));
-	paramSc1.add(keepDistanceThr.set( "Distance Std.Dev. Threshold", 10, 0, 20));
-	paramSc1.add(movingThr.set( "Movement Threshold", 0.1, 0, 2));
-    paramSc1.add(newStarMax.set( "New Star Maximum", 30, 5, 80));
-    paramSc1.add(newStarBonus.set( "Bonus every X Stars", 5, 1, 15));
+    paramSc1.setName("Sc1 Stars");
+    paramSc1.add(freezeMaxVel.set( "Freeze MaxVel",0.1, 0, 1.0 ));
+    paramSc1.add(freezeMinTime.set( "Freeze MinTime",2, 0, 5 ));
+    paramSc1.add(freezeMaxTime.set( "Freeze MaxTime",10, 0, 30 ));
+    paramSc1.add(keepDistanceThr.set( "Dist StdDev", 10, 0, 20));
+    paramSc1.add(movingThr.set( "Movement Thr", 0.1, 0, 2));
+    paramSc1.add(newStarMax.set( "NewStar Max", 30, 1, 40));
+    paramSc1.add(newStarBonus.set( "Bonus every", 5, 1, 40));
     gui.add(paramSc1);
 
 
-    paramSc2.setName("Sc.2 - Revolutions");
-    gui.add(paramSc2);
+    // paramSc2.setName("Sc2 Revolutions");
+    // gui.add(paramSc2);
 
-    paramSc3.setName("Sc.3 - Sun");
+    paramSc3.setName("Sc3 Sun");
     paramSc3.add(edgeMargin.set( "Edge Margin", 50, 0, 150));
     gui.add(paramSc3);
 
-    paramSc4.setName("Sc.4 - Alignment");
-    gui.add(paramSc4);
+    // paramSc4.setName("Sc4 Alignment");
+    // gui.add(paramSc4);
 
-    paramSc5.setName("Sc.5 - Combustion");
-    gui.add(paramSc5);
+    // paramSc5.setName("Sc5 Combustion");
+    // gui.add(paramSc5);
 
 
-    gui.loadFromFile("settings.xml");
+	gui.setSize(200,500);
+    // gui.loadFromFile("settings.xml");
 
     // init
-	this->initScenes();
+    this->initScenes();
 
     // compute the perspectiveTransformation
     // to map from blob-coordinates to the top-down view
@@ -865,7 +864,7 @@ void planeApp::receiveOsc(){
             Blob* b = &blobs.find(blobid)->second;
             b->follow(posx + blobW/2.0, posy + blobH/2.0, blobserverW, blobserverH, edgeMargin);
             b->setVelocity(velx, vely);
-            b->analyze(freezeMinVel, freezeMinTime, freezeMaxTime, movingThr);    //
+            b->analyze(freezeMaxVel, freezeMinTime, freezeMaxTime, movingThr);    //
             b->age = age;
             b->lostDuration = lost;
             if (newBlob) ofNotifyEvent( blobs[blobid].onCreate, blobid, &blobs[blobid] );
@@ -1000,7 +999,7 @@ void planeApp::drawScreen(int x, int y, float scale){
     if (flash) {
         ofEnableAlphaBlending();
         int alpha = (flashCnt < flashMax/2) ? 255*(flashCnt/(flashMax/2.f)) : 255*(flashMax - flashCnt)/(flashMax/2.f);
-        ofSetColor(255,0,0,alpha); ofFill();
+        ofSetColor(flashColor.get().r,flashColor.get().g,flashColor.get().b,alpha); ofFill();
         ofRect(x,y,projectionW*scale,projectionH*scale);
         ofDisableAlphaBlending();
     }
@@ -1132,9 +1131,9 @@ void planeApp::drawControlInfo(int x, int y){
                        "\nLENGTH\t\t" + ofToString(scenes[scene].length[segment]) +
                        "\nSUCCESS\t\t" + ofToString(success ? "true" : "false") +
                        "\nSUCCESS CNT\t" + ofToString(successCnt) +
-                       "\n\n" + instruction +
-                       "\n\nAUTOPLAY\t" + ofToString(autoplay ? "true" : "false") +
-                       "\nTRANSITION\t" + ofToString(transition ? "true" : "false") +
+                       // "\n\n" + instruction +
+                       // "\n\nAUTOPLAY\t" + ofToString(autoplay ? "true" : "false") +
+                       "\n\nTRANSITION\t" + ofToString(transition ? "true" : "false") +
                        "\nGLOBAL TIME\t" + ofToString(masterClock) +
                        "\nSEGMENT TIME\t" + ofToString(segmentClock), x+3, y+10 );
 }
@@ -1239,10 +1238,10 @@ void planeApp::keyReleased(int key){
         autoplay = !autoplay;
     }
     if(key == 's') {
-		gui.saveToFile("settings.xml");
+		gui.saveToFile("planets01.xml");
 	}
 	if(key == 'l') {
-		gui.loadFromFile("settings.xml");
+		gui.loadFromFile("planets01.xml");
 	}
     if (key=='f') {
         fullscreen = !fullscreen;

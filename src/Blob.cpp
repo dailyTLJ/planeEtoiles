@@ -70,8 +70,8 @@ void Blob::setVelocity(float dx, float dy){
 
 
 //--------------------------------------------------------------
-void Blob::analyze(float freezeMinVel, float freezeMinTime, float freezeMaxTime, float movingThr) {
-    if(this->vel < freezeMinVel) {
+void Blob::analyze(float freezeMaxVel, float freezeMinTime, float freezeMaxTime, float movingThr) {
+    if(this->vel < freezeMaxVel) {
         if(!frozen) {
             frozen = true;
             frozenStart = ofGetUnixTime();
