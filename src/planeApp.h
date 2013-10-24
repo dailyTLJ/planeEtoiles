@@ -107,6 +107,7 @@ class planeApp : public ofBaseApp{
 		bool moveOn;
 		bool transition;
 		bool success;			// if people followed the instructions
+		int successCnt;
 		bool flash;				// in between transitions, catch attention
 		int flashCnt;
 		int flashMax;
@@ -130,6 +131,9 @@ class planeApp : public ofBaseApp{
 		ofParameter<float> mapSiteH;
 		ofParameter<int> offsetX;
 		ofParameter<int> offsetY;
+
+		ofParameter<int> newStarMax;
+		ofParameter<int> newStarBonus;
 
 		std::vector< ofPtr<mediaElement> > fgMedia;
 //		std::map<int, std::vector<videoElement> > fgVideos;

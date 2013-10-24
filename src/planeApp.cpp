@@ -17,6 +17,7 @@ void planeApp::setup(){
     fullscreen = false;
     autoplay = false;
     success = false;
+    successCnt = 0;
 	drawBlobDetail = false;
     transition = false;
     moveOn = false;
@@ -53,6 +54,9 @@ void planeApp::setup(){
 	gui.add(movingThr.set( "Movement Threshold", 0.1, 0, 2));
 	gui.add(edgeMargin.set( "Edge Margin", 50, 0, 150));
 	gui.add(hopLength.set( "Hop Length", 5, 0, 35));
+
+    gui.add(newStarMax.set( "New Star Maximum", 30, 5, 80));
+    gui.add(newStarBonus.set( "Bonus every X Stars", 5, 1, 15));
 
     // init
 	this->initScenes();
@@ -305,6 +309,11 @@ void planeApp::update(){
             cout << "scene 0 success" << endl;
             endSegment(1);
         }
+    } else if (scene==1) {
+        if (segment==1 && successCnt > newStarMax) {
+            cout << "scene 1 segment 1 success" << endl;
+            endSegment(1);
+        }
     } else if (scene==3) {
         if (segment==4 || segment==6 ) {
             // FREEZE!
@@ -461,7 +470,6 @@ void planeApp::blobOnFreeze(int & blobID) {
     if (!transition) {
         if (scene==1) {
             if (segment==0 || segment==1) {
-
                 // STAND STILL
                 // create new video element
     //            cout << "blob " << blobID << " \t\tfreeze ! " << endl;
@@ -470,6 +478,16 @@ void planeApp::blobOnFreeze(int & blobID) {
                 (*fgMedia[fgMedia.size()-1]).setDisplay(ofRandom(projectionW-100), ofRandom(projectionH-100));
                 (*fgMedia[fgMedia.size()-1]).reset();
                 (*fgMedia[fgMedia.size()-1]).outroTransformation = &mediaElement::scaleAway;
+                if (segment==1) {
+                    successCnt++;
+                    if (successCnt%newStarBonus == 0) {
+                        string bonusVideo = "video/2_stars/HAND animation-QTAnimation.mov";
+                        fgMedia.push_back(ofPtr<mediaElement>( new videoElement(bonusVideo) ));
+                        (*fgMedia[fgMedia.size()-1]).setDisplay(ofRandom(projectionW-600), ofRandom(projectionH-800));
+                        (*fgMedia[fgMedia.size()-1]).reset(true);
+                        (*fgMedia[fgMedia.size()-1]).autoDestroy(true);
+                    }
+                }
             }
         } else if (scene==3) {
             if ((segment==4 || segment==6) && !success) {
@@ -710,6 +728,7 @@ void planeApp::initSegment(){
 
     fgMedia.clear();   // delete all foreground videos
     success = false;
+    successCnt = 0;
     flash = true;       // 
     segmentStart = ofGetUnixTime();
 
@@ -1087,8 +1106,10 @@ void planeApp::drawControlInfo(int x, int y){
                        "\nSEGMENT\t\t" + ofToString(segment) +
                        "\nLENGTH\t\t" + ofToString(scenes[scene].length[segment]) +
                        "\nSUCCESS\t\t" + ofToString(success ? "true" : "false") +
+                       "\nSUCCESS CNT\t" + ofToString(successCnt) +
                        "\n\n" + instruction +
-                       "\n\nTRANSITION\t" + ofToString(transition ? "true" : "false") +
+                       "\n\nAUTOPLAY\t" + ofToString(autoplay ? "true" : "false") +
+                       "\nTRANSITION\t" + ofToString(transition ? "true" : "false") +
                        "\nGLOBAL TIME\t" + ofToString(masterClock) +
                        "\nSEGMENT TIME\t" + ofToString(segmentClock), x+3, y+10 );
 }
@@ -1189,7 +1210,9 @@ void planeApp::keyReleased(int key){
     } else if (key == OF_KEY_RIGHT){
         endSegment(1);
     }
-
+    if (key == ' ') {
+        autoplay = !autoplay;
+    }
     if(key == 's') {
 		gui.saveToFile("settings.xml");
 	}
