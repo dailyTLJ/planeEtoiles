@@ -82,6 +82,7 @@ class planeApp : public ofBaseApp{
         int blobserverH;
         int blobW;
         int blobH;
+        float cameraExposure;
 
 		int mouseX, mouseY;
 		string mouseButtonState;

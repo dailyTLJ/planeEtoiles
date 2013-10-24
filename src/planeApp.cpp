@@ -37,7 +37,7 @@ void planeApp::setup(){
 	siteH.addListener(this,&planeApp::recalculatePerspective);
 
 
-	gui.setup("HUMANS AND PLANETS", "planets01.xml", 1084,250);
+	gui.setup("HUMANS AND PLANETS", "planets01.xml", 1084,150);
     gui.setDefaultBackgroundColor( ofColor(0,0,50) );
     gui.add(autoplay.setup("autoplay", false)); 
     gui.add(flashColor.set("Transition Flash Color",ofColor(255,200,100),ofColor(0,0),ofColor(255,255)));
@@ -831,7 +831,16 @@ void planeApp::receiveOsc(){
 
 		} else if(m.getAddress() == "/blobserver/stitch"){
 
-		} else if(m.getAddress() == "/blobserver/nop"){
+        } else if(m.getAddress() == "/blobserver/nop"){
+
+		} else if(m.getAddress() == "/blobserver/broadcast"){
+
+            string var = m.getArgAsString(0);
+            string source = m.getArgAsString(1);
+            string cam = m.getArgAsString(2);
+            float val = ofToFloat( m.getArgAsString(3) );
+            if (var.compare("exposureTime") == 0) cameraExposure = val;
+            cout << "BROADCAST" << var << ", " << source << ", " << cam << ", " << val << endl;
 
 		} else if(m.getAddress() == "/blobserver/hog"){
 			// parse incoming elements:  iiiffii: id x y vx vy age lost
@@ -1153,7 +1162,7 @@ void planeApp::drawRawData(int x, int y, float scale){
     // write information
     string rawInfo = "port: \t" + ofToString(PORT);
     rawInfo += "\nframerate: \t" + ofToString(28);
-    rawInfo += "\nexposure: \t" + ofToString(0.4333,2);
+    rawInfo += "\nexposure: \t" + ofToString(cameraExposure,5);
     ofDrawBitmapStringHighlight(rawInfo, x + 3, y + blobserverH*scale + 15);
 
     // draw frame for each blob. blobserver frame size = 64 x 128 px
