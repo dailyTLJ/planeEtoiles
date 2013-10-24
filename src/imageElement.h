@@ -16,6 +16,7 @@ class imageElement: public mediaElement
 
         void draw();
         void draw(int x, int y, float _scale);
+        void drawElement(float _scale);
 
         ofImage img;
 

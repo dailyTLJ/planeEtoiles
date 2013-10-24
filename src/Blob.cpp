@@ -200,7 +200,7 @@ ofPoint Blob::transformPerspective(ofPoint& v){
 }
 
 //--------------------------------------------------------------
-void Blob::update(){
+void Blob::update(int minLostTime){
 	if(this->updated == false) {
 		this->lifetime--;
 		return;
@@ -208,7 +208,7 @@ void Blob::update(){
     this->lifetime = this->maxLifetime;
 	this->updated = false;
 	// now do analysis
-    if(this->lostDuration > 0) {
+    if(this->lostDuration > minLostTime) {
         if (!lost) {
             lost = true;
             ofNotifyEvent(onLost,this->id,this);

@@ -17,17 +17,32 @@ void imageElement::loadImage(string filename, float _scale) {
 }
 
 void imageElement::update() {
-
+    mediaElement::update();
 }
 
 void imageElement::draw() {
-    if (scale!=1.0) img.draw(position.x * scale, position.y * scale, w * scale, h * scale);
-    else img.draw(position, w, h);
-
+    ofPushMatrix();
+    ofTranslate(position.x, position.y);
+    ofRotateZ(this->rotation);
+    drawElement(1.0f);
+    ofPopMatrix();
 }
 
 void imageElement::draw(int x, int y, float _scale) {
-//    cout << "draw \t x " << x << "   position.x " << position.x << "  scale " << scale << "   this->scale " << this->scale << endl;
-    if (scale!=1.0) img.draw(x + position.x * _scale, y + position.y * _scale, w * _scale * scale, h * _scale * scale);
-    else img.draw(x + position.x * _scale, y + position.y * _scale, w * _scale, h * _scale);
+    ofPushMatrix();
+    ofTranslate(x + position.x, y + position.y );
+    ofRotateZ(this->rotation);
+    drawElement(_scale);
+    ofPopMatrix();
+}
+
+void imageElement::drawElement(float _scale) {
+    ofSetColor(255, 255, 255, int(255*opacity));
+    float msc = (scale+addSc) * _scale;
+    if (centered) {
+        img.draw(-w * msc * 0.5, -h * msc * 0.5, w * msc, h * msc);
+    } else {
+        img.draw(0, 0, w * msc, h * msc);
+    }
+    ofSetColor(255, 255, 255, 255);
 }

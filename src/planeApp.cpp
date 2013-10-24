@@ -69,6 +69,7 @@ void planeApp::setup(){
     // gui.add(paramSc2);
 
     paramSc3.setName("Sc3 Sun");
+    paramSc3.add(minLostTime.set( "Min LostTime", 1, 0, 10));
     paramSc3.add(edgeMargin.set( "Edge Margin", 50, 0, 150));
     gui.add(paramSc3);
 
@@ -80,7 +81,7 @@ void planeApp::setup(){
 
 
 	gui.setSize(200,500);
-    // gui.loadFromFile("settings.xml");
+    gui.loadFromFile("planets01.xml");
 
     // init
     this->initScenes();
@@ -282,7 +283,7 @@ void planeApp::update(){
     std::map<int,Blob>::iterator it = blobs.begin();
     while (it != blobs.end()) {
         Blob* b = &it->second;
-    	b->update();
+    	b->update(minLostTime);
     	if( !b->isAlive() ) {
 //            cout << "erase blob " << b->id << endl;
             ofNotifyEvent(b->prepareToDie,b->id,b);
@@ -317,7 +318,7 @@ void planeApp::update(){
         }
     }
     // TIME TRIGGERS
-    if (autoplay && scenes[scene].length[segment] > 0 && segmentClock >= scenes[scene].length[segment]) {
+    if (autoplay && scenes[scene].length[segment] > 0 && segmentClock >= scenes[scene].length[segment] && !transition) {
         endSegment(1);
     }
     // triggered by the end of fading out the bg
@@ -334,7 +335,7 @@ void planeApp::update(){
             endSegment(1);
         }
     } else if (scene==1) {
-        if (segment==1 && successCnt > newStarMax) {
+        if (segment==1 && successCnt > newStarMax && !transition) {
             cout << "scene 1 segment 1 success" << endl;
             endSegment(1);
         }
@@ -583,9 +584,10 @@ void planeApp::blobOnCreate(int & blobID) {
             }
         } else if (scene==4) {
             // PLANETS
-            int randomPlanet = ofRandom(3) + 18;
-            // fgMedia.push_back(ofPtr<mediaElement>( new imageElement("video/5_eclipse/PLANET_" + ofToString(randomPlanet)+".png", 0.5f)));
-            fgMedia.push_back(ofPtr<mediaElement>( new videoElement("video/5_eclipse/PLANET_"+ofToString(randomPlanet)+".mov")));
+            int randomPlanet = ofRandom(23) + 1;
+            // int randomPlanet = ofRandom(3) + 18;
+            fgMedia.push_back(ofPtr<mediaElement>( new imageElement("video/5_eclipse/PLANET_" + ofToString(randomPlanet)+".png", 0.5f)));
+            // fgMedia.push_back(ofPtr<mediaElement>( new videoElement("video/5_eclipse/PLANET_"+ofToString(randomPlanet)+".mov")));
             float x = offsetX + blobs[blobID].position.x * mapSiteW;
             float y = offsetY + blobs[blobID].position.y *mapSiteH;
             cout << "init planet   pos: " << x << "/" << y << endl;
@@ -692,6 +694,9 @@ void planeApp::beginSegment() {
             (**it).fadeIn();
         }
         transition = true;
+    } else {
+        int tmp = 1;
+        bgMediaFadedIn(tmp);
     }
 
 }
@@ -743,7 +748,7 @@ void planeApp::nextSegment(int direction) {
 
 
     if (sceneChange) cout << "scene " << scene << ": " << scenes[scene].name << endl;
-    cout << "nextSegment() " << scene << ": segment " << segment << ": " << scenes[scene].instructions[segment] << endl;
+    cout << "nextSegment() " << scene << ": segment " << segment << endl;
 
     initSegment();
 }
@@ -1021,17 +1026,13 @@ void planeApp::drawAnalysis(int x, int y, float scale){
     ofNoFill(); ofSetColor(255);
     ofRect(x,y,projectionW*scale,projectionH*scale);
 
-    // display  instructions big
-    string instruction = scenes[scene].instructions[segment];
-    ofFill(); ofSetColor(255);
-    font.drawString(instruction, x+20, y+projectionH*scale*0.1);
 
     if (scene==1) {
         if( segment==0 || segment==1 ) {
 
             // STAND STILL
             // draw circle for each blob, and display frozen, frozentimer
-            int bx = x + 100; int by = y + 250;
+            int bx = x + 100; int by = y + 100;
             ofFill();
             for(std::map<int, Blob>::iterator it = blobs.begin(); it != blobs.end(); ++it){
                 Blob* b = &it->second;
@@ -1060,7 +1061,7 @@ void planeApp::drawAnalysis(int x, int y, float scale){
         } else if( segment==2 || segment==3 ) {
 
             // KEEP THE DISTANCE
-            int bx = x + 100; int by = y + 250;
+            int bx = x + 100; int by = y + 100;
             ofFill();
             for(std::map<int, Blob>::iterator it = blobs.begin(); it != blobs.end(); ++it){
                 Blob* b = &it->second;
@@ -1089,7 +1090,7 @@ void planeApp::drawAnalysis(int x, int y, float scale){
         if (segment==1 || segment==2) {
 
             // HOP
-            int bx = x + 100; int by = y + 250;
+            int bx = x + 100; int by = y + 100;
             ofFill();
             for(std::map<int, Blob>::iterator it = blobs.begin(); it != blobs.end(); ++it){
                 Blob* b = &it->second;

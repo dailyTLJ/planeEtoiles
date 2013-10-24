@@ -142,6 +142,7 @@ class planeApp : public ofBaseApp{
 
 		ofParameter<int> newStarMax;
 		ofParameter<int> newStarBonus;
+		ofParameter<int> minLostTime;
 
 		std::vector< ofPtr<mediaElement> > fgMedia;
 //		std::map<int, std::vector<videoElement> > fgVideos;

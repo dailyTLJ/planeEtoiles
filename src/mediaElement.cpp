@@ -130,7 +130,7 @@ void mediaElement::moveInFromTop() {
     position.y -= 1200;
     // velocity.set(0,2);
     opacity = 1.0f;
-    moveSpeed = 2;
+    moveSpeed = 3;
 }
 
 void mediaElement::moveInFromSide(int centerx, int centery) {
@@ -143,7 +143,7 @@ void mediaElement::moveInFromSide(int centerx, int centery) {
     // velocity.set(-2*sin(rot), -2*cos(rot));
     opacity = 1.0f;
     moveSpeed = 7;
-    cout << "mediaElement::moveInFromSide   position: " << position.x << "/" << position.y << "  goal: " << goal.x << "/" << goal.y << "   vel: " << velocity.x << "/" << velocity.y << endl;
+    cout << "mediaElement::moveInFromSide   rot: " << rot << "  position: " << position.x << "/" << position.y << "  goal: " << goal.x << "/" << goal.y << endl;
 }
 
 void mediaElement::fade(float speed) {

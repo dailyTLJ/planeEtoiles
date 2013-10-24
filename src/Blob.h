@@ -125,7 +125,7 @@ class Blob {
         void analyze(float freezeMinVel, float freezeMinTime, float freezeMaxTime, float movingThr);
         void analyzeNeighbors(std::map<int, ofPoint> neighborLocation, float keepDistanceThr);
         ofPoint transformPerspective(ofPoint& v);
-        void update();
+        void update(int minLostTime);
         bool isAlive();
 
         cv::Mat* perspectiveMat;
