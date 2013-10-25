@@ -20,6 +20,9 @@ mediaElement::mediaElement() {
     this->blend = true;
     this->visible = false;
     this->moveSpeed = 1.f;
+    this->bridgeVideo = false;
+    this->bridgeBlobID[0] = 0;
+    this->bridgeBlobID[1] = 0;
     outroTransformation = &mediaElement::fadeOut; 
     introTransformation = &mediaElement::fadeIn;
 }
@@ -80,6 +83,12 @@ void mediaElement::draw() {
 
 void mediaElement::bounce() {
     addSc += 0.1;
+}
+
+void mediaElement::bridge(int id1, int id2) {
+    bridgeVideo = true;
+    bridgeBlobID[0] = id1;
+    bridgeBlobID[1] = id2;
 }
 
 void mediaElement::draw(int x, int y, float _scale) {

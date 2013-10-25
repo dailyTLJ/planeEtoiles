@@ -67,6 +67,10 @@ class mediaElement
         bool selfdestroy;
         bool dead;
 
+        bool bridgeVideo;
+        int bridgeBlobID[2];
+        void bridge(int id1, int id2);
+
         ofEvent<int> fadeOutEnd;
         ofEvent<int> fadeInEnd;
 

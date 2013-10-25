@@ -499,66 +499,87 @@ void planeApp::blobOnLost(int & blobID) {
     }
 }
 
-void planeApp::blobSteady(int & blobID, int & neighborID) {
-    cout << "blobSteady() " << blobID << endl;
+void planeApp::blobSteady(Pair & pair) {
+    cout << "blobSteady() " << pair.blob1 << " + " << pair.blob2 << endl;
     // add particle trail video between stars
     if (!transition && scene==1 && segment>1) {
-        Blob* b = &blobs[blobID];
-        for(std::map<int, Neighbor>::iterator iter = b->neighbors.begin(); iter != b->neighbors.end(); ++iter){
-            Neighbor* nb = &iter->second;
-            if (nb->steadyDistance) {
-                // draw a line between blob and steady neighbor
-                // ofNoFill(); ofSetColor(255);
-                float p1x = b->position.x;
-                float p1y = b->position.y;
-                float p2x = blobs[nb->id].position.x;
-                float p2y = blobs[nb->id].position.y;
+        Blob* b1 = &blobs[pair.blob1];
+        Blob* b2 = &blobs[pair.blob2];
 
-                // cout << blobID << "  add bridge video" << endl;
-
-                // string newVideoName = "video/2_stars/ATTRACTION_link-01-animation.mov";
-                // fgMedia.push_back(ofPtr<mediaElement>( new videoElement(newVideoName)));
-                // (*fgMedia[fgMedia.size()-1]).setDisplay(p1x, p1y, false);
-                // (*fgMedia[fgMedia.size()-1]).reset();
-                // b->bridgeLink = fgMedia[fgMedia.size()-1];
-                // ofLine( p1x, p1y, p2x, p2y );
+        // check if bridge already exists
+        bool exists = false;
+        for (vector<ofPtr<mediaElement> >::iterator it = fgMedia.begin(); it != fgMedia.end(); it++) {
+            if ((**it).bridgeVideo && (**it).bridgeBlobID[0]==pair.blob1 && (**it).bridgeBlobID[1]==pair.blob2) {
+                exists = true;
+                break;
             }
         }
+
+        if (!exists) {
+            cout << "\t\tadd video bridge" << endl;
+            string newVideoName = "video/2_stars/ATTRACTION_link-01-animation.mov";
+            fgMedia.push_back(ofPtr<mediaElement>( new videoElement(newVideoName)));
+            (*fgMedia[fgMedia.size()-1]).setDisplay(b1->position.x, b1->position.y, false);
+            (*fgMedia[fgMedia.size()-1]).reset();
+            (*fgMedia[fgMedia.size()-1]).bridge(b1->id, b2->id);
+        }
+
     }
 }
 
-void planeApp::blobSteadyReward(int & blobID) {
-    // cout << "blobSteadyReward() " << blobID << endl;
+void planeApp::blobSteadyReward(Pair & pair) {
+    cout << "blobSteadyReward() " << pair.blob1 << " + " << pair.blob2 << endl;
     if (!transition && scene==1 && segment>1) {
-        ofPtr<mediaElement> vid = blobs[blobID].mediaLink; 
+        ofPtr<mediaElement> vid1 = blobs[pair.blob1].mediaLink;
+        ofPtr<mediaElement> vid2 = blobs[pair.blob2].mediaLink;
+
         // replace video with sparklier star
-        if (vid != NULL) {
-            // cout << "blob " << blobID << " \t\tfound vid" << endl;
-            (*vid).loadMovie("video/2_stars/ATTRACTION_star_glow-01-animation.mov");
-            (*vid).reset();
+        if (vid1 != NULL) {
+            cout << "blob " << pair.blob1 << " \t\tfound vid" << endl;
+            (*vid1).loadMovie("video/2_stars/ATTRACTION_star_glow-01-animation.mov");
+            (*vid1).reset();
+        }
+        if (vid2 != NULL) {
+            cout << "blob " << pair.blob2 << " \t\tfound vid" << endl;
+            (*vid2).loadMovie("video/2_stars/ATTRACTION_star_glow-01-animation.mov");
+            (*vid2).reset();
         }
     }
 }
 
-void planeApp::blobBreakSteady(int & blobID) {
-    cout << "blobBreakSteady() " << blobID << endl;
-    if (!transition) {
-        ofPtr<mediaElement> vid = blobs[blobID].mediaLink; 
-        // replace video with normal star, only if it was in steadyrewarded mode!
-        if (vid != NULL && blobs[blobID].steadyRewarded) {
-            // cout << "blob " << blobID << " \t\tfound vid" << endl;
-            (*vid).loadMovie("video/2_stars/INDIV STAR 2 loop-H264-10mbps.mp4");
-            (*vid).reset();
+void planeApp::blobBreakSteady(Pair & pair) {
+    cout << "blobBreakSteady() " << pair.blob1 << " + " << pair.blob2 << endl;
+    // if (!transition) {
+    //     ofPtr<mediaElement> vid = blobs[blobID].mediaLink; 
+    //     // replace video with normal star, only if it was in steadyrewarded mode!
+    //     if (vid != NULL && blobs[blobID].steadyRewarded) {
+    //         // cout << "blob " << blobID << " \t\tfound vid" << endl;
+    //         (*vid).loadMovie("video/2_stars/INDIV STAR 2 loop-H264-10mbps.mp4");
+    //         (*vid).reset();
+    //     }
+    //     // delete sparkle-bridge video
+    //     // for (vector<ofPtr<mediaElement> >::iterator it = fgMedia.begin(); it != fgMedia.end(); it++) {
+    //     //     if (*it == blobs[blobID].bridgeLink) {
+    //     //         blobs[blobID].bridgeLink = ofPtr<mediaElement>();
+    //     //         cout << "blob " << blobID << " break steady - unlinked bridge" << endl;
+    //     //         fgMedia.erase(it);
+    //     //         break;
+    //     //     }
+    //     // }
+    // }
+    if (!transition && scene==1 && segment>1) {
+        Blob* b1 = &blobs[pair.blob1];
+        Blob* b2 = &blobs[pair.blob2];
+
+        // delete bridge video if it exists
+        for (vector<ofPtr<mediaElement> >::iterator it = fgMedia.begin(); it != fgMedia.end(); it++) {
+            if ((**it).bridgeVideo && (**it).bridgeBlobID[0]==pair.blob1 && (**it).bridgeBlobID[1]==pair.blob2) {
+                cout << "blob break steady - unlinked bridge" << endl;
+                fgMedia.erase(it);
+                break;
+            }
         }
-        // delete sparkle-bridge video
-        // for (vector<ofPtr<mediaElement> >::iterator it = fgMedia.begin(); it != fgMedia.end(); it++) {
-        //     if (*it == blobs[blobID].bridgeLink) {
-        //         blobs[blobID].bridgeLink = ofPtr<mediaElement>();
-        //         cout << "blob " << blobID << " break steady - unlinked bridge" << endl;
-        //         fgMedia.erase(it);
-        //         break;
-        //     }
-        // }
+
     }
 }
 
@@ -777,14 +798,14 @@ void planeApp::blobUnlink(int & blobID) {
             break;
         }
     }
-    // for (vector<ofPtr<mediaElement> >::iterator it = fgMedia.begin(); it != fgMedia.end(); it++) {
-    //     if (*it == blobs[blobID].bridgeLink) {
-    //         blobs[blobID].bridgeLink = ofPtr<mediaElement>();
-    //         cout << blobID << "  blobUnlink unlinked bridge " << endl;
-    //         fgMedia.erase(it);
-    //         break;
-    //     }
-    // }
+    // delete bridge video if it exists
+    for (vector<ofPtr<mediaElement> >::iterator it = fgMedia.begin(); it != fgMedia.end(); it++) {
+        if ((**it).bridgeVideo && ((**it).bridgeBlobID[0]==blobID || (**it).bridgeBlobID[1]==blobID)) {
+            cout << blobID << "  blobUnlink unlinked bridge" << endl;
+            fgMedia.erase(it);
+            break;
+        }
+    }
 }
 
 void planeApp::beginSegment() {

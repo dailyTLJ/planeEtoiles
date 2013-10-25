@@ -144,19 +144,19 @@ void Blob::analyzeNeighbors(std::map<int, ofPoint> neighborLocation, float keepD
                 n->distance.erase( n->distance.begin() );
             }
             n->updated = true;
-
+            Pair pair = Pair( min(this->id,n->id), max(this->id,n->id) );
             if (n->distance.size() >= NEIGHBOR_HISTORY && n->getStdDev() < keepDistanceThr) {
                 if (!n->steadyDistance) {
                     n->steadyDistance = true;
                     n->steadyStart = ofGetUnixTime();
                     n->steadyTimer = 0;
-                    // ofNotifyEvent(onSteady,this->id,this);
+                    ofNotifyEvent(onSteady,pair,this);
                 } else {
                     n->steadyTimer = ofGetUnixTime() - n->steadyStart;
                     if (n->steadyTimer >= steadyReward && !n->steadyRewarded) {
                         n->steadyRewarded = true;
-                        // ofNotifyEvent(onSteadyReward,this->id,this);
-                        // steadyRewarded = true;
+                        ofNotifyEvent(onSteadyReward,pair,this);
+                        steadyRewarded = true;
                     }
                 }
             } else {
@@ -164,8 +164,8 @@ void Blob::analyzeNeighbors(std::map<int, ofPoint> neighborLocation, float keepD
                     n->steadyDistance = false;
                     n->steadyTimer = 0;
                     n->steadyRewarded = false;
-                    // ofNotifyEvent(onBreakSteady, this->id, this);
-                    // steadyRewarded = false;     // this needs to come after the notifyEvent!
+                    ofNotifyEvent(onBreakSteady, pair, this);
+                    steadyRewarded = false;     // this needs to come after the notifyEvent!
                 }
             }
 
@@ -178,10 +178,10 @@ void Blob::analyzeNeighbors(std::map<int, ofPoint> neighborLocation, float keepD
     std::map<int,Neighbor>::iterator it = neighbors.begin();
     while (it != neighbors.end()) {
     	if( !it->second.updated ) {
-            // if (it->second.steadyRewarded) {
-            //     ofNotifyEvent(onBreakSteady,this->id,this);
-            //     steadyRewarded = false;
-            // }
+            if (it->second.steadyDistance) {
+                Pair pair = Pair( min(this->id,it->second.id), max(this->id,it->second.id) );
+                ofNotifyEvent(onBreakSteady,pair,this);
+            }
     		neighbors.erase(it++);
     	} else {
     		++it;

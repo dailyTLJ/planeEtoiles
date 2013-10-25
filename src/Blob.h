@@ -24,6 +24,17 @@ class TimedPoint {
 };
 
 
+class Pair {
+    public:
+        int blob1;
+        int blob2;
+
+        Pair(int p1, int p2) {
+            blob1 = p1;
+            blob2 = p2;
+        }
+};
+
 
 // to compute the distance between a blob and a neighbor blob
 // it keeps a copy of the distance over time, to judge if distance stays the same
@@ -121,9 +132,9 @@ class Blob {
         ofEvent<int> overFreeze;
         ofEvent<int> prepareToDie;
         ofEvent<int> updatePosition;
-        ofEvent<int> onSteady;
-        ofEvent<int> onSteadyReward;
-        ofEvent<int> onBreakSteady;
+        ofEvent<Pair> onSteady;
+        ofEvent<Pair> onSteadyReward;
+        ofEvent<Pair> onBreakSteady;
 
         bool movingMean;
         std::map<int, Neighbor> neighbors;
