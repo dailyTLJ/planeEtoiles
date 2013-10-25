@@ -499,7 +499,7 @@ void planeApp::blobOnLost(int & blobID) {
     }
 }
 
-void planeApp::blobSteady(int & blobID) {
+void planeApp::blobSteady(int & blobID, int & neighborID) {
     cout << "blobSteady() " << blobID << endl;
     // add particle trail video between stars
     if (!transition && scene==1 && segment>1) {
@@ -728,13 +728,6 @@ void planeApp::videoFollowBlob(int & blobID) {
     // find videoElement
     if (!transition) {
         ofPtr<mediaElement> vid = blobs[blobID].mediaLink; 
-        // ofPtr<mediaElement> vid; 
-        // for (vector<ofPtr<mediaElement> >::iterator it = fgMedia.begin(); it != fgMedia.end(); it++) {
-        //     if (*it == blobs[blobID].mediaLink) {
-        //         vid = *it;
-        //         break;
-        //     }
-        // }
         // update position
         float bx;
         float by;
