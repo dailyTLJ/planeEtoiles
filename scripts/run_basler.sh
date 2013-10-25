@@ -12,8 +12,8 @@
 source helpers.sh
 
 # cd ../data
-blobserver -C basler_eva.xml $@ &
+blobserver -C basler.xml $@ &
 sleep 5
-shmvid /tmp/blobserver_output_1
+shmvid /tmp/blobserver_1_hog_0
 killall blobserver
 killall gst-launch-0.10

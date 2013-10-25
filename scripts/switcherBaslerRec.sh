@@ -18,5 +18,7 @@ sleep 1
 
 switcher-ctrl -C uridecodebin video
 switcher-ctrl -s video loop true
-switcher-ctrl -s video uri 'file:///home/planeblob/Videos/test.avi'
+switcher-ctrl -s video uri 'file:///home/planeblob/Videos/turn.avi'
+# switcher-ctrl -s video uri 'file:///home/planeblob/Videos/jump.avi'
+# switcher-ctrl -s video uri 'file:///home/planeblob/Videos/hop.avi'
 switcher-ctrl -s video started true
