@@ -64,7 +64,7 @@
             </Param>
             <Param>
                 <Name>modelFilename</Name>
-                <Value>models/model_8x8.xml</Value>
+                <Value>models/model_8x8_bw.xml</Value>
             </Param>
             <Param>
                 <Name>maxTimePerFrame</Name>

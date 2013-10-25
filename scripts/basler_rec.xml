@@ -9,11 +9,15 @@
             </Param>
             <Param>
                 <Name>scale</Name>
-                <Value>0.3</Value>
+                <Value>0.35</Value>
             </Param>
             <Param>
                 <Name>rotation</Name>
                 <Value>0.0</Value>
+            </Param>
+            <Param>
+                <Name>gammaCorrection</Name>
+                <Value>0.5</Value>
             </Param>
         </Source>
         <Actuator>
@@ -24,11 +28,11 @@
             </Param>
             <Param>
                 <Name>modelFilename</Name>
-                <Value>models/model_8x8.xml</Value>
+                <Value>models/model_8x8_bw.xml</Value>
             </Param>
             <Param>
                 <Name>maxTimePerFrame</Name>
-                <Value>1e5</Value>
+                <Value>2e5</Value>
             </Param>
             <Param>
                 <Name>maxThreads</Name>
@@ -36,11 +40,11 @@
             </Param>
             <Param>
                 <Name>mergeDistance</Name>
-                <Value>24</Value>
+                <Value>64</Value>
             </Param>
             <Param>
                 <Name>filterSize</Name>
-                <Value>3</Value>
+                <Value>1</Value>
             </Param>
             <Param>
                 <Name>roiSize</Name>
@@ -54,17 +58,17 @@
                 <Name>cellSize</Name>
                 <Value>size_8x8</Value>
             </Param>
-            <Param>
+<!--             <Param>
                 <Name>bins</Name>
                 <Value>9</Value>
-            </Param>
+            </Param> -->
             <Param>
                 <Name>margin</Name>
-                <Value>0.8</Value>
+                <Value>0.9</Value>
             </Param>
             <Param>
                 <Name>lifetime</Name>
-                <Value>15</Value>
+                <Value>30</Value>
             </Param>
             <Param>
                 <Name>keepOldBlobs</Name>
@@ -73,11 +77,11 @@
 
             <Param>
                 <Name>processNoiseCov</Name>
-                <Value>1e-6</Value>
+                <Value>1e-4</Value>
             </Param>
             <Param>
                 <Name>measurementNoiseCov</Name>
-                <Value>1e-4</Value>
+                <Value>1e-2</Value>
             </Param>
             <Param>
                 <Name>saveSamples</Name>
@@ -93,6 +97,35 @@
         <Source>
             <Type>Source_2D_Shmdata</Type>
             <Subsource>0</Subsource>
+        </Source>
+        <Actuator>
+            <Type>Actuator_BgSubtractor</Type>
+            <Param>
+                <Name>filterSize</Name>
+                <Value>5</Value>
+            </Param>
+            <Param>
+                <Name>verbose</Name>
+                <Value>1</Value>
+            </Param>
+            <Param>
+                <Name>learningTime</Name>
+                <Value>15</Value>
+            </Param>
+            <Param>
+                <Name>keepOldBlobs</Name>
+                <Value>0 0</Value>
+            </Param>
+            <Param>
+                <Name>lifetime</Name>
+                <Value>20</Value>
+            </Param>
+        </Actuator>
+    </Flow>
+    <Flow>
+        <Source>
+            <Type>Source_2D_Shmdata</Type>
+            <Subsource>0</Subsource>
 <!--            <Param>
                 <Name>location</Name>
                 <Value>/tmp/blobserver_output_1</Value>
@@ -101,6 +134,7 @@
         <Actuator>
             <Type>Actuator_Nop</Type>
         </Actuator>
+
         <Client>
             <Address>192.168.2.120</Address>
             <Port>9000</Port>

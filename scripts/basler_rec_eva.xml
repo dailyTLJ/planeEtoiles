@@ -1,6 +1,6 @@
 <Blobserver>
     <Flow>
-<!--         <Source>
+        <Source>
             <Type>Source_2D_Shmdata</Type>
             <Subsource>0</Subsource>
             <Param>
@@ -9,48 +9,16 @@
             </Param>
             <Param>
                 <Name>scale</Name>
-                <Value>0.3</Value>
+                <Value>0.35</Value>
             </Param>
             <Param>
                 <Name>rotation</Name>
                 <Value>0.0</Value>
             </Param>
-        </Source> -->
-        <Source>
-            <Type>Source_2D_Gige</Type>
-            <Subsource>0</Subsource>
-            <Param>
-                <Name>raw</Name>
-                <Value>1</Value>
-            </Param>
-            <Param>
-                <Name>binning</Name>
-                <Value>2</Value>
-            </Param>
-            <Param>
-                <Name>width</Name>
-                <Value>800</Value>
-            </Param>
-            <Param>
-                <Name>height</Name>
-                <Value>600</Value>
-            </Param>
-            <Param>
-                <Name>autoExposure</Name>
-                <Value>300 200 200 200 64 32 0.05</Value>
-            </Param>
-            <Param>
-                <Name>gain</Name>
-                <Value>220</Value>
-            </Param>
-            <Param>
-                <Name>invertRGB</Name>
-                <Value>1</Value>
-            </Param>
-            <Param>
-                <Name>framerate</Name>
-                <Value>15</Value>
-            </Param>
+<!--             <Param>
+                <Name>gammaCorrection</Name>
+                <Value>0.5</Value>
+            </Param> -->
         </Source>
         <Actuator>
             <Type>Actuator_Hog</Type>
@@ -60,11 +28,11 @@
             </Param>
             <Param>
                 <Name>modelFilename</Name>
-                <Value>models/model_8x8.xml</Value>
+                <Value>models/model_8x8_bw.xml</Value>
             </Param>
             <Param>
                 <Name>maxTimePerFrame</Name>
-                <Value>1e5</Value>
+                <Value>2e5</Value>
             </Param>
             <Param>
                 <Name>maxThreads</Name>
@@ -72,11 +40,11 @@
             </Param>
             <Param>
                 <Name>mergeDistance</Name>
-                <Value>60</Value>
+                <Value>64</Value>
             </Param>
             <Param>
                 <Name>filterSize</Name>
-                <Value>3</Value>
+                <Value>1</Value>
             </Param>
             <Param>
                 <Name>roiSize</Name>
@@ -90,17 +58,17 @@
                 <Name>cellSize</Name>
                 <Value>size_8x8</Value>
             </Param>
-            <Param>
+<!--             <Param>
                 <Name>bins</Name>
                 <Value>9</Value>
-            </Param>
+            </Param> -->
             <Param>
                 <Name>margin</Name>
-                <Value>0.8</Value>
+                <Value>0.9</Value>
             </Param>
             <Param>
                 <Name>lifetime</Name>
-                <Value>15</Value>
+                <Value>30</Value>
             </Param>
             <Param>
                 <Name>keepOldBlobs</Name>
@@ -109,20 +77,20 @@
 
             <Param>
                 <Name>processNoiseCov</Name>
-                <Value>1e-6</Value>
-            </Param>
-            <Param>
-                <Name>measurementNoiseCov</Name>
                 <Value>1e-4</Value>
             </Param>
             <Param>
+                <Name>measurementNoiseCov</Name>
+                <Value>1e-2</Value>
+            </Param>
+<!--             <Param>
                 <Name>saveSamples</Name>
                 <Value>0</Value>
             </Param>
             <Param>
                 <Name>saveSamplesAge</Name>
                 <Value>120</Value>
-            </Param>
+            </Param> -->
         </Actuator>
     </Flow>
     <Flow>
@@ -138,7 +106,7 @@
             <Type>Actuator_Nop</Type>
         </Actuator>
         <Client>
-            <Address>192.168.2.38</Address>
+            <Address>192.168.2.24</Address>
             <Port>9000</Port>
         </Client>
         <Server>

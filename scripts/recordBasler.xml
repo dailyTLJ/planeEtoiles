@@ -21,23 +21,23 @@
             </Param>
             <Param>
                 <Name>binning</Name>
-                <Value>3</Value>
+                <Value>2</Value>
             </Param>
             <Param>
                 <Name>width</Name>
-                <Value>520</Value>
+                <Value>800</Value>
             </Param>
             <Param>
                 <Name>height</Name>
-                <Value>390</Value>
+                <Value>600</Value>
             </Param>
             <Param>
                 <Name>scale</Name>
-                <Value>0.7</Value>
+                <Value>1</Value>
             </Param>
             <Param>
                 <Name>autoExposure</Name>
-                <Value>150 130 200 100 64 32 0.05</Value>
+                <Value>300 200 200 100 64 32 0.05</Value>
             </Param>
             <Param>
                 <Name>gain</Name>
