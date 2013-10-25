@@ -146,7 +146,7 @@ class Blob {
         cv::Mat* perspectiveMat;
 
         ofPtr<mediaElement> mediaLink;
-        ofPtr<mediaElement> bridgeLink;
+        std::map<int, ofPtr<mediaElement> > bridgeLink;
         bool videoTrace;
 
 };

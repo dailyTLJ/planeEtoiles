@@ -139,7 +139,6 @@ void Blob::analyzeNeighbors(std::map<int, ofPoint> neighborLocation, float keepD
             // update neighbor with new location data
             Neighbor* n = &neighbors.find(nid)->second;
             float distance = ofDist(this->position.x, this->position.y, p.x, p.y);
-//            float distance = ofVec2f(this->position.x, this->position.y).distance( ofVec2f(p.x, p.y) );
             n->distance.push_back(distance);
             while( n->distance.size() > NEIGHBOR_HISTORY ) {
                 n->distance.erase( n->distance.begin() );
@@ -151,13 +150,13 @@ void Blob::analyzeNeighbors(std::map<int, ofPoint> neighborLocation, float keepD
                     n->steadyDistance = true;
                     n->steadyStart = ofGetUnixTime();
                     n->steadyTimer = 0;
-                    ofNotifyEvent(onSteady,this->id,this);
+                    // ofNotifyEvent(onSteady,this->id,this);
                 } else {
                     n->steadyTimer = ofGetUnixTime() - n->steadyStart;
                     if (n->steadyTimer >= steadyReward && !n->steadyRewarded) {
                         n->steadyRewarded = true;
-                        ofNotifyEvent(onSteadyReward,this->id,this);
-                        steadyRewarded = true;
+                        // ofNotifyEvent(onSteadyReward,this->id,this);
+                        // steadyRewarded = true;
                     }
                 }
             } else {
@@ -165,8 +164,8 @@ void Blob::analyzeNeighbors(std::map<int, ofPoint> neighborLocation, float keepD
                     n->steadyDistance = false;
                     n->steadyTimer = 0;
                     n->steadyRewarded = false;
-                    ofNotifyEvent(onBreakSteady, this->id, this);
-                    steadyRewarded = false;     // this needs to come after the notifyEvent!
+                    // ofNotifyEvent(onBreakSteady, this->id, this);
+                    // steadyRewarded = false;     // this needs to come after the notifyEvent!
                 }
             }
 
@@ -179,6 +178,10 @@ void Blob::analyzeNeighbors(std::map<int, ofPoint> neighborLocation, float keepD
     std::map<int,Neighbor>::iterator it = neighbors.begin();
     while (it != neighbors.end()) {
     	if( !it->second.updated ) {
+            // if (it->second.steadyRewarded) {
+            //     ofNotifyEvent(onBreakSteady,this->id,this);
+            //     steadyRewarded = false;
+            // }
     		neighbors.erase(it++);
     	} else {
     		++it;
