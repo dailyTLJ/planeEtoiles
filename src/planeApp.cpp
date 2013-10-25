@@ -33,11 +33,16 @@ void planeApp::setup(){
     blobW = 64;
     blobH = 128;
 
+    bgsubtractorFlowId = 2; // 1 = hog, 2 = bgs, 3 = nop
+    bgsubtractorCnt = 0;
+    bgsubtractorVel = 0.f;
+    bgsubtractorAvVel = 0.f;
+
     siteW.addListener(this,&planeApp::recalculatePerspective);
 	siteH.addListener(this,&planeApp::recalculatePerspective);
 
 
-	gui.setup("HUMANS AND PLANETS", "planets01.xml", 1084,150);
+	gui.setup("HUMANS AND PLANETS", "planets01.xml", 1104,170);
     gui.setDefaultBackgroundColor( ofColor(0,0,50) );
     gui.add(autoplay.setup("autoplay", false)); 
     gui.add(flashColor.set("Transition Flash Color",ofColor(255,200,100),ofColor(0,0),ofColor(255,255)));
@@ -829,10 +834,39 @@ void planeApp::receiveOsc(){
 		receiver.getNextMessage(&m);
 
 		if(m.getAddress() == "/blobserver/startFrame"){
-//			cout << "\n";
+
+            int flowid = m.getArgAsInt32(1);
+            // cout << "start frame flow " << flowid << endl;
+            if (flowid==bgsubtractorFlowId) {
+                bgsubtractorCnt = 0;
+                bgsubtractorVel = 0.f;
+                bgsubtractorAvVel = 0.f;
+            }
+
 		} else if(m.getAddress() == "/blobserver/endFrame"){
+            int flowid = m.getArgAsInt32(1);
+            // cout << "end frame flow " << flowid << endl;
+            if (flowid==bgsubtractorFlowId) {
+                bgsubtractorAvVel = (bgsubtractorCnt>0) ? bgsubtractorVel/bgsubtractorCnt : 0;
+                // cout << "bgsubtractorCnt\t" << bgsubtractorCnt << "\tavg vel\t" << (bgsubtractorVel/bgsubtractorCnt) << endl;
+            } 
 
 		} else if(m.getAddress() == "/blobserver/bgsubtractor"){
+
+            // parse incoming elements:  iiiiffii: id x y size vx vy age lost
+            int blobid = m.getArgAsInt32(0);
+            int posx = m.getArgAsInt32(1);
+            int posy = m.getArgAsInt32(2);
+            int size = m.getArgAsInt32(3);
+            float velx = m.getArgAsFloat(4);
+            float vely = m.getArgAsFloat(5);
+            int age = m.getArgAsInt32(6);
+            int lost = m.getArgAsInt32(7);
+
+            bgsubtractorCnt++;
+            bgsubtractorVel += sqrt( pow(velx,2) + pow(vely,2) );
+
+            // cout << "bgsubtractor : " << blobid << " " << posx << "/" << posy << " " << size << " " << velx << "/" << vely << " " << age << " " << lost << endl;
 
 		} else if(m.getAddress() == "/blobserver/stitch"){
 
@@ -859,9 +893,10 @@ void planeApp::receiveOsc(){
 
 			std::map<int,Blob>::iterator iter = blobs.find(blobid);
             bool newBlob = false;
-			if( iter != blobs.end() ) {		// blob instance already exists
-
-			} else {					// create new blob instance
+			if( iter != blobs.end() ) {		
+                // blob instance already exists
+			} else {					
+                // create new blob instance
                 newBlob = true;
 				blobs[blobid].id = blobid;
                 blobs[blobid].perspectiveMat = &this->perspectiveMat;
@@ -924,7 +959,7 @@ void planeApp::draw(){
 
         this->drawRawData(offsx, offsy, 0.7);
 
-        offsy += 220 + 10;
+        offsy += 260 + 10;
         this->drawTopDown(offsx, offsy, 0.5, drawBlobDetail);
 
         offsy = 10;
@@ -1161,9 +1196,11 @@ void planeApp::drawRawData(int x, int y, float scale){
     ofRect(x,y,blobserverW*scale,blobserverH*scale);
 
     // write information
-    string rawInfo = "port: \t" + ofToString(PORT);
+    string rawInfo = "port: \t\t" + ofToString(PORT);
     rawInfo += "\nframerate: \t" + ofToString(28);
     rawInfo += "\nexposure: \t" + ofToString(cameraExposure,5);
+    rawInfo += "\nbgsubtraction\nblob cnt: \t" + ofToString(bgsubtractorCnt);
+    rawInfo += "\navg velocity: \t" + ofToString(bgsubtractorAvVel,2);
     ofDrawBitmapStringHighlight(rawInfo, x + 3, y + blobserverH*scale + 15);
 
     // draw frame for each blob. blobserver frame size = 64 x 128 px

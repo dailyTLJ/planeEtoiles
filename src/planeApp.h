@@ -91,7 +91,9 @@ class planeApp : public ofBaseApp{
 		Blob testBlob;
 		cv::Mat perspectiveMat;
 
-		bool fullscreen;		 
+		bool fullscreen;	
+
+		// SEQUENCING	 
         ofxToggle autoplay; 			 // advance to next segment by itself
 		int scene;
 		int segment;
@@ -112,6 +114,11 @@ class planeApp : public ofBaseApp{
 		std::map<int, sceneInfo> scenes;
 
 		bool drawBlobDetail;
+
+		int bgsubtractorCnt;
+		int bgsubtractorFlowId;
+		float bgsubtractorVel;	
+		float bgsubtractorAvVel;
 
 		ofTrueTypeFont font;
 		ofxPanel gui;
