@@ -4,10 +4,12 @@
 #include "ofxOsc.h"
 #include "ofxOpenCv.h"
 #include "ofxGui.h"
+#include "ofEvents.h"
 
 #include <map>
 #include "Blob.h"
 #include "videoElement.h"
+#include "imageElement.h"
 
 // listen to blobserver on port 9000
 #define PORT 9000
@@ -27,8 +29,41 @@ class planeApp : public ofBaseApp{
 		void setup();
 		void update();
 		void draw();
-		void initScenes();
+		void exit();
+
 		void receiveOsc();
+
+		void initScenes();
+		void setPerspective();
+		void recalculatePerspective(int & v);
+
+		void drawRawData(int x, int y, float scale);
+		void drawTopDown(int x, int y, float scale, bool detailed = false);
+		void drawScreen(int x, int y, float scale);
+		void drawAnalysis(int x, int y, float scale);
+		void drawControlInfo(int x, int y);
+
+		// to be triggered via blob/media ofEvents
+		void blobOnCreate(int & blobID);
+		void blobOnLost(int & blobID);
+		void blobOnFreeze(int & blobID);
+		void blobUnFreeze(int & blobID);
+		void blobOverFreeze(int & blobID);
+		void blobUnlink(int & blobID);
+		void videoFollowBlob(int & blobID);
+
+		void blobCountChange();
+		void jumpToScene(int s);
+
+		void endSegment(int direction = 1);	// 1. trigger fgMediaFadedOut 
+		void fgMediaFadedOut(int & trans);  // 2. call outroTransformation calls on FG and BG media
+		void bgMediaFadedOut(int & trans);	// 3. all elements faded out, moveOn = true
+		void nextSegment(int direction = 1);// 4. pick the next segment
+		void initSegment();					// 5. initialize the new segment, create new fgvideos
+		void beginSegment();				// 6. after flash, fade in BG
+		void bgMediaFadedIn(int & trans);	// 7. reinit blobs, introtransformation of videos
+		void fgMediaFadedIn(int & trans);
+
 
 		void keyPressed(int key);
 		void keyReleased(int key);
@@ -40,19 +75,14 @@ class planeApp : public ofBaseApp{
 		void dragEvent(ofDragInfo dragInfo);
 		void gotMessage(ofMessage msg);
 
+
 		int projectionW;
         int projectionH;
-
-		void drawRawData(int x, int y, float scale);
-		void drawTopDown(int x, int y, float scale, bool detailed = false);
-		void drawScreen(int x, int y, float scale);
-		void drawAnalysis(int x, int y, float scale);
-		void drawControlInfo(int x, int y);
-		void nextSegment(int direction);
-
-		ofTrueTypeFont font;
-		ofxPanel gui;
-		ofxOscReceiver receiver;
+        int blobserverW;
+        int blobserverH;
+        int blobW;
+        int blobH;
+        float cameraExposure;
 
 		int mouseX, mouseY;
 		string mouseButtonState;
@@ -61,26 +91,61 @@ class planeApp : public ofBaseApp{
 		Blob testBlob;
 		cv::Mat perspectiveMat;
 
-        bool autoplay;  // advance to next segment by itself
+		bool fullscreen;		 
+        ofxToggle autoplay; 			 // advance to next segment by itself
 		int scene;
 		int segment;
+		int segmentChange;
+		bool sceneChange;
 		int masterClock;
 		int segmentClock;
 		int segmentStart;
 		int globalStart;
+		bool moveOn;
+		bool transition;
+		bool success;			// if people followed the instructions
+		int successCnt;
+		bool flash;				// in between transitions, catch attention
+		int flashCnt;
+		int flashMax;
 
 		std::map<int, sceneInfo> scenes;
 
 		bool drawBlobDetail;
 
-		ofParameter<float> freezeMinVel;
+		ofTrueTypeFont font;
+		ofxPanel gui;
+		ofParameterGroup paramBasic;
+		ofParameterGroup paramTiming;
+		ofParameterGroup paramSc1;
+		ofParameterGroup paramSc2;
+		ofParameterGroup paramSc3;
+		ofParameterGroup paramSc4;
+		ofParameterGroup paramSc5;
+        ofParameter<ofColor> flashColor;
+		ofxOscReceiver receiver;
+
+		ofParameter<float> freezeMaxVel;
 		ofParameter<int> freezeMinTime;
 		ofParameter<int> freezeMaxTime;
 
 		ofParameter<float> keepDistanceThr;
 		ofParameter<float> movingThr;
+		ofParameter<int> edgeMargin;
 
-		std::map<int, std::vector<videoElement> > bgVideos;
-		std::map<int, std::vector<videoElement> > fgVideos;
+		ofParameter<int> siteW;
+		ofParameter<int> siteH;
+		ofParameter<float> mapSiteW;
+		ofParameter<float> mapSiteH;
+		ofParameter<int> offsetX;
+		ofParameter<int> offsetY;
+
+		ofParameter<int> newStarMax;
+		ofParameter<int> newStarBonus;
+		ofParameter<int> minLostTime;
+
+		std::vector< ofPtr<mediaElement> > fgMedia;
+//		std::map<int, std::vector<videoElement> > fgVideos;
+		std::map<int, std::vector<ofPtr<mediaElement> > > bgVideos;
 
 };

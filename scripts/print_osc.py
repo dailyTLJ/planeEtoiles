@@ -54,16 +54,16 @@ def printMsg(path, tags, args, source):
 
 
 server.addMsgHandler( "/blobserver/startFrame", startMessage )
-# server.addMsgHandler( "/blobserver/startFrame", printMsg )
+# server.addMsgHandler( "/blobserver/startFrame", ignore )
 server.addMsgHandler( "/blobserver/endFrame", stopMessage )
-# server.addMsgHandler( "/blobserver/endFrame", printMsg )
+# server.addMsgHandler( "/blobserver/endFrame", ignore )
 server.addMsgHandler( "/blobserver/bgsubtractor", printBlob )
-# server.addMsgHandler( "/blobserver/bgsubtractor", printMsg )
+# server.addMsgHandler( "/blobserver/bgsubtractor", ignore )
 server.addMsgHandler( "/blobserver/stitch", ignore )
 #server.addMsgHandler( "/blobserver/stitch", printMsg )
 server.addMsgHandler( "/blobserver/hog", printBlob )
 server.addMsgHandler( "/blobserver/nop", ignore )
-
+server.addMsgHandler( "/blobserver/broadcast", printMsg )
 
 
 

@@ -26,3 +26,13 @@ switcher -d &
 switcher-ctrl -C uridecodebin video
 switcher-ctrl -s video loop true
 switcher-ctrl -i video to_shmdata 'path/to/the/file'
+
+
+
+
+
+TODO
+
+================
+3 - fake round sun
+3 - sun splashes on hops
