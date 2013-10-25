@@ -63,10 +63,11 @@ void planeApp::setup(){
     paramSc1.add(freezeMaxVel.set( "Freeze MaxVel",0.1, 0, 1.0 ));
     paramSc1.add(freezeMinTime.set( "Freeze MinTime",2, 0, 5 ));
     paramSc1.add(freezeMaxTime.set( "Freeze MaxTime",10, 0, 30 ));
-    paramSc1.add(keepDistanceThr.set( "Dist StdDev", 10, 0, 20));
-    paramSc1.add(movingThr.set( "Movement Thr", 0.1, 0, 2));
     paramSc1.add(newStarMax.set( "NewStar Max", 30, 1, 40));
     paramSc1.add(newStarBonus.set( "Bonus every", 5, 1, 40));
+    paramSc1.add(keepDistanceThr.set( "Dist StdDev", 10, 0, 20));
+    paramSc1.add(movingThr.set( "Movement Thr", 0.1, 0, 2));
+    paramSc1.add(steadyRewardTime.set( "Dist Reward", 2, 0, 10));
     gui.add(paramSc1);
 
 
@@ -307,7 +308,7 @@ void planeApp::update(){
     }
     for(std::map<int, Blob>::iterator it = blobs.begin(); it != blobs.end(); ++it){
         Blob* b = &it->second;
-        b->analyzeNeighbors(blobPositions, keepDistanceThr);
+        b->analyzeNeighbors(blobPositions, keepDistanceThr, steadyRewardTime);
     }
 
     // SCHEDULING
@@ -494,6 +495,83 @@ void planeApp::blobOnLost(int & blobID) {
     }
 }
 
+void planeApp::blobSteady(int & blobID) {
+    cout << "blobSteady() " << blobID << "  bridgeLink: " << blobs[blobID].bridgeLink << endl;
+    // add particle trail video between stars
+    if (!transition && scene==1 && segment>1) {
+        Blob* b = &blobs[blobID];
+        for(std::map<int, Neighbor>::iterator iter = b->neighbors.begin(); iter != b->neighbors.end(); ++iter){
+            Neighbor* nb = &iter->second;
+            if (nb->steadyDistance && blobs[nb->id].movingMean) {
+                // draw a line between blob and steady neighbor
+                // ofNoFill(); ofSetColor(255);
+                float p1x = b->position.x;
+                float p1y = b->position.y;
+                float p2x = blobs[nb->id].position.x;
+                float p2y = blobs[nb->id].position.y;
+
+                cout << blobID << "  add bridge video" << endl;
+
+                string newVideoName = "video/2_stars/ATTRACTION_link-01-animation.mov";
+                fgMedia.push_back(ofPtr<mediaElement>( new videoElement(newVideoName)));
+                (*fgMedia[fgMedia.size()-1]).setDisplay(p1x, p1y, false);
+                (*fgMedia[fgMedia.size()-1]).reset();
+                b->bridgeLink = fgMedia[fgMedia.size()-1];
+                // ofLine( p1x, p1y, p2x, p2y );
+            }
+        }
+    }
+}
+
+void planeApp::blobSteadyReward(int & blobID) {
+    // cout << "blobSteadyReward() " << blobID << endl;
+    if (!transition && scene==1 && segment>1) {
+        ofPtr<mediaElement> vid; 
+        for (vector<ofPtr<mediaElement> >::iterator it = fgMedia.begin(); it != fgMedia.end(); it++) {
+            if (*it == blobs[blobID].mediaLink) {
+                vid = *it;
+                break;
+            }
+        }
+        // replace video with sparklier star
+        if (vid != NULL) {
+            // cout << "blob " << blobID << " \t\tfound vid" << endl;
+            (*vid).loadMovie("video/2_stars/ATTRACTION_star_glow-01-animation.mov");
+            (*vid).reset();
+        }
+    }
+}
+
+void planeApp::blobBreakSteady(int & blobID) {
+    cout << "blobBreakSteady() " << blobID << endl;
+    if (!transition) {
+        ofPtr<mediaElement> vid; 
+        for (vector<ofPtr<mediaElement> >::iterator it = fgMedia.begin(); it != fgMedia.end(); it++) {
+            if (*it == blobs[blobID].mediaLink) {
+                vid = *it;
+                break;
+            }
+        }
+        // replace video with normal star, only if it was in steadyrewarded mode!
+        if (vid != NULL && blobs[blobID].steadyRewarded) {
+            // cout << "blob " << blobID << " \t\tfound vid" << endl;
+            (*vid).loadMovie("video/2_stars/INDIV STAR 2 loop-H264-10mbps.mp4");
+            (*vid).reset();
+        }
+        // delete sparkle-bridge video
+        for (vector<ofPtr<mediaElement> >::iterator it = fgMedia.begin(); it != fgMedia.end(); it++) {
+            if (*it == blobs[blobID].bridgeLink) {
+                blobs[blobID].bridgeLink = ofPtr<mediaElement>();
+                cout << "blob " << blobID << " break steady - unlinked bridge" << endl;
+                fgMedia.erase(it);
+                break;
+            }
+        }
+    }
+}
+
+
+
 
 void planeApp::blobOnFreeze(int & blobID) {
 //    cout << "BLOB " << blobID << " froze!" << endl;
@@ -665,14 +743,41 @@ void planeApp::videoFollowBlob(int & blobID) {
             }
         }
         // update position
+        float bx;
+        float by;
         if (vid != NULL) {
             // cout << "blob " << blobID << " \t\tfound vid" << endl;
-            float x = offsetX + blobs[blobID].position.x * mapSiteW;
-            float y = offsetY + blobs[blobID].position.y *mapSiteH;
+            bx = offsetX + blobs[blobID].position.x * mapSiteW;
+            by = offsetY + blobs[blobID].position.y *mapSiteH;
             if (!(*vid).moveElement) {
-                (*vid).setDisplay( x, y, true);
+                (*vid).setDisplay( bx, by, true);
             } else {
-                (*vid).goal.set( x, y );
+                (*vid).goal.set( bx, by );
+            }
+        }
+        // update position of sparkly bridge
+        if (scene==1 && segment>1) {
+            ofPtr<mediaElement> bridge; 
+            for (vector<ofPtr<mediaElement> >::iterator it = fgMedia.begin(); it != fgMedia.end(); it++) {
+                if (*it == blobs[blobID].bridgeLink) {
+                    vid = *it;
+                    break;
+                }
+            }
+            if (bridge!=NULL) {
+                Blob* b = &blobs[blobID];
+
+                for(std::map<int, Neighbor>::iterator iter = b->neighbors.begin(); iter != b->neighbors.end(); ++iter){
+                    Neighbor* nb = &iter->second;
+                    if (nb->steadyDistance && blobs[nb->id].movingMean) {
+                        float bx2 = blobs[nb->id].position.x;
+                        float by2 = blobs[nb->id].position.y;
+                        float rot = atan2(bx-bx2,by-by2);
+                        (*vid).setDisplay( bx, by, false);
+                        (*vid).rotation = ofDegToRad(rot);
+                        // ofLine( p1x, p1y, p2x, p2y );
+                    }
+                }
             }
         }
     }
@@ -680,10 +785,19 @@ void planeApp::videoFollowBlob(int & blobID) {
 
 void planeApp::blobUnlink(int & blobID) {
     // making sure, a blob goes to die and untethers all connections
+    cout << blobID << " blobUnlink   mediaLink: " << blobs[blobID].mediaLink << "   bridgeLink: " << blobs[blobID].bridgeLink << endl;
     for (vector<ofPtr<mediaElement> >::iterator it = fgMedia.begin(); it != fgMedia.end(); it++) {
         if (*it == blobs[blobID].mediaLink) {
             blobs[blobID].mediaLink = ofPtr<mediaElement>();
-            cout << "unlinked blob " << blobID << endl;
+            cout << blobID << "  blobUnlink unlinked blob " <<  endl;
+            fgMedia.erase(it);
+            break;
+        }
+    }
+    for (vector<ofPtr<mediaElement> >::iterator it = fgMedia.begin(); it != fgMedia.end(); it++) {
+        if (*it == blobs[blobID].bridgeLink) {
+            blobs[blobID].bridgeLink = ofPtr<mediaElement>();
+            cout << blobID << "  blobUnlink unlinked bridge " << endl;
             fgMedia.erase(it);
             break;
         }
@@ -908,6 +1022,9 @@ void planeApp::receiveOsc(){
                 ofAddListener( blobs[blobid].prepareToDie, this, &planeApp::blobUnlink );
                 ofAddListener( blobs[blobid].onCreate, this, &planeApp::blobOnCreate );
                 ofAddListener( blobs[blobid].updatePosition, this, &planeApp::videoFollowBlob );
+                ofAddListener( blobs[blobid].onSteady, this, &planeApp::blobSteady );
+                ofAddListener( blobs[blobid].onSteadyReward, this, &planeApp::blobSteadyReward );
+                ofAddListener( blobs[blobid].onBreakSteady, this, &planeApp::blobBreakSteady );
             }
             // update blob with new values
             Blob* b = &blobs.find(blobid)->second;
@@ -1005,31 +1122,31 @@ void planeApp::drawScreen(int x, int y, float scale){
     }
 
     // extra things to draw? // will become video later on!
-    if (scene==1 && !transition) {
-        if (segment==2 || segment==3) {
+    // if (scene==1 && !transition) {
+    //     if (segment==2 || segment==3) {
 
-            for(std::map<int, Blob>::iterator it = blobs.begin(); it != blobs.end(); ++it){
-                Blob* b = &it->second;
+    //         for(std::map<int, Blob>::iterator it = blobs.begin(); it != blobs.end(); ++it){
+    //             Blob* b = &it->second;
 
-                if (b->movingMean) {
-                    for(std::map<int, Neighbor>::iterator iter = b->neighbors.begin(); iter != b->neighbors.end(); ++iter){
-                        Neighbor* nb = &iter->second;
-                        if (nb->steadyDistance && blobs[nb->id].movingMean) {
-                            // draw a line between blob and steady neighbor
-                            ofNoFill(); ofSetColor(255);
-                            float p1x = x + (offsetX + b->position.x * mapSiteW) * scale;
-                            float p1y = y + (offsetY + b->position.y * mapSiteH) * scale;
-                            float p2x = x + (offsetX + blobs[nb->id].position.x * mapSiteW) * scale;
-                            float p2y = y + (offsetY + blobs[nb->id].position.y * mapSiteH) * scale;
-                            ofLine( p1x, p1y, p2x, p2y );
-                            // ofLine(x + b->position.x*scale, y + b->position.y*scale, x + blobs[nb->id].position.x*scale, y + blobs[nb->id].position.y*scale);
-                        }
-                    }
-                }
-            }
+    //             if (b->movingMean) {
+    //                 for(std::map<int, Neighbor>::iterator iter = b->neighbors.begin(); iter != b->neighbors.end(); ++iter){
+    //                     Neighbor* nb = &iter->second;
+    //                     if (nb->steadyDistance && blobs[nb->id].movingMean) {
+    //                         // draw a line between blob and steady neighbor
+    //                         ofNoFill(); ofSetColor(255);
+    //                         float p1x = x + (offsetX + b->position.x * mapSiteW) * scale;
+    //                         float p1y = y + (offsetY + b->position.y * mapSiteH) * scale;
+    //                         float p2x = x + (offsetX + blobs[nb->id].position.x * mapSiteW) * scale;
+    //                         float p2y = y + (offsetY + blobs[nb->id].position.y * mapSiteH) * scale;
+    //                         ofLine( p1x, p1y, p2x, p2y );
+    //                         // ofLine(x + b->position.x*scale, y + b->position.y*scale, x + blobs[nb->id].position.x*scale, y + blobs[nb->id].position.y*scale);
+    //                     }
+    //                 }
+    //             }
+    //         }
 
-        }
-    }
+    //     }
+    // }
     
     ofDisableBlendMode();
     // ofDisableAlphaBlending();

@@ -50,6 +50,9 @@ class planeApp : public ofBaseApp{
 		void blobUnFreeze(int & blobID);
 		void blobOverFreeze(int & blobID);
 		void blobUnlink(int & blobID);
+		void blobSteady(int & blobID);
+		void blobSteadyReward(int & blobID);
+		void blobBreakSteady(int & blobID);
 		void videoFollowBlob(int & blobID);
 
 		void blobCountChange();
@@ -138,6 +141,7 @@ class planeApp : public ofBaseApp{
 
 		ofParameter<float> keepDistanceThr;
 		ofParameter<float> movingThr;
+		ofParameter<int> steadyRewardTime;
 		ofParameter<int> edgeMargin;
 
 		ofParameter<int> siteW;

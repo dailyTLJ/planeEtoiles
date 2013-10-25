@@ -36,6 +36,17 @@ class Neighbor {
         bool updated;
         vector<float> distance;
         bool steadyDistance;
+        int steadyStart;
+        int steadyTimer;
+        bool steadyRewarded;
+
+        Neighbor() {
+            steadyStart = 0;
+            steadyTimer = 0;
+            steadyRewarded = false;
+            steadyDistance = false;
+            updated = false;
+        }
 
         float getMean() {
             float sum = 0;
@@ -110,9 +121,13 @@ class Blob {
         ofEvent<int> overFreeze;
         ofEvent<int> prepareToDie;
         ofEvent<int> updatePosition;
+        ofEvent<int> onSteady;
+        ofEvent<int> onSteadyReward;
+        ofEvent<int> onBreakSteady;
 
         bool movingMean;
         std::map<int, Neighbor> neighbors;
+        bool steadyRewarded;
 
         bool onEdge;    // if blob disappears, most likely bc it escaped the frame
 
@@ -123,7 +138,7 @@ class Blob {
         void follow(float x, float y, float frameW = 800, float frameH = 600, float margin = 0);
         void setVelocity(float dx, float dy);
         void analyze(float freezeMinVel, float freezeMinTime, float freezeMaxTime, float movingThr);
-        void analyzeNeighbors(std::map<int, ofPoint> neighborLocation, float keepDistanceThr);
+        void analyzeNeighbors(std::map<int, ofPoint> neighborLocation, float keepDistanceThr, int steadyReward);
         ofPoint transformPerspective(ofPoint& v);
         void update(int minLostTime);
         bool isAlive();
@@ -131,6 +146,7 @@ class Blob {
         cv::Mat* perspectiveMat;
 
         ofPtr<mediaElement> mediaLink;
+        ofPtr<mediaElement> bridgeLink;
         bool videoTrace;
 
 };

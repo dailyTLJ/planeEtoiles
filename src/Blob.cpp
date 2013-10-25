@@ -24,6 +24,7 @@ void Blob::init(){
 	this->movingMean = false;
 	this->onEdge = false;
     this->videoTrace = false;
+    this->steadyRewarded = false;
 }
 
 //--------------------------------------------------------------
@@ -81,7 +82,6 @@ void Blob::analyze(float freezeMaxVel, float freezeMinTime, float freezeMaxTime,
             if (frozenTimer >= freezeMinTime && !properFreeze) {
                 properFreeze = true;
                 ofNotifyEvent(onFreeze,this->id,this);
-
             }
             if (frozenTimer >= freezeMaxTime && !overFrozen) {
                 overFrozen = true;
@@ -114,7 +114,7 @@ void Blob::analyze(float freezeMaxVel, float freezeMinTime, float freezeMaxTime,
 }
 
 //--------------------------------------------------------------
-void Blob::analyzeNeighbors(std::map<int, ofPoint> neighborLocation, float keepDistanceThr){
+void Blob::analyzeNeighbors(std::map<int, ofPoint> neighborLocation, float keepDistanceThr, int steadyReward){
 
     // set all neighbor-updates to false, to be able to delete inactive ones after
     for(std::map<int, Neighbor>::iterator it = neighbors.begin(); it != neighbors.end(); ++it){
@@ -146,25 +146,28 @@ void Blob::analyzeNeighbors(std::map<int, ofPoint> neighborLocation, float keepD
             }
             n->updated = true;
 
-            // compute steadyDistance
-//            cout << this->id << " : neighbor " << n->id << "\t";
-//            for (std::vector<float>::iterator dit = n->distance.begin(); dit != n->distance.end(); ++dit) {
-//                cout << " " << *dit;
-//            }
-//            cout << endl;
-//            // mean
-//            cout << this->id << " : neighbor " << n->id << "\t mean = \t" << n->getMean() << endl;
-//            // median
-//            cout << this->id << " : neighbor " << n->id << "\t median = \t" << n->getMedian() << endl;
-//            // variance
-//            cout << this->id << " : neighbor " << n->id << "\t variance = \t" << n->getVariance() << endl;
-//            // standard deviation .. how far the data values lie from the mean
-//            cout << this->id << " : neighbor " << n->id << "\t std dev = \t" << n->getStdDev() << endl;
-
             if (n->distance.size() >= NEIGHBOR_HISTORY && n->getStdDev() < keepDistanceThr) {
-                n->steadyDistance = true;
+                if (!n->steadyDistance) {
+                    n->steadyDistance = true;
+                    n->steadyStart = ofGetUnixTime();
+                    n->steadyTimer = 0;
+                    ofNotifyEvent(onSteady,this->id,this);
+                } else {
+                    n->steadyTimer = ofGetUnixTime() - n->steadyStart;
+                    if (n->steadyTimer >= steadyReward && !n->steadyRewarded) {
+                        n->steadyRewarded = true;
+                        ofNotifyEvent(onSteadyReward,this->id,this);
+                        steadyRewarded = true;
+                    }
+                }
             } else {
-                n->steadyDistance = false;
+                if (n->steadyDistance) {
+                    n->steadyDistance = false;
+                    n->steadyTimer = 0;
+                    n->steadyRewarded = false;
+                    ofNotifyEvent(onBreakSteady, this->id, this);
+                    steadyRewarded = false;     // this needs to come after the notifyEvent!
+                }
             }
 
 
