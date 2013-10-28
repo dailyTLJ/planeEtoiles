@@ -1,0 +1,50 @@
+<HUMANS_AND_PLANETS>
+	<autoplay>1</autoplay>
+	<Transition_Flash_Color>255, 200, 100, 255</Transition_Flash_Color>
+	<Global>
+		<Site_Width>500</Site_Width>
+		<Site_Length>700</Site_Length>
+		<Map_Site_to_Viz_Width>2</Map_Site_to_Viz_Width>
+		<Map_Site_to_Viz_Height>2</Map_Site_to_Viz_Height>
+		<Offset_X>0</Offset_X>
+		<Offset_Y>0</Offset_Y>
+	</Global>
+	<Timing/>
+	<Sc1_Stars>
+		<Freeze_Minimum_Velocity>0.602041</Freeze_Minimum_Velocity>
+		<Freeze_Minimum_Time>0</Freeze_Minimum_Time>
+		<Freeze_Maximum_Time>13</Freeze_Maximum_Time>
+		<Distance_Std.Dev._Threshold>10</Distance_Std.Dev._Threshold>
+		<Movement_Threshold>0.1</Movement_Threshold>
+		<New_Star_Maximum>30</New_Star_Maximum>
+		<Bonus_every_X_Stars>5</Bonus_every_X_Stars>
+	<Distance_StdDev_Thresh>10</Distance_StdDev_Thresh>
+	<Freeze_MinVel>0.602041</Freeze_MinVel>
+		<Freeze_MinTime>0</Freeze_MinTime>
+		<Freeze_MaxTime>10</Freeze_MaxTime>
+		<Dist_StdDev>10</Dist_StdDev>
+		<Movement_Thr>0.1</Movement_Thr>
+		<NewStar_Max>30</NewStar_Max>
+		<Bonus_every>5</Bonus_every>
+	<Freeze_MaxVel>0.530612</Freeze_MaxVel>
+	<Dist_Reward>2</Dist_Reward>
+	</Sc1_Stars>
+	<Sc2_Revolutions/>
+	<Sc3_Sun>
+		<Edge_Margin>21</Edge_Margin>
+	<Min_LostTime>1</Min_LostTime>
+	</Sc3_Sun>
+	<Sc4_Alignment/>
+	<Sc5_Combustion/>
+<HUMANS_AND_PLANETS/>
+	<Dimension>
+		<Site_Width>500</Site_Width>
+		<Site_Length>700</Site_Length>
+		<Map_Site_to_Viz_Width>2</Map_Site_to_Viz_Width>
+		<Map_Site_to_Viz_Height>2</Map_Site_to_Viz_Height>
+		<Offset_X>0</Offset_X>
+		<Offset_Y>0</Offset_Y>
+	<Map_Width>2</Map_Width>
+		<Map_Height>2</Map_Height>
+	</Dimension>
+</HUMANS_AND_PLANETS>
