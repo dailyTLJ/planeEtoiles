@@ -824,7 +824,7 @@ void planeApp::videoFollowBlob(int & blobID) {
                 float by2 = offsetY + blobs[blob2ID].position.y *mapSiteH;
                 (*bridge).setDisplay( bx, by, false);
                 (*bridge).w = ofDist(bx, by, bx2, by2);
-                (*bridge).rotation = ofRadToDeg(atan2(bx2-bx,by2-by));
+                (*bridge).rotation = -ofRadToDeg(atan2(bx2-bx,by2-by)) + 90;
             }
         }
     }
