@@ -21,6 +21,7 @@ class sceneInfo {
         int segments;
         int length[6];
         string instructions[6];
+        string analysis[6];
 };
 
 class planeApp : public ofBaseApp{
@@ -123,7 +124,8 @@ class planeApp : public ofBaseApp{
 		float bgsubtractorVel;	
 		float bgsubtractorAvVel;
 
-		ofTrueTypeFont font;
+		ofTrueTypeFont fontBg;
+		ofTrueTypeFont fontSm;
 		ofxPanel gui;
 		ofParameterGroup paramBasic;
 		ofParameterGroup paramTiming;
@@ -139,7 +141,7 @@ class planeApp : public ofBaseApp{
 		ofParameter<int> freezeMinTime;
 		ofParameter<int> freezeMaxTime;
 
-		ofParameter<float> keepDistanceThr;
+		ofParameter<float> distStdDevThr;
 		ofParameter<float> movingThr;
 		ofParameter<int> steadyRewardTime;
 		ofParameter<int> edgeMargin;

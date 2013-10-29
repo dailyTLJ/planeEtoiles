@@ -114,7 +114,7 @@ void Blob::analyze(float freezeMaxVel, float freezeMinTime, float freezeMaxTime,
 }
 
 //--------------------------------------------------------------
-void Blob::analyzeNeighbors(std::map<int, ofPoint> neighborLocation, float keepDistanceThr, int steadyReward){
+void Blob::analyzeNeighbors(std::map<int, ofPoint> neighborLocation, float distStdDevThr, int steadyReward){
 
     // set all neighbor-updates to false, to be able to delete inactive ones after
     for(std::map<int, Neighbor>::iterator it = neighbors.begin(); it != neighbors.end(); ++it){
@@ -145,7 +145,7 @@ void Blob::analyzeNeighbors(std::map<int, ofPoint> neighborLocation, float keepD
             }
             n->updated = true;
             Pair pair = Pair( min(this->id,n->id), max(this->id,n->id) );
-            if (n->distance.size() >= NEIGHBOR_HISTORY && n->getStdDev() < keepDistanceThr) {
+            if (n->distance.size() >= NEIGHBOR_HISTORY && n->getStdDev() < distStdDevThr) {
                 if (!n->steadyDistance) {
                     n->steadyDistance = true;
                     n->steadyStart = ofGetUnixTime();

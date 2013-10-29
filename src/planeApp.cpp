@@ -6,9 +6,13 @@ void planeApp::setup(){
 
 	ofTrueTypeFont::setGlobalDpi(72);
 
-    font.loadFont("Mercury Bold.otf", 36, true, true);
-	font.setLineHeight(30.0f);
-	font.setLetterSpacing(1.037);
+    fontBg.loadFont("Mercury Bold.otf", 36, true, true);
+    fontBg.setLineHeight(30.0f);
+    fontBg.setLetterSpacing(1.037);
+
+    fontSm.loadFont("Mercury Bold.otf", 20, true, true);
+	fontSm.setLineHeight(16.0f);
+	fontSm.setLetterSpacing(1.037);
 
 	mouseX = 0;
 	mouseY = 0;
@@ -65,7 +69,7 @@ void planeApp::setup(){
     paramSc1.add(freezeMaxTime.set( "Freeze MaxTime",10, 0, 30 ));
     paramSc1.add(newStarMax.set( "NewStar Max", 30, 1, 40));
     paramSc1.add(newStarBonus.set( "Bonus every", 5, 1, 40));
-    paramSc1.add(keepDistanceThr.set( "Dist StdDev", 10, 0, 20));
+    paramSc1.add(distStdDevThr.set( "Dist StdDev", 10, 0, 20));
     paramSc1.add(movingThr.set( "Movement Thr", 0.1, 0, 2));
     paramSc1.add(steadyRewardTime.set( "Dist Reward", 2, 0, 10));
     gui.add(paramSc1);
@@ -151,6 +155,7 @@ void planeApp::initScenes(){
     idle.name = "Idle";
     idle.no = n;
     idle.segments = 1;
+    idle.analysis[0] = "* detection";
     idle.instructions[0] = "Come closer";
     idle.length[0] = -1;
     scenes[n] = idle;
@@ -168,12 +173,16 @@ void planeApp::initScenes(){
     stars.no = n;
     stars.segments = 4;
     stars.instructions[0] = "Stand still";
+    stars.analysis[0] = "* Velocity < FreezeMaxVel\n* frozenTimer > freezeMinTime\n-> 20 sec";
     stars.length[0] = 20;
     stars.instructions[1] = "Try new spots \nto light up \nmore stars.";
+    stars.analysis[1] = "* Velocity < FreezeMaxVel\n* frozenTimer > freezeMinTime\n* frozenTimer < freezeMaxTime\n+ Bonus every newStarBonus\n-> newStarMax stars || 40 sec";
     stars.length[1] = 40;
     stars.instructions[2] = "Walk with \nsomeone. \nKeep the \nsame distance \nbetween you.";
+    stars.analysis[2] = "* velocity history > movingThr \n* distance history < distStdDevThr\n-> 45 sec";
     stars.length[2] = 45;
     stars.instructions[3] = "Walk with \nsomeone. \nMake eye \ncontact. \nKeep the \ndistance.";
+    stars.analysis[3] = "* velocity history > movingThr \n* distance history < distStdDevThr\n-> 60 sec";
     stars.length[3] = 60;
     scenes[n] = stars;
 
@@ -189,8 +198,10 @@ void planeApp::initScenes(){
     revolution.no = n;
     revolution.segments = 2;
     revolution.instructions[0] = "Take someone's \nhand. \nSpin and lean \nout as far as \npossible.";
+    revolution.analysis[0] = "* \n-> 20 sec";
     revolution.length[0] = 20;
     revolution.instructions[1] = "Let go...";
+    revolution.analysis[1] = "* \n-> 20 sec";
     revolution.length[1] = 20;
     scenes[n] = revolution;
 
@@ -206,16 +217,22 @@ void planeApp::initScenes(){
     sun.no = n;
     sun.segments = 6;
     sun.instructions[0] = "Stand on one leg.";
+    sun.analysis[0] = "- \n-> 25 sec";
     sun.length[0] = 25;
     sun.instructions[1] = "Hope from one \nspot to the other.";
+    sun.analysis[1] = "* onLost event\n-> 20 sec";
     sun.length[1] = 20;
     sun.instructions[2] = "Hope from one \nspot to the other.\nEveryone in unison.";
+    sun.analysis[2] = "* onLost event\n-> 20 sec";
     sun.length[2] = 20;
     sun.instructions[3] = "FREEZE!";
+    sun.analysis[3] = "* velocity < freezeMaxVel\n-> 20 sec || all frozen";
     sun.length[3] = 20;
     sun.instructions[4] = "Run in every \ndirection at once.";
+    sun.analysis[4] = "* \n-> 40 sec";
     sun.length[4] = 40;
     sun.instructions[5] = "FREEZE!";
+    sun.analysis[5] = "* velocity < freezeMaxVel\n-> 20 sec || all frozen";
     sun.length[5] = 13;
     scenes[n] = sun;
 
@@ -238,10 +255,13 @@ void planeApp::initScenes(){
     eclipse.no = n;
     eclipse.segments = 4;
     eclipse.instructions[0] = "Now align \nyourself in \nfront of me.\nAnd follow me.";
+    eclipse.analysis[0] = "- \n-> 40 sec";
     eclipse.length[0] = 40;
     eclipse.instructions[1] = "Step out \nof the line.\nStep into \nthe line.";
+    eclipse.analysis[1] = "* x == main.x\n-> 20 sec";
     eclipse.length[1] = 20;
     eclipse.instructions[2] = "Disperse very \nslowly towards \nthe edges.";
+    eclipse.analysis[2] = "* edge-proximity = opacity \n-> 15 sec";
     eclipse.length[2] = 15;
     scenes[n] = eclipse;
 
@@ -257,14 +277,19 @@ void planeApp::initScenes(){
     shooting.no = n;
     shooting.segments = 4;
     shooting.instructions[0] = "Move like a \nshooting star.";
+    shooting.analysis[0] = "* onLost event \n-> 25 sec";
     shooting.length[0] = 25;
     shooting.instructions[1] = "Drop to the \nground!";
+    shooting.analysis[1] = "* onLost event \n-> 15 sec";
     shooting.length[1] = 15;
     shooting.instructions[2] = "Exhale.\nLook at the sky.";
+    shooting.analysis[2] = "- \n-> 15 sec";
     shooting.length[2] = 15;
     shooting.instructions[3] = "Stand up";
+    shooting.analysis[3] = "- \n-> 10 sec";
     shooting.length[3] = 10;
     shooting.instructions[4] = "Thank you";
+    shooting.analysis[4] = "- \n-> 5 sec";
     shooting.length[4] = 5;
     scenes[n] = shooting;
 
@@ -312,7 +337,7 @@ void planeApp::update(){
     }
     for(std::map<int, Blob>::iterator it = blobs.begin(); it != blobs.end(); ++it){
         Blob* b = &it->second;
-        b->analyzeNeighbors(blobPositions, keepDistanceThr, steadyRewardTime);
+        b->analyzeNeighbors(blobPositions, distStdDevThr, steadyRewardTime);
     }
 
     // SCHEDULING
@@ -1060,7 +1085,7 @@ void planeApp::draw(){
 
         string instruction = scenes[scene].instructions[segment];
         ofFill(); ofSetColor(255);
-        font.drawString(instruction, 50, 50);
+        fontBg.drawString(instruction, 50, 50);
 
         ofPopMatrix();
 
@@ -1124,33 +1149,6 @@ void planeApp::drawScreen(int x, int y, float scale){
     for (vector<ofPtr<mediaElement> >::iterator it = fgMedia.begin(); it != fgMedia.end(); ++it) {
         (**it).draw(x, y, scale);   // if ((**it).blend) 
     }
-
-    // extra things to draw? // will become video later on!
-    // if (scene==1 && !transition) {
-    //     if (segment==2 || segment==3) {
-
-    //         for(std::map<int, Blob>::iterator it = blobs.begin(); it != blobs.end(); ++it){
-    //             Blob* b = &it->second;
-
-    //             if (b->movingMean) {
-    //                 for(std::map<int, Neighbor>::iterator iter = b->neighbors.begin(); iter != b->neighbors.end(); ++iter){
-    //                     Neighbor* nb = &iter->second;
-    //                     if (nb->steadyDistance && blobs[nb->id].movingMean) {
-    //                         // draw a line between blob and steady neighbor
-    //                         ofNoFill(); ofSetColor(255);
-    //                         float p1x = x + (offsetX + b->position.x * mapSiteW) * scale;
-    //                         float p1y = y + (offsetY + b->position.y * mapSiteH) * scale;
-    //                         float p2x = x + (offsetX + blobs[nb->id].position.x * mapSiteW) * scale;
-    //                         float p2y = y + (offsetY + blobs[nb->id].position.y * mapSiteH) * scale;
-    //                         ofLine( p1x, p1y, p2x, p2y );
-    //                         // ofLine(x + b->position.x*scale, y + b->position.y*scale, x + blobs[nb->id].position.x*scale, y + blobs[nb->id].position.y*scale);
-    //                     }
-    //                 }
-    //             }
-    //         }
-
-    //     }
-    // }
     
     ofDisableBlendMode();
     // ofDisableAlphaBlending();
@@ -1164,7 +1162,7 @@ void planeApp::drawScreen(int x, int y, float scale){
 
     string instruction = scenes[scene].instructions[segment];
     ofFill(); ofSetColor(255);
-    font.drawString(instruction, x+20, y+projectionH*scale*0.8);
+    fontBg.drawString(instruction, x+20, y+projectionH*scale*0.8);
 
     if (flash) {
         ofEnableAlphaBlending();
@@ -1182,33 +1180,49 @@ void planeApp::drawAnalysis(int x, int y, float scale){
     ofNoFill(); ofSetColor(255);
     ofRect(x,y,projectionW*scale,projectionH*scale);
 
+    string analysisTxt = scenes[scene].analysis[segment];
+    ofFill(); ofSetColor(255);
+    fontSm.drawString(analysisTxt, x+20, y + projectionH*scale*0.05);
 
-    if (scene==1) {
+
+    if (scene==0) {
+        // IDLE mode
+        // draw circle for each blob
+        int bx = x + 100; int by = y + 150;
+        ofFill();
+        for(std::map<int, Blob>::iterator it = blobs.begin(); it != blobs.end(); ++it){
+            Blob* b = &it->second;
+            ofSetColor(50);
+            ofCircle(bx, by, 50);
+            bx += 130;
+            if (bx > projectionW-300) {
+                bx = x + 100;
+                by += 130;
+            }
+        }
+    } else if (scene==1) {
         if( segment==0 || segment==1 ) {
-
             // STAND STILL
             // draw circle for each blob, and display frozen, frozentimer
-            int bx = x + 100; int by = y + 100;
+            int bx = x + 100; int by = y + 150;
             ofFill();
             for(std::map<int, Blob>::iterator it = blobs.begin(); it != blobs.end(); ++it){
                 Blob* b = &it->second;
-//                int add = b.frozenTimer < 10 ? b.frozenTimer*5 : 50;
-//                if(b.frozen) ofSetColor(200+add,0,200+add); else ofSetColor(100);
                 if(b->properFreeze) {
                     if(segment==1 && b->frozenTimer > freezeMaxTime) {
-                        ofSetColor(50);
+                        ofSetColor(0);
                     } else ofSetColor(255);
                 } else if(b->frozen) ofSetColor(100);
                 else ofSetColor(50);
 
                 ofCircle(bx, by, 50);
 
-                string textStr = "id\t: " + ofToString(b->id);
-                textStr += "\nvel\t: " + ofToString(b->vel, 2);
-                textStr += "\nfrozen\t: "+ ofToString(b->frozen ? "true" : "false");
-                textStr += "\nproperFreeze : "+ ofToString(b->properFreeze ? "true" : "false");
-                textStr += "\noverFrozen : "+ ofToString(b->overFrozen ? "true" : "false");
-                textStr += "\nfrozenTimer : " + ofToString(b->frozenTimer);
+                string textStr = "id\t\t: " + ofToString(b->id);
+                textStr += "\nvel\t\t: " + ofToString(b->vel, 2);
+                textStr += "\nfrozen\t\t: "+ ofToString(b->frozen ? "true" : "false");
+                textStr += "\nproperFreeze \t: "+ ofToString(b->properFreeze ? "true" : "false");
+                textStr += "\noverFrozen \t: "+ ofToString(b->overFrozen ? "true" : "false");
+                textStr += "\nfrozenTimer \t: " + ofToString(b->frozenTimer);
                 ofDrawBitmapStringHighlight(textStr, bx+70, by -30);
 
                 by += 110;
@@ -1217,7 +1231,7 @@ void planeApp::drawAnalysis(int x, int y, float scale){
         } else if( segment==2 || segment==3 ) {
 
             // KEEP THE DISTANCE
-            int bx = x + 100; int by = y + 100;
+            int bx = x + 100; int by = y + 150;
             ofFill();
             for(std::map<int, Blob>::iterator it = blobs.begin(); it != blobs.end(); ++it){
                 Blob* b = &it->second;
@@ -1246,7 +1260,7 @@ void planeApp::drawAnalysis(int x, int y, float scale){
         if (segment==1 || segment==2) {
 
             // HOP
-            int bx = x + 100; int by = y + 100;
+            int bx = x + 100; int by = y + 150;
             ofFill();
             for(std::map<int, Blob>::iterator it = blobs.begin(); it != blobs.end(); ++it){
                 Blob* b = &it->second;
