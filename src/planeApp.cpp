@@ -1,6 +1,12 @@
 #include "planeApp.h"
 #include "ofBitmapFont.h"
 
+
+std::ostream& tcout() {
+  // Todo: get a timestamp in the desired format
+  return std::cout << ofGetFrameNum() << " \t";
+}
+
 //--------------------------------------------------------------
 void planeApp::setup(){
 
@@ -108,7 +114,7 @@ void planeApp::setup(){
 //    }
 
     // listen on the given port
-	cout << "listening for osc messages on port " << PORT << "\n";
+	tcout() << "listening for osc messages on port " << PORT << "\n";
 	receiver.setup(PORT);
 
 	ofBackground(255);
@@ -116,9 +122,8 @@ void planeApp::setup(){
 }
 
 void planeApp::recalculatePerspective(int & v) {
-    cout << "recalculatePerspective" << endl;
-    cout << "value " << v << endl;
-    cout << "siteW " << siteW << "   siteH " << siteH << endl;
+    tcout() << "recalculatePerspective" << endl;
+    tcout() << "siteW " << siteW << "   siteH " << siteH << endl;
     this->setPerspective();
 }
 
@@ -298,7 +303,7 @@ void planeApp::initScenes(){
     ofAddListener( (*bgVideos[n][bgVideos[n].size()-1]).fadeOutEnd, this, &planeApp::bgMediaFadedOut );
     ofAddListener( (*bgVideos[n][0]).fadeInEnd, this, &planeApp::bgMediaFadedIn );
 
-    cout << "there are " << scenes.size() << " scenes" << endl;
+    tcout() << "there are " << scenes.size() << " scenes" << endl;
 
     sceneChange = true;
     nextSegment(1);
@@ -316,7 +321,7 @@ void planeApp::update(){
         Blob* b = &it->second;
     	b->update(minLostTime);
     	if( !b->isAlive() ) {
-//            cout << "erase blob " << b->id << endl;
+            tcout() << "Blob dead\t" << b->id << endl;
             ofNotifyEvent(b->prepareToDie,b->id,b);
     		blobs.erase(it++);
             blobCountChange();
@@ -324,6 +329,7 @@ void planeApp::update(){
     		++it;
     	}
     }
+    // tcout() << "Blob count\t" << blobs.size() << "\t\tvideo count\t" << fgMedia.size() << endl;
 
     // ANALYSIS
     std::map<int, ofPoint> blobPositions;
@@ -346,7 +352,7 @@ void planeApp::update(){
     if (flash) {
         flashCnt++;
         if (flashCnt > flashMax) {
-            cout << "flash done" << endl;
+            // tcout() << "flash done" << endl;
             flashCnt = 0;
             flash = false;
             beginSegment();
@@ -366,19 +372,19 @@ void planeApp::update(){
     if (scene==0) {
         // fade out idle-mode video, connect fade-End to transition to next Segment
         if(success && !transition) {
-            cout << "scene 0 success" << endl;
+            tcout() << "scene 0 success" << endl;
             endSegment(1);
         }
     } else if (scene==1) {
         if (segment==1 && successCnt > newStarMax && !transition) {
-            cout << "scene 1 segment 1 success" << endl;
+            tcout() << "scene 1 segment 1 success" << endl;
             endSegment(1);
         }
     } else if (scene==3) {
         if (segment==4 || segment==6 ) {
             // FREEZE!
             if(success && !transition) {
-                cout << "FREEZE success" << endl;
+                tcout() << "FREEZE success" << endl;
                 endSegment(1);
             }
         }
@@ -393,7 +399,7 @@ void planeApp::update(){
     while (iter != fgMedia.end()) {
         (**iter).update();
         if ((**iter).dead) {
-            cout << "delete video " << (**iter).file << "  size " << fgMedia.size() << endl;
+            // tcout() << "delete video " << (**iter).file << "  size " << fgMedia.size() << endl;
             iter = fgMedia.erase(iter);
         } else {
             ++iter;
@@ -408,7 +414,7 @@ void planeApp::update(){
 }
 
 void planeApp::bgMediaFadedOut(int & trans) {
-    cout << "bgMediaFadedOut" << endl;
+    tcout() << "bgMediaFadedOut" << endl;
     // set moveOn to true, instead of calling nextSegment()
     // to avoid conflicting threading
     moveOn = true;
@@ -416,13 +422,13 @@ void planeApp::bgMediaFadedOut(int & trans) {
 
 // trans -1 : trigger first fade from main-loop and not from faded-event
 void planeApp::fgMediaFadedOut(int & trans) {
-    cout << "fgMediaFadedOut  " << trans << "  fgmedia size = " << fgMedia.size() << endl;
+    tcout() << "fgMediaFadedOut  " << trans << "  fgmedia size = " << fgMedia.size() << endl;
     
     if (fgMedia.size()>0) {
         
         if (trans == -1) {
             ofAddListener( (*fgMedia.back()).fadeOutEnd, this, &planeApp::fgMediaFadedOut );
-            cout << "call outroTransformation() on fgMedia[" << (fgMedia.size()-1) << "]" << endl;
+            tcout() << "call outroTransformation() on fgMedia[" << (fgMedia.size()-1) << "]" << endl;
             ((*fgMedia.back()).*((*fgMedia.back()).outroTransformation))();
 
         } else {
@@ -432,7 +438,7 @@ void planeApp::fgMediaFadedOut(int & trans) {
             if (fgMedia.size()>1) {
                 // fade new last fgMedia object
                 ofAddListener( (*fgMedia[fgMedia.size()-2]).fadeOutEnd, this, &planeApp::fgMediaFadedOut );
-                cout << "call outroTransformation() on fgMedia[" << (fgMedia.size()-2) << "]" << endl;
+                tcout() << "call outroTransformation() on fgMedia[" << (fgMedia.size()-2) << "]" << endl;
                 ((*fgMedia[fgMedia.size()-2]).*((*fgMedia[fgMedia.size()-2]).outroTransformation))();
             } else {
                 // fade BG now
@@ -454,11 +460,11 @@ void planeApp::fgMediaFadedOut(int & trans) {
 }
 
 void planeApp::fgMediaFadedIn(int & trans) {
-    cout << "fgMediaFadedIn  " << trans << endl;
+    tcout() << "fgMediaFadedIn  " << trans << endl;
     if (fgMedia.size() > 0) {
         for (vector<ofPtr<mediaElement> >::iterator it = fgMedia.begin(); it != fgMedia.end(); it++) {
             if (!(**it).visible) {
-                cout << "fgMediaFadedIn   " << (**it).file << endl;
+                tcout() << "fgMediaFadedIn   " << (**it).file << endl;
                 ofAddListener( (**it).fadeInEnd, this, &planeApp::fgMediaFadedIn );
                 ((**it).*((**it).introTransformation))();
             }
@@ -467,12 +473,12 @@ void planeApp::fgMediaFadedIn(int & trans) {
 }
 
 void planeApp::bgMediaFadedIn(int & trans) {
-    cout << "bgMediaFadedIn" << endl;
+    tcout() << "bgMediaFadedIn" << endl;
     transition = false;
 
     // make new blob connections, to ensure blobs are connected to video elements, if necessary
     for(std::map<int, Blob>::iterator it = blobs.begin(); it != blobs.end(); ++it){
-        cout << "new blob connection " << endl;
+        // tcout() << "new blob connection " << endl;
         Blob* b = &it->second;
         ofNotifyEvent(b->onCreate,b->id,b);
     }
@@ -485,7 +491,7 @@ void planeApp::bgMediaFadedIn(int & trans) {
 }
 
 void planeApp::blobOnLost(int & blobID) {
-    // cout << "BLOB " << blobID << " just got lost" << endl;
+    // tcout() << "BLOB " << blobID << " just got lost" << endl;
     if (!transition) {
         if (scene==3) {
             // SUN explosions
@@ -525,7 +531,13 @@ void planeApp::blobOnLost(int & blobID) {
 }
 
 void planeApp::blobSteady(Pair & pair) {
-    cout << "blobSteady() \t" << pair.blob1 << " + " << pair.blob2 << endl;
+    tcout() << "BLOBS \t";
+    for(std::map<int, Blob>::iterator it = blobs.begin(); it != blobs.end(); ++it){
+            Blob* b = &it->second;
+            cout << b->id << "\t";
+    }
+    cout << endl;
+    tcout() << "blobSteady() \t\t" << pair.blob1 << " + " << pair.blob2 << endl;
     // add particle trail video between stars
     if (!transition && scene==1 && segment>1) {
         Blob* b1 = &blobs[pair.blob1];
@@ -541,31 +553,36 @@ void planeApp::blobSteady(Pair & pair) {
         }
 
         if (!exists) {
-            cout << "\t\t\tadd video bridge" << endl;
+            tcout() << "\t\t\tadd video bridge" << endl;
             string newVideoName = "video/2_stars/ATTRACTION_link-01-animation.mov";
             fgMedia.push_back(ofPtr<mediaElement>( new videoElement(newVideoName)));
             (*fgMedia[fgMedia.size()-1]).setDisplay(b1->position.x, b1->position.y, false);
+            (*fgMedia[fgMedia.size()-1]).w = ofDist(b1->position.x, b1->position.y, b2->position.x, b2->position.y);
             (*fgMedia[fgMedia.size()-1]).reset();
             (*fgMedia[fgMedia.size()-1]).bridge(b1->id, b2->id);
+        } else {
+            tcout() << "\t\t\talready exists" << endl;
         }
 
+    } else {
+        tcout() << "\t\t\tdoesn't apply" << endl;
     }
 }
 
 void planeApp::blobSteadyReward(Pair & pair) {
-    cout << "blobSteadyReward() " << pair.blob1 << " + " << pair.blob2 << endl;
+    // tcout() << "blobSteadyReward() \t" << pair.blob1 << " + " << pair.blob2 << endl;
     if (!transition && scene==1 && segment>1) {
         ofPtr<mediaElement> vid1 = blobs[pair.blob1].mediaLink;
         ofPtr<mediaElement> vid2 = blobs[pair.blob2].mediaLink;
 
         // replace video with sparklier star
         if (vid1 != NULL) {
-            cout << "blob " << pair.blob1 << " \t\tfound vid" << endl;
+            // tcout() << "blob " << pair.blob1 << " \t\tfound vid" << endl;
             (*vid1).loadMovie("video/2_stars/ATTRACTION_star_glow-01-animation.mov");
             (*vid1).reset();
         }
         if (vid2 != NULL) {
-            cout << "blob " << pair.blob2 << " \t\tfound vid" << endl;
+            // tcout() << "blob " << pair.blob2 << " \t\tfound vid" << endl;
             (*vid2).loadMovie("video/2_stars/ATTRACTION_star_glow-01-animation.mov");
             (*vid2).reset();
         }
@@ -573,12 +590,12 @@ void planeApp::blobSteadyReward(Pair & pair) {
 }
 
 void planeApp::blobBreakSteady(Pair & pair) {
-    cout << "blobBreakSteady() \t" << pair.blob1 << " + " << pair.blob2 << endl;
+    tcout() << "blobBreakSteady() \t" << pair.blob1 << " + " << pair.blob2 << endl;
     // if (!transition) {
     //     ofPtr<mediaElement> vid = blobs[blobID].mediaLink; 
     //     // replace video with normal star, only if it was in steadyrewarded mode!
     //     if (vid != NULL && blobs[blobID].steadyRewarded) {
-    //         // cout << "blob " << blobID << " \t\tfound vid" << endl;
+    //         // tcout() << "blob " << blobID << " \t\tfound vid" << endl;
     //         (*vid).loadMovie("video/2_stars/INDIV STAR 2 loop-H264-10mbps.mp4");
     //         (*vid).reset();
     //     }
@@ -586,25 +603,26 @@ void planeApp::blobBreakSteady(Pair & pair) {
     //     // for (vector<ofPtr<mediaElement> >::iterator it = fgMedia.begin(); it != fgMedia.end(); it++) {
     //     //     if (*it == blobs[blobID].bridgeLink) {
     //     //         blobs[blobID].bridgeLink = ofPtr<mediaElement>();
-    //     //         cout << "blob " << blobID << " break steady - unlinked bridge" << endl;
+    //     //         tcout() << "blob " << blobID << " break steady - unlinked bridge" << endl;
     //     //         fgMedia.erase(it);
     //     //         break;
     //     //     }
     //     // }
     // }
     if (!transition && scene==1 && segment>1) {
-        Blob* b1 = &blobs[pair.blob1];
-        Blob* b2 = &blobs[pair.blob2];
-
         // delete bridge video if it exists
+        bool found = false;
         for (vector<ofPtr<mediaElement> >::iterator it = fgMedia.begin(); it != fgMedia.end(); it++) {
             if ((**it).bridgeVideo && (**it).bridgeBlobID[0]==pair.blob1 && (**it).bridgeBlobID[1]==pair.blob2) {
-                cout << "\t\t\tunlinked bridge" << endl;
-                fgMedia.erase(it);
-                break;
+                tcout() << "\t\t\tunlinked bridge" << endl;
+                (**it).dead = true;
+                found = true;
             }
         }
+        if (!found) tcout() << "\t\t\tbridge not found" << endl;
 
+    } else {
+        tcout() << "\t\t\tdoesn't apply" << endl;
     }
 }
 
@@ -612,13 +630,13 @@ void planeApp::blobBreakSteady(Pair & pair) {
 
 
 void planeApp::blobOnFreeze(int & blobID) {
-//    cout << "BLOB " << blobID << " froze!" << endl;
+//    tcout() << "BLOB " << blobID << " froze!" << endl;
     if (!transition) {
         if (scene==1) {
             if (segment==0 || segment==1) {
                 // STAND STILL
                 // create new video element
-    //            cout << "blob " << blobID << " \t\tfreeze ! " << endl;
+    //            tcout() << "blob " << blobID << " \t\tfreeze ! " << endl;
                 fgMedia.push_back(ofPtr<mediaElement>( new videoElement("video/2_stars/INDIV STAR 2 loop-H264-10mbps.mp4")));
                 blobs[blobID].mediaLink = fgMedia[fgMedia.size()-1];
                 (*fgMedia[fgMedia.size()-1]).setDisplay(ofRandom(projectionW-100), ofRandom(projectionH-100));
@@ -651,12 +669,12 @@ void planeApp::blobOnFreeze(int & blobID) {
     }
 }
 void planeApp::blobUnFreeze(int & blobID) {
-
     if (!transition) {
         if (scene==1) {
             if (segment==0 || segment==1) {
-    //            cout << "BLOB " << blobID << " moved again!  mediaLink = " << blobs[blobID].mediaLink << endl;
+    //            tcout() << "BLOB " << blobID << " moved again!  mediaLink = " << blobs[blobID].mediaLink << endl;
                 // STAND STILL
+                tcout() << "blobUnFreeze()\t\t" << blobID << endl;
                 this->blobUnlink(blobID);
             }
         }
@@ -668,6 +686,7 @@ void planeApp::blobOverFreeze(int & blobID) {
         if (scene==1) {
             if (segment==1) {
                 // no more video, been frozen too long!
+                tcout() << "blobOverFreeze()\t\t" << blobID << endl;
                 this->blobUnlink(blobID);
             }
         }
@@ -678,12 +697,12 @@ void planeApp::blobOnCreate(int & blobID) {
    
     if (!transition) {
         // first clean up, all related blob settings
+        tcout() << "blobOnCreate() \t" << blobID << endl;
         this->blobUnlink(blobID);
         blobs[blobID].videoTrace = false;
         blobs[blobID].mediaLink = ofPtr<mediaElement>();  // TODO how to release ofPtr ? 
         
 
-        cout << "BLOB " << blobID << " blobOnCreate!  medialink: " << blobs[blobID].mediaLink << endl;
 
         // then assign the appropriate ones
         if (scene==0) {
@@ -693,7 +712,7 @@ void planeApp::blobOnCreate(int & blobID) {
             if (segment==2 || segment==3) {
                 // KEEP THE DISTANCE
                 // create new video element
-    //            cout << "blob " << blobID << " \t\tfreeze ! " << endl;
+    //            tcout() << "blob " << blobID << " \t\tfreeze ! " << endl;
                 fgMedia.push_back(ofPtr<mediaElement>( new videoElement("video/2_stars/INDIV STAR 2 loop-H264-10mbps.mp4")));
                 blobs[blobID].mediaLink = fgMedia[fgMedia.size()-1];
                 blobs[blobID].videoTrace = true;
@@ -711,7 +730,7 @@ void planeApp::blobOnCreate(int & blobID) {
             // fgMedia.push_back(ofPtr<mediaElement>( new videoElement("video/5_eclipse/PLANET_"+ofToString(randomPlanet)+".mov")));
             float x = offsetX + blobs[blobID].position.x * mapSiteW;
             float y = offsetY + blobs[blobID].position.y *mapSiteH;
-            cout << "init planet   pos: " << x << "/" << y << endl;
+            tcout() << "init planet   pos: " << x << "/" << y << endl;
             (*fgMedia[fgMedia.size()-1]).setDisplay(x, y, 500, 500, true);
             // (*fgMedia[fgMedia.size()-1]).introTransformation = &mediaElement::moveInFromSide;
             blobs[blobID].mediaLink = fgMedia[fgMedia.size()-1];
@@ -770,7 +789,7 @@ void planeApp::blobCountChange() {
 }
 
 void planeApp::videoFollowBlob(int & blobID) {
-    // cout << "blob " << blobID << " \t\tvideoFollowBlob" << endl;
+    // tcout() << "blob " << blobID << " \t\tvideoFollowBlob" << endl;
     // find videoElement
     if (!transition) {
         ofPtr<mediaElement> vid = blobs[blobID].mediaLink; 
@@ -778,7 +797,7 @@ void planeApp::videoFollowBlob(int & blobID) {
         float bx;
         float by;
         if (vid != NULL) {
-            // cout << "blob " << blobID << " \t\tfound vid" << endl;
+            // tcout() << "blob " << blobID << " \t\tfound vid" << endl;
             bx = offsetX + blobs[blobID].position.x * mapSiteW;
             by = offsetY + blobs[blobID].position.y *mapSiteH;
             if (!(*vid).moveElement) {
@@ -789,52 +808,51 @@ void planeApp::videoFollowBlob(int & blobID) {
         }
         // update position of sparkly bridge
         if (scene==1 && segment>1) {
-            // ofPtr<mediaElement> bridge; 
-            // for (vector<ofPtr<mediaElement> >::iterator it = fgMedia.begin(); it != fgMedia.end(); it++) {
-            //     if (*it == blobs[blobID].bridgeLink) {
-            //         vid = *it;
-            //         break;
-            //     }
-            // }
-            // if (bridge!=NULL) {
-            //     Blob* b = &blobs[blobID];
+            // check if bridge exists
+            ofPtr<mediaElement> bridge; 
+            int blob2ID;
+            for (vector<ofPtr<mediaElement> >::iterator it = fgMedia.begin(); it != fgMedia.end(); it++) {
+                if ((**it).bridgeVideo && ((**it).bridgeBlobID[0]==blobID || (**it).bridgeBlobID[1]==blobID)) {
+                    bridge = (*it);
+                    blob2ID = (**it).bridgeBlobID[0]==blobID ? (**it).bridgeBlobID[1] : (**it).bridgeBlobID[0];
+                    break;
+                }
+            }
 
-            //     for(std::map<int, Neighbor>::iterator iter = b->neighbors.begin(); iter != b->neighbors.end(); ++iter){
-            //         Neighbor* nb = &iter->second;
-            //         float bx2 = blobs[nb->id].position.x;
-            //         float by2 = blobs[nb->id].position.y;
-            //         float rot = atan2(bx-bx2,by-by2);
-            //         (*vid).setDisplay( bx, by, false);
-            //         (*vid).rotation = ofDegToRad(rot);
-            //     }
-            // }
+            if (bridge != NULL) {
+                float bx2 = offsetX + blobs[blob2ID].position.x * mapSiteW;
+                float by2 = offsetY + blobs[blob2ID].position.y *mapSiteH;
+                (*bridge).setDisplay( bx, by, false);
+                (*bridge).w = ofDist(bx, by, bx2, by2);
+                // (*bridge).rotation = ofRadToDeg(atan2(bx2-bx,by2-by));
+            }
         }
     }
 }
 
 void planeApp::blobUnlink(int & blobID) {
     // making sure, a blob goes to die and untethers all connections
-    cout << " blobUnlink() \t" << blobID << "\tmediaLink: " << blobs[blobID].mediaLink << endl;
+    tcout() << "blobUnlink() \t" << blobID << "\tmediaLink: " << blobs[blobID].mediaLink << endl;
     for (vector<ofPtr<mediaElement> >::iterator it = fgMedia.begin(); it != fgMedia.end(); it++) {
         if (*it == blobs[blobID].mediaLink) {
             blobs[blobID].mediaLink = ofPtr<mediaElement>();
-            cout << blobID << "\t\t\terased video, unlinked blob " <<  endl;
-            fgMedia.erase(it);
+            tcout() << "\t\t\tunlinked blob " <<  endl;
+            (**it).dead = true;
             break;
         }
     }
     // delete bridge video if it exists
     for (vector<ofPtr<mediaElement> >::iterator it = fgMedia.begin(); it != fgMedia.end(); it++) {
         if ((**it).bridgeVideo && ((**it).bridgeBlobID[0]==blobID || (**it).bridgeBlobID[1]==blobID)) {
-            cout << blobID << "\t\t\terased video, unlinked bridge" << endl;
-            fgMedia.erase(it);
+            tcout() << "\t\t\tunlinked bridge\t" << (**it).bridgeBlobID[0] << " " << (**it).bridgeBlobID[1] << endl;
+            (**it).dead = true;
             break;
         }
     }
 }
 
 void planeApp::beginSegment() {
-    cout << "beginSegment()" << endl;
+    tcout() << "beginSegment()" << endl;
     // ONLY FADE BG IN, IF SCENE CHANGE HAPPENED
     if (sceneChange) {
         cout << "beginSegment() fade in BG   " << scene << ":" << segment << endl;
@@ -850,7 +868,7 @@ void planeApp::beginSegment() {
 }
 
 void planeApp::endSegment(int direction) {
-    cout << "endSegment()   " << scene << ":" << segment << endl;
+    tcout() << "endSegment()   " << scene << ":" << segment << endl;
     segmentChange = direction;
 
     // ONLY DO BG-VIDEO TRANSITIONS IF A SCENE CHANGE IS COMING UP!
@@ -894,9 +912,8 @@ void planeApp::nextSegment(int direction) {
         segment = scenes[scene].segments -1;
     }
 
-
-    if (sceneChange) cout << "scene " << scene << ": " << scenes[scene].name << endl;
-    cout << "nextSegment() " << scene << ": segment " << segment << endl;
+    if (sceneChange) tcout() << "scene " << scene << ": " << scenes[scene].name << endl;
+    tcout() << "------------------------------------------\t" << scene << " : " << segment << endl;
 
     initSegment();
 }
@@ -979,7 +996,7 @@ void planeApp::receiveOsc(){
 		if(m.getAddress() == "/blobserver/startFrame"){
 
             int flowid = m.getArgAsInt32(1);
-            // cout << "start frame flow " << flowid << endl;
+            // tcout() << "start frame flow " << flowid << endl;
             if (flowid==bgsubtractorFlowId) {
                 bgsubtractorCnt = 0;
                 bgsubtractorVel = 0.f;
@@ -988,10 +1005,10 @@ void planeApp::receiveOsc(){
 
 		} else if(m.getAddress() == "/blobserver/endFrame"){
             int flowid = m.getArgAsInt32(1);
-            // cout << "end frame flow " << flowid << endl;
+            // tcout() << "end frame flow " << flowid << endl;
             if (flowid==bgsubtractorFlowId) {
                 bgsubtractorAvVel = (bgsubtractorCnt>0) ? bgsubtractorVel/bgsubtractorCnt : 0;
-                // cout << "bgsubtractorCnt\t" << bgsubtractorCnt << "\tavg vel\t" << (bgsubtractorVel/bgsubtractorCnt) << endl;
+                // tcout() << "bgsubtractorCnt\t" << bgsubtractorCnt << "\tavg vel\t" << (bgsubtractorVel/bgsubtractorCnt) << endl;
             } 
 
 		} else if(m.getAddress() == "/blobserver/bgsubtractor"){
@@ -1009,7 +1026,7 @@ void planeApp::receiveOsc(){
             bgsubtractorCnt++;
             bgsubtractorVel += sqrt( pow(velx,2) + pow(vely,2) );
 
-            // cout << "bgsubtractor : " << blobid << " " << posx << "/" << posy << " " << size << " " << velx << "/" << vely << " " << age << " " << lost << endl;
+            // tcout() << "bgsubtractor : " << blobid << " " << posx << "/" << posy << " " << size << " " << velx << "/" << vely << " " << age << " " << lost << endl;
 
 		} else if(m.getAddress() == "/blobserver/stitch"){
 
@@ -1022,7 +1039,7 @@ void planeApp::receiveOsc(){
             string cam = m.getArgAsString(2);
             float val = ofToFloat( m.getArgAsString(3) );
             if (var.compare("exposureTime") == 0) cameraExposure = val;
-            cout << "BROADCAST" << var << ", " << source << ", " << cam << ", " << val << endl;
+            tcout() << "BROADCAST" << var << ", " << source << ", " << cam << ", " << val << endl;
 
 		} else if(m.getAddress() == "/blobserver/hog"){
 			// parse incoming elements:  iiiffii: id x y vx vy age lost
@@ -1042,6 +1059,7 @@ void planeApp::receiveOsc(){
                 // create new blob instance
                 newBlob = true;
 				blobs[blobid].id = blobid;
+                tcout() << "New Blob\t" << blobid << endl;
                 blobs[blobid].perspectiveMat = &this->perspectiveMat;
                 // add Events, so blobs can report back to planeApp
                 ofAddListener( blobs[blobid].onLost, this, &planeApp::blobOnLost );
@@ -1063,7 +1081,7 @@ void planeApp::receiveOsc(){
             b->age = age;
             b->lostDuration = lost;
             if (newBlob) ofNotifyEvent( blobs[blobid].onCreate, blobid, &blobs[blobid] );
-//			cout << "blob " << blobid << "   " << posx << "|" << posy << "   - lifetime: " << b->lifetime << "\n";
+//			tcout() << "blob " << blobid << "   " << posx << "|" << posy << "   - lifetime: " << b->lifetime << "\n";
 		}
 		else{
 			// unrecognized message
@@ -1195,7 +1213,7 @@ void planeApp::drawAnalysis(int x, int y, float scale){
             ofSetColor(50);
             ofCircle(bx, by, 50);
             bx += 130;
-            if (bx > projectionW-300) {
+            if (bx < projectionW-300) {
                 bx = x + 100;
                 by += 130;
             }
@@ -1395,7 +1413,7 @@ void planeApp::drawTopDown(int x, int y, float scale, bool detailed) {
 
 void planeApp::exit() {
     // do some destructing here
-    cout << "goodbye" << endl;
+    tcout() << "goodbye" << endl;
 }
 
 
@@ -1430,17 +1448,17 @@ void planeApp::keyReleased(int key){
     }
 
     if (key=='p') {
-        cout << "make screenshot" << endl;
+        tcout() << "make screenshot" << endl;
         ofImage img;
         img.grabScreen(0,0,1425,700);
         string fileName = "plane_"+ofGetTimestampString()+".png";
         img.saveImage(fileName);
-        cout << "saved screenshot " << fileName.c_str() << endl;
+        tcout() << "saved screenshot " << fileName.c_str() << endl;
     }
 
     if (key>='0' && key<='5') {
         int s = int(key) - int('0');
-        cout << "key input = " << key << " scene = " << s << endl;
+        tcout() << "key input = " << key << " scene = " << s << endl;
         jumpToScene(s);
     }
 }

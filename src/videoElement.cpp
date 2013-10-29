@@ -54,7 +54,7 @@ void videoElement::update() {
 }
 
 void videoElement::reset(bool visible) {
-    cout << "reset video " << file << "  " << visible << endl;
+    // cout << "reset video " << file << "  " << visible << endl;
     mediaElement::reset(visible);
     displaySpeed = 1.f;
     this->pause(false);

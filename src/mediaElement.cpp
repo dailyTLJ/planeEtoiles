@@ -35,7 +35,7 @@ void mediaElement::update() {
         if (goalDefined) {
             float distance = ofDist(position.x, position.y, goal.x, goal.y);
             if (distance < moveSpeed) {
-                cout << "mediaElement::update()  arrived at goal" << endl;
+                // cout << "mediaElement::update()  arrived at goal" << endl;
                 moveElement = false;
                 goalDefined = false;
                 visible = true;
@@ -70,7 +70,7 @@ void mediaElement::update() {
     if (scaling) {
         scale *= 0.95;
         if (scale < 0.05) {
-            cout << "mediaElement scaled away, call notifyEvent" << endl;
+            // cout << "mediaElement scaled away, call notifyEvent" << endl;
             visible = false;
             ofNotifyEvent(fadeOutEnd,this->w,this);
         }
@@ -126,13 +126,13 @@ void mediaElement::finishFast() {
 }
 
 void mediaElement::scaleAway() {
-    cout << "mediaElement::scaleAway" << endl;
+    // cout << "mediaElement::scaleAway" << endl;
     if (hide) scale = 0.01;
     scaling = true;
 }
 
 void mediaElement::moveInFromTop() {
-    cout << "mediaElement::moveInFromTop" << endl;
+    // cout << "mediaElement::moveInFromTop" << endl;
     goalDefined = true;
     moveElement = true;
     goal.set(position.x,position.y);
@@ -152,7 +152,7 @@ void mediaElement::moveInFromSide(int centerx, int centery) {
     // velocity.set(-2*sin(rot), -2*cos(rot));
     opacity = 1.0f;
     moveSpeed = 7;
-    cout << "mediaElement::moveInFromSide   rot: " << rot << "  position: " << position.x << "/" << position.y << "  goal: " << goal.x << "/" << goal.y << endl;
+    // cout << "mediaElement::moveInFromSide   rot: " << rot << "  position: " << position.x << "/" << position.y << "  goal: " << goal.x << "/" << goal.y << endl;
 }
 
 void mediaElement::fade(float speed) {
@@ -172,12 +172,12 @@ void mediaElement::fadeIn() {
 }
 
 void mediaElement::fadeOut(float speed) {
-    cout << "mediaElement::fadeOut  " << file << endl;
+    // cout << "mediaElement::fadeOut  " << file << endl;
     fade(-speed);
 }
 
 void mediaElement::fadeIn(float speed) {
-    cout << "mediaElement::fadeIn  " << file << endl;
+    // cout << "mediaElement::fadeIn  " << file << endl;
     opacity = 0.0f;
     fade(speed);
 }

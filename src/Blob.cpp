@@ -36,7 +36,7 @@ void Blob::follow(float x, float y, float frameW, float frameH, float margin){
         this->onEdge = true;
     } else this->onEdge = false;
 
-    this->position = transformPerspective(this->_rawPos);
+    this->newPosition = transformPerspective(this->_rawPos);
 
     TimedPoint rawPoint;
     rawPoint.set(x,y);
@@ -210,7 +210,9 @@ void Blob::update(int minLostTime){
 	if(this->updated == false) {
 		this->lifetime--;
 		return;
-	}
+	} else {
+        position = newPosition;
+    }
     this->lifetime = this->maxLifetime;
 	this->updated = false;
 	// now do analysis
