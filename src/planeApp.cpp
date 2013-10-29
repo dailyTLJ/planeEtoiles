@@ -525,7 +525,7 @@ void planeApp::blobOnLost(int & blobID) {
 }
 
 void planeApp::blobSteady(Pair & pair) {
-    cout << "blobSteady() " << pair.blob1 << " + " << pair.blob2 << endl;
+    cout << "blobSteady() \t" << pair.blob1 << " + " << pair.blob2 << endl;
     // add particle trail video between stars
     if (!transition && scene==1 && segment>1) {
         Blob* b1 = &blobs[pair.blob1];
@@ -541,7 +541,7 @@ void planeApp::blobSteady(Pair & pair) {
         }
 
         if (!exists) {
-            cout << "\t\tadd video bridge" << endl;
+            cout << "\t\t\tadd video bridge" << endl;
             string newVideoName = "video/2_stars/ATTRACTION_link-01-animation.mov";
             fgMedia.push_back(ofPtr<mediaElement>( new videoElement(newVideoName)));
             (*fgMedia[fgMedia.size()-1]).setDisplay(b1->position.x, b1->position.y, false);
@@ -573,7 +573,7 @@ void planeApp::blobSteadyReward(Pair & pair) {
 }
 
 void planeApp::blobBreakSteady(Pair & pair) {
-    cout << "blobBreakSteady() " << pair.blob1 << " + " << pair.blob2 << endl;
+    cout << "blobBreakSteady() \t" << pair.blob1 << " + " << pair.blob2 << endl;
     // if (!transition) {
     //     ofPtr<mediaElement> vid = blobs[blobID].mediaLink; 
     //     // replace video with normal star, only if it was in steadyrewarded mode!
@@ -599,7 +599,7 @@ void planeApp::blobBreakSteady(Pair & pair) {
         // delete bridge video if it exists
         for (vector<ofPtr<mediaElement> >::iterator it = fgMedia.begin(); it != fgMedia.end(); it++) {
             if ((**it).bridgeVideo && (**it).bridgeBlobID[0]==pair.blob1 && (**it).bridgeBlobID[1]==pair.blob2) {
-                cout << "blob break steady - unlinked bridge" << endl;
+                cout << "\t\t\tunlinked bridge" << endl;
                 fgMedia.erase(it);
                 break;
             }
@@ -814,11 +814,11 @@ void planeApp::videoFollowBlob(int & blobID) {
 
 void planeApp::blobUnlink(int & blobID) {
     // making sure, a blob goes to die and untethers all connections
-    cout << blobID << " blobUnlink   mediaLink: " << blobs[blobID].mediaLink << endl;
+    cout << " blobUnlink() \t" << blobID << "\tmediaLink: " << blobs[blobID].mediaLink << endl;
     for (vector<ofPtr<mediaElement> >::iterator it = fgMedia.begin(); it != fgMedia.end(); it++) {
         if (*it == blobs[blobID].mediaLink) {
             blobs[blobID].mediaLink = ofPtr<mediaElement>();
-            cout << blobID << "  blobUnlink unlinked blob " <<  endl;
+            cout << blobID << "\t\t\terased video, unlinked blob " <<  endl;
             fgMedia.erase(it);
             break;
         }
@@ -826,7 +826,7 @@ void planeApp::blobUnlink(int & blobID) {
     // delete bridge video if it exists
     for (vector<ofPtr<mediaElement> >::iterator it = fgMedia.begin(); it != fgMedia.end(); it++) {
         if ((**it).bridgeVideo && ((**it).bridgeBlobID[0]==blobID || (**it).bridgeBlobID[1]==blobID)) {
-            cout << blobID << "  blobUnlink unlinked bridge" << endl;
+            cout << blobID << "\t\t\terased video, unlinked bridge" << endl;
             fgMedia.erase(it);
             break;
         }
