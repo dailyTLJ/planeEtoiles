@@ -333,16 +333,16 @@ void planeApp::update(){
             if (oscActive && oscLastMsgTimer > oscLastMsgTimerMax) {
                 oscActive = false;
             }
-            tcout() << "." << endl;
+            // tcout() << "." << endl;
         }
 
         if (oscMsgReceived) {
-            tcout() << "BLOBS \t\t";
-            for(std::map<int, Blob>::iterator it = blobs.begin(); it != blobs.end(); ++it){
-                Blob* b = &it->second;
-                cout << b->id << "\t";
-            }
-            cout << endl;
+            // tcout() << "BLOBS \t\t";
+            // for(std::map<int, Blob>::iterator it = blobs.begin(); it != blobs.end(); ++it){
+            //     Blob* b = &it->second;
+            //     cout << b->id << "\t";
+            // }
+            // cout << endl;
 
         	// BLOB CLEANUP
             std::map<int,Blob>::iterator it = blobs.begin();
