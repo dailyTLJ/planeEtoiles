@@ -563,9 +563,10 @@ void planeApp::blobOnLost(int & blobID) {
 }
 
 void planeApp::blobSteady(Pair & pair) {
-    tcout() << "blobSteady() \t\t" << pair.blob1 << " + " << pair.blob2 << endl;
     // add particle trail video between stars
     if (!transition && scene==1 && segment>1) {
+        tcout() << "blobSteady() \t\t" << pair.blob1 << " + " << pair.blob2 << endl;
+
         Blob* b1 = &blobs[pair.blob1];
         Blob* b2 = &blobs[pair.blob2];
 
@@ -588,9 +589,6 @@ void planeApp::blobSteady(Pair & pair) {
         } else {
             tcout() << "\t\t\talready exists" << endl;
         }
-
-    } else {
-        tcout() << "\t\t\tdoesn't apply" << endl;
     }
 }
 
@@ -615,9 +613,9 @@ void planeApp::blobSteadyReward(Pair & pair) {
 }
 
 void planeApp::blobBreakSteady(Pair & pair) {
-    tcout() << "blobBreakSteady() \t" << pair.blob1 << " + " << pair.blob2 << endl;
-
     if (!transition && scene==1 && segment>1) {
+        tcout() << "blobBreakSteady() \t" << pair.blob1 << " + " << pair.blob2 << endl;
+
         ofPtr<mediaElement> vid1 = blobs[pair.blob1].mediaLink;
         ofPtr<mediaElement> vid2 = blobs[pair.blob2].mediaLink;
 
@@ -643,8 +641,6 @@ void planeApp::blobBreakSteady(Pair & pair) {
         }
         if (!found) tcout() << "\t\t\tbridge not found" << endl;
 
-    } else {
-        tcout() << "\t\t\tdoesn't apply" << endl;
     }
 }
 

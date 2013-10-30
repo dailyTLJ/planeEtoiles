@@ -149,8 +149,8 @@ void mediaElement::moveInFromSide(int centerx, int centery) {
     moveElement = true;
     goal.set(position.x,position.y);
     float rot = atan2(centerx-position.x,centery-position.y);
-    if (rot==0) rot -= ofDegToRad(90);
-    position.set(centerx - centerx*sin(rot), centery - centery*cos(rot));
+    // if (rot==0) rot -= ofDegToRad(90);
+    position.set(centerx - centerx*sin(rot), centery + centery*cos(rot));
     // velocity.set(-2*sin(rot), -2*cos(rot));
     opacity = 1.0f;
     moveSpeed = 7;
