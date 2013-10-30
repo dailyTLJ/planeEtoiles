@@ -58,6 +58,7 @@ class planeApp : public ofBaseApp{
 
 		void blobCountChange();
 		void jumpToScene(int s);
+		bool allBlobsAlignedWith(ofPoint &p);
 
 		void endSegment(int direction = 1);	// 1. trigger fgMediaFadedOut 
 		void fgMediaFadedOut(int & trans);  // 2. call outroTransformation calls on FG and BG media
@@ -166,6 +167,9 @@ class planeApp : public ofBaseApp{
 		ofParameter<int> newStarMax;
 		ofParameter<int> newStarBonus;
 		ofParameter<int> minLostTime;
+
+		ofParameter<int> alignmentMaxDist;
+		ofParameter<int> alignmentTransition;
 
 		std::vector< ofPtr<mediaElement> > fgMedia;
 //		std::map<int, std::vector<videoElement> > fgVideos;

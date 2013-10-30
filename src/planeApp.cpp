@@ -99,8 +99,10 @@ void planeApp::setup(){
     paramSc3.add(edgeMargin.set( "Edge Margin", 50, 0, 150));
     gui.add(paramSc3);
 
-    // paramSc4.setName("Sc4 Alignment");
-    // gui.add(paramSc4);
+    paramSc4.setName("Sc4 Alignment");
+    paramSc4.add(alignmentMaxDist.set( "Alignm MaxDist", 50, 0, 200));
+    paramSc4.add(alignmentTransition.set( "Alignm Transition", 10, 0, 20));
+    gui.add(paramSc4);
 
     // paramSc5.setName("Sc5 Combustion");
     // gui.add(paramSc5);
@@ -439,6 +441,23 @@ void planeApp::update(){
         // animation related
         if (scene==3 && segment==5) {
             if (ofRandom(100)<2) (*fgMedia[0]).bounce();
+        } else if (!transition && segmentClock > alignmentTransition && scene==4 && blobs.size()>0) {
+            // check if all are aligned
+            bool allAligned = allBlobsAlignedWith((*fgMedia[0]).position);
+
+            if (allAligned) {
+                if (!success) {
+                    // aligned
+                    success = true;
+                    string alignmentGlow = "video/5_eclipse/ECLIPSE_alignment-glow-01-animation.mov";
+                    fgMedia.push_back(ofPtr<mediaElement>( new videoElement(alignmentGlow) ));
+                    (*fgMedia[fgMedia.size()-1]).setDisplay(projectionW/2, projectionH/2, true);
+                    (*fgMedia[fgMedia.size()-1]).reset(true);
+                    (*fgMedia[fgMedia.size()-1]).autoDestroy(true);
+                }
+            } else {
+                success = false;
+            }
         }
 
     }
@@ -752,10 +771,13 @@ void planeApp::blobOnCreate(int & blobID) {
             float y = offsetY + blobs[blobID].position.y *mapSiteH;
             (*fgMedia[fgMedia.size()-1]).setDisplay(x, y, true);
             (*fgMedia[fgMedia.size()-1]).reset();
-            (*fgMedia[fgMedia.size()-1]).fadeIn();
             // (*fgMedia[fgMedia.size()-1]).introTransformation = &mediaElement::moveInFromSide;
             // tcout() << "init planet   pos: " << x << "/" << y << endl;
-            (*fgMedia[fgMedia.size()-1]).moveInFromSide(projectionW/2,projectionH/2);
+            if (segmentClock < alignmentTransition) {
+                (*fgMedia[fgMedia.size()-1]).moveInFromSide(projectionW/2,projectionH/2);
+            } else {
+                (*fgMedia[fgMedia.size()-1]).fadeIn();
+            }
         }
 
         blobCountChange();
@@ -1484,6 +1506,22 @@ void planeApp::drawTopDown(int x, int y, float scale, bool detailed) {
 }
 
 
+bool planeApp::allBlobsAlignedWith(ofPoint &p) {
+    bool allAligned = true;
+    for(std::map<int, Blob>::iterator it = blobs.begin(); it != blobs.end(); ++it){
+        Blob* b = &it->second;
+        float x = offsetX + b->position.x * mapSiteW;
+        float y = offsetY + b->position.y * mapSiteH;
+        float d = ofDist(x, y, p.x, p.y);
+        if (d > alignmentMaxDist) {
+            allAligned = false;
+            break;
+        }
+    }
+    return allAligned;
+}
+
+
 void planeApp::exit() {
     // do some destructing here
     tcout() << "goodbye" << endl;
@@ -1555,6 +1593,14 @@ void planeApp::keyReleased(int key){
         int s = int(key) - int('0');
         tcout() << "key input = " << key << " scene = " << s << endl;
         jumpToScene(s);
+    }
+
+    if (key=='g') {
+        string alignmentGlow = "video/5_eclipse/ECLIPSE_alignment-glow-01-animation.mov";
+        fgMedia.push_back(ofPtr<mediaElement>( new videoElement(alignmentGlow) ));
+        (*fgMedia[fgMedia.size()-1]).setDisplay(projectionW/2, projectionH/2, true);
+        (*fgMedia[fgMedia.size()-1]).reset(true);
+        (*fgMedia[fgMedia.size()-1]).autoDestroy(true);
     }
 }
 

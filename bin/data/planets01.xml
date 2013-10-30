@@ -34,7 +34,10 @@
 		<Edge_Margin>21</Edge_Margin>
 	<Min_LostTime>1</Min_LostTime>
 	</Sc3_Sun>
-	<Sc4_Alignment/>
+	<Sc4_Alignment>
+		<Alignm_MaxDist>200</Alignm_MaxDist>
+		<Alignm_Transition>10</Alignm_Transition>
+	</Sc4_Alignment>
 	<Sc5_Combustion/>
 <HUMANS_AND_PLANETS/>
 	<Dimension>
