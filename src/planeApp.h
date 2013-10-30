@@ -98,6 +98,7 @@ class planeApp : public ofBaseApp{
 		bool fullscreen;	
 
 		// SEQUENCING	 
+		bool processing;
         ofxToggle autoplay; 			 // advance to next segment by itself
 		int scene;
 		int segment;
@@ -114,6 +115,10 @@ class planeApp : public ofBaseApp{
 		bool flash;				// in between transitions, catch attention
 		int flashCnt;
 		int flashMax;
+
+		bool drawBridge;
+		float bridgeX;
+		float bridgeY;
 
 		std::map<int, sceneInfo> scenes;
 

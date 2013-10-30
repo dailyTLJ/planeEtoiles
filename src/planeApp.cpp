@@ -20,6 +20,7 @@ void planeApp::setup(){
 	fontSm.setLineHeight(16.0f);
 	fontSm.setLetterSpacing(1.037);
 
+    processing = true;
 	mouseX = 0;
 	mouseY = 0;
 	mouseButtonState = "";
@@ -35,6 +36,10 @@ void planeApp::setup(){
     flash = false;
     flashCnt = 0;
     flashMax = 20;
+
+    drawBridge = false;
+    bridgeX = 5;
+    bridgeY = 55;
 
     projectionW = 1080;
     projectionH = 1920;
@@ -313,102 +318,112 @@ void planeApp::initScenes(){
 //--------------------------------------------------------------
 void planeApp::update(){
 
-    this->receiveOsc();
+    if (processing) {
 
-	// BLOB CLEANUP
-    std::map<int,Blob>::iterator it = blobs.begin();
-    while (it != blobs.end()) {
-        Blob* b = &it->second;
-    	b->update(minLostTime);
-    	if( !b->isAlive() ) {
-            tcout() << "Blob dead\t" << b->id << endl;
-            ofNotifyEvent(b->prepareToDie,b->id,b);
-    		blobs.erase(it++);
-            blobCountChange();
-    	} else {
-    		++it;
-    	}
-    }
-    // tcout() << "Blob count\t" << blobs.size() << "\t\tvideo count\t" << fgMedia.size() << endl;
+        this->receiveOsc();
 
-    // ANALYSIS
-    std::map<int, ofPoint> blobPositions;
-    for(std::map<int, Blob>::iterator it = blobs.begin(); it != blobs.end(); ++it){
-        Blob* b = &it->second;
-        blobPositions[b->id] = b->position;
-    }
-    for(std::map<int, Blob>::iterator it = blobs.begin(); it != blobs.end(); ++it){
-        Blob* b = &it->second;
-        b->analyze(freezeMaxVel, freezeMinTime, freezeMaxTime, movingThr);
-    }
-    for(std::map<int, Blob>::iterator it = blobs.begin(); it != blobs.end(); ++it){
-        Blob* b = &it->second;
-        b->analyzeNeighbors(blobPositions, distStdDevThr, steadyRewardTime);
-    }
-
-    // SCHEDULING
-    masterClock = ofGetUnixTime() - globalStart;
-    segmentClock = ofGetUnixTime() - segmentStart;
-    if (flash) {
-        flashCnt++;
-        if (flashCnt > flashMax) {
-            // tcout() << "flash done" << endl;
-            flashCnt = 0;
-            flash = false;
-            beginSegment();
+        tcout() << "BLOBS \t";
+        for(std::map<int, Blob>::iterator it = blobs.begin(); it != blobs.end(); ++it){
+            Blob* b = &it->second;
+            cout << b->id << "\t";
         }
-    }
-    // TIME TRIGGERS
-    if (autoplay && scenes[scene].length[segment] > 0 && segmentClock >= scenes[scene].length[segment] && !transition) {
-        endSegment(1);
-    }
-    // triggered by the end of fading out the bg
-    if (moveOn) {   
-        nextSegment(segmentChange);
-        moveOn = false;
-    }
 
-    // TRANSITIONING BETWEEN SEGMENT RELATED ACTION
-    if (scene==0) {
-        // fade out idle-mode video, connect fade-End to transition to next Segment
-        if(success && !transition) {
-            tcout() << "scene 0 success" << endl;
-            endSegment(1);
+    	// BLOB CLEANUP
+        std::map<int,Blob>::iterator it = blobs.begin();
+        while (it != blobs.end()) {
+            Blob* b = &it->second;
+        	b->update(minLostTime);
+        	if( !b->isAlive() ) {
+                tcout() << "Blob dead\t" << b->id << endl;
+                ofNotifyEvent(b->prepareToDie,b->id,b);
+        		blobs.erase(it++);
+                blobCountChange();
+        	} else {
+        		++it;
+        	}
         }
-    } else if (scene==1) {
-        if (segment==1 && successCnt > newStarMax && !transition) {
-            tcout() << "scene 1 segment 1 success" << endl;
-            endSegment(1);
+        // tcout() << "Blob count\t" << blobs.size() << "\t\tvideo count\t" << fgMedia.size() << endl;
+
+        // ANALYSIS
+        std::map<int, ofPoint> blobPositions;
+        for(std::map<int, Blob>::iterator it = blobs.begin(); it != blobs.end(); ++it){
+            Blob* b = &it->second;
+            blobPositions[b->id] = b->position;
         }
-    } else if (scene==3) {
-        if (segment==4 || segment==6 ) {
-            // FREEZE!
-            if(success && !transition) {
-                tcout() << "FREEZE success" << endl;
-                endSegment(1);
+        for(std::map<int, Blob>::iterator it = blobs.begin(); it != blobs.end(); ++it){
+            Blob* b = &it->second;
+            b->analyze(freezeMaxVel, freezeMinTime, freezeMaxTime, movingThr);
+        }
+        for(std::map<int, Blob>::iterator it = blobs.begin(); it != blobs.end(); ++it){
+            Blob* b = &it->second;
+            b->analyzeNeighbors(blobPositions, distStdDevThr, steadyRewardTime);
+        }
+
+        // SCHEDULING
+        masterClock = ofGetUnixTime() - globalStart;
+        segmentClock = ofGetUnixTime() - segmentStart;
+        if (flash) {
+            flashCnt++;
+            if (flashCnt > flashMax) {
+                // tcout() << "flash done" << endl;
+                flashCnt = 0;
+                flash = false;
+                beginSegment();
             }
         }
-    }
-
-    // VIDEO UPDATES
-    for (vector<ofPtr<mediaElement> >::iterator it = bgVideos[scene].begin() ; it != bgVideos[scene].end(); ++it) {
-        (**it).update();
-    }
-
-    vector<ofPtr<mediaElement> >::iterator iter = fgMedia.begin();
-    while (iter != fgMedia.end()) {
-        (**iter).update();
-        if ((**iter).dead) {
-            // tcout() << "delete video " << (**iter).file << "  size " << fgMedia.size() << endl;
-            iter = fgMedia.erase(iter);
-        } else {
-            ++iter;
+        // TIME TRIGGERS
+        if (autoplay && scenes[scene].length[segment] > 0 && segmentClock >= scenes[scene].length[segment] && !transition) {
+            endSegment(1);
         }
-    }
+        // triggered by the end of fading out the bg
+        if (moveOn) {   
+            nextSegment(segmentChange);
+            moveOn = false;
+        }
 
-    // animation related
-    if (scene==3 && segment==5) {
-        if (ofRandom(100)<2) (*fgMedia[0]).bounce();
+        // TRANSITIONING BETWEEN SEGMENT RELATED ACTION
+        if (scene==0) {
+            // fade out idle-mode video, connect fade-End to transition to next Segment
+            if(success && !transition) {
+                tcout() << "scene 0 success" << endl;
+                endSegment(1);
+            }
+        } else if (scene==1) {
+            if (segment==1 && successCnt > newStarMax && !transition) {
+                tcout() << "scene 1 segment 1 success" << endl;
+                endSegment(1);
+            }
+        } else if (scene==3) {
+            if (segment==4 || segment==6 ) {
+                // FREEZE!
+                if(success && !transition) {
+                    tcout() << "FREEZE success" << endl;
+                    endSegment(1);
+                }
+            }
+        }
+
+        // VIDEO UPDATES
+        for (vector<ofPtr<mediaElement> >::iterator it = bgVideos[scene].begin() ; it != bgVideos[scene].end(); ++it) {
+            (**it).update();
+        }
+
+        vector<ofPtr<mediaElement> >::iterator iter = fgMedia.begin();
+        while (iter != fgMedia.end()) {
+            (**iter).update();
+            if ((**iter).dead) {
+                tcout() << "delete video " << (**iter).file << endl;
+                iter = fgMedia.erase(iter);
+            } else {
+                ++iter;
+            }
+        }
+
+        // animation related
+        if (scene==3 && segment==5) {
+            if (ofRandom(100)<2) (*fgMedia[0]).bounce();
+        }
+
     }
 
 }
@@ -531,11 +546,6 @@ void planeApp::blobOnLost(int & blobID) {
 }
 
 void planeApp::blobSteady(Pair & pair) {
-    tcout() << "BLOBS \t";
-    for(std::map<int, Blob>::iterator it = blobs.begin(); it != blobs.end(); ++it){
-            Blob* b = &it->second;
-            cout << b->id << "\t";
-    }
     cout << endl;
     tcout() << "blobSteady() \t\t" << pair.blob1 << " + " << pair.blob2 << endl;
     // add particle trail video between stars
@@ -822,9 +832,22 @@ void planeApp::videoFollowBlob(int & blobID) {
             if (bridge != NULL) {
                 float bx2 = offsetX + blobs[blob2ID].position.x * mapSiteW;
                 float by2 = offsetY + blobs[blob2ID].position.y *mapSiteH;
-                (*bridge).setDisplay( bx, by, false);
-                (*bridge).w = ofDist(bx, by, bx2, by2);
-                (*bridge).rotation = -ofRadToDeg(atan2(bx2-bx,by2-by)) + 90;
+
+                float rot = -ofRadToDeg(atan2(bx2-bx,by2-by)) + 90;
+                float tx = bridgeX;
+                float ty = bridgeY;
+                float tz = sqrt( pow(tx,2) + pow(ty,2) );
+                // float addRot = ofRadToDeg(atan2(-tx,-ty));
+
+                float addRot = ofRadToDeg(atan2(tx,-ty));
+                float cx = bx - tz*sin(ofDegToRad(rot+addRot));
+                float cy = by + tz*cos(ofDegToRad(rot+addRot));
+
+
+                (*bridge).setDisplay( cx, cy, false);
+                (*bridge).w = ofDist(bx, by, bx2, by2) + tx*2;
+                // (*bridge).h = ty*2;
+                (*bridge).rotation = rot;
             }
         }
     }
@@ -1176,6 +1199,45 @@ void planeApp::drawScreen(int x, int y, float scale){
     for (vector<ofPtr<mediaElement> >::iterator it = fgMedia.begin(); it != fgMedia.end(); ++it) {
         if (!(**it).blend) (**it).draw(x, y, scale);
     }
+
+    // draw starBridge dummies
+    // extra things to draw?
+    if (drawBridge && scene==1 && segment>1) {
+        for(std::map<int, Blob>::iterator it = blobs.begin(); it != blobs.end(); ++it){
+            Blob* b = &it->second;
+            for(std::map<int, Neighbor>::iterator iter = b->neighbors.begin(); iter != b->neighbors.end(); ++iter){
+                Neighbor* nb = &iter->second;
+                if (nb->steadyDistance) {
+                    // draw a line between blob and steady neighbor
+                    ofNoFill(); ofSetColor(255);
+                    float p1x = x + (offsetX + b->position.x * mapSiteW) * scale;
+                    float p1y = y + (offsetY + b->position.y * mapSiteH) * scale;
+                    float p2x = x + (offsetX + blobs[nb->id].position.x * mapSiteW) * scale;
+                    float p2y = y + (offsetY + blobs[nb->id].position.y * mapSiteH) * scale;
+
+                    float rot = -ofRadToDeg(atan2(p2x-p1x,p2y-p1y)) + 90;
+                    float tx = bridgeX;
+                    float ty = bridgeY;
+                    float tz = sqrt( pow(tx,2) + pow(ty,2) );
+                    float addRot = ofRadToDeg(atan2(tx,-ty));
+                    float cx = p1x - tz*sin(ofDegToRad(rot+addRot));
+                    float cy = p1y + tz*cos(ofDegToRad(rot+addRot));
+                    float rw = ofDist(p1x, p1y, p2x, p2y) + tx*2;
+                    float rh = ty*2;
+
+                    ofLine( p1x, p1y, p2x, p2y );
+                    ofPushMatrix();
+                    ofTranslate(cx,cy);
+                    ofRotateZ(rot);
+                    ofRect( 0, 0, rw, rh );
+                    ofPopMatrix();
+                    // ofLine(x + b->position.x*scale, y + b->position.y*scale, x + blobs[nb->id].position.x*scale, y + blobs[nb->id].position.y*scale);
+                }
+            }
+        }
+    }
+
+
     ofDisableAlphaBlending();
 
     string instruction = scenes[scene].instructions[segment];
@@ -1425,10 +1487,32 @@ void planeApp::keyPressed(int key){
 //--------------------------------------------------------------
 void planeApp::keyReleased(int key){
 
-    if( key == 'd' ) {
+    if (key == 'd') {
         drawBlobDetail = !drawBlobDetail;
     }
 
+    if (key == 'b') {
+        drawBridge = !drawBridge;
+    }
+
+    if (key == OF_KEY_RETURN) {
+        processing = !processing;
+    }
+
+    if (key == OF_KEY_DOWN){
+        bridgeX += 2;
+        tcout() << "bridgeX \t" << bridgeX << endl;
+    } else if (key == OF_KEY_UP){
+        bridgeX -= 2;
+        tcout() << "bridgeX \t" << bridgeX << endl;
+    }
+    if (key == OF_KEY_PAGE_DOWN){
+        bridgeY += 2;
+        tcout() << "bridgeY \t" << bridgeY << endl;
+    } else if (key == OF_KEY_PAGE_UP){
+        bridgeY -= 2;
+        tcout() << "bridgeY \t" << bridgeY << endl;
+    }
     if (key == OF_KEY_LEFT){
         endSegment(-1);
     } else if (key == OF_KEY_RIGHT){

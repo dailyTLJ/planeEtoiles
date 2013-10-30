@@ -55,7 +55,6 @@ void Blob::follow(float x, float y, float frameW, float frameH, float margin){
     }
 
 	this->updated = true;
-    if (videoTrace) ofNotifyEvent(updatePosition, this->id, this);
 }
 
 //--------------------------------------------------------------
@@ -212,6 +211,7 @@ void Blob::update(int minLostTime){
 		return;
 	} else {
         position = newPosition;
+        if (videoTrace) ofNotifyEvent(updatePosition, this->id, this);
     }
     this->lifetime = this->maxLifetime;
 	this->updated = false;
