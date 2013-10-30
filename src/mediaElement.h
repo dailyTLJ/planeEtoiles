@@ -69,6 +69,7 @@ class mediaElement
 
         bool bridgeVideo;
         int bridgeBlobID[2];
+        bool bridgeUpdated;
         void bridge(int id1, int id2);
 
         ofEvent<int> fadeOutEnd;

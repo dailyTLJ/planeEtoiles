@@ -15,20 +15,22 @@ mediaElement::mediaElement() {
     this->centered = false;
     this->moveElement = false;
     this->velocity.set(0,0);
-    this->goal.set(0,0);
-    this->goalDefined = false;
-    this->blend = true;
-    this->visible = false;
-    this->moveSpeed = 1.f;
-    this->bridgeVideo = false;
-    this->bridgeBlobID[0] = 0;
-    this->bridgeBlobID[1] = 0;
+    goal.set(0,0);
+    goalDefined = false;
+    blend = true;
+    visible = false;
+    moveSpeed = 1.f;
+    bridgeVideo = false;
+    bridgeBlobID[0] = 0;
+    bridgeBlobID[1] = 0;
+    bridgeUpdated = false;
     outroTransformation = &mediaElement::fadeOut; 
     introTransformation = &mediaElement::fadeIn;
 }
 
 
 void mediaElement::update() {
+    bridgeUpdated = false;
     if (moveElement) {
         position.x += velocity.x;
         position.y += velocity.y;

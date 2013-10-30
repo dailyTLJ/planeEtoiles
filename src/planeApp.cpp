@@ -324,7 +324,7 @@ void planeApp::initScenes(){
 void planeApp::update(){
 
     if (processing) {
-        
+
         oscMsgReceived = false;
         this->receiveOsc();
 
@@ -582,10 +582,9 @@ void planeApp::blobSteady(Pair & pair) {
             tcout() << "\t\t\tadd video bridge" << endl;
             string newVideoName = "video/2_stars/ATTRACTION_link-01-animation.mov";
             fgMedia.push_back(ofPtr<mediaElement>( new videoElement(newVideoName)));
-            (*fgMedia[fgMedia.size()-1]).setDisplay(b1->position.x, b1->position.y, false);
-            (*fgMedia[fgMedia.size()-1]).w = ofDist(b1->position.x, b1->position.y, b2->position.x, b2->position.y);
             (*fgMedia[fgMedia.size()-1]).reset();
             (*fgMedia[fgMedia.size()-1]).bridge(b1->id, b2->id);
+            ofNotifyEvent( blobs[pair.blob1].updatePosition, pair.blob1, &blobs[pair.blob1] );
         } else {
             tcout() << "\t\t\talready exists" << endl;
         }
@@ -617,25 +616,22 @@ void planeApp::blobSteadyReward(Pair & pair) {
 
 void planeApp::blobBreakSteady(Pair & pair) {
     tcout() << "blobBreakSteady() \t" << pair.blob1 << " + " << pair.blob2 << endl;
-    // if (!transition) {
-    //     ofPtr<mediaElement> vid = blobs[blobID].mediaLink; 
-    //     // replace video with normal star, only if it was in steadyrewarded mode!
-    //     if (vid != NULL && blobs[blobID].steadyRewarded) {
-    //         // tcout() << "blob " << blobID << " \t\tfound vid" << endl;
-    //         (*vid).loadMovie("video/2_stars/INDIV STAR 2 loop-H264-10mbps.mp4");
-    //         (*vid).reset();
-    //     }
-    //     // delete sparkle-bridge video
-    //     // for (vector<ofPtr<mediaElement> >::iterator it = fgMedia.begin(); it != fgMedia.end(); it++) {
-    //     //     if (*it == blobs[blobID].bridgeLink) {
-    //     //         blobs[blobID].bridgeLink = ofPtr<mediaElement>();
-    //     //         tcout() << "blob " << blobID << " break steady - unlinked bridge" << endl;
-    //     //         fgMedia.erase(it);
-    //     //         break;
-    //     //     }
-    //     // }
-    // }
+
     if (!transition && scene==1 && segment>1) {
+        ofPtr<mediaElement> vid1 = blobs[pair.blob1].mediaLink;
+        ofPtr<mediaElement> vid2 = blobs[pair.blob2].mediaLink;
+
+        // replace video with normal star
+        if (vid1 != NULL) {
+            // tcout() << "blob " << pair.blob1 << " \t\tfound vid" << endl;
+            (*vid1).loadMovie("video/2_stars/INDIV STAR 2 loop-H264-10mbps.mp4");
+            (*vid1).reset();
+        }
+        if (vid2 != NULL) {
+            // tcout() << "blob " << pair.blob2 << " \t\tfound vid" << endl;
+            (*vid2).loadMovie("video/2_stars/INDIV STAR 2 loop-H264-10mbps.mp4");
+            (*vid2).reset();
+        }
         // delete bridge video if it exists
         bool found = false;
         for (vector<ofPtr<mediaElement> >::iterator it = fgMedia.begin(); it != fgMedia.end(); it++) {
@@ -838,7 +834,7 @@ void planeApp::videoFollowBlob(int & blobID) {
             ofPtr<mediaElement> bridge; 
             int blob2ID;
             for (vector<ofPtr<mediaElement> >::iterator it = fgMedia.begin(); it != fgMedia.end(); it++) {
-                if ((**it).bridgeVideo && ((**it).bridgeBlobID[0]==blobID || (**it).bridgeBlobID[1]==blobID)) {
+                if ((**it).bridgeVideo && !(**it).bridgeUpdated && ((**it).bridgeBlobID[0]==blobID || (**it).bridgeBlobID[1]==blobID)) {
                     bridge = (*it);
                     blob2ID = (**it).bridgeBlobID[0]==blobID ? (**it).bridgeBlobID[1] : (**it).bridgeBlobID[0];
                     break;
@@ -846,25 +842,22 @@ void planeApp::videoFollowBlob(int & blobID) {
             }
 
             if (bridge != NULL) {
-                float bx2 = offsetX + blobs[blob2ID].position.x * mapSiteW;
-                float by2 = offsetY + blobs[blob2ID].position.y *mapSiteH;
-
+                float bx2 = offsetX + blobs[blob2ID].newPosition.x * mapSiteW;
+                float by2 = offsetY + blobs[blob2ID].newPosition.y *mapSiteH;
                 float rot = -ofRadToDeg(atan2(bx2-bx,by2-by)) + 90;
-                if (rot==90) tcout() << "WEIRD STRAIGHT 0 DEGREE STAR BRIDGE" << endl;
                 float tx = bridgeX;
                 float ty = bridgeY;
                 float tz = sqrt( pow(tx,2) + pow(ty,2) );
-                // float addRot = ofRadToDeg(atan2(-tx,-ty));
-
                 float addRot = ofRadToDeg(atan2(tx,-ty));
                 float cx = bx - tz*sin(ofDegToRad(rot+addRot));
                 float cy = by + tz*cos(ofDegToRad(rot+addRot));
 
-
                 (*bridge).setDisplay( cx, cy, false);
+                (*bridge).bridgeUpdated = true;;
                 (*bridge).w = ofDist(bx, by, bx2, by2) + tx*2;
                 // (*bridge).h = ty*2;
                 (*bridge).rotation = rot;
+                // tcout() << "bridge udpate\t" << blobID << ":" << blob2ID << "\t" << bx << "|" << by << "  rot: " << rot << endl;
             }
         }
     }
