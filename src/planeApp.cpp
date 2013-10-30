@@ -21,6 +21,11 @@ void planeApp::setup(){
 	fontSm.setLetterSpacing(1.037);
 
     processing = true;
+    oscMsgReceived = false;
+    oscLastMsg = 0;
+    oscLastMsgTimer = 0;
+    oscLastMsgTimerMax = 10;
+    oscActive = false;
 	mouseX = 0;
 	mouseY = 0;
 	mouseButtonState = "";
@@ -319,44 +324,56 @@ void planeApp::initScenes(){
 void planeApp::update(){
 
     if (processing) {
-
+        
+        oscMsgReceived = false;
         this->receiveOsc();
 
-        tcout() << "BLOBS \t";
-        for(std::map<int, Blob>::iterator it = blobs.begin(); it != blobs.end(); ++it){
-            Blob* b = &it->second;
-            cout << b->id << "\t";
+        if (!oscMsgReceived) {
+            oscLastMsgTimer = ofGetUnixTime() - oscLastMsg;
+            if (oscActive && oscLastMsgTimer > oscLastMsgTimerMax) {
+                oscActive = false;
+            }
+            tcout() << "." << endl;
         }
 
-    	// BLOB CLEANUP
-        std::map<int,Blob>::iterator it = blobs.begin();
-        while (it != blobs.end()) {
-            Blob* b = &it->second;
-        	b->update(minLostTime);
-        	if( !b->isAlive() ) {
-                tcout() << "Blob dead\t" << b->id << endl;
-                ofNotifyEvent(b->prepareToDie,b->id,b);
-        		blobs.erase(it++);
-                blobCountChange();
-        	} else {
-        		++it;
-        	}
-        }
-        // tcout() << "Blob count\t" << blobs.size() << "\t\tvideo count\t" << fgMedia.size() << endl;
+        if (oscMsgReceived) {
+            tcout() << "BLOBS \t\t";
+            for(std::map<int, Blob>::iterator it = blobs.begin(); it != blobs.end(); ++it){
+                Blob* b = &it->second;
+                cout << b->id << "\t";
+            }
+            cout << endl;
 
-        // ANALYSIS
-        std::map<int, ofPoint> blobPositions;
-        for(std::map<int, Blob>::iterator it = blobs.begin(); it != blobs.end(); ++it){
-            Blob* b = &it->second;
-            blobPositions[b->id] = b->position;
-        }
-        for(std::map<int, Blob>::iterator it = blobs.begin(); it != blobs.end(); ++it){
-            Blob* b = &it->second;
-            b->analyze(freezeMaxVel, freezeMinTime, freezeMaxTime, movingThr);
-        }
-        for(std::map<int, Blob>::iterator it = blobs.begin(); it != blobs.end(); ++it){
-            Blob* b = &it->second;
-            b->analyzeNeighbors(blobPositions, distStdDevThr, steadyRewardTime);
+        	// BLOB CLEANUP
+            std::map<int,Blob>::iterator it = blobs.begin();
+            while (it != blobs.end()) {
+                Blob* b = &it->second;
+            	b->update(minLostTime);
+            	if( !b->isAlive() ) {
+                    tcout() << "Blob dead\t" << b->id << endl;
+                    ofNotifyEvent(b->prepareToDie,b->id,b);
+            		blobs.erase(it++);
+                    blobCountChange();
+            	} else {
+            		++it;
+            	}
+            }
+            // tcout() << "Blob count\t" << blobs.size() << "\t\tvideo count\t" << fgMedia.size() << endl;
+
+            // ANALYSIS
+            std::map<int, ofPoint> blobPositions;
+            for(std::map<int, Blob>::iterator it = blobs.begin(); it != blobs.end(); ++it){
+                Blob* b = &it->second;
+                blobPositions[b->id] = b->position;
+            }
+            for(std::map<int, Blob>::iterator it = blobs.begin(); it != blobs.end(); ++it){
+                Blob* b = &it->second;
+                b->analyze(freezeMaxVel, freezeMinTime, freezeMaxTime, movingThr);
+            }
+            for(std::map<int, Blob>::iterator it = blobs.begin(); it != blobs.end(); ++it){
+                Blob* b = &it->second;
+                b->analyzeNeighbors(blobPositions, distStdDevThr, steadyRewardTime);
+            }
         }
 
         // SCHEDULING
@@ -546,7 +563,6 @@ void planeApp::blobOnLost(int & blobID) {
 }
 
 void planeApp::blobSteady(Pair & pair) {
-    cout << endl;
     tcout() << "blobSteady() \t\t" << pair.blob1 << " + " << pair.blob2 << endl;
     // add particle trail video between stars
     if (!transition && scene==1 && segment>1) {
@@ -834,6 +850,7 @@ void planeApp::videoFollowBlob(int & blobID) {
                 float by2 = offsetY + blobs[blob2ID].position.y *mapSiteH;
 
                 float rot = -ofRadToDeg(atan2(bx2-bx,by2-by)) + 90;
+                if (rot==90) tcout() << "WEIRD STRAIGHT 0 DEGREE STAR BRIDGE" << endl;
                 float tx = bridgeX;
                 float ty = bridgeY;
                 float tz = sqrt( pow(tx,2) + pow(ty,2) );
@@ -1011,6 +1028,9 @@ void planeApp::receiveOsc(){
 
 	// check for waiting messages
 	while(receiver.hasWaitingMessages()){
+        oscMsgReceived = true;
+        if (!oscActive) oscActive =true;
+        oscLastMsg = ofGetUnixTime();
 
 		// get the next message
 		ofxOscMessage m;
@@ -1412,7 +1432,8 @@ void planeApp::drawRawData(int x, int y, float scale){
 
     // write information
     string rawInfo = "port: \t\t" + ofToString(PORT);
-    rawInfo += "\nframerate: \t" + ofToString(28);
+    rawInfo += "\nosc active: \t" + ofToString(oscActive ? "true" : "false");
+    rawInfo += "\nosc last msg: \t" + ofToString(oscLastMsgTimer) + " sec";
     rawInfo += "\nexposure: \t" + ofToString(cameraExposure,5);
     rawInfo += "\nbgsubtraction\nblob cnt: \t" + ofToString(bgsubtractorCnt);
     rawInfo += "\navg velocity: \t" + ofToString(bgsubtractorAvVel,2);

@@ -99,6 +99,11 @@ class planeApp : public ofBaseApp{
 
 		// SEQUENCING	 
 		bool processing;
+		bool oscMsgReceived;
+		bool oscActive;
+		int oscLastMsg;
+		int oscLastMsgTimer;
+		int oscLastMsgTimerMax;
         ofxToggle autoplay; 			 // advance to next segment by itself
 		int scene;
 		int segment;

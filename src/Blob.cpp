@@ -11,7 +11,7 @@ Blob::~Blob() {
 
 //--------------------------------------------------------------
 void Blob::init(){
-    this->maxLifetime = 20;
+    this->maxLifetime = 1;
 	this->lifetime = this->maxLifetime;
 	this->updated = true;
 

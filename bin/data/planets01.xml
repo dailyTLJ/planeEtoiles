@@ -1,5 +1,5 @@
 <HUMANS_AND_PLANETS>
-	<autoplay>1</autoplay>
+	<autoplay>0</autoplay>
 	<Transition_Flash_Color>255, 200, 100, 255</Transition_Flash_Color>
 	<Global>
 		<Site_Width>500</Site_Width>
@@ -22,12 +22,12 @@
 	<Freeze_MinVel>0.602041</Freeze_MinVel>
 		<Freeze_MinTime>0</Freeze_MinTime>
 		<Freeze_MaxTime>10</Freeze_MaxTime>
-		<Dist_StdDev>10</Dist_StdDev>
+		<Dist_StdDev>20</Dist_StdDev>
 		<Movement_Thr>0.1</Movement_Thr>
 		<NewStar_Max>30</NewStar_Max>
 		<Bonus_every>5</Bonus_every>
 	<Freeze_MaxVel>0.530612</Freeze_MaxVel>
-	<Dist_Reward>2</Dist_Reward>
+	<Dist_Reward>10</Dist_Reward>
 	</Sc1_Stars>
 	<Sc2_Revolutions/>
 	<Sc3_Sun>
