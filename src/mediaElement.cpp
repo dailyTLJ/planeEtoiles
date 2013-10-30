@@ -34,6 +34,7 @@ void mediaElement::update() {
     if (moveElement) {
         position.x += velocity.x;
         position.y += velocity.y;
+        if (opacity<1) opacity += opacityChange;
         if (goalDefined) {
             float distance = ofDist(position.x, position.y, goal.x, goal.y);
             if (distance < moveSpeed) {
@@ -148,13 +149,14 @@ void mediaElement::moveInFromSide(int centerx, int centery) {
     goalDefined = true;
     moveElement = true;
     goal.set(position.x,position.y);
-    float rot = atan2(centerx-position.x,centery-position.y);
+    float rot = atan2(position.x-centerx,position.y-centery);
     // if (rot==0) rot -= ofDegToRad(90);
-    position.set(centerx - centerx*sin(rot), centery + centery*cos(rot));
+    position.set(centerx + centery*sin(rot), centery + centery*cos(rot));
     // velocity.set(-2*sin(rot), -2*cos(rot));
-    opacity = 1.0f;
+    opacity = 0.f;
+    opacityChange = 0.01; // don't do this with fade, to avoid triggering the fadeInEvent
     moveSpeed = 7;
-    // cout << "mediaElement::moveInFromSide   rot: " << rot << "  position: " << position.x << "/" << position.y << "  goal: " << goal.x << "/" << goal.y << endl;
+    cout << " moveInFromSide   rot: " << rot << "  position: " << position.x << "/" << position.y << "  goal: " << goal.x << "/" << goal.y << endl;
 }
 
 void mediaElement::fade(float speed) {

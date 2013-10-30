@@ -36,7 +36,7 @@ void Blob::follow(float x, float y, float frameW, float frameH, float margin){
         this->onEdge = true;
     } else this->onEdge = false;
 
-    this->newPosition = transformPerspective(this->_rawPos);
+    this->position = transformPerspective(this->_rawPos);
 
     TimedPoint rawPoint;
     rawPoint.set(x,y);
@@ -210,7 +210,6 @@ void Blob::update(int minLostTime){
 		this->lifetime--;
 		return;
 	} else {
-        position = newPosition;
         if (videoTrace) ofNotifyEvent(updatePosition, this->id, this);
     }
     this->lifetime = this->maxLifetime;

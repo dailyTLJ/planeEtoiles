@@ -30,7 +30,7 @@ void imageElement::draw() {
 
 void imageElement::draw(int x, int y, float _scale) {
     ofPushMatrix();
-    ofTranslate(x + position.x, y + position.y );
+    ofTranslate(x + position.x * _scale, y + position.y * _scale );
     ofRotateZ(this->rotation);
     drawElement(_scale);
     ofPopMatrix();

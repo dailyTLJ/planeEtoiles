@@ -350,7 +350,7 @@ void planeApp::update(){
                 Blob* b = &it->second;
             	b->update(minLostTime);
             	if( !b->isAlive() ) {
-                    tcout() << "Blob dead\t" << b->id << endl;
+                    // tcout() << "Blob dead\t" << b->id << endl;
                     ofNotifyEvent(b->prepareToDie,b->id,b);
             		blobs.erase(it++);
                     blobCountChange();
@@ -715,7 +715,7 @@ void planeApp::blobOnCreate(int & blobID) {
    
     if (!transition) {
         // first clean up, all related blob settings
-        tcout() << "blobOnCreate() \t" << blobID << endl;
+        // tcout() << "blobOnCreate() \t" << blobID << endl;
         this->blobUnlink(blobID);
         blobs[blobID].videoTrace = false;
         blobs[blobID].mediaLink = ofPtr<mediaElement>();  // TODO how to release ofPtr ? 
@@ -734,7 +734,7 @@ void planeApp::blobOnCreate(int & blobID) {
                 fgMedia.push_back(ofPtr<mediaElement>( new videoElement("video/2_stars/INDIV STAR 2 loop-H264-10mbps.mp4")));
                 blobs[blobID].mediaLink = fgMedia[fgMedia.size()-1];
                 blobs[blobID].videoTrace = true;
-                (*fgMedia[fgMedia.size()-1]).setDisplay(0, 0, 200, 200, true);
+                (*fgMedia[fgMedia.size()-1]).setDisplay(0, 0, true);
                 // (*fgMedia[fgMedia.size()-1]).setDisplay(ofRandom(projectionW-100), ofRandom(projectionH-100));
                 (*fgMedia[fgMedia.size()-1]).reset();
                 (*fgMedia[fgMedia.size()-1]).fadeIn();
@@ -746,14 +746,15 @@ void planeApp::blobOnCreate(int & blobID) {
             // int randomPlanet = ofRandom(3) + 18;
             fgMedia.push_back(ofPtr<mediaElement>( new imageElement("video/5_eclipse/PLANET_" + ofToString(randomPlanet)+".png", 0.5f)));
             // fgMedia.push_back(ofPtr<mediaElement>( new videoElement("video/5_eclipse/PLANET_"+ofToString(randomPlanet)+".mov")));
-            float x = offsetX + blobs[blobID].position.x * mapSiteW;
-            float y = offsetY + blobs[blobID].position.y *mapSiteH;
-            tcout() << "init planet   pos: " << x << "/" << y << endl;
-            (*fgMedia[fgMedia.size()-1]).setDisplay(x, y, 500, 500, true);
-            // (*fgMedia[fgMedia.size()-1]).introTransformation = &mediaElement::moveInFromSide;
             blobs[blobID].mediaLink = fgMedia[fgMedia.size()-1];
             blobs[blobID].videoTrace = true;
+            float x = offsetX + blobs[blobID].position.x * mapSiteW;
+            float y = offsetY + blobs[blobID].position.y *mapSiteH;
+            (*fgMedia[fgMedia.size()-1]).setDisplay(x, y, true);
             (*fgMedia[fgMedia.size()-1]).reset();
+            (*fgMedia[fgMedia.size()-1]).fadeIn();
+            // (*fgMedia[fgMedia.size()-1]).introTransformation = &mediaElement::moveInFromSide;
+            // tcout() << "init planet   pos: " << x << "/" << y << endl;
             (*fgMedia[fgMedia.size()-1]).moveInFromSide(projectionW/2,projectionH/2);
         }
 
@@ -838,8 +839,8 @@ void planeApp::videoFollowBlob(int & blobID) {
             }
 
             if (bridge != NULL) {
-                float bx2 = offsetX + blobs[blob2ID].newPosition.x * mapSiteW;
-                float by2 = offsetY + blobs[blob2ID].newPosition.y *mapSiteH;
+                float bx2 = offsetX + blobs[blob2ID].position.x * mapSiteW;
+                float by2 = offsetY + blobs[blob2ID].position.y *mapSiteH;
                 float rot = -ofRadToDeg(atan2(bx2-bx,by2-by)) + 90;
                 float tx = bridgeX;
                 float ty = bridgeY;
@@ -861,11 +862,11 @@ void planeApp::videoFollowBlob(int & blobID) {
 
 void planeApp::blobUnlink(int & blobID) {
     // making sure, a blob goes to die and untethers all connections
-    tcout() << "blobUnlink() \t" << blobID << "\tmediaLink: " << blobs[blobID].mediaLink << endl;
+    // tcout() << "blobUnlink() \t" << blobID << "\tmediaLink: " << blobs[blobID].mediaLink << endl;
     for (vector<ofPtr<mediaElement> >::iterator it = fgMedia.begin(); it != fgMedia.end(); it++) {
         if (*it == blobs[blobID].mediaLink) {
             blobs[blobID].mediaLink = ofPtr<mediaElement>();
-            tcout() << "\t\t\tunlinked blob " <<  endl;
+            // tcout() << "\t\t\tunlinked blob " <<  endl;
             (**it).dead = true;
             break;
         }
@@ -873,7 +874,7 @@ void planeApp::blobUnlink(int & blobID) {
     // delete bridge video if it exists
     for (vector<ofPtr<mediaElement> >::iterator it = fgMedia.begin(); it != fgMedia.end(); it++) {
         if ((**it).bridgeVideo && ((**it).bridgeBlobID[0]==blobID || (**it).bridgeBlobID[1]==blobID)) {
-            tcout() << "\t\t\tunlinked bridge\t" << (**it).bridgeBlobID[0] << " " << (**it).bridgeBlobID[1] << endl;
+            // tcout() << "\t\t\tunlinked bridge\t" << (**it).bridgeBlobID[0] << " " << (**it).bridgeBlobID[1] << endl;
             (**it).dead = true;
             break;
         }

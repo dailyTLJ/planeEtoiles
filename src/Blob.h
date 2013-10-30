@@ -102,7 +102,6 @@ class Blob {
         // ofVec2f
     	ofPoint _rawPos;
     	ofPoint position;
-        ofPoint newPosition;
     	ofPoint velocity;
         float size;
         float age;
