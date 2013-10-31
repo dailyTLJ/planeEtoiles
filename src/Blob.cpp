@@ -144,7 +144,7 @@ void Blob::analyzeNeighbors(std::map<int, ofPoint> neighborLocation, float distS
             }
             n->updated = true;
             Pair pair = Pair( min(this->id,n->id), max(this->id,n->id) );
-            if (n->distance.size() >= NEIGHBOR_HISTORY && n->getStdDev() < distStdDevThr) {
+            if (n->distance.size() >= NEIGHBOR_HISTORY && n->getStdDev() < distStdDevThr && movingMean) {
                 if (!n->steadyDistance) {
                     n->steadyDistance = true;
                     n->steadyStart = ofGetUnixTime();

@@ -270,7 +270,7 @@ void planeApp::initScenes(){
     sceneInfo eclipse;
     eclipse.name = "Alignment";
     eclipse.no = n;
-    eclipse.segments = 4;
+    eclipse.segments = 3;
     eclipse.instructions[0] = "Now align \nyourself in \nfront of me.\nAnd follow me.";
     eclipse.analysis[0] = "- \n-> 40 sec";
     eclipse.length[0] = 40;
@@ -734,7 +734,7 @@ void planeApp::blobOnCreate(int & blobID) {
    
     if (!transition) {
         // first clean up, all related blob settings
-        // tcout() << "blobOnCreate() \t" << blobID << endl;
+        tcout() << "blobOnCreate() \t" << blobID << endl;
         this->blobUnlink(blobID);
         blobs[blobID].videoTrace = false;
         blobs[blobID].mediaLink = ofPtr<mediaElement>();  // TODO how to release ofPtr ? 
@@ -884,11 +884,11 @@ void planeApp::videoFollowBlob(int & blobID) {
 
 void planeApp::blobUnlink(int & blobID) {
     // making sure, a blob goes to die and untethers all connections
-    // tcout() << "blobUnlink() \t" << blobID << "\tmediaLink: " << blobs[blobID].mediaLink << endl;
+    tcout() << "blobUnlink() \t" << blobID << "\tmediaLink: " << blobs[blobID].mediaLink << endl;
     for (vector<ofPtr<mediaElement> >::iterator it = fgMedia.begin(); it != fgMedia.end(); it++) {
         if (*it == blobs[blobID].mediaLink) {
             blobs[blobID].mediaLink = ofPtr<mediaElement>();
-            // tcout() << "\t\t\tunlinked blob " <<  endl;
+            tcout() << "\t\t\tunlinked blob " <<  endl;
             (**it).dead = true;
             break;
         }
@@ -896,7 +896,7 @@ void planeApp::blobUnlink(int & blobID) {
     // delete bridge video if it exists
     for (vector<ofPtr<mediaElement> >::iterator it = fgMedia.begin(); it != fgMedia.end(); it++) {
         if ((**it).bridgeVideo && ((**it).bridgeBlobID[0]==blobID || (**it).bridgeBlobID[1]==blobID)) {
-            // tcout() << "\t\t\tunlinked bridge\t" << (**it).bridgeBlobID[0] << " " << (**it).bridgeBlobID[1] << endl;
+            tcout() << "\t\t\tunlinked bridge\t" << (**it).bridgeBlobID[0] << " " << (**it).bridgeBlobID[1] << endl;
             (**it).dead = true;
             break;
         }
@@ -1348,20 +1348,21 @@ void planeApp::drawAnalysis(int x, int y, float scale){
             for(std::map<int, Blob>::iterator it = blobs.begin(); it != blobs.end(); ++it){
                 Blob* b = &it->second;
 
-                ofSetColor(255);
+                if (b->movingMean) ofSetColor(255);
+                else ofSetColor(100);
 
                 ofCircle(bx, by, 50);
 
-                string textStr = "id\t: " + ofToString(b->id);
-                textStr += "\nneighbors : "+ ofToString(b->neighbors.size());
-                textStr += "\nmovingMean : " + ofToString(b->movingMean ? "true" : "false");
+                string textStr = "id\t\t: " + ofToString(b->id);
+                textStr += "\nneighbors\t: "+ ofToString(b->neighbors.size());
+                textStr += "\nmovingMean\t: " + ofToString(b->movingMean ? "true" : "false");
                 ofDrawBitmapStringHighlight(textStr, bx+70, by -40);
 
                 for(std::map<int, Neighbor>::iterator iter = b->neighbors.begin(); iter != b->neighbors.end(); ++iter){
                     Neighbor* nb = &iter->second;
                     if (nb->steadyDistance) ofSetColor(255); else ofSetColor(0);
                     ofDrawBitmapString(ofToString(nb->id), bx+70, by+20);
-                    ofRect(bx+100, by+20, nb->distance[0]*0.2, -10);
+                    ofRect(bx+120, by+20, nb->distance[0]*0.2, -10);
                     by += 20;
                 }
 
