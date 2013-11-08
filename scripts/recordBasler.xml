@@ -1,17 +1,5 @@
 <Blobserver>
     <Flow>
-<!--         <Source>
-            <Type>Source_2D_Shmdata</Type>
-            <Subsource>0</Subsource>
-            <Param>
-                <Name>location</Name>
-                <Value>/tmp/switcher_default_video_video_0</Value>
-            </Param>
-            <Param>
-                <Name>save</Name>
-                <Value>1. 3 /tmp/default_recording/grab_</Value>
-            </Param>
-        </Source> -->
         <Source>
             <Type>Source_2D_Gige</Type>
             <Subsource>Basler-21369007</Subsource>
@@ -36,12 +24,16 @@
                 <Value>1</Value>
             </Param>
             <Param>
+                <Name>rotation</Name>
+                <Value>-6</Value>
+            </Param>
+            <Param>
                 <Name>autoExposure</Name>
                 <Value>300 200 200 100 64 32 0.05</Value>
             </Param>
             <Param>
                 <Name>gain</Name>
-                <Value>220</Value>
+                <Value>500</Value>
             </Param>
             <Param>
                 <Name>invertRGB</Name>
@@ -53,7 +45,7 @@
             </Param>
             <Param>
                 <Name>save</Name>
-                <Value>1. 3 /tmp/default_recording/grab_</Value>
+                <Value>1 1500 /home/planeblob/Documents/grabs/tmp/daytime_nov7_</Value>
             </Param>
         </Source>
 <!--         <Actuator>
