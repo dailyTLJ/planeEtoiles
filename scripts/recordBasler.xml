@@ -56,8 +56,79 @@
                 <Value>1. 3 /tmp/default_recording/grab_</Value>
             </Param>
         </Source>
-        <Actuator>
+<!--         <Actuator>
             <Type>Actuator_Nop</Type>
+        </Actuator> -->
+        <Actuator>
+            <Type>Actuator_Hog</Type>
+            <Param>
+                <Name>verbose</Name>
+                <Value>0</Value>
+            </Param>
+            <Param>
+                <Name>modelFilename</Name>
+                <Value>models/model_8x8_bw.xml</Value>
+            </Param>
+            <Param>
+                <Name>maxTimePerFrame</Name>
+                <Value>2e5</Value>
+            </Param>
+            <Param>
+                <Name>maxThreads</Name>
+                <Value>8</Value>
+            </Param>
+            <Param>
+                <Name>mergeDistance</Name>
+                <Value>45</Value>
+            </Param>
+            <Param>
+                <Name>filterSize</Name>
+                <Value>3</Value>
+            </Param>
+            <Param>
+                <Name>roiSize</Name>
+                <Value>size_64x128</Value>
+            </Param>
+            <Param>
+                <Name>blockSize</Name>
+                <Value>size_3x3</Value>
+            </Param>
+            <Param>
+                <Name>cellSize</Name>
+                <Value>size_8x8</Value>
+            </Param>
+            <Param>
+                <Name>bins</Name>
+                <Value>9</Value>
+            </Param>
+            <Param>
+                <Name>margin</Name>
+                <Value>0.8</Value>
+            </Param>
+            <Param>
+                <Name>lifetime</Name>
+                <Value>15</Value>
+            </Param>
+            <Param>
+                <Name>keepOldBlobs</Name>
+                <Value>0 0</Value>
+            </Param>
+            <Param>
+                <Name>processNoiseCov</Name>
+                <Value>1e-4</Value>
+            </Param>
+            <Param>
+                <Name>measurementNoiseCov</Name>
+                <Value>1e-2</Value>
+            </Param>
+            <Param>
+                <Name>saveSamples</Name>
+                <Value>0</Value>
+            </Param>
+            <Param>
+                <Name>saveSamplesAge</Name>
+                <Value>120</Value>
+            </Param>
         </Actuator>
         <Client>
             <Address>localhost</Address>
