@@ -24,8 +24,12 @@
                 <Value>1</Value>
             </Param>
             <Param>
+                <Name>rotation</Name>
+                <Value>-6</Value>
+            </Param>
+            <Param>
                 <Name>autoExposure</Name>
-                <Value>150 130 200 100 64 32 0.05</Value>
+                <Value>300 200 200 100 64 32 0.05</Value>
             </Param>
             <Param>
                 <Name>gain</Name>
@@ -48,7 +52,8 @@
             </Param>
             <Param>
                 <Name>modelFilename</Name>
-                <Value>models/model_8x8_bw.xml</Value>
+                <!-- <Value>models/model_8x8_bw.xml</Value> -->
+                <Value>models/model_nov8.xml</Value>
             </Param>
             <Param>
                 <Name>maxTimePerFrame</Name>
@@ -68,7 +73,8 @@
             </Param>
             <Param>
                 <Name>roiSize</Name>
-                <Value>size_64x128</Value>
+                <Value>size_80x160</Value>
+                <!-- <Value>size_64x128</Value> -->
             </Param>
             <Param>
                 <Name>blockSize</Name>

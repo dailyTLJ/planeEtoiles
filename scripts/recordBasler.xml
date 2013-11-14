@@ -45,7 +45,7 @@
             </Param>
             <Param>
                 <Name>save</Name>
-                <Value>1 1500 /home/planeblob/Documents/grabs/tmp/daytime_nov7_</Value>
+                <Value>1 900 /home/planeblob/Documents/grabs/tmp/weekend_nov8-10_</Value>
             </Param>
         </Source>
 <!--         <Actuator>
@@ -59,7 +59,8 @@
             </Param>
             <Param>
                 <Name>modelFilename</Name>
-                <Value>models/model_8x8_bw.xml</Value>
+                <!-- <Value>models/model_8x8_bw.xml</Value> -->
+                <Value>models/model_nov8.xml</Value>
             </Param>
             <Param>
                 <Name>maxTimePerFrame</Name>
@@ -79,7 +80,8 @@
             </Param>
             <Param>
                 <Name>roiSize</Name>
-                <Value>size_64x128</Value>
+                <Value>size_80x160</Value>
+                <!-- <Value>size_64x128</Value> -->
             </Param>
             <Param>
                 <Name>blockSize</Name>
