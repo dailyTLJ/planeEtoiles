@@ -9,16 +9,16 @@
             </Param>
             <Param>
                 <Name>scale</Name>
-                <Value>0.35</Value>
+                <Value>1</Value>
             </Param>
             <Param>
                 <Name>rotation</Name>
                 <Value>0.0</Value>
             </Param>
-            <Param>
+<!--             <Param>
                 <Name>gammaCorrection</Name>
                 <Value>0.5</Value>
-            </Param>
+            </Param> -->
         </Source>
         <Actuator>
             <Type>Actuator_Hog</Type>
@@ -28,7 +28,7 @@
             </Param>
             <Param>
                 <Name>modelFilename</Name>
-                <Value>models/model_8x8_bw.xml</Value>
+                <Value>models/model_wrongs.xml</Value>
             </Param>
             <Param>
                 <Name>maxTimePerFrame</Name>
@@ -40,15 +40,15 @@
             </Param>
             <Param>
                 <Name>mergeDistance</Name>
-                <Value>64</Value>
+                <Value>45</Value>
             </Param>
             <Param>
                 <Name>filterSize</Name>
-                <Value>1</Value>
+                <Value>6</Value>
             </Param>
             <Param>
                 <Name>roiSize</Name>
-                <Value>size_64x128</Value>
+                <Value>size_80x160</Value>
             </Param>
             <Param>
                 <Name>blockSize</Name>
@@ -56,19 +56,19 @@
             </Param>
             <Param>
                 <Name>cellSize</Name>
-                <Value>size_8x8</Value>
+                <Value>size_16x16</Value>
             </Param>
-<!--             <Param>
+            <Param>
                 <Name>bins</Name>
-                <Value>9</Value>
-            </Param> -->
+                <Value>13</Value>
+            </Param>
             <Param>
                 <Name>margin</Name>
-                <Value>0.9</Value>
+                <Value>0.8</Value>
             </Param>
             <Param>
                 <Name>lifetime</Name>
-                <Value>30</Value>
+                <Value>5</Value>
             </Param>
             <Param>
                 <Name>keepOldBlobs</Name>
@@ -77,11 +77,11 @@
 
             <Param>
                 <Name>processNoiseCov</Name>
-                <Value>1e-4</Value>
+                <Value>1e-6</Value>
             </Param>
             <Param>
                 <Name>measurementNoiseCov</Name>
-                <Value>1e-2</Value>
+                <Value>1e-4</Value>
             </Param>
             <Param>
                 <Name>saveSamples</Name>
@@ -102,7 +102,7 @@
             <Type>Actuator_BgSubtractor</Type>
             <Param>
                 <Name>filterSize</Name>
-                <Value>5</Value>
+                <Value>3</Value>
             </Param>
             <Param>
                 <Name>verbose</Name>
@@ -118,7 +118,7 @@
             </Param>
             <Param>
                 <Name>lifetime</Name>
-                <Value>20</Value>
+                <Value>15</Value>
             </Param>
         </Actuator>
     </Flow>
@@ -136,7 +136,7 @@
         </Actuator>
 
         <Client>
-            <Address>192.168.2.120</Address>
+            <Address>10.10.44.21</Address>
             <Port>9000</Port>
         </Client>
         <Server>

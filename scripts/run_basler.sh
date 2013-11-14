@@ -12,6 +12,7 @@
 source helpers.sh
 
 # cd ../data
+# blobserver -C basler.xml 
 blobserver -C basler.xml $@ &
 sleep 5
 shmvid /tmp/blobserver_1_hog_0
