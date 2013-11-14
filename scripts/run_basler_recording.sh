@@ -4,7 +4,7 @@
 # ./switcherBaslerRec.sh  ...
 
 # accesses:
-# /tmp/switcher_default_video_video_0
+# /tmp/switcher_default_video_video-0
 
 
 #!/bin/bash
@@ -15,8 +15,9 @@ source helpers.sh
 blobserver -C basler_rec.xml $@ &
 
 sleep 5
-shmvid /tmp/blobserver_1_hog_0 &
-shmvid /tmp/blobserver_2_bgsubtractor_0
+# shmvid /tmp/blobserver_1_hog_0 &
+# shmvid /tmp/blobserver_2_bgsubtractor_0
+shmvid /tmp/blobserver_1_hog_0
 
 #gst-launch-0.10 shmsrc socket-path=/tmp/blobserver_output_2 ! \
 #	gdpdepay ! decodebin2 ! ffmpegcolorspace ! \

@@ -18,7 +18,14 @@ sleep 1
 
 switcher-ctrl -C uridecodebin video
 switcher-ctrl -s video loop true
-switcher-ctrl -s video uri 'file:///home/planeblob/Videos/align.avi'
+# switcher-ctrl -s video uri 'file:///home/planeblob/Videos/align.avi'
 # switcher-ctrl -s video uri 'file:///home/planeblob/Videos/full.avi'
 # switcher-ctrl -s video uri 'file:///home/planeblob/Videos/hop_freeze.avi'
+# switcher-ctrl -s video uri 'file:///home/planeblob/Videos/standingstill.avi'
+# switcher-ctrl -s video uri 'file:///home/planeblob/Videos/keepdistance.avi'
+# switcher-ctrl -s video uri 'file:///home/planeblob/Videos/run_freeze.avi'
+# switcher-ctrl -s video uri 'file:///home/planeblob/Videos/spin.avi'
+# switcher-ctrl -s video uri 'file:///home/planeblob/Videos/drop.avi'
+switcher-ctrl -s video uri 'file:///home/planeblob/Videos/random.avi'
+# switcher-ctrl -s video uri 'file:///home/planeblob/Videos/groups.avi'
 switcher-ctrl -s video started true
