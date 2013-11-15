@@ -41,7 +41,7 @@ for ((i = 9; i <= 13; i += 2));
 do
     for ((j = 12; j <= 16; j += 4));
     do
-        blobtrainer -T -p ./models/positive -n ./models/negative --roi-size 80x160 --position 0x0 -C 0.7 -E 0.1 -c 0.01 -b ${i} --cell-size ${j}x${j} --cell-step 1.3x1.3 --block-size 2x2 -o models/model_nov14_cell${j}_bin${i}_block2.xml >> models/plane_training_NOV14.csv &
-        blobtrainer -T -p ./models/positive -n ./models/negative --roi-size 80x160 --position 0x0 -C 0.7 -E 0.1 -c 0.01 -b ${i} --cell-size ${j}x${j} --cell-step 1.3x1.3 --block-size 3x3 -o models/model_nov14_cell${j}_bin${i}_block3.xml >> models/plane_training_NOV14.csv
+        blobtrainer -T -p ./models/positive -n ./models/negative --roi-size 80x160 --position 0x0 -C 0.7 -E 0.1 -c 0.01 -b ${i} --cell-size ${j}x${j} --cell-step 1.3x1.3 --block-size 2x2 -o models/model_nov15d_cell${j}_bin${i}_block2.xml >> models/plane_training_NOV15.csv &
+        blobtrainer -T -p ./models/positive -n ./models/negative --roi-size 80x160 --position 0x0 -C 0.7 -E 0.1 -c 0.01 -b ${i} --cell-size ${j}x${j} --cell-step 1.3x1.3 --block-size 3x3 -o models/model_nov15d_cell${j}_bin${i}_block3.xml >> models/plane_training_NOV15.csv
     done
 done

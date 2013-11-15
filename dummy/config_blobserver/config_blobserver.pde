@@ -16,26 +16,29 @@ int port = 5555;
 int flow = 1;
 
 void setup() {
-  size(300,600);
+  size(250,420);
   frameRate(25);
   
   controlP5 = new ControlP5(this);
   
-  int x = 50;
+  int x = 20;
   int y = 10;
   int h = 15;
   int dy = 30;
-  controlP5.addButton("connect",0,50,y+=dy,80,19);
+  controlP5.addButton("connect",0,x,y+=dy,80,19);
   y+=dy;
   controlP5.addSlider("mergeDistance",0,100,45,x,y+=dy,100,h);
-  controlP5.addSlider("lifetime",0,50,7,x,y+=dy,100,h);
-  controlP5.addSlider("filterSize",0,15,1,x,y+=dy,100,h);
-  controlP5.addSlider("processNoiseCov",0,10,1,x,y+=dy,100,h);
+  controlP5.addSlider("lifetime",0,20,5,x,y+=dy,100,h);
+  controlP5.addSlider("filterSize",0,15,3,x,y+=dy,100,h);
+  controlP5.addSlider("processNoiseCov",0,10,2,x,y+=dy,100,h);
   controlP5.addSlider("measurementNoiseCov",0,10,1,x,y+=dy,100,h);
-  controlP5.addSlider("margin",0,1,0.8,x,y+=dy,100,h);
+  controlP5.addSlider("margin",0,1,1,x,y+=dy,100,h);
   controlP5.addSlider("maxTimePerFrame",0,10,5,x,y+=dy,100,h);
   controlP5.addSlider("maxThreads",0,10,8,x,y+=dy,100,h);
   controlP5.addToggle("saveSamples",false,x,y+=dy,20,20);
+  y+=10;
+  controlP5.addSlider("saveSamplesAge",10,200,120,x,y+=dy,100,h);
+  
   
   /* listening */
   oscP5 = new OscP5(this,port);
@@ -98,6 +101,13 @@ void lifetime(int v) {
   m = new OscMessage("/blobserver/setParameter", new Object[] {client, flow, actuator, "lifetime", new Float(v) } );
   oscP5.send(m,myRemoteLocation);  
   println("lifetime: " + v);
+}
+
+void saveSamplesAge(int v) {
+  OscMessage m;
+  m = new OscMessage("/blobserver/setParameter", new Object[] {client, flow, actuator, "saveSamplesAge", new Float(v) } );
+  oscP5.send(m,myRemoteLocation);  
+  println("saveSamplesAge: " + v);
 }
 
 void margin(float v) {

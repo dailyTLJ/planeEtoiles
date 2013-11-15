@@ -7,6 +7,10 @@
                 <Name>location</Name>
                 <Value>/tmp/switcher_default_video_video-0</Value>
             </Param>
+<!--             <Param>
+                <Name>mask</Name>
+                <Value>models/mask.jpg</Value>
+            </Param> -->
             <Param>
                 <Name>scale</Name>
                 <Value>1</Value>
@@ -28,23 +32,27 @@
             </Param>
             <Param>
                 <Name>modelFilename</Name>
-                <Value>models/model_nov14_cell12_bin9_block3.xml</Value>
+                <Value>models/model_nov15c_cell12_bin9_block3.xml</Value>
             </Param>
             <Param>
                 <Name>cellSize</Name>
                 <Value>size_12x12</Value>
+                <!-- <Value>size_16x16</Value> -->
             </Param>
             <Param>
                 <Name>bins</Name>
                 <Value>9</Value>
+                <!-- <Value>11</Value> -->
+                <!-- <Value>13</Value> -->
             </Param>
             <Param>
                 <Name>blockSize</Name>
+                <!-- <Value>size_2x2</Value> -->
                 <Value>size_3x3</Value>
             </Param>
             <Param>
                 <Name>filterSize</Name>
-                <Value>1</Value>
+                <Value>3</Value>
             </Param>
             <Param>
                 <Name>mergeDistance</Name>
@@ -52,7 +60,7 @@
             </Param>
             <Param>
                 <Name>processNoiseCov</Name>
-                <Value>1e-1</Value>
+                <Value>1e-2</Value>
             </Param>
             <Param>
                 <Name>measurementNoiseCov</Name>
@@ -64,7 +72,7 @@
             </Param>
             <Param>
                 <Name>lifetime</Name>
-                <Value>7</Value>
+                <Value>5</Value>
             </Param>
             <Param>
                 <Name>maxTimePerFrame</Name>
