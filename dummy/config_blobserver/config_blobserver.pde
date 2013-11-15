@@ -9,21 +9,39 @@ ControlP5 controlP5;
 OscP5 oscP5;
 NetAddress myRemoteLocation; 
 
-int hog_mergeDistance = 45; 
+String client = "localhost";
+String actuator = "Actuator";
+int blobport = 9002;
+int port = 5555;
+int flow = 1;
 
 void setup() {
   size(300,600);
   frameRate(25);
   
   controlP5 = new ControlP5(this);
-  controlP5.addSlider("mergeDistance",0,100,45,50,100,100,10);
-  controlP5.addSlider("lifetime",0,50,7,50,140,100,10);
+  
+  int x = 50;
+  int y = 10;
+  int h = 15;
+  int dy = 30;
+  controlP5.addButton("connect",0,50,y+=dy,80,19);
+  y+=dy;
+  controlP5.addSlider("mergeDistance",0,100,45,x,y+=dy,100,h);
+  controlP5.addSlider("lifetime",0,50,7,x,y+=dy,100,h);
+  controlP5.addSlider("filterSize",0,15,1,x,y+=dy,100,h);
+  controlP5.addSlider("processNoiseCov",0,10,1,x,y+=dy,100,h);
+  controlP5.addSlider("measurementNoiseCov",0,10,1,x,y+=dy,100,h);
+  controlP5.addSlider("margin",0,1,0.8,x,y+=dy,100,h);
+  controlP5.addSlider("maxTimePerFrame",0,10,5,x,y+=dy,100,h);
+  controlP5.addSlider("maxThreads",0,10,8,x,y+=dy,100,h);
+  controlP5.addToggle("saveSamples",false,x,y+=dy,20,20);
   
   /* listening */
-  oscP5 = new OscP5(this,5555);
+  oscP5 = new OscP5(this,port);
   
   /* broadcasting */
-  myRemoteLocation = new NetAddress("127.0.0.1",9002);
+  myRemoteLocation = new NetAddress("127.0.0.1",blobport);
 }
 
 void draw() {
@@ -44,20 +62,13 @@ void mousePressed() {
 
 
 void keyPressed() {
-  OscMessage m;
-  switch(key) {
-    case('c'):
-      m = new OscMessage("/blobserver/signIn", new Object[] {"localhost", 5555} );
-      oscP5.send(m,myRemoteLocation);  
-      println("connect");
-      break;
-    case('d'):
-      m = new OscMessage("/blobserver/signOut", new Object[] {"127.0.0.1"} );
-      oscP5.send(m,myRemoteLocation);  
-      println("disconnect");
-      break;
+}
 
-  }  
+void connect(int v) {
+  OscMessage m;
+  m = new OscMessage("/blobserver/signIn", new Object[] {client, port} );
+  oscP5.send(m,myRemoteLocation);  
+  println("connect");
 }
 
 
@@ -68,17 +79,72 @@ void oscEvent(OscMessage theOscMessage) {
   println("### " +theOscMessage.get(0));
 }
 
+void filterSize(int v) {
+  OscMessage m;
+  m = new OscMessage("/blobserver/setParameter", new Object[] {client, flow, actuator, "filterSize", new Float(v) } );
+  oscP5.send(m,myRemoteLocation);  
+  println("filterSize: " + v);
+}
 
 void mergeDistance(int v) {
   OscMessage m;
-  m = new OscMessage("/blobserver/setParameter", new Object[] {"localhost", 1, "Actuator", "mergeDistance", new Float(v) } );
+  m = new OscMessage("/blobserver/setParameter", new Object[] {client, flow, actuator, "mergeDistance", new Float(v) } );
   oscP5.send(m,myRemoteLocation);  
   println("mergeDistance: " + v);
 }
 
 void lifetime(int v) {
   OscMessage m;
-  m = new OscMessage("/blobserver/setParameter", new Object[] {"localhost", 1, "Actuator", "lifetime", new Float(v) } );
+  m = new OscMessage("/blobserver/setParameter", new Object[] {client, flow, actuator, "lifetime", new Float(v) } );
   oscP5.send(m,myRemoteLocation);  
   println("lifetime: " + v);
+}
+
+void margin(float v) {
+  OscMessage m;
+  m = new OscMessage("/blobserver/setParameter", new Object[] {client, flow, actuator, "margin", new Float(v) } );
+  oscP5.send(m,myRemoteLocation);  
+  println("margin: " + v);
+}
+
+void maxThreads(int v) {
+  OscMessage m;
+  m = new OscMessage("/blobserver/setParameter", new Object[] {client, flow, actuator, "maxThreads", new Float(v) } );
+  oscP5.send(m,myRemoteLocation);  
+  println("maxThreads: " + v);
+}
+
+void processNoiseCov(int v) {
+  float logv = pow(10, -v);
+  OscMessage m;
+  m = new OscMessage("/blobserver/setParameter", new Object[] {client, flow, actuator, "processNoiseCov", new Float(logv) } );
+  oscP5.send(m,myRemoteLocation);  
+  println("processNoiseCov: " + logv);
+}
+
+void measurementNoiseCov(int v) {
+  float logv = pow(10, -v);
+  OscMessage m;
+  m = new OscMessage("/blobserver/setParameter", new Object[] {client, flow, actuator, "measurementNoiseCov", new Float(logv) } );
+  oscP5.send(m,myRemoteLocation);  
+  println("measurementNoiseCov: " + logv);
+}
+
+void maxTimePerFrame(int v) {
+  float logv = 2 * pow(10, v);
+  OscMessage m;
+  m = new OscMessage("/blobserver/setParameter", new Object[] {client, flow, actuator, "maxTimePerFrame", new Float(logv) } );
+  oscP5.send(m,myRemoteLocation);  
+  println("maxTimePerFrame: " + logv);
+}
+
+void saveSamples(boolean theFlag) {
+  int v = 0;
+  if(theFlag==true) {
+    v = 1;
+  }
+  OscMessage m;
+  m = new OscMessage("/blobserver/setParameter", new Object[] {client, flow, actuator, "saveSamples", new Float(v) } );
+  oscP5.send(m,myRemoteLocation);  
+  println("saveSamples: " + v);
 }
