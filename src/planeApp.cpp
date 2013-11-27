@@ -20,6 +20,7 @@ void planeApp::setup(){
 	fontSm.setLineHeight(16.0f);
 	fontSm.setLetterSpacing(1.037);
 
+    language = 0;
     processing = true;
     oscMsgReceived = false;
     oscLastMsg = 0;
@@ -48,10 +49,10 @@ void planeApp::setup(){
 
     projectionW = 1080;
     projectionH = 1920;
-    blobserverW = 320;
-    blobserverH = 240;
-    blobW = 64;
-    blobH = 128;
+    blobserverW = 800;
+    blobserverH = 600;
+    blobW = 80;
+    blobH = 160;
 
     bgsubtractorFlowId = 2; // 1 = hog, 2 = bgs, 3 = nop
     bgsubtractorCnt = 0;
@@ -69,7 +70,8 @@ void planeApp::setup(){
 
     paramBasic.setName("Dimension"); 
     paramBasic.add(siteW.set( "Site Width", 500, 0, 1000));
-    paramBasic.add(siteH.set( "Site Length", 700, 0, 1000));
+    paramBasic.add(siteH.set( "Site Length", 500, 0, 1000));
+    paramBasic.add(stageRadius.set( "Stage Radius", 200, 0, 500));
     paramBasic.add(mapSiteW.set( "Map Width", 2, 0, 4));
     paramBasic.add(mapSiteH.set( "Map Height", 2, 0, 4));
     paramBasic.add(offsetX.set( "Offset X", 0, -500, 500));
@@ -124,6 +126,17 @@ void planeApp::setup(){
 //        testBlob.follow( i*3, i * 3.0/5.0 );
 //        testBlob.follow(150-i*3,i * 3.0/5.0);
 //    }
+    steles[0].set(383,184,0);
+    steles[1].set(457,198,0);
+    steles[2].set(506,224,0);
+    steles[3].set(446,260,0);
+    steles[4].set(312,276,0);
+    steles[5].set(160,269,0);
+    steles[6].set(159,231,0);
+    steles[7].set(241,203,0);
+    
+    int tmp = 1;
+    recalculatePerspective(tmp);
 
     // listen on the given port
 	tcout() << "listening for osc messages on port " << PORT << "\n";
@@ -137,12 +150,21 @@ void planeApp::recalculatePerspective(int & v) {
     tcout() << "recalculatePerspective" << endl;
     tcout() << "siteW " << siteW << "   siteH " << siteH << endl;
     this->setPerspective();
+
+    for (int i=0; i<8; i++) {    
+        vector<cv::Point2f> pre, post;
+        pre.push_back(cv::Point2f(steles[i].x, steles[i].y));
+        cv::perspectiveTransform(pre, post, perspectiveMat);
+        steles_topdown[i].set(post[0].x, post[0].y,0);
+    }
 }
 
 void planeApp::setPerspective() {
     int skew = 0;
-    // 800x600  scale 0.4 >> 320x240   mninus 64x128
-    float in[] = {skew,0,blobserverW-skew,0,blobserverW,blobserverH,0,blobserverH};
+    // 800x600  scale 0.4 >> 320x240   minus 64x128
+    // float in[] = {skew,0,blobserverW-skew,0,blobserverW,blobserverH,0,blobserverH};
+    // float in[] = {180,180,660,140,410,300,0,320};
+    float in[] = {260,140,600,210,380,300,-150,300};
     float out[] = {0,0,siteW,0,siteW,siteH,0,siteH};
 
     cv::Mat proj_in(4,2, CV_32FC1, in);
@@ -173,7 +195,8 @@ void planeApp::initScenes(){
     idle.no = n;
     idle.segments = 1;
     idle.analysis[0] = "* detection";
-    idle.instructions[0] = "Come closer";
+    idle.instructions[0][0] = "Come closer";
+    idle.instructions[1][0] = "Approchez";
     idle.length[0] = -1;
     scenes[n] = idle;
  
@@ -189,16 +212,20 @@ void planeApp::initScenes(){
     stars.name = "Star Links";
     stars.no = n;
     stars.segments = 4;
-    stars.instructions[0] = "Stand still";
+    stars.instructions[0][0] = "Stand still";
+    stars.instructions[1][0] = "Ne bougez plus";
     stars.analysis[0] = "* Velocity < FreezeMaxVel\n* frozenTimer > freezeMinTime\n-> 20 sec";
     stars.length[0] = 20;
-    stars.instructions[1] = "Try new spots \nto light up \nmore stars.";
+    stars.instructions[0][1] = "Try new spots to light up more stars";
+    stars.instructions[1][1] = "Essayez de nouveaux \nendroits pour allumer \nplus d'étoiles";
     stars.analysis[1] = "* Velocity < FreezeMaxVel\n* frozenTimer > freezeMinTime\n* frozenTimer < freezeMaxTime\n+ Bonus every newStarBonus\n-> newStarMax stars || 40 sec";
     stars.length[1] = 40;
-    stars.instructions[2] = "Walk with \nsomeone. \nKeep the \nsame distance \nbetween you.";
+    stars.instructions[0][2] = "Walk with someone. \nKeep the same distance between you.\n(No hands!)";
+    stars.instructions[1][2] = "Marchez avec un partenaire\nGardez la même distance entre vous\n(Sans les mains!)";
     stars.analysis[2] = "* velocity history > movingThr \n* distance history < distStdDevThr\n-> 45 sec";
     stars.length[2] = 45;
-    stars.instructions[3] = "Walk with \nsomeone. \nMake eye \ncontact. \nKeep the \ndistance.";
+    stars.instructions[0][3] = "Walk with \nsomeone. \nMake eye \ncontact. \nKeep the \ndistance.";
+    stars.instructions[1][3] = "Marchez avec un partenaire \nGardez la même distance entre vous \nRegardez-vous dans les yeux";
     stars.analysis[3] = "* velocity history > movingThr \n* distance history < distStdDevThr\n-> 60 sec";
     stars.length[3] = 60;
     scenes[n] = stars;
@@ -214,10 +241,12 @@ void planeApp::initScenes(){
     revolution.name = "Revolution";
     revolution.no = n;
     revolution.segments = 2;
-    revolution.instructions[0] = "Take someone's \nhand. \nSpin and lean \nout as far as \npossible.";
+    revolution.instructions[0][0] = "Take someone's hand \nSpin and lean out as far as possible";
+    revolution.instructions[1][0] = "Tenez les mains de votre partenaire \nTournez";
     revolution.analysis[0] = "* \n-> 20 sec";
     revolution.length[0] = 20;
-    revolution.instructions[1] = "Let go...";
+    revolution.instructions[0][1] = "Let go...";
+    revolution.instructions[1][1] = "Lâchez !";
     revolution.analysis[1] = "* \n-> 20 sec";
     revolution.length[1] = 20;
     scenes[n] = revolution;
@@ -233,22 +262,28 @@ void planeApp::initScenes(){
     sun.name = "Explosion";
     sun.no = n;
     sun.segments = 6;
-    sun.instructions[0] = "Stand on one leg.";
+    sun.instructions[0][0] = "Stand on one leg.";
+    sun.instructions[1][0] = "Tenez-vous sur une jambe";
     sun.analysis[0] = "- \n-> 25 sec";
     sun.length[0] = 25;
-    sun.instructions[1] = "Hope from one \nspot to the other.";
+    sun.instructions[0][1] = "Hop from one \nspot to the other.";
+    sun.instructions[1][1] = "Déplacez-vous en sautant";
     sun.analysis[1] = "* onLost event\n-> 20 sec";
     sun.length[1] = 20;
-    sun.instructions[2] = "Hope from one \nspot to the other.\nEveryone in unison.";
+    sun.instructions[0][2] = "Everyone in unison";
+    sun.instructions[1][2] = "Tous en même temps";
     sun.analysis[2] = "* onLost event\n-> 20 sec";
     sun.length[2] = 20;
-    sun.instructions[3] = "FREEZE!";
+    sun.instructions[0][3] = "FREEZE!";
+    sun.instructions[1][3] = "STOP!";
     sun.analysis[3] = "* velocity < freezeMaxVel\n-> 20 sec || all frozen";
     sun.length[3] = 20;
-    sun.instructions[4] = "Run in every \ndirection at once.";
+    sun.instructions[0][4] = "Run in every \ndirection at once.";
+    sun.instructions[1][4] = "Courez partout en même temps";
     sun.analysis[4] = "* \n-> 40 sec";
     sun.length[4] = 40;
-    sun.instructions[5] = "FREEZE!";
+    sun.instructions[0][5] = "FREEZE!";
+    sun.instructions[1][5] = "STOP!";
     sun.analysis[5] = "* velocity < freezeMaxVel\n-> 20 sec || all frozen";
     sun.length[5] = 13;
     scenes[n] = sun;
@@ -270,16 +305,35 @@ void planeApp::initScenes(){
     sceneInfo eclipse;
     eclipse.name = "Alignment";
     eclipse.no = n;
-    eclipse.segments = 3;
-    eclipse.instructions[0] = "Now align \nyourself in \nfront of me.\nAnd follow me.";
-    eclipse.analysis[0] = "- \n-> 40 sec";
-    eclipse.length[0] = 40;
-    eclipse.instructions[1] = "Step out \nof the line.\nStep into \nthe line.";
-    eclipse.analysis[1] = "* x == main.x\n-> 20 sec";
+    eclipse.segments = 7;
+    eclipse.instructions[0][0] = "Now line-up in front of me";
+    eclipse.instructions[1][0] = "Faites une file face à moi.";
+    eclipse.analysis[0] = "- \n-> 20 sec";
+    eclipse.length[0] = 20;
+    eclipse.instructions[0][1] = "Follow me";
+    eclipse.instructions[1][1] = "Suivez-moi.";
+    eclipse.analysis[1] = "\n-> 20 sec";
     eclipse.length[1] = 20;
-    eclipse.instructions[2] = "Disperse very \nslowly towards \nthe edges.";
-    eclipse.analysis[2] = "* edge-proximity = opacity \n-> 15 sec";
-    eclipse.length[2] = 15;
+    eclipse.instructions[0][2] = "Step out of the line";
+    eclipse.instructions[1][2] = "Sortez de la file.";
+    eclipse.analysis[2] = "\n-> 10 sec";
+    eclipse.length[2] = 10;
+    eclipse.instructions[0][3] = "Step into the line";
+    eclipse.instructions[1][3] = "Revenez dans la file.";
+    eclipse.analysis[3] = "* x == main.x\n-> 10 sec";
+    eclipse.length[3] = 10;
+    eclipse.instructions[0][4] = "Step out of the line";
+    eclipse.instructions[1][4] = "Sortez de la file.";
+    eclipse.analysis[4] = "\n-> 10 sec";
+    eclipse.length[4] = 10;
+    eclipse.instructions[0][5] = "Step into the line";
+    eclipse.instructions[1][5] = "Revenez dans la file.";
+    eclipse.analysis[5] = "* x == main.x\n-> 10 sec";
+    eclipse.length[5] = 10;
+    eclipse.instructions[0][6] = "Disperse very slowly towards the edges.";
+    eclipse.instructions[1][6] = "Dispersez-vous lentement vers l'extérieur.";
+    eclipse.analysis[6] = "* edge-proximity = opacity \n-> 15 sec";
+    eclipse.length[6] = 15;
     scenes[n] = eclipse;
 
     // bgVideos[n].push_back(videoElement("video/2_stars/BACKGROUND 1 loop-QTAnimation.mov"));
@@ -293,19 +347,24 @@ void planeApp::initScenes(){
     shooting.name = "Combustion";
     shooting.no = n;
     shooting.segments = 4;
-    shooting.instructions[0] = "Move like a \nshooting star.";
+    shooting.instructions[0][0] = "Move like a \nshooting star.";
+    shooting.instructions[1][0] = "Bougez comme une étoile filante";
     shooting.analysis[0] = "* onLost event \n-> 25 sec";
     shooting.length[0] = 25;
-    shooting.instructions[1] = "Drop to the \nground!";
+    shooting.instructions[0][1] = "Drop to the \nground!";
+    shooting.instructions[1][1] = "Laissez-vous tomber";
     shooting.analysis[1] = "* onLost event \n-> 15 sec";
     shooting.length[1] = 15;
-    shooting.instructions[2] = "Exhale.\nLook at the sky.";
+    shooting.instructions[0][2] = "Exhale.\nLook at the sky.";
+    shooting.instructions[1][2] = "Regardez le ciel\nExpirez";
     shooting.analysis[2] = "- \n-> 15 sec";
     shooting.length[2] = 15;
-    shooting.instructions[3] = "Stand up";
+    shooting.instructions[0][3] = "Stand up";
+    shooting.instructions[1][3] = "Relevez-vous.";
     shooting.analysis[3] = "- \n-> 10 sec";
     shooting.length[3] = 10;
-    shooting.instructions[4] = "Thank you";
+    shooting.instructions[0][4] = "Thank you";
+    shooting.instructions[1][4] = "Merci";
     shooting.analysis[4] = "- \n-> 5 sec";
     shooting.length[4] = 5;
     scenes[n] = shooting;
@@ -543,13 +602,13 @@ void planeApp::bgMediaFadedIn(int & trans) {
 
 void planeApp::blobOnLost(int & blobID) {
     // tcout() << "BLOB " << blobID << " just got lost" << endl;
-    if (!transition) {
+    if (!transition && blobs[blobID].onStage) {
         if (scene==3) {
             // SUN explosions
             if (segment==1 || segment==2) {
-                int randomShooter = ofRandom(6) + 1;
-                // string newVideoName = "video/4_sun/SUN_explosion-" + ofToString(randomShooter,2,'0') + "-animation.mov";
-                string newVideoName = "video/4_sun/SUN_explosion-" + ofToString(randomShooter,2,'0') + "-animation.mp4";
+                int randomExpl = ofRandom(6) + 1;
+                // string newVideoName = "video/4_sun/SUN_explosion-" + ofToString(randomExpl,2,'0') + "-animation.mov";
+                string newVideoName = "video/4_sun/SUN_explosion-" + ofToString(randomExpl,2,'0') + "-animation.mp4";
                 // newVideoName = "video/4_sun/SUN_explosion-01-H264-10mbps.mp4";
                 // newVideoName = "video/4_sun/SUN_explosion-01-photoJPEG.mov";
                 newVideoName = "video/4_sun/SUN_explosion-01-animation.mov";
@@ -670,7 +729,7 @@ void planeApp::blobOnFreeze(int & blobID) {
 //    tcout() << "BLOB " << blobID << " froze!" << endl;
     if (!transition) {
         if (scene==1) {
-            if (segment==0 || segment==1) {
+            if ((segment==0 || segment==1) && blobs[blobID].onStage) {
                 // STAND STILL
                 // create new video element
     //            tcout() << "blob " << blobID << " \t\tfreeze ! " << endl;
@@ -698,7 +757,7 @@ void planeApp::blobOnFreeze(int & blobID) {
                 bool allFrozen = true;
                 for(std::map<int, Blob>::iterator it = blobs.begin(); it != blobs.end(); ++it){
                     Blob* b = &it->second;
-                    if (!b->frozen) allFrozen = false;
+                    if (!b->frozen && b->onStage) allFrozen = false;
                 }
                 if (allFrozen) success = true;
             }
@@ -730,25 +789,17 @@ void planeApp::blobOverFreeze(int & blobID) {
     }
 }
 
-void planeApp::blobOnCreate(int & blobID) {
-   
+void planeApp::blobEnterStage(int & blobID) {
     if (!transition) {
-        // first clean up, all related blob settings
-        tcout() << "blobOnCreate() \t" << blobID << endl;
-        this->blobUnlink(blobID);
-        blobs[blobID].videoTrace = false;
-        blobs[blobID].mediaLink = ofPtr<mediaElement>();  // TODO how to release ofPtr ? 
-        
-
-
         // then assign the appropriate ones
         if (scene==0) {
             // COME CLOSER, recognition of people == time to move on
             if (!success) success = true;
+
         } else if (scene==1) {
             if (segment==2 || segment==3) {
                 // KEEP THE DISTANCE
-                // create new video element
+                // create new video element, but only show if inside the stage? 
     //            tcout() << "blob " << blobID << " \t\tfreeze ! " << endl;
                 fgMedia.push_back(ofPtr<mediaElement>( new videoElement("video/2_stars/INDIV STAR 2 loop-H264-10mbps.mp4")));
                 blobs[blobID].mediaLink = fgMedia[fgMedia.size()-1];
@@ -779,8 +830,36 @@ void planeApp::blobOnCreate(int & blobID) {
                 (*fgMedia[fgMedia.size()-1]).fadeIn();
             }
         }
-
         blobCountChange();
+    }
+}
+
+void planeApp::blobLeaveStage(int & blobID) {
+    if (!transition) {
+        if (scene==1) {
+            if (segment==2 || segment==3) {
+                tcout() << "blobLeaveStage()\t\t" << blobID << endl;
+                this->blobUnlink(blobID);
+            }
+        } else if (scene==4) {
+            tcout() << "blobLeaveStage()\t\t" << blobID << endl;
+            this->blobUnlink(blobID);
+        }
+    }
+}
+
+void planeApp::blobOnCreate(int & blobID) {
+   
+    if (!transition) {
+        // first clean up, all related blob settings
+        tcout() << "blobOnCreate() \t" << blobID << endl;
+        this->blobUnlink(blobID);
+        blobs[blobID].videoTrace = false;
+        blobs[blobID].mediaLink = ofPtr<mediaElement>();  // TODO how to release ofPtr ? 
+        
+        if (blobs[blobID].onStage) {
+            this->blobEnterStage(blobID);
+        }
     }
 }
 
@@ -953,6 +1032,7 @@ void planeApp::nextSegment(int direction) {
         scene++;
         segment = 0;
         if(scene >= scenes.size()) {
+            language = (language==0) ? 1 : 0;
             scene = 0;
             globalStart = ofGetUnixTime();
         }
@@ -960,6 +1040,7 @@ void planeApp::nextSegment(int direction) {
         scene--;
         if(scene < 0){
             scene = scenes.size()-1;
+            language = (language==0) ? 1 : 0;
         }
         segment = scenes[scene].segments -1;
     }
@@ -1127,10 +1208,12 @@ void planeApp::receiveOsc(){
                 ofAddListener( blobs[blobid].onSteady, this, &planeApp::blobSteady );
                 ofAddListener( blobs[blobid].onSteadyReward, this, &planeApp::blobSteadyReward );
                 ofAddListener( blobs[blobid].onBreakSteady, this, &planeApp::blobBreakSteady );
+                ofAddListener( blobs[blobid].onEnterStage, this, &planeApp::blobEnterStage );
+                ofAddListener( blobs[blobid].onLeaveStage, this, &planeApp::blobLeaveStage );
             }
             // update blob with new values
             Blob* b = &blobs.find(blobid)->second;
-            b->follow(posx + blobW/2.0, posy + blobH/2.0, blobserverW, blobserverH, edgeMargin);
+            b->follow(posx + blobW/2.0, posy + blobH*0.8, siteW, siteH, stageRadius);
             b->setVelocity(velx, vely);
             // b->analyze(freezeMaxVel, freezeMinTime, freezeMaxTime, movingThr);    //
             b->age = age;
@@ -1156,7 +1239,7 @@ void planeApp::draw(){
 
         this->drawScreen(0, 0, 1);
 
-        string instruction = scenes[scene].instructions[segment];
+        string instruction = scenes[scene].instructions[language][segment];
         ofFill(); ofSetColor(255);
         fontBg.drawString(instruction, 50, 50);
 
@@ -1176,7 +1259,7 @@ void planeApp::draw(){
 
         offsy += 20;
 
-        this->drawRawData(offsx, offsy, 0.7);
+        this->drawRawData(offsx, offsy, 0.3);
 
         offsy += 260 + 10;
         this->drawTopDown(offsx, offsy, 0.5, drawBlobDetail);
@@ -1272,7 +1355,7 @@ void planeApp::drawScreen(int x, int y, float scale){
 
     ofDisableAlphaBlending();
 
-    string instruction = scenes[scene].instructions[segment];
+    string instruction = scenes[scene].instructions[language][segment];
     ofFill(); ofSetColor(255);
     fontBg.drawString(instruction, x+20, y+projectionH*scale*0.8);
 
@@ -1304,12 +1387,14 @@ void planeApp::drawAnalysis(int x, int y, float scale){
         ofFill();
         for(std::map<int, Blob>::iterator it = blobs.begin(); it != blobs.end(); ++it){
             Blob* b = &it->second;
-            ofSetColor(50);
-            ofCircle(bx, by, 50);
-            bx += 130;
-            if (bx < projectionW-300) {
-                bx = x + 100;
-                by += 130;
+            if (b->onStage) {
+                ofSetColor(50);
+                ofCircle(bx, by, 50);
+                bx += 130;
+                if (bx < projectionW-300) {
+                    bx = x + 100;
+                    by += 130;
+                }
             }
         }
     } else if (scene==1) {
@@ -1320,24 +1405,26 @@ void planeApp::drawAnalysis(int x, int y, float scale){
             ofFill();
             for(std::map<int, Blob>::iterator it = blobs.begin(); it != blobs.end(); ++it){
                 Blob* b = &it->second;
-                if(b->properFreeze) {
-                    if(segment==1 && b->frozenTimer > freezeMaxTime) {
-                        ofSetColor(0);
-                    } else ofSetColor(255);
-                } else if(b->frozen) ofSetColor(100);
-                else ofSetColor(50);
+                if (b->onStage) {
+                    if(b->properFreeze) {
+                        if(segment==1 && b->frozenTimer > freezeMaxTime) {
+                            ofSetColor(0);
+                        } else ofSetColor(255);
+                    } else if(b->frozen) ofSetColor(100);
+                    else ofSetColor(50);
 
-                ofCircle(bx, by, 50);
+                    ofCircle(bx, by, 50);
 
-                string textStr = "id\t\t: " + ofToString(b->id);
-                textStr += "\nvel\t\t: " + ofToString(b->vel, 2);
-                textStr += "\nfrozen\t\t: "+ ofToString(b->frozen ? "true" : "false");
-                textStr += "\nproperFreeze \t: "+ ofToString(b->properFreeze ? "true" : "false");
-                textStr += "\noverFrozen \t: "+ ofToString(b->overFrozen ? "true" : "false");
-                textStr += "\nfrozenTimer \t: " + ofToString(b->frozenTimer);
-                ofDrawBitmapStringHighlight(textStr, bx+70, by -30);
+                    string textStr = "id\t\t: " + ofToString(b->id);
+                    textStr += "\nvel\t\t: " + ofToString(b->vel, 2);
+                    textStr += "\nfrozen\t\t: "+ ofToString(b->frozen ? "true" : "false");
+                    textStr += "\nproperFreeze \t: "+ ofToString(b->properFreeze ? "true" : "false");
+                    textStr += "\noverFrozen \t: "+ ofToString(b->overFrozen ? "true" : "false");
+                    textStr += "\nfrozenTimer \t: " + ofToString(b->frozenTimer);
+                    ofDrawBitmapStringHighlight(textStr, bx+70, by -30);
 
-                by += 110;
+                    by += 110;
+                }
             }
 
         } else if( segment==2 || segment==3 ) {
@@ -1347,26 +1434,27 @@ void planeApp::drawAnalysis(int x, int y, float scale){
             ofFill();
             for(std::map<int, Blob>::iterator it = blobs.begin(); it != blobs.end(); ++it){
                 Blob* b = &it->second;
+                if (b->onStage) {
+                    if (b->movingMean) ofSetColor(255);
+                    else ofSetColor(100);
 
-                if (b->movingMean) ofSetColor(255);
-                else ofSetColor(100);
+                    ofCircle(bx, by, 50);
 
-                ofCircle(bx, by, 50);
+                    string textStr = "id\t\t: " + ofToString(b->id);
+                    textStr += "\nneighbors\t: "+ ofToString(b->neighbors.size());
+                    textStr += "\nmovingMean\t: " + ofToString(b->movingMean ? "true" : "false");
+                    ofDrawBitmapStringHighlight(textStr, bx+70, by -40);
 
-                string textStr = "id\t\t: " + ofToString(b->id);
-                textStr += "\nneighbors\t: "+ ofToString(b->neighbors.size());
-                textStr += "\nmovingMean\t: " + ofToString(b->movingMean ? "true" : "false");
-                ofDrawBitmapStringHighlight(textStr, bx+70, by -40);
+                    for(std::map<int, Neighbor>::iterator iter = b->neighbors.begin(); iter != b->neighbors.end(); ++iter){
+                        Neighbor* nb = &iter->second;
+                        if (nb->steadyDistance) ofSetColor(255); else ofSetColor(0);
+                        ofDrawBitmapString(ofToString(nb->id), bx+70, by+20);
+                        ofRect(bx+120, by+20, nb->distance[0]*0.2, -10);
+                        by += 20;
+                    }
 
-                for(std::map<int, Neighbor>::iterator iter = b->neighbors.begin(); iter != b->neighbors.end(); ++iter){
-                    Neighbor* nb = &iter->second;
-                    if (nb->steadyDistance) ofSetColor(255); else ofSetColor(0);
-                    ofDrawBitmapString(ofToString(nb->id), bx+70, by+20);
-                    ofRect(bx+120, by+20, nb->distance[0]*0.2, -10);
-                    by += 20;
+                    by += 110;
                 }
-
-                by += 110;
             }
         }
     } else if (scene==3) {
@@ -1377,19 +1465,20 @@ void planeApp::drawAnalysis(int x, int y, float scale){
             ofFill();
             for(std::map<int, Blob>::iterator it = blobs.begin(); it != blobs.end(); ++it){
                 Blob* b = &it->second;
+                if (b->onStage) {
 
+                    if(b->lostDuration > 0 && !b->onEdge) ofSetColor(255);  // b->lostDuration < hopLength 
+                    else ofSetColor(100);
 
-                if(b->lostDuration > 0 && !b->onEdge) ofSetColor(255);  // b->lostDuration < hopLength 
-                else ofSetColor(100);
+                    ofCircle(bx, by, 40);
 
-                ofCircle(bx, by, 40);
+                    string textStr = "id\t: " + ofToString(b->id);
+                    textStr += "\nonEdge\t: " + ofToString(b->onEdge ? "true" : "false");
+                    textStr += "\nlost\t: "+ ofToString(b->lostDuration);
+                    ofDrawBitmapStringHighlight(textStr, bx+70, by -20);
 
-                string textStr = "id\t: " + ofToString(b->id);
-                textStr += "\nonEdge\t: " + ofToString(b->onEdge ? "true" : "false");
-                textStr += "\nlost\t: "+ ofToString(b->lostDuration);
-                ofDrawBitmapStringHighlight(textStr, bx+70, by -20);
-
-                by += 90;
+                    by += 90;
+                }
             }
 
         }
@@ -1417,7 +1506,7 @@ void planeApp::drawAnalysis(int x, int y, float scale){
 void planeApp::drawControlInfo(int x, int y){
     ofFill(); ofSetColor(255);
 
-    string instruction = scenes[scene].instructions[segment];
+    string instruction = scenes[scene].instructions[language][segment];
     ofDrawBitmapString("SCENE ID\t" + ofToString(scene) +
                        "\nSCENE NAME\t" + scenes[scene].name +
                        "\nSEGMENT\t\t" + ofToString(segment) +
@@ -1448,14 +1537,20 @@ void planeApp::drawRawData(int x, int y, float scale){
     rawInfo += "\nosc active: \t" + ofToString(oscActive ? "true" : "false");
     rawInfo += "\nosc last msg: \t" + ofToString(oscLastMsgTimer) + " sec";
     rawInfo += "\nexposure: \t" + ofToString(cameraExposure,5);
-    rawInfo += "\nbgsubtraction\nblob cnt: \t" + ofToString(bgsubtractorCnt);
+    rawInfo += "\nbgs blob cnt: \t" + ofToString(bgsubtractorCnt);
     rawInfo += "\navg velocity: \t" + ofToString(bgsubtractorAvVel,2);
     ofDrawBitmapStringHighlight(rawInfo, x + 3, y + blobserverH*scale + 15);
 
     // draw frame for each blob. blobserver frame size = 64 x 128 px
     for(std::map<int, Blob>::iterator it = blobs.begin(); it != blobs.end(); ++it){
         Blob* b = &it->second;
-        ofRect( x + b->_rawPos.x*scale - blobW*scale/2.0, y + b->_rawPos.y*scale - blobH*scale/2.0, blobW*scale, blobH*scale);
+        ofRect( x + b->_rawPos.x*scale - blobW*scale/2.0, y + b->_rawPos.y*scale - blobH*scale*0.8, blobW*scale, blobH*scale);
+    }
+
+    // draw steles
+    for (int i=0; i<8; i++) {
+        if (i==0) ofCircle(x + steles[i].x*scale, y + steles[i].y*scale, 5*scale, 5*scale);
+        else ofCircle(x + steles[i].x*scale, y + steles[i].y*scale, 10*scale, 10*scale);
     }
 
 }
@@ -1485,8 +1580,8 @@ void planeApp::drawTopDown(int x, int y, float scale, bool detailed) {
     // draw blobs as circles
     ofFill();
     for(std::map<int, Blob>::iterator it = blobs.begin(); it != blobs.end(); ++it){
-        ofSetColor(255);
         Blob* b = &it->second;
+        if (b->onStage) ofSetColor(255); else ofSetColor(160);
         int bx = x + b->position.x*scale;
         int by = y + b->position.y*scale;
         ofCircle( bx, by, 20);
@@ -1503,6 +1598,13 @@ void planeApp::drawTopDown(int x, int y, float scale, bool detailed) {
             ofDrawBitmapString( ofToString(b->id, 4, '0'), bx-15, by+5);
         }
 
+    }
+
+    // draw steles
+    ofNoFill(); ofSetColor(255);
+    for (int i=0; i<8; i++) {
+        if (i==0) ofCircle(x + steles_topdown[i].x*scale, y + steles_topdown[i].y*scale, 5*scale, 5*scale);
+        else ofCircle(x + steles_topdown[i].x*scale, y + steles_topdown[i].y*scale, 10*scale, 10*scale);
     }
 }
 

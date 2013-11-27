@@ -16,6 +16,7 @@ void Blob::init(){
 	this->updated = true;
 
     this->vel = 0;
+    this->onStage = false;
 	this->frozen = false;
 	this->properFreeze = false;
 	this->overFrozen = false;
@@ -28,15 +29,22 @@ void Blob::init(){
 }
 
 //--------------------------------------------------------------
-void Blob::follow(float x, float y, float frameW, float frameH, float margin){
+void Blob::follow(float x, float y, float frameW, float frameH, float stageRadius){
     this->_rawPos.set(x, y);
 
     // on Edge?
-    if (x<margin || x>frameW-margin || y<margin || y>frameH-margin) {
-        this->onEdge = true;
-    } else this->onEdge = false;
+    // if (x<margin || x>frameW-margin || y<margin || y>frameH-margin) {
+    //     this->onEdge = true;
+    // } else this->onEdge = false;
 
     this->position = transformPerspective(this->_rawPos);
+
+    // on Stage?
+    bool tmp = false;
+    if ( abs(ofDist(this->position.x, this->position.y,frameW/2,frameH/2)) < stageRadius) tmp = true;
+    if (onStage==true && tmp==false) ofNotifyEvent(onLeaveStage, this->id, this);
+    else if (onStage==false && tmp==true) ofNotifyEvent(onEnterStage, this->id, this);
+    onStage = tmp;
 
     TimedPoint rawPoint;
     rawPoint.set(x,y);
@@ -144,7 +152,7 @@ void Blob::analyzeNeighbors(std::map<int, ofPoint> neighborLocation, float distS
             }
             n->updated = true;
             Pair pair = Pair( min(this->id,n->id), max(this->id,n->id) );
-            if (n->distance.size() >= NEIGHBOR_HISTORY && n->getStdDev() < distStdDevThr && movingMean) {
+            if (n->distance.size() >= NEIGHBOR_HISTORY && n->getStdDev() < distStdDevThr && movingMean && onStage) {
                 if (!n->steadyDistance) {
                     n->steadyDistance = true;
                     n->steadyStart = ofGetUnixTime();
@@ -192,7 +200,7 @@ void Blob::analyzeNeighbors(std::map<int, ofPoint> neighborLocation, float distS
 //--------------------------------------------------------------
 ofPoint Blob::transformPerspective(ofPoint& v){
 
-    float pv[2] = {v.x, v.y};
+    // float pv[2] = {v.x, v.y};
 
     vector<cv::Point2f> pre, post;
     pre.push_back(cv::Point2f(v.x, v.y));

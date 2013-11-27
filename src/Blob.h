@@ -5,7 +5,7 @@
 #include "ofEvents.h"
 #include "videoElement.h"
 
-#define MAX_HISTORY 100
+#define MAX_HISTORY 15
 #define NEIGHBOR_HISTORY 10
 #define VELOCITY_HISTORY 10
 
@@ -108,6 +108,7 @@ class Blob {
         float lostDuration;
         float vel;
         vector<float> velHistory;
+        bool onStage;
 
         vector<TimedPoint> rawHistory;
     	vector<TimedPoint> history;    // array length of MAX_HISTORY
@@ -132,6 +133,8 @@ class Blob {
         ofEvent<int> overFreeze;
         ofEvent<int> prepareToDie;
         ofEvent<int> updatePosition;
+        ofEvent<int> onEnterStage;
+        ofEvent<int> onLeaveStage;
         ofEvent<Pair> onSteady;
         ofEvent<Pair> onSteadyReward;
         ofEvent<Pair> onBreakSteady;
@@ -146,7 +149,7 @@ class Blob {
         Blob();
         ~Blob();
         void init();
-        void follow(float x, float y, float frameW = 800, float frameH = 600, float margin = 0);
+        void follow(float x, float y, float frameW = 500, float frameH = 500, float stageRadius = 200);
         void setVelocity(float dx, float dy);
         void analyze(float freezeMinVel, float freezeMinTime, float freezeMaxTime, float movingThr);
         void analyzeNeighbors(std::map<int, ofPoint> neighborLocation, float distStdDevThr, int steadyReward);

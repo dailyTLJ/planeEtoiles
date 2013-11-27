@@ -42,12 +42,12 @@
 <HUMANS_AND_PLANETS/>
 	<Dimension>
 		<Site_Width>500</Site_Width>
-		<Site_Length>700</Site_Length>
+		<Site_Length>500</Site_Length>
 		<Map_Site_to_Viz_Width>2</Map_Site_to_Viz_Width>
 		<Map_Site_to_Viz_Height>2</Map_Site_to_Viz_Height>
 		<Offset_X>0</Offset_X>
 		<Offset_Y>0</Offset_Y>
-	<Map_Width>2</Map_Width>
-		<Map_Height>2</Map_Height>
+	<Map_Width>2.02041</Map_Width>
+		<Map_Height>2.85714</Map_Height>
 	</Dimension>
 </HUMANS_AND_PLANETS>

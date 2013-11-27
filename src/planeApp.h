@@ -19,9 +19,9 @@ class sceneInfo {
         string name;
         int no;
         int segments;
-        int length[6];
-        string instructions[6];
-        string analysis[6];
+        int length[7];
+        string instructions[2][7];
+        string analysis[7];
 };
 
 class planeApp : public ofBaseApp{
@@ -55,6 +55,8 @@ class planeApp : public ofBaseApp{
 		void blobSteadyReward(Pair & pair);
 		void blobBreakSteady(Pair & pair);
 		void videoFollowBlob(int & blobID);
+		void blobEnterStage(int & blobID);
+		void blobLeaveStage(int & blobID);
 
 		void blobCountChange();
 		void jumpToScene(int s);
@@ -80,6 +82,7 @@ class planeApp : public ofBaseApp{
 		void dragEvent(ofDragInfo dragInfo);
 		void gotMessage(ofMessage msg);
 
+		int language;
 
 		int projectionW;
         int projectionH;
@@ -93,8 +96,10 @@ class planeApp : public ofBaseApp{
 		string mouseButtonState;
 
 		std::map<int, Blob> blobs;
-		Blob testBlob;
+		// Blob testBlob;
 		cv::Mat perspectiveMat;
+		ofPoint steles[8];
+		ofPoint steles_topdown[8];
 
 		bool fullscreen;	
 
@@ -163,6 +168,7 @@ class planeApp : public ofBaseApp{
 		ofParameter<float> mapSiteH;
 		ofParameter<int> offsetX;
 		ofParameter<int> offsetY;
+		ofParameter<int> stageRadius;
 
 		ofParameter<int> newStarMax;
 		ofParameter<int> newStarBonus;
