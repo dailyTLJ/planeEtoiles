@@ -54,6 +54,7 @@ void planeApp::setup(){
     blobW = 80;
     blobH = 160;
 
+    hogFlowId = 1;
     bgsubtractorFlowId = 2; // 1 = hog, 2 = bgs, 3 = nop
     bgsubtractorCnt = 0;
     bgsubtractorVel = 0.f;
@@ -1131,18 +1132,18 @@ void planeApp::receiveOsc(){
 
 		if(m.getAddress() == "/blobserver/startFrame"){
 
-            int flowid = m.getArgAsInt32(1);
+            currentFlowId = m.getArgAsInt32(1);
             // tcout() << "start frame flow " << flowid << endl;
-            if (flowid==bgsubtractorFlowId) {
+            if (currentFlowId==bgsubtractorFlowId) {
                 bgsubtractorCnt = 0;
                 bgsubtractorVel = 0.f;
                 bgsubtractorAvVel = 0.f;
             }
 
 		} else if(m.getAddress() == "/blobserver/endFrame"){
-            int flowid = m.getArgAsInt32(1);
+            currentFlowId = m.getArgAsInt32(1);
             // tcout() << "end frame flow " << flowid << endl;
-            if (flowid==bgsubtractorFlowId) {
+            if (currentFlowId==bgsubtractorFlowId) {
                 bgsubtractorAvVel = (bgsubtractorCnt>0) ? bgsubtractorVel/bgsubtractorCnt : 0;
                 // tcout() << "bgsubtractorCnt\t" << bgsubtractorCnt << "\tavg vel\t" << (bgsubtractorVel/bgsubtractorCnt) << endl;
             } 
@@ -1177,7 +1178,7 @@ void planeApp::receiveOsc(){
             if (var.compare("exposureTime") == 0) cameraExposure = val;
             tcout() << "BROADCAST" << var << ", " << source << ", " << cam << ", " << val << endl;
 
-		} else if(m.getAddress() == "/blobserver/hog"){
+		} else if(m.getAddress() == "/blobserver/hog" && currentFlowId==hogFlowId){
 			// parse incoming elements:  iiiffii: id x y vx vy age lost
 			int blobid = m.getArgAsInt32(0);
 			int posx = m.getArgAsInt32(1);

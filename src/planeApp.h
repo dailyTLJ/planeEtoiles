@@ -135,8 +135,10 @@ class planeApp : public ofBaseApp{
 
 		bool drawBlobDetail;
 
+		int currentFlowId;
 		int bgsubtractorCnt;
 		int bgsubtractorFlowId;
+		int hogFlowId;
 		float bgsubtractorVel;	
 		float bgsubtractorAvVel;
 
