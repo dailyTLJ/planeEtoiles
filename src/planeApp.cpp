@@ -32,6 +32,7 @@ void planeApp::setup(){
 	mouseButtonState = "";
 
     fullscreen = false;
+    ofSetWindowPosition(0,0);
     success = false;
     successCnt = 0;
 	drawBlobDetail = false;
@@ -49,8 +50,8 @@ void planeApp::setup(){
 
     projectionW = 1080;
     projectionH = 1920;
-    blobserverW = 800;
-    blobserverH = 600;
+    blobserverW = 500;
+    blobserverH = 300;
     blobW = 80;
     blobH = 160;
 
@@ -127,14 +128,14 @@ void planeApp::setup(){
 //        testBlob.follow( i*3, i * 3.0/5.0 );
 //        testBlob.follow(150-i*3,i * 3.0/5.0);
 //    }
-    steles[0].set(383,184,0);
-    steles[1].set(457,198,0);
-    steles[2].set(506,224,0);
-    steles[3].set(446,260,0);
-    steles[4].set(312,276,0);
-    steles[5].set(160,269,0);
-    steles[6].set(159,231,0);
-    steles[7].set(241,203,0);
+    steles[0].set(383-78,184-16,0);
+    steles[1].set(457-78,198-16,0);
+    steles[2].set(506-78,224-16,0);
+    steles[3].set(446-78,260-16,0);
+    steles[4].set(312-78,276-16,0);
+    steles[5].set(160-78,269-16,0);
+    steles[6].set(159-78,231-16,0);
+    steles[7].set(241-78,203-16,0);
     
     int tmp = 1;
     recalculatePerspective(tmp);
@@ -165,7 +166,7 @@ void planeApp::setPerspective() {
     // 800x600  scale 0.4 >> 320x240   minus 64x128
     // float in[] = {skew,0,blobserverW-skew,0,blobserverW,blobserverH,0,blobserverH};
     // float in[] = {180,180,660,140,410,300,0,320};
-    float in[] = {260,140,600,210,380,300,-150,300};
+    float in[] = {260-78,140-16,600-78,210-16,380-78,300-16,-150-78,300-16};
     float out[] = {0,0,siteW,0,siteW,siteH,0,siteH};
 
     cv::Mat proj_in(4,2, CV_32FC1, in);
@@ -463,19 +464,19 @@ void planeApp::update(){
         // TRANSITIONING BETWEEN SEGMENT RELATED ACTION
         if (scene==0) {
             // fade out idle-mode video, connect fade-End to transition to next Segment
-            if(success && !transition) {
+            if(autoplay && success && !transition) {
                 tcout() << "scene 0 success" << endl;
                 endSegment(1);
             }
         } else if (scene==1) {
-            if (segment==1 && successCnt > newStarMax && !transition) {
+            if (autoplay && segment==1 && successCnt > newStarMax && !transition) {
                 tcout() << "scene 1 segment 1 success" << endl;
                 endSegment(1);
             }
         } else if (scene==3) {
             if (segment==4 || segment==6 ) {
                 // FREEZE!
-                if(success && !transition) {
+                if(autoplay && success && !transition) {
                     tcout() << "FREEZE success" << endl;
                     endSegment(1);
                 }
@@ -1235,8 +1236,8 @@ void planeApp::draw(){
 
         ofBackground(0);
         ofPushMatrix();
-        ofTranslate(0, 700);
-        ofRotateZ(-90);
+        // ofTranslate(0, 1080);
+        // ofRotateZ(-90);
 
         this->drawScreen(0, 0, 1);
 
@@ -1260,7 +1261,7 @@ void planeApp::draw(){
 
         offsy += 20;
 
-        this->drawRawData(offsx, offsy, 0.3);
+        this->drawRawData(offsx, offsy, 0.5);
 
         offsy += 260 + 10;
         this->drawTopDown(offsx, offsy, 0.5, drawBlobDetail);
@@ -1277,6 +1278,12 @@ void planeApp::draw(){
         this->drawControlInfo(offsx, offsy);
 
         gui.draw();
+
+
+        this->drawScreen(1440, 0, 1);
+
+        ofFill(); ofSetColor(255);
+        ofDrawBitmapString(ofToString(ofGetFrameRate()), 10, 10);
 
     }
 }
@@ -1451,10 +1458,10 @@ void planeApp::drawAnalysis(int x, int y, float scale){
                         if (nb->steadyDistance) ofSetColor(255); else ofSetColor(0);
                         ofDrawBitmapString(ofToString(nb->id), bx+70, by+20);
                         ofRect(bx+120, by+20, nb->distance[0]*0.2, -10);
-                        by += 20;
+                        by += 15;
                     }
 
-                    by += 110;
+                    by += 100;
                 }
             }
         }
@@ -1681,7 +1688,14 @@ void planeApp::keyReleased(int key){
 		gui.loadFromFile("planets01.xml");
 	}
     if (key=='f') {
-        fullscreen = !fullscreen;
+        // fullscreen = !fullscreen;
+        // if (fullscreen) {
+        //     ofSetWindowPosition(1440,0);
+        //     ofSetFullscreen(true);
+        // } else {
+        //     ofSetWindowPosition(0,0);
+        //     ofSetFullscreen(false);
+        // }
     }
 
     if (key=='p') {
