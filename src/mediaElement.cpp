@@ -116,7 +116,7 @@ void mediaElement::reset(bool vis) {
     fading = false;
 }
 
-void mediaElement::moveAcross(float v, int maxw, int maxh, bool destr) {
+void mediaElement::moveAcross(float vx, float vy, int maxw, int maxh, bool destr) {
 
 }
 

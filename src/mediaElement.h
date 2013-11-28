@@ -14,7 +14,7 @@ class mediaElement
         virtual void draw(int x, int y, float _scale);
         virtual void drawElement(float _scale);
 
-        virtual void moveAcross(float v, int maxw, int maxh, bool destr);
+        virtual void moveAcross(float vx, float vy, int maxw, int maxh, bool destr);
         virtual void moveAcross(float vx, float vy, int maxw, bool destr);
         virtual void autoDestroy(bool v);
         virtual void loadMovie(string filename);
@@ -74,6 +74,8 @@ class mediaElement
 
         ofEvent<int> fadeOutEnd;
         ofEvent<int> fadeInEnd;
+
+        ofPtr<ofVideoPlayer> movie;
 
     protected:
     private:

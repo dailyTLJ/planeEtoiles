@@ -626,7 +626,7 @@ void planeApp::blobOnLost(int & blobID) {
                 int randomShooter = ofRandom(6) + 1;
                 fgMedia.push_back(ofPtr<mediaElement>( new videoElement("video/6_shooting/SSTAR_0" + ofToString(randomShooter) + "-H264-10mbps.mp4")));
                 (*fgMedia[fgMedia.size()-1]).setDisplay(ofRandom(projectionW-100), ofRandom(projectionH-100), true);
-                (*fgMedia[fgMedia.size()-1]).moveAcross( 45.f, projectionW, projectionH, true);
+                (*fgMedia[fgMedia.size()-1]).moveAcross( blobs[blobID].velocity.x, blobs[blobID].velocity.y, projectionW, projectionH, true);
                 (*fgMedia[fgMedia.size()-1]).reset();
             } else if (segment==1) {
                 float randdeg = ofRandom(-5.f, 5.f);
@@ -636,6 +636,7 @@ void planeApp::blobOnLost(int & blobID) {
                     (*fgMedia[fgMedia.size()-1]).setDisplay(ofRandom(projectionW-100), ofRandom(projectionH-100), true);
                     (*fgMedia[fgMedia.size()-1]).moveAcross( randdeg, 45.f, projectionW, true);
                     (*fgMedia[fgMedia.size()-1]).reset();
+                    // (*fgMedia[fgMedia.size()-1]).movie->setFrame(i);
                 }
             }
         }
@@ -826,7 +827,7 @@ void planeApp::blobEnterStage(int & blobID) {
             (*fgMedia[fgMedia.size()-1]).reset();
             // (*fgMedia[fgMedia.size()-1]).introTransformation = &mediaElement::moveInFromSide;
             // tcout() << "init planet   pos: " << x << "/" << y << endl;
-            if (segmentClock < alignmentTransition) {
+            if (segment==0 && segmentClock < alignmentTransition) {
                 (*fgMedia[fgMedia.size()-1]).moveInFromSide(projectionW/2,projectionH/2);
             } else {
                 (*fgMedia[fgMedia.size()-1]).fadeIn();
@@ -920,8 +921,20 @@ void planeApp::videoFollowBlob(int & blobID) {
         float by;
         if (vid != NULL) {
             // tcout() << "blob " << blobID << " \t\tfound vid" << endl;
-            bx = offsetX + blobs[blobID].position.x * mapSiteW;
-            by = offsetY + blobs[blobID].position.y *mapSiteH;
+
+            if (scene==4 && (segment==2 || segment==3)) {
+                // PLANETS aligned on horizontal, move left right
+                bx = offsetX + blobs[blobID].position.x * mapSiteW;
+                by = offsetY + projectionH/2.0;
+            } else if (scene==4 && (segment==4 || segment==5)) {
+                // PLANETS aligned on vertical, move up down
+                by = offsetX + blobs[blobID].position.x * mapSiteW * (16.0/9.0);
+                bx = offsetX + projectionW/2.0;
+            } else {
+                bx = offsetX + blobs[blobID].position.x * mapSiteW;
+                by = offsetY + blobs[blobID].position.y *mapSiteH;
+            }
+
             if (!(*vid).moveElement) {
                 (*vid).setDisplay( bx, by, true);
             } else {
@@ -1106,7 +1119,7 @@ void planeApp::initSegment(){
         if (sceneChange) (*fgMedia[fgMedia.size()-1]).reset(false);
         else (*fgMedia[fgMedia.size()-1]).reset();
         (*fgMedia[fgMedia.size()-1]).blend = false;
-        if (segment>0) {
+        if (segment>6) {
             (*fgMedia[fgMedia.size()-1]).clr = ofColor(0, 0, 0);
             (*fgMedia[fgMedia.size()-1]).moveInFromSide(projectionW/2,projectionH/2);
         } else {
@@ -1398,10 +1411,12 @@ void planeApp::drawAnalysis(int x, int y, float scale){
             if (b->onStage) {
                 ofSetColor(50);
                 ofCircle(bx, by, 50);
+                ofSetColor(0,0,255);
+                ofDrawBitmapString( ofToString(b->id, 4, '0'), bx-15, by+5);
                 bx += 130;
                 if (bx < projectionW-300) {
                     bx = x + 100;
-                    by += 130;
+                    by += 110;
                 }
             }
         }
@@ -1422,9 +1437,10 @@ void planeApp::drawAnalysis(int x, int y, float scale){
                     else ofSetColor(50);
 
                     ofCircle(bx, by, 50);
+                    ofSetColor(0,0,255);
+                    ofDrawBitmapString( ofToString(b->id, 4, '0'), bx-15, by+5);
 
-                    string textStr = "id\t\t: " + ofToString(b->id);
-                    textStr += "\nvel\t\t: " + ofToString(b->vel, 2);
+                    string textStr = "vel\t\t: " + ofToString(b->vel, 2);
                     textStr += "\nfrozen\t\t: "+ ofToString(b->frozen ? "true" : "false");
                     textStr += "\nproperFreeze \t: "+ ofToString(b->properFreeze ? "true" : "false");
                     textStr += "\noverFrozen \t: "+ ofToString(b->overFrozen ? "true" : "false");
@@ -1447,21 +1463,22 @@ void planeApp::drawAnalysis(int x, int y, float scale){
                     else ofSetColor(100);
 
                     ofCircle(bx, by, 50);
+                    ofSetColor(0,0,255);
+                    ofDrawBitmapString( ofToString(b->id, 4, '0'), bx-15, by+5);
 
-                    string textStr = "id\t\t: " + ofToString(b->id);
-                    textStr += "\nneighbors\t: "+ ofToString(b->neighbors.size());
+                    string textStr = "neighbors\t: "+ ofToString(b->neighbors.size());
                     textStr += "\nmovingMean\t: " + ofToString(b->movingMean ? "true" : "false");
                     ofDrawBitmapStringHighlight(textStr, bx+70, by -40);
 
                     for(std::map<int, Neighbor>::iterator iter = b->neighbors.begin(); iter != b->neighbors.end(); ++iter){
                         Neighbor* nb = &iter->second;
                         if (nb->steadyDistance) ofSetColor(255); else ofSetColor(0);
-                        ofDrawBitmapString(ofToString(nb->id), bx+70, by+20);
+                        ofDrawBitmapString(ofToString(nb->id), bx+70, by-5);
                         ofRect(bx+120, by+20, nb->distance[0]*0.2, -10);
                         by += 15;
                     }
 
-                    by += 100;
+                    by += 60;
                 }
             }
         }
@@ -1479,16 +1496,42 @@ void planeApp::drawAnalysis(int x, int y, float scale){
                     else ofSetColor(100);
 
                     ofCircle(bx, by, 40);
+                    ofSetColor(0,0,255);
+                    ofDrawBitmapString( ofToString(b->id, 4, '0'), bx-15, by+5);
 
-                    string textStr = "id\t: " + ofToString(b->id);
-                    textStr += "\nonEdge\t: " + ofToString(b->onEdge ? "true" : "false");
+                    string textStr = "onEdge\t: " + ofToString(b->onEdge ? "true" : "false");
                     textStr += "\nlost\t: "+ ofToString(b->lostDuration);
                     ofDrawBitmapStringHighlight(textStr, bx+70, by -20);
 
-                    by += 90;
+                    by += 70;
                 }
             }
 
+        }
+
+    } else if (scene==5) {
+        // SHOOTING STARS
+        int bx = x + 100; int by = y + 150;
+        ofFill();
+        for(std::map<int, Blob>::iterator it = blobs.begin(); it != blobs.end(); ++it){
+            Blob* b = &it->second;
+            if (b->onStage) {
+
+                if(b->lostDuration > 0 && !b->onEdge) ofSetColor(255);  // b->lostDuration < hopLength 
+                else ofSetColor(100);
+
+                ofCircle(bx, by, 40);
+                ofSetColor(0,0,255);
+                ofDrawBitmapString( ofToString(b->id, 4, '0'), bx-15, by+5);
+
+                string textStr = "id\t: " + ofToString(b->id);
+                textStr += "\nlost\t: "+ ofToString(b->lostDuration);
+                textStr += "\nvel x\t: "+ ofToString(b->velocity.x);
+                textStr += "\nvel y\t: "+ ofToString(b->velocity.y);
+                ofDrawBitmapStringHighlight(textStr, bx+70, by -20);
+
+                by += 90;
+            }
         }
 
     }
