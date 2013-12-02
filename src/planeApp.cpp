@@ -35,6 +35,7 @@ void planeApp::setup(){
     ofSetWindowPosition(0,0);
     success = false;
     successCnt = 0;
+    activityCnt = 0;
 	drawBlobDetail = false;
     transition = false;
     moveOn = false;
@@ -65,7 +66,7 @@ void planeApp::setup(){
 	siteH.addListener(this,&planeApp::recalculatePerspective);
 
 
-	gui.setup("HUMANS AND PLANETS", "planets01.xml", 1104,170);
+	gui.setup("HUMANS AND PLANETS", "planets01.xml", 1104,190);
     gui.setDefaultBackgroundColor( ofColor(0,0,50) );
     gui.add(autoplay.setup("autoplay", false)); 
     gui.add(flashColor.set("Transition Flash Color",ofColor(255,200,100),ofColor(0,0),ofColor(255,255)));
@@ -94,9 +95,11 @@ void planeApp::setup(){
     paramSc1.add(steadyRewardTime.set( "Dist Reward", 2, 0, 10));
     gui.add(paramSc1);
 
-
-    // paramSc2.setName("Sc2 Revolutions");
-    // gui.add(paramSc2);
+    paramSc2.add(spinJudgeTime.set( "spinJudgeTime", 180, 0, 240));
+    paramSc2.add(spinSuccess.set( "spinSuccess", 5, 0, 10));
+    paramSc2.add(spinFailure.set( "spinFailure", 2, 0, 10));
+    paramSc2.setName("Sc2 Revolutions");
+    gui.add(paramSc2);
 
     paramSc3.setName("Sc3 Sun");
     paramSc3.add(minLostTime.set( "Min LostTime", 1, 0, 10));
@@ -400,12 +403,6 @@ void planeApp::update(){
         }
 
         if (oscMsgReceived) {
-            // tcout() << "BLOBS \t\t";
-            // for(std::map<int, Blob>::iterator it = blobs.begin(); it != blobs.end(); ++it){
-            //     Blob* b = &it->second;
-            //     cout << b->id << "\t";
-            // }
-            // cout << endl;
 
         	// BLOB CLEANUP
             std::map<int,Blob>::iterator it = blobs.begin();
@@ -416,7 +413,6 @@ void planeApp::update(){
                     // tcout() << "Blob dead\t" << b->id << endl;
                     ofNotifyEvent(b->prepareToDie,b->id,b);
             		blobs.erase(it++);
-                    blobCountChange();
             	} else {
             		++it;
             	}
@@ -500,7 +496,33 @@ void planeApp::update(){
         }
 
         // animation related
-        if (scene==3 && segment==5) {
+        if (scene==2) {
+            if (!transition && ofGetFrameNum()%spinJudgeTime==0) {
+                if (segment==0) {
+                    int oldCnt = planetCnt;
+                    // set planetCnt based on activityCnt
+                    if (activityCnt >= spinSuccess) planetCnt++;
+                    else if (activityCnt < spinFailure) planetCnt--;
+                    if (planetCnt>5) planetCnt = 5;
+                    else if (planetCnt<0) planetCnt = 0;
+                    if (oldCnt!=planetCnt) positionRevolutions();
+                } else if (segment==1) {
+                    int oldCnt = planetCnt;
+                    if (activityCnt < spinFailure) planetCnt--;
+                    if (planetCnt<oldCnt && planetCnt>=0) {
+                        int videoPick = planetCnt+1;
+                        (*fgMedia[planetCnt]).loadMovie("video/3_revolution/REV_0"+ofToString(videoPick)+"-out-animation.mov");
+                        (*fgMedia[planetCnt]).reset(true);
+                        (*fgMedia[planetCnt]).autoDestroy(true);
+                        if (planetCnt<=0) success = true;
+                    }
+                    // if (fgMedia.size()>planetCnt) {
+                    // }
+                }
+                tcout() << "\tactivityCnt\t" << activityCnt << "\tplanetCnt\t" << planetCnt << endl;
+                activityCnt = 0;
+            }
+        } else if (scene==3 && segment==5) {
             if (ofRandom(100)<2) (*fgMedia[0]).bounce();
         } else if (!transition && segmentClock > alignmentTransition && scene==4 && blobs.size()>0) {
             // check if all are aligned
@@ -605,7 +627,9 @@ void planeApp::bgMediaFadedIn(int & trans) {
 void planeApp::blobOnLost(int & blobID) {
     // tcout() << "BLOB " << blobID << " just got lost" << endl;
     if (!transition && blobs[blobID].onStage) {
-        if (scene==3) {
+        if (scene==2) {
+            activityCnt++;
+        } else if (scene==3) {
             // SUN explosions
             if (segment==1 || segment==2) {
                 int randomExpl = ofRandom(6) + 1;
@@ -840,7 +864,6 @@ void planeApp::blobEnterStage(int & blobID) {
                 (*fgMedia[fgMedia.size()-1]).fadeIn();
             }
         }
-        blobCountChange();
     }
 }
 
@@ -873,21 +896,21 @@ void planeApp::blobOnCreate(int & blobID) {
     }
 }
 
-// triggered when a blob is added or erased
-void planeApp::blobCountChange() {
+// 
+void planeApp::positionRevolutions() {
 
-    if ( scene==2 && fgMedia.size()>=5 ) {
+    if (fgMedia.size()>=5 ) {
         // REVOLUTION
 
         // there should only be 5 fgMedia elements
         for (unsigned int i=0; i<fgMedia.size(); i++) {
             (*fgMedia[i]).hide = true;
-            if (i < blobs.size()+3) (*fgMedia[i]).hide = false;
+            if (i < planetCnt) (*fgMedia[i]).hide = false;
             (*fgMedia[i]).rotation = 0;
         }
 
         // positioning
-        switch (blobs.size()+3) {
+        switch (planetCnt) {
             case 1:     (*fgMedia[0]).setDisplay(projectionW/2, projectionH/2, true);
                         break;
             case 2:     (*fgMedia[0]).setDisplay(projectionW/2, projectionH/2 - 350, true);
@@ -902,7 +925,6 @@ void planeApp::blobCountChange() {
                         (*fgMedia[2]).setDisplay(projectionW/2-100, projectionH/2 + 200, true);
                         (*fgMedia[3]).setDisplay(projectionW/2+100, projectionH/2 + 550, true);
                         break;
-            default:
             case 5:     (*fgMedia[0]).setDisplay(projectionW/2, projectionH/2, true);
                         (*fgMedia[1]).setDisplay(projectionW/2-200, projectionH/2 - 350, true);
                         (*fgMedia[1]).rotation = -45;
@@ -1078,6 +1100,8 @@ void planeApp::initSegment(){
     fgMedia.clear();   // delete all foreground videos
     success = false;
     successCnt = 0;
+    activityCnt = 0;
+    if (segment==0) planetCnt = 0;
     flash = true;       // 
     segmentStart = ofGetUnixTime();
 
@@ -1094,21 +1118,15 @@ void planeApp::initSegment(){
         // REVOLUTIONS
         for (int i=0; i<5; i++) {
             string videoFile;
-            if (segment==0) {
-                int videoPick = i+1;
-                videoFile = "video/3_revolution/REV_0"+ofToString(videoPick)+"-animation.mov";
-            } else if (segment==1)  {
-                int videoPick = (i==4||i==2) ? 4 : i+1;
-                videoFile = "video/3_revolution/REV_0"+ofToString(videoPick)+"-out-animation.mov";
-            }
+            int videoPick = i+1;
+            videoFile = "video/3_revolution/REV_0"+ofToString(videoPick)+"-animation.mov";
             fgMedia.push_back(ofPtr<mediaElement>( new videoElement(videoFile)));
-            // fgMedia.push_back(ofPtr<mediaElement>( new videoElement("video/3_revolution/REV_06-animation.mov")));
-            (*fgMedia[fgMedia.size()-1]).outroTransformation = &mediaElement::scaleAway;
+            if (segment==1 && i>=planetCnt) (*fgMedia[i]).dead = true;
             if (sceneChange) (*fgMedia[i]).reset(false);
             else (*fgMedia[i]).reset();
         }
 
-        blobCountChange();  // to position and turn on/off videos
+        positionRevolutions();  // to position and turn on/off videos
     } else if (scene==3) {
         // SUN
         fgMedia.push_back(ofPtr<mediaElement>( new videoElement("video/4_sun/SUN_8-ASSET-animation.mov")));
@@ -1571,6 +1589,8 @@ void planeApp::drawControlInfo(int x, int y){
                        "\nLENGTH\t\t" + ofToString(scenes[scene].length[segment]) +
                        "\nSUCCESS\t\t" + ofToString(success ? "true" : "false") +
                        "\nSUCCESS CNT\t" + ofToString(successCnt) +
+                       "\nACTIVITY CNT\t" + ofToString(activityCnt) +
+                       "\nFG MEDIA\t" + ofToString(fgMedia.size()) +
                        // "\n\n" + instruction +
                        // "\n\nAUTOPLAY\t" + ofToString(autoplay ? "true" : "false") +
                        "\n\nTRANSITION\t" + ofToString(transition ? "true" : "false") +

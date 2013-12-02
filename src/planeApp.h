@@ -58,7 +58,7 @@ class planeApp : public ofBaseApp{
 		void blobEnterStage(int & blobID);
 		void blobLeaveStage(int & blobID);
 
-		void blobCountChange();
+		void positionRevolutions();
 		void jumpToScene(int s);
 		bool allBlobsAlignedWith(ofPoint &p);
 
@@ -123,6 +123,8 @@ class planeApp : public ofBaseApp{
 		bool transition;
 		bool success;			// if people followed the instructions
 		int successCnt;
+		int activityCnt;
+		int planetCnt;
 		bool flash;				// in between transitions, catch attention
 		int flashCnt;
 		int flashMax;
@@ -175,6 +177,10 @@ class planeApp : public ofBaseApp{
 		ofParameter<int> newStarMax;
 		// ofParameter<int> newStarBonus;
 		ofParameter<int> minLostTime;
+
+		ofParameter<int> spinSuccess;
+		ofParameter<int> spinFailure;
+		ofParameter<int> spinJudgeTime;
 
 		ofParameter<int> alignmentMaxDist;
 		ofParameter<int> alignmentTransition;

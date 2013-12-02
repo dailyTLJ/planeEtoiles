@@ -29,7 +29,11 @@
 	<Freeze_MaxVel>0.530612</Freeze_MaxVel>
 	<Dist_Reward>10</Dist_Reward>
 	</Sc1_Stars>
-	<Sc2_Revolutions/>
+	<Sc2_Revolutions>
+		<spinSuccess>6</spinSuccess>
+		<spinJudgeTime>176</spinJudgeTime>
+		<spinFailure>3</spinFailure>
+	</Sc2_Revolutions>
 	<Sc3_Sun>
 		<Edge_Margin>21</Edge_Margin>
 	<Min_LostTime>1</Min_LostTime>
