@@ -173,7 +173,7 @@ class planeApp : public ofBaseApp{
 		ofParameter<int> stageRadius;
 
 		ofParameter<int> newStarMax;
-		ofParameter<int> newStarBonus;
+		// ofParameter<int> newStarBonus;
 		ofParameter<int> minLostTime;
 
 		ofParameter<int> alignmentMaxDist;

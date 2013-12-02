@@ -6,6 +6,7 @@ mediaElement::mediaElement() {
     this->scale = 1.0;
     this->addSc = 0.0;
     this->selfdestroy = false;
+    this->fadeoutDestroy = false;
     this->dead = false;
     this->clr = ofColor(255, 255, 255);
     this->opacityChange = 0.01f;
@@ -68,6 +69,7 @@ void mediaElement::update() {
             fading = false;
             visible = false;
             ofNotifyEvent(fadeOutEnd,this->w,this);
+            if (fadeoutDestroy) dead = true;
         }
     }
     if (scaling) {
@@ -175,8 +177,10 @@ void mediaElement::fadeIn() {
     fadeIn(0.01);
 }
 
-void mediaElement::fadeOut(float speed) {
+void mediaElement::fadeOut(float speed, float op, bool destroy) {
     // cout << "mediaElement::fadeOut  " << file << endl;
+    opacity = op;
+    fadeoutDestroy = destroy;
     fade(-speed);
 }
 

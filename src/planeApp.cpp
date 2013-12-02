@@ -88,7 +88,7 @@ void planeApp::setup(){
     paramSc1.add(freezeMinTime.set( "Freeze MinTime",2, 0, 5 ));
     paramSc1.add(freezeMaxTime.set( "Freeze MaxTime",10, 0, 30 ));
     paramSc1.add(newStarMax.set( "NewStar Max", 30, 1, 40));
-    paramSc1.add(newStarBonus.set( "Bonus every", 5, 1, 40));
+    // paramSc1.add(newStarBonus.set( "Bonus every", 5, 1, 40));
     paramSc1.add(distStdDevThr.set( "Dist StdDev", 10, 0, 20));
     paramSc1.add(movingThr.set( "Movement Thr", 0.1, 0, 2));
     paramSc1.add(steadyRewardTime.set( "Dist Reward", 2, 0, 10));
@@ -220,7 +220,7 @@ void planeApp::initScenes(){
     stars.length[0] = 20;
     stars.instructions[0][1] = "Try new spots to light up more stars";
     stars.instructions[1][1] = "Essayez de nouveaux \nendroits pour allumer \nplus d'étoiles";
-    stars.analysis[1] = "* Velocity < FreezeMaxVel\n* frozenTimer > freezeMinTime\n* frozenTimer < freezeMaxTime\n+ Bonus every newStarBonus\n-> newStarMax stars || 40 sec";
+    stars.analysis[1] = "* Velocity < FreezeMaxVel\n* frozenTimer > freezeMinTime\n* frozenTimer < freezeMaxTime\n+ Star Animation at end of freezeMaxTime\n-> newStarMax stars || 40 sec";
     stars.length[1] = 40;
     stars.instructions[0][2] = "Walk with someone. \nKeep the same distance between you.\n(No hands!)";
     stars.instructions[1][2] = "Marchez avec un partenaire\nGardez la même distance entre vous\n(Sans les mains!)";
@@ -738,19 +738,11 @@ void planeApp::blobOnFreeze(int & blobID) {
     //            tcout() << "blob " << blobID << " \t\tfreeze ! " << endl;
                 fgMedia.push_back(ofPtr<mediaElement>( new videoElement("video/2_stars/INDIV STAR 2 loop-H264-10mbps.mp4")));
                 blobs[blobID].mediaLink = fgMedia[fgMedia.size()-1];
-                (*fgMedia[fgMedia.size()-1]).setDisplay(ofRandom(projectionW-100), ofRandom(projectionH-100));
+                // (*fgMedia[fgMedia.size()-1]).setDisplay(ofRandom(projectionW-100), ofRandom(projectionH-100));
+                (*fgMedia[fgMedia.size()-1]).setDisplay(offsetX + blobs[blobID].position.x * mapSiteW, offsetY + blobs[blobID].position.y * mapSiteH);
                 (*fgMedia[fgMedia.size()-1]).reset();
                 (*fgMedia[fgMedia.size()-1]).outroTransformation = &mediaElement::scaleAway;
-                if (segment==1) {
-                    successCnt++;
-                    if (successCnt%newStarBonus == 0) {
-                        string bonusVideo = "video/2_stars/HAND animation-QTAnimation.mov";
-                        fgMedia.push_back(ofPtr<mediaElement>( new videoElement(bonusVideo) ));
-                        (*fgMedia[fgMedia.size()-1]).setDisplay(ofRandom(projectionW-600), ofRandom(projectionH-800));
-                        (*fgMedia[fgMedia.size()-1]).reset(true);
-                        (*fgMedia[fgMedia.size()-1]).autoDestroy(true);
-                    }
-                }
+                if (segment==1) successCnt++;
             }
         } else if (scene==3) {
             if ((segment==4 || segment==6) && !success) {
@@ -774,7 +766,14 @@ void planeApp::blobUnFreeze(int & blobID) {
     //            tcout() << "BLOB " << blobID << " moved again!  mediaLink = " << blobs[blobID].mediaLink << endl;
                 // STAND STILL
                 tcout() << "blobUnFreeze()\t\t" << blobID << endl;
-                this->blobUnlink(blobID);
+                // video unlink
+                // video fade away
+                ofPtr<mediaElement> vid = blobs[blobID].mediaLink; 
+                if (vid != NULL) {
+                    vid->movie->setPaused(true);
+                    vid->fadeOut(0.001, 0.5, true);
+                    blobs[blobID].mediaLink = ofPtr<mediaElement>();
+                }
             }
         }
     }
@@ -784,8 +783,16 @@ void planeApp::blobOverFreeze(int & blobID) {
     if (!transition) {
         if (scene==1) {
             if (segment==1) {
-                // no more video, been frozen too long!
                 tcout() << "blobOverFreeze()\t\t" << blobID << endl;
+                // rewarding star animation video, placed at star position
+                string bonusVideo = "video/2_stars/HAND animation-QTAnimation.mov";
+                fgMedia.push_back(ofPtr<mediaElement>( new videoElement(bonusVideo) ));
+                float x = offsetX + blobs[blobID].position.x * mapSiteW;
+                float y = offsetY + blobs[blobID].position.y * mapSiteH;
+                (*fgMedia[fgMedia.size()-1]).setDisplay(x, y);
+                (*fgMedia[fgMedia.size()-1]).reset(true);
+                (*fgMedia[fgMedia.size()-1]).autoDestroy(true);
+
                 this->blobUnlink(blobID);
             }
         }

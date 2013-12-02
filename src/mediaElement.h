@@ -29,7 +29,7 @@ class mediaElement
         void fade(float speed);
         void fadeOut();
         void fadeIn();
-        void fadeOut(float speed);
+        void fadeOut(float speed, float op = 1.0, bool destroy = false);
         void fadeIn(float speed);
 
         void (mediaElement::*outroTransformation)();
@@ -65,6 +65,7 @@ class mediaElement
         bool blend;
 
         bool selfdestroy;
+        bool fadeoutDestroy;
         bool dead;
 
         bool bridgeVideo;
