@@ -147,6 +147,7 @@ class planeApp : public ofBaseApp{
 		int hogFlowId;
 		float bgsubtractorVel;	
 		float bgsubtractorAvVel;
+		float hogAvVel;
 
 		ofTrueTypeFont fontBg;
 		ofTrueTypeFont fontSm;
@@ -186,6 +187,12 @@ class planeApp : public ofBaseApp{
 		ofParameter<int> spinSuccess;
 		ofParameter<int> spinFailure;
 		ofParameter<int> spinJudgeTime;
+		ofParameter<int> freezeJudgeTime;
+		ofParameter<float> freezeVideoSpeedMap;
+		ofParameter<int> runJudgeTime;
+		ofParameter<float> runHogThr;
+		ofParameter<float> runBgsThr;
+		ofParameter<int> runActThr;
 
 		ofParameter<int> alignmentMaxDist;
 		ofParameter<int> alignmentTransition;

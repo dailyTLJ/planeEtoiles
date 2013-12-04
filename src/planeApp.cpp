@@ -82,6 +82,7 @@ void planeApp::setup(){
     bgsubtractorCnt = 0;
     bgsubtractorVel = 0.f;
     bgsubtractorAvVel = 0.f;
+    hogAvVel = 0.f;
 
     siteW.addListener(this,&planeApp::recalculatePerspective);
 	siteH.addListener(this,&planeApp::recalculatePerspective);
@@ -124,8 +125,14 @@ void planeApp::setup(){
 
     paramSc3.setName("Sc3 Sun");
     paramSc3.add(minLostTime.set( "Min LostTime", 1, 0, 10));
-    paramSc3.add(edgeMargin.set( "Edge Margin", 50, 0, 150));
+    // paramSc3.add(edgeMargin.set( "Edge Margin", 50, 0, 150));
     paramSc3.add(activityColorCh.set( "Activity Color Change", 10, 0, 30));
+    paramSc3.add(freezeJudgeTime.set( "freezeJudgeTime", 180, 0, 240));
+    paramSc3.add(freezeVideoSpeedMap.set( "freezeVideoSpeedMap", 0.1, 0, 1));
+    paramSc3.add(runJudgeTime.set( "runJudgeTime", 80, 0, 240));
+    paramSc3.add(runHogThr.set( "runHogThr", 1.0, 0, 10));
+    paramSc3.add(runBgsThr.set( "runBgsThr", 3.0, 0, 10));
+    paramSc3.add(runActThr.set( "runActThr", 5, 0, 20));
     gui.add(paramSc3);
 
     paramSc4.setName("Sc4 Alignment");
@@ -427,10 +434,15 @@ void planeApp::update(){
             }
 
             blobsOnStage = 0;
+            float totalVel = 0;
             for(std::map<int, Blob>::iterator it = blobs.begin(); it != blobs.end(); ++it){
                 Blob* b = &it->second;
-                if (b->onStage) blobsOnStage++;
+                if (b->onStage) {
+                    blobsOnStage++;
+                    totalVel += sqrt( pow(b->velocity.x,2) + pow(b->velocity.y,2) );
+                }
             }
+            hogAvVel = (blobsOnStage>0) ? totalVel/blobsOnStage : 0;
         }
 
         // SCHEDULING
@@ -526,8 +538,34 @@ void planeApp::update(){
                 ofLogNotice("interaction") << "\t" << ofGetFrameNum() << "\t" << "\tactivityCnt\t" << activityCnt << "\tplanetCnt\t" << planetCnt;
                 activityCnt = 0;
             }
-        } else if (scene==3 && segment==5) {
-            if (ofRandom(100)<2) (*fgMedia[0]).bounce();
+        } else if (scene==3 && (segment==3 || segment==5)) {
+            // FREEZE
+            if (!transition && ofGetFrameNum()%freezeJudgeTime==0) {
+                // hogAvVel influences displaySpeed of sun-movie
+                float videoSpeed = (hogAvVel<0.1) ? 0.1 : 0.1+hogAvVel*freezeVideoSpeedMap;
+                (*fgMedia[0]).movie->setSpeed(videoSpeed);
+                ofLogNotice("interaction") << "\t" << ofGetFrameNum() << "\t" << "\tfreezeJudge:\thogAvVel " << hogAvVel << " (" << blobsOnStage << ")\tvideoSpeed " << videoSpeed;
+            }
+        } else if (scene==3 && segment==4) {
+            if (!transition && ofGetFrameNum()%runJudgeTime==0) {
+                // hogAvVel, bgsubtractorAvVel, activityCnt
+                // SUN_run_surface-9-qtPNG.mov
+                if (hogAvVel > runHogThr || bgsubtractorAvVel > runBgsThr || activityCnt > runActThr) {
+                    // activity!
+                    int rndSun = ofRandom(16)+1;
+                    fgMedia.push_back(ofPtr<mediaElement>( new videoElement("video/4_sun/SUN_run_surface-"+ofToString(rndSun)+"-qtPNG.mov",false)));
+                    (*fgMedia[fgMedia.size()-1]).setDisplay(projectionW/2,projectionH/2, true);
+                    (*fgMedia[fgMedia.size()-1]).reset();
+                    (*fgMedia[fgMedia.size()-1]).autoDestroy(true);
+                    ofLogNotice("interaction") << "\t" << ofGetFrameNum() << "\t" << "\trunJudge:  activity!  hog: "<< hogAvVel << "\tbg: " << bgsubtractorAvVel << "\tact: " << activityCnt;
+                } else {
+                    ofLogNotice("interaction") << "\t" << ofGetFrameNum() << "\t" << "\trunJudge:  not enough activity";
+                }
+
+                activityCnt = 0;                
+            }
+        // } else if (scene==3 && segment==5) {
+        //     if (ofRandom(100)<2) (*fgMedia[0]).bounce();
         } else if (!transition && segmentClock > alignmentTransition && scene==4 && blobs.size()>0) {
             // check if all are aligned
             bool allAligned = allBlobsAlignedWith((*fgMedia[0]).position);
@@ -664,8 +702,8 @@ void planeApp::blobOnLost(int & blobID) {
             activityCnt++;
         } else if (scene==3) {
             // SUN explosions
+            activityCnt++;
             if (segment==1 || segment==2) {
-                activityCnt++;
                 int randomExpl = ofRandom(7) + 1;
                 string videoEnd = "_fullscale-posterized-qtPNG.mov";
                 if (activityCnt > activityColorCh*2) videoEnd = "_fullscale-blue-posterized-qtPNG.mov";
@@ -1202,6 +1240,9 @@ void planeApp::initSegment(){
         } else if (segment==3) {
             (*fgMedia[0]).loadMovie("video/4_sun/SUN_run_loop-1-qtPNG.mov");
             (*fgMedia[0]).reset();
+        } else if (segment==4) {
+            // RUN EVERYWHERE
+            (*fgMedia[0]).movie->setSpeed(1.0);
         }
 
     } else if (scene==4) {
@@ -1677,7 +1718,8 @@ void planeApp::drawRawData(int x, int y, float scale){
     rawInfo += "\nosc last msg: \t" + ofToString(oscLastMsgTimer) + " sec";
     rawInfo += "\nexposure: \t" + ofToString(cameraExposure,5);
     rawInfo += "\nbgs blob cnt: \t" + ofToString(bgsubtractorCnt);
-    rawInfo += "\navg velocity: \t" + ofToString(bgsubtractorAvVel,2);
+    rawInfo += "\nbgs avg vel: \t" + ofToString(bgsubtractorAvVel,2);
+    rawInfo += "\nhog velocity: \t" + ofToString(hogAvVel,2);
     ofDrawBitmapStringHighlight(rawInfo, x + 3, y + blobserverH*scale + 15);
 
     // draw frame for each blob. blobserver frame size = 64 x 128 px

@@ -38,6 +38,11 @@
 		<Edge_Margin>21</Edge_Margin>
 	<Min_LostTime>1</Min_LostTime>
 	<Activity_Color_Change>10</Activity_Color_Change>
+	<freezeJudgeTime>180</freezeJudgeTime>
+		<freezeVideoSpeedMap>0.1</freezeVideoSpeedMap>
+		<runJudgeTime>24</runJudgeTime>
+		<runHogThr>1.17347</runHogThr>
+		<runBgsThr>8</runBgsThr>
 	</Sc3_Sun>
 	<Sc4_Alignment>
 		<Alignm_MaxDist>200</Alignm_MaxDist>
