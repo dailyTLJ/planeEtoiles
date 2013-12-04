@@ -20,13 +20,13 @@
 		<Bonus_every_X_Stars>5</Bonus_every_X_Stars>
 	<Distance_StdDev_Thresh>10</Distance_StdDev_Thresh>
 	<Freeze_MinVel>0.602041</Freeze_MinVel>
-		<Freeze_MinTime>0</Freeze_MinTime>
-		<Freeze_MaxTime>10</Freeze_MaxTime>
+		<Freeze_MinTime>1</Freeze_MinTime>
+		<Freeze_MaxTime>14</Freeze_MaxTime>
 		<Dist_StdDev>20</Dist_StdDev>
 		<Movement_Thr>0.1</Movement_Thr>
 		<NewStar_Max>30</NewStar_Max>
 		<Bonus_every>5</Bonus_every>
-	<Freeze_MaxVel>0.530612</Freeze_MaxVel>
+	<Freeze_MaxVel>2.69388</Freeze_MaxVel>
 	<Dist_Reward>10</Dist_Reward>
 	</Sc1_Stars>
 	<Sc2_Revolutions>
@@ -53,6 +53,6 @@
 		<Offset_Y>0</Offset_Y>
 	<Map_Width>2.02041</Map_Width>
 		<Map_Height>3.73469</Map_Height>
-	<Stage_Radius>200</Stage_Radius>
+	<Stage_Radius>405</Stage_Radius>
 	</Dimension>
 </HUMANS_AND_PLANETS>

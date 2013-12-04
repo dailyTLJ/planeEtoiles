@@ -86,11 +86,11 @@ void Blob::analyze(float freezeMaxVel, float freezeMinTime, float freezeMaxTime,
             frozenTimer = 0;
         } else {
             frozenTimer = ofGetUnixTime() - frozenStart;
-            if (frozenTimer >= freezeMinTime && !properFreeze) {
+            if (frozenTimer >= freezeMinTime && !properFreeze && !lost) {
                 properFreeze = true;
                 ofNotifyEvent(onFreeze,this->id,this);
             }
-            if (frozenTimer >= freezeMaxTime && !overFrozen) {
+            if (frozenTimer >= freezeMaxTime && !overFrozen && !lost) {
                 overFrozen = true;
                 ofNotifyEvent(overFreeze, this->id, this);
             }

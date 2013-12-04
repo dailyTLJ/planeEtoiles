@@ -52,6 +52,7 @@ class mediaElement
         float scale;
         float addSc;
         string file; 
+        string loopFile;
         ofColor clr;    
         bool fading;
         bool scaling;

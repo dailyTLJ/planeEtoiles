@@ -8,6 +8,7 @@ mediaElement::mediaElement() {
     this->addSc = 0.0;
     this->selfdestroy = false;
     this->movieEndTrigger = false;
+    this->loopFile = "";
     this->fadeoutDestroy = false;
     this->dead = false;
     this->clr = ofColor(255, 255, 255);
@@ -60,7 +61,7 @@ void mediaElement::update() {
     }
     if (fading) {
         opacity += opacityChange;
-        cout << "update opacity > " << opacity << endl;
+        // ofLogNotice("mediaElement") << "update opacity > " << opacity;
         if (opacityChange>0 && opacity >= 1.0f) {
             opacity = 1.f;
             fading = false;
@@ -70,7 +71,7 @@ void mediaElement::update() {
             opacity = 0.f;
             fading = false;
             visible = false;
-            cout << "mediaElement::update opacity 0, fadeoutend" << endl;
+            ofLogNotice("mediaElement") << ofGetFrameNum() << "\t" << "mediaElement::update opacity 0, fadeoutend";
             ofNotifyEvent(fadeOutEnd,this->w,this);
             if (fadeoutDestroy) dead = true;
         }
@@ -78,7 +79,6 @@ void mediaElement::update() {
     if (scaling) {
         scale *= 0.95;
         if (scale < 0.05) {
-            // cout << "mediaElement scaled away, call notifyEvent" << endl;
             visible = false;
             ofNotifyEvent(fadeOutEnd,this->w,this);
         }
@@ -139,13 +139,11 @@ void mediaElement::finishMovie() {
 }
 
 void mediaElement::scaleAway() {
-    // cout << "mediaElement::scaleAway" << endl;
     if (hide) scale = 0.01;
     scaling = true;
 }
 
 void mediaElement::moveInFromTop() {
-    // cout << "mediaElement::moveInFromTop" << endl;
     goalDefined = true;
     moveElement = true;
     goal.set(position.x,position.y);
@@ -166,7 +164,7 @@ void mediaElement::moveInFromSide(int centerx, int centery) {
     opacity = 0.f;
     opacityChange = 0.01; // don't do this with fade, to avoid triggering the fadeInEvent
     moveSpeed = 7;
-    cout << " moveInFromSide   rot: " << rot << "  position: " << position.x << "/" << position.y << "  goal: " << goal.x << "/" << goal.y << endl;
+    ofLogNotice("mediaElement") << ofGetFrameNum() << "\t" << " moveInFromSide   rot: " << rot << "  position: " << position.x << "/" << position.y << "  goal: " << goal.x << "/" << goal.y;
 }
 
 void mediaElement::fade(float speed) {
@@ -176,7 +174,7 @@ void mediaElement::fade(float speed) {
 }
 
 void mediaElement::fadeOut() {
-    cout << "mediaElement::fadeOut()" << endl;
+    ofLogNotice("mediaElement") << ofGetFrameNum() << "\t" << "fadeOut()";
     if (hide) opacity = 0.01;       // set to low value, so there is at least one procession step
                                     // else endless feedback loop to event fgMediaFadedOut would be created
     fadeOut(0.01);
@@ -187,14 +185,13 @@ void mediaElement::fadeIn() {
 }
 
 void mediaElement::fadeOut(float speed, float op, bool destroy) {
-    // cout << "mediaElement::fadeOut  " << file << endl;
+    ofLogNotice("mediaElement") << ofGetFrameNum() << "\t" << file << "\tfadeOut()";
     opacity = op;
     fadeoutDestroy = destroy;
     fade(-speed);
 }
 
 void mediaElement::fadeIn(float speed) {
-    // cout << "mediaElement::fadeIn  " << file << endl;
     opacity = 0.0f;
     fade(speed);
 }

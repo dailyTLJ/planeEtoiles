@@ -6,7 +6,7 @@ videoElement::videoElement() {
 
 videoElement::videoElement(string filename, bool _blend) {
     movie = ofPtr<ofVideoPlayer>( new ofVideoPlayer() );
-    movie->setPixelFormat(OF_PIXELS_RGBA);  // need to set this even for non-alpha videos, 
+    movie->setPixelFormat(OF_PIXELS_BGRA);  // need to set this even for non-alpha videos, 
                                             // because of alpha-fix in ofGstVideoPlayer.cpp
     this->blend = _blend;
     this->rotation = 0;
@@ -19,7 +19,7 @@ videoElement::~videoElement() {
 }
 
 void videoElement::loadMovie(string filename) {
-    // cout << "video : loadMovie " << filename << endl;
+    ofLogNotice("videoElement") << ofGetFrameNum() << "\t" << "loadMovie " << filename;
     this->file = filename;
     movie->loadMovie(filename);
     this->w = movie->getWidth();
@@ -31,6 +31,7 @@ void videoElement::loadMovie(string filename) {
 void videoElement::play(bool loop) {
     movie->play();
     movie->setLoopState( loop ? OF_LOOP_NORMAL : OF_LOOP_NONE );
+    ofLogNotice("videoElement") << ofGetFrameNum() << "\t" << "play  setLoopState " << loop;
 }
 
 void videoElement::pause(bool v) {
@@ -46,15 +47,20 @@ void videoElement::update() {
         if (this->selfdestroy) {
             this->dead = true;
         }
-        if (this->movieEndTrigger) {
-            cout << "videoElement::update movieisdone, movieEndTrigger, fadeoutend" << endl;
+        if (this->movieEndTrigger && loopFile!="") {
+            ofLogNotice("videoElement") << ofGetFrameNum() << "\t" << "update movieisdone, movieEndTrigger, load loop file";
+            loadMovie(loopFile);
+            loopFile = "";
+            play(true);
+        } else if (this->movieEndTrigger) {
+            ofLogNotice("videoElement") << ofGetFrameNum() << "\t" << "update movieisdone, movieEndTrigger, fadeoutend";
             ofNotifyEvent(fadeOutEnd,this->w,this);
         }
     }
 }
 
 void videoElement::reset(bool visible) {
-    // cout << "reset video " << file << "  " << visible << endl;
+    ofLogNotice("videoElement") << ofGetFrameNum() << "\t" << "reset video " << file << "  " << visible;
     mediaElement::reset(visible);
     displaySpeed = 1.f;
     this->pause(false);
@@ -68,7 +74,7 @@ void videoElement::finishMovie() {
 
 void videoElement::finishMovie(float _speed) {
     // end transformation for 0-IDLE video = play fast to end
-    cout << "videoElement::finishFast" << endl;
+    ofLogNotice("videoElement") << ofGetFrameNum() << "\t" << "finishMovie()";
     // if (hide) 
     movieEndTrigger = true;
     movie->setLoopState(OF_LOOP_NONE);

@@ -83,6 +83,8 @@ class planeApp : public ofBaseApp{
 		void dragEvent(ofDragInfo dragInfo);
 		void gotMessage(ofMessage msg);
 
+		std::stringstream coutput;
+
 		int language;
 
 		int projectionW;
