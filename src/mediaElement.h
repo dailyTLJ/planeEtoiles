@@ -34,14 +34,15 @@ class mediaElement
 
         void (mediaElement::*outroTransformation)();
         void (mediaElement::*introTransformation)();
-        virtual void finishFast();
+        virtual void finishMovie();
+        virtual void finishMovie(float _speed = 5.0);
         virtual void scaleAway();
         void moveInFromTop();
         void moveInFromSide(int centerx, int centery);
 
         void bounce();
 
-
+        int id;
         ofPoint position;
         int w;
         int h;
@@ -66,6 +67,7 @@ class mediaElement
 
         bool selfdestroy;
         bool fadeoutDestroy;
+        bool movieEndTrigger;
         bool dead;
 
         bool bridgeVideo;

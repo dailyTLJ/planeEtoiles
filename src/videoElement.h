@@ -7,7 +7,7 @@ class videoElement: public mediaElement
 {
     public:
         videoElement();
-        videoElement(string filename, float speed = 1.0);
+        videoElement(string filename, bool _blend = true);
         ~videoElement();
 
         void update();
@@ -25,9 +25,8 @@ class videoElement: public mediaElement
         void moveAcross(float vx, float vy, int maxw, bool destr);
 
         void autoDestroy(bool v);
-        void finishFast();
-
-        bool endFade;
+        void finishMovie(float speed = 5.0);
+        void finishMovie();
 
         
         float displaySpeed;

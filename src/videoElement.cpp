@@ -4,13 +4,12 @@ videoElement::videoElement() {
     movie = ofPtr<ofVideoPlayer>( new ofVideoPlayer() );
 }
 
-videoElement::videoElement(string filename, float speed) {
+videoElement::videoElement(string filename, bool _blend) {
     movie = ofPtr<ofVideoPlayer>( new ofVideoPlayer() );
-    this->displaySpeed = speed;
-    this->endFade = false;
-    
+    movie->setPixelFormat(OF_PIXELS_RGBA);  // need to set this even for non-alpha videos, 
+                                            // because of alpha-fix in ofGstVideoPlayer.cpp
+    this->blend = _blend;
     this->rotation = 0;
-    
     this->loadMovie(filename);
 }
 
@@ -47,8 +46,9 @@ void videoElement::update() {
         if (this->selfdestroy) {
             this->dead = true;
         }
-        if (this->endFade && !fading) {
-            fadeOut();
+        if (this->movieEndTrigger) {
+            cout << "videoElement::update movieisdone, movieEndTrigger, fadeoutend" << endl;
+            ofNotifyEvent(fadeOutEnd,this->w,this);
         }
     }
 }
@@ -62,13 +62,17 @@ void videoElement::reset(bool visible) {
     movie->firstFrame();
 }
 
-void videoElement::finishFast() {
+void videoElement::finishMovie() {
+    finishMovie(5.0);
+}
+
+void videoElement::finishMovie(float _speed) {
     // end transformation for 0-IDLE video = play fast to end
     cout << "videoElement::finishFast" << endl;
     // if (hide) 
-    endFade = true;
+    movieEndTrigger = true;
     movie->setLoopState(OF_LOOP_NONE);
-    this->displaySpeed = 5.0f;
+    this->displaySpeed = _speed;
     movie->setSpeed(this->displaySpeed);
 }
 

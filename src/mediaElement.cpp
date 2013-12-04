@@ -1,11 +1,13 @@
 #include "mediaElement.h"
 
 mediaElement::mediaElement() {
+    this->id = -1;
     this->hide = false;
     this->position.set(0,0);
     this->scale = 1.0;
     this->addSc = 0.0;
     this->selfdestroy = false;
+    this->movieEndTrigger = false;
     this->fadeoutDestroy = false;
     this->dead = false;
     this->clr = ofColor(255, 255, 255);
@@ -58,7 +60,7 @@ void mediaElement::update() {
     }
     if (fading) {
         opacity += opacityChange;
-        // cout << "update opacity > " << opacity << endl;
+        cout << "update opacity > " << opacity << endl;
         if (opacityChange>0 && opacity >= 1.0f) {
             opacity = 1.f;
             fading = false;
@@ -68,6 +70,7 @@ void mediaElement::update() {
             opacity = 0.f;
             fading = false;
             visible = false;
+            cout << "mediaElement::update opacity 0, fadeoutend" << endl;
             ofNotifyEvent(fadeOutEnd,this->w,this);
             if (fadeoutDestroy) dead = true;
         }
@@ -112,6 +115,7 @@ void mediaElement::drawElement(float _scale) {
 }
 
 void mediaElement::reset(bool vis) {
+    hide = false;
     opacity = (vis) ? 1.f : 0.f;
     visible = (vis) ? true : false;
     opacityChange = 0.01f;
@@ -126,7 +130,11 @@ void mediaElement::moveAcross(float vx, float vy, int maxw, bool destr) {
 
 }
 
-void mediaElement::finishFast() {
+void mediaElement::finishMovie(float _speed) {
+    fadeOut();
+}
+
+void mediaElement::finishMovie() {
     fadeOut();
 }
 
@@ -168,6 +176,7 @@ void mediaElement::fade(float speed) {
 }
 
 void mediaElement::fadeOut() {
+    cout << "mediaElement::fadeOut()" << endl;
     if (hide) opacity = 0.01;       // set to low value, so there is at least one procession step
                                     // else endless feedback loop to event fgMediaFadedOut would be created
     fadeOut(0.01);

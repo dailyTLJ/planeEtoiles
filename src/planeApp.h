@@ -65,6 +65,7 @@ class planeApp : public ofBaseApp{
 		void endSegment(int direction = 1);	// 1. trigger fgMediaFadedOut 
 		void fgMediaFadedOut(int & trans);  // 2. call outroTransformation calls on FG and BG media
 		void bgMediaFadedOut(int & trans);	// 3. all elements faded out, moveOn = true
+		void bgMediaSwap(int & trans);		// 
 		void nextSegment(int direction = 1);// 4. pick the next segment
 		void initSegment();					// 5. initialize the new segment, create new fgvideos
 		void beginSegment();				// 6. after flash, fade in BG
@@ -124,6 +125,7 @@ class planeApp : public ofBaseApp{
 		bool success;			// if people followed the instructions
 		int successCnt;
 		int activityCnt;
+		int blobsOnStage;
 		int planetCnt;
 		bool flash;				// in between transitions, catch attention
 		int flashCnt;
@@ -186,7 +188,8 @@ class planeApp : public ofBaseApp{
 		ofParameter<int> alignmentTransition;
 
 		std::vector< ofPtr<mediaElement> > fgMedia;
-//		std::map<int, std::vector<videoElement> > fgVideos;
-		std::map<int, std::vector<ofPtr<mediaElement> > > bgVideos;
+		ofPtr<mediaElement> bgMedia;
+		ofPtr<mediaElement> nebula;
+		// std::map<int, std::vector<ofPtr<mediaElement> > > bgVideos;
 
 };
