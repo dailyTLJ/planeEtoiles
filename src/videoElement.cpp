@@ -46,14 +46,17 @@ void videoElement::update() {
         // cout << "movie " << file << " ended,  destroy: " << this->selfdestroy << endl;
         if (this->selfdestroy) {
             this->dead = true;
-        }
-        if (this->movieEndTrigger && loopFile!="") {
-            ofLogNotice("videoElement") << ofGetFrameNum() << "\t" << "update movieisdone, movieEndTrigger, load loop file";
+            if (this->movieEndTrigger) {
+                ofLogNotice("videoElement") << ofGetFrameNum() << "\t" << "movieisdone, selfdestroy " << file;
+                ofNotifyEvent(fadeOutEnd,this->w,this);
+            }
+        } else if (this->movieEndTrigger && loopFile!="") {
+            ofLogNotice("videoElement") << ofGetFrameNum() << "\t" << "movieisdone, loopfile " << file;
             loadMovie(loopFile);
             loopFile = "";
             play(true);
         } else if (this->movieEndTrigger) {
-            ofLogNotice("videoElement") << ofGetFrameNum() << "\t" << "update movieisdone, movieEndTrigger, fadeoutend";
+            ofLogNotice("videoElement") << ofGetFrameNum() << "\t" << "movieisdone, fadeoutend " << file;
             ofNotifyEvent(fadeOutEnd,this->w,this);
         }
     }
@@ -74,7 +77,7 @@ void videoElement::finishMovie() {
 
 void videoElement::finishMovie(float _speed) {
     // end transformation for 0-IDLE video = play fast to end
-    ofLogNotice("videoElement") << ofGetFrameNum() << "\t" << "finishMovie()";
+    ofLogNotice("videoElement") << ofGetFrameNum() << "\t" << file << " finishMovie()";
     // if (hide) 
     movieEndTrigger = true;
     movie->setLoopState(OF_LOOP_NONE);

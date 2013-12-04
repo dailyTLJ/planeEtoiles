@@ -66,6 +66,7 @@ void mediaElement::update() {
             opacity = 1.f;
             fading = false;
             visible = true;
+            ofLogNotice("mediaElement") << ofGetFrameNum() << "\t" << "mediaElement::update opacity 1, fadeInEnd";
             ofNotifyEvent(fadeInEnd,this->w,this);
         } else if (opacityChange<0 && opacity <= 0.f) {
             opacity = 0.f;
