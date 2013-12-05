@@ -32,7 +32,7 @@ void setup() {
   controlP5.addSlider("filterSize",0,15,3,x,y+=dy,100,h);
   controlP5.addSlider("processNoiseCov",0,10,2,x,y+=dy,100,h);
   controlP5.addSlider("measurementNoiseCov",0,10,1,x,y+=dy,100,h);
-  controlP5.addSlider("margin",0,1,1,x,y+=dy,100,h);
+  controlP5.addSlider("margin",-1,1,1,x,y+=dy,100,h);
   controlP5.addSlider("maxTimePerFrame",0,10,5,x,y+=dy,100,h);
   controlP5.addSlider("maxThreads",0,10,8,x,y+=dy,100,h);
   controlP5.addToggle("saveSamples",false,x,y+=dy,20,20);

@@ -7,10 +7,11 @@
                 <Name>location</Name>
                 <Value>/tmp/switcher_default_video_video-0</Value>
             </Param>
-<!--             <Param>
+            <Param>
                 <Name>mask</Name>
-                <Value>models/mask.jpg</Value>
-            </Param> -->
+                <!-- <Value>models/mask1_steles.png</Value> -->
+                <!-- <Value>models/mask1.png</Value> -->
+            </Param>
             <Param>
                 <Name>scale</Name>
                 <Value>1</Value>
@@ -18,6 +19,10 @@
             <Param>
                 <Name>rotation</Name>
                 <Value>0.0</Value>
+            </Param>
+            <Param>
+                <Name>crop</Name>
+                <Value>78 16 500 300</Value>
             </Param>
 <!--             <Param>
                 <Name>gammaCorrection</Name>
@@ -32,27 +37,39 @@
             </Param>
             <Param>
                 <Name>modelFilename</Name>
-                <Value>models/model_nov15c_cell12_bin9_block3.xml</Value>
+                <!-- <Value>models/model_nov20g_cell16_bin9_block3.xml</Value> -->
+                <Value>models/model_nov29d_cell8_bin9_block1.xml</Value>
+                <!-- <Value>models/model_8x8_bw.xml</Value> -->
             </Param>
             <Param>
                 <Name>cellSize</Name>
-                <Value>size_12x12</Value>
+                <Value>size_8x8</Value>
+                <!-- <Value>size_12x12</Value> -->
                 <!-- <Value>size_16x16</Value> -->
             </Param>
+<!--             <Param>
+                <Name>cellMaxSize</Name>
+                <Value>size_32x32</Value>
+            </Param>
+            <Param>
+                <Name>cellStep</Name>
+                <Value>size_1.3x1.3</Value>
+            </Param> -->
             <Param>
                 <Name>bins</Name>
                 <Value>9</Value>
-                <!-- <Value>11</Value> -->
-                <!-- <Value>13</Value> -->
+                 <!-- <Value>11</Value> -->
+                <!-- <Value>13</Value>  -->
             </Param>
             <Param>
                 <Name>blockSize</Name>
-                <!-- <Value>size_2x2</Value> -->
-                <Value>size_3x3</Value>
+                 <Value>size_1x1</Value>
+                <!-- <Value>size_2x2</Value>  -->
+                 <!-- <Value>size_3x3</Value> -->
             </Param>
             <Param>
                 <Name>filterSize</Name>
-                <Value>3</Value>
+                <Value>1</Value>
             </Param>
             <Param>
                 <Name>mergeDistance</Name>
@@ -68,11 +85,11 @@
             </Param>
             <Param>
                 <Name>margin</Name>
-                <Value>1</Value>
+                <Value>0</Value>
             </Param>
             <Param>
                 <Name>lifetime</Name>
-                <Value>5</Value>
+                <Value>9</Value>
             </Param>
             <Param>
                 <Name>maxTimePerFrame</Name>
@@ -85,6 +102,7 @@
             <Param>
                 <Name>roiSize</Name>
                 <Value>size_80x160</Value>
+                <!-- <Value>size_64x128</Value> -->
             </Param>
             <Param>
                 <Name>keepOldBlobs</Name>
@@ -133,17 +151,13 @@
         <Source>
             <Type>Source_2D_Shmdata</Type>
             <Subsource>0</Subsource>
-<!--            <Param>
-                <Name>location</Name>
-                <Value>/tmp/blobserver_output_1</Value>
-            </Param> -->
         </Source>
         <Actuator>
             <Type>Actuator_Nop</Type>
         </Actuator>
-
         <Client>
-            <Address>10.10.44.21</Address>
+            <!-- <Address>10.10.44.21</Address> -->
+            <Address>192.168.2.39</Address>
             <Port>9000</Port>
         </Client>
         <Server>
