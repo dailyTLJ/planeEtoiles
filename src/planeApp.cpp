@@ -10,6 +10,8 @@ std::ostream& tcout() {
 //--------------------------------------------------------------
 void planeApp::setup(){
 
+    ofLogNotice("START") << "\t" << ofGetFrameNum() << "\t" << "setup"; 
+
     ofSetLogLevel(OF_LOG_NOTICE);
     // OF_LOG_VERBOSE 
     // OF_LOG_NOTICE 
@@ -24,9 +26,9 @@ void planeApp::setup(){
     // ofLogError()
     // ofLogFatalError()
 
-    ofSetLogLevel("BLOB", OF_LOG_WARNING);
-    ofSetLogLevel("TRANSITION", OF_LOG_VERBOSE);
-    ofSetLogLevel("interaction", OF_LOG_VERBOSE);
+    ofSetLogLevel("BLOB", OF_LOG_VERBOSE);
+    ofSetLogLevel("TRANSITION", OF_LOG_WARNING);
+    ofSetLogLevel("interaction", OF_LOG_WARNING);
     ofSetLogLevel("videoElement", OF_LOG_VERBOSE);
     ofSetLogLevel("mediaElement", OF_LOG_VERBOSE);
 
@@ -78,6 +80,7 @@ void planeApp::setup(){
     blobH = 160;
 
     hogFlowId = 1;
+    hogFlowName = "Actuator";
     bgsubtractorFlowId = 2; // 1 = hog, 2 = bgs, 3 = nop
     bgsubtractorCnt = 0;
     bgsubtractorVel = 0.f;
@@ -148,8 +151,17 @@ void planeApp::setup(){
     // gui.add(paramSc5);
 
 
-	gui.setSize(200,500);
+    gui.setSize(200,500);
     gui.loadFromFile("planets01.xml");
+
+    // OSC SETUP
+    ofLogNotice("OSC") << "\t\t" << ofGetFrameNum() << "\t" << "listening for osc messages on port " << MYPORT;
+    receiver.setup(MYPORT);
+	ofLogNotice("OSC") << "\t\t" << ofGetFrameNum() << "\t" << "sending osc messages to " << BLOBSERVERIP << " on port " << BLOBPORT;
+    sender.setup( BLOBSERVERIP, BLOBPORT );
+
+    sendOscMsg("signIn", MYIP, MYPORT);
+
 
     // init
     this->initScenes();
@@ -158,12 +170,6 @@ void planeApp::setup(){
     // to map from blob-coordinates to the top-down view
     this->setPerspective();
 
-    // test blob to verify perspective Mat
-//    testBlob.perspectiveMat = &perspectiveMat;
-//    for( int i=0; i<50; i++ ) {
-//        testBlob.follow( i*3, i * 3.0/5.0 );
-//        testBlob.follow(150-i*3,i * 3.0/5.0);
-//    }
     steles[0].set(383-78,184-16,0);
     steles[1].set(457-78,198-16,0);
     steles[2].set(506-78,224-16,0);
@@ -176,9 +182,6 @@ void planeApp::setup(){
     int tmp = 1;
     recalculatePerspective(tmp);
 
-    // listen on the given port
-	ofLogNotice("START") << "listening for osc messages on port " << PORT;
-	receiver.setup(PORT);
 
 	ofBackground(255);
 
@@ -215,6 +218,8 @@ void planeApp::setPerspective() {
 
 //--------------------------------------------------------------
 void planeApp::initScenes(){
+
+    ofLogNotice("START") << "\t" << ofGetFrameNum() << "\t" << "initialize scenes";
 
     int n = 0;
 
@@ -384,7 +389,7 @@ void planeApp::initScenes(){
     shooting.length[4] = 5;
     scenes[n] = shooting;
 
-    ofLogNotice("START") << "there are " << scenes.size() << " scenes";
+    ofLogNotice("START") << "\t" << ofGetFrameNum() << "\t" << "there are " << scenes.size() << " scenes";
 
     sceneChange = true;
     nextSegment(1);
@@ -474,24 +479,24 @@ void planeApp::update(){
         if (scene==0) {
             // fade out idle-mode video, connect fade-End to transition to next Segment
             if(autoplay && success && !transition) {
-                ofLogNotice("SUCCESS") << "scene 0 success";
+                ofLogNotice("interaction") << "\t" << ofGetFrameNum() << "\t" << "scene 0 success";
                 endSegment(1);
             }
         } else if (scene==1) {
             if (autoplay && segment==1 && successCnt > newStarMax && !transition) {
-                ofLogNotice("SUCCESS")  << "scene 1 segment 1 success";
+                ofLogNotice("interaction") << "\t" << ofGetFrameNum() << "\t" << "scene 1 segment 1 success";
                 endSegment(1);
             }
         } else if (scene==2 && segment==1) {
             if (autoplay && success && !transition) {
-                ofLogNotice("SUCCESS")  << "scene 2 segment 1 success";
+                ofLogNotice("interaction") << "\t" << ofGetFrameNum() << "\t" << "scene 2 segment 1 success";
                 endSegment(1);
             }
         } else if (scene==3) {
             if (segment==4 || segment==6 ) {
                 // FREEZE!
                 if(autoplay && success && !transition) {
-                    ofLogNotice("SUCCESS") << "FREEZE success";
+                    ofLogNotice("interaction") << "\t" << ofGetFrameNum() << "\t" << "FREEZE success";
                     endSegment(1);
                 }
             }
@@ -504,7 +509,7 @@ void planeApp::update(){
         while (iter != fgMedia.end()) {
             (**iter).update();
             if ((**iter).dead) {
-                ofLogNotice("VIDEO") << "\t" << ofGetFrameNum() << "\t" << "delete video " << (**iter).file;
+                ofLogNotice("videoElement") << "\t" << ofGetFrameNum() << "\t" << "delete video " << (**iter).file;
                 iter = fgMedia.erase(iter);
             } else {
                 ++iter;
@@ -647,23 +652,23 @@ void planeApp::bgMediaSwap(int & trans) {
 
 }
 
-void planeApp::bgMediaFadedOut(int & trans) {
-    ofLogNotice("TRANSITION") << "bgMediaFadedOut, moveOn = true";
-    // set moveOn to true, instead of calling nextSegment()
-    // to avoid conflicting threading
-    moveOn = true;
-}
+// void planeApp::bgMediaFadedOut(int & trans) {
+//     ofLogNotice("TRANSITION") << "\t" << ofGetFrameNum() << "\t" << "bgMediaFadedOut, moveOn = true";
+//     // set moveOn to true, instead of calling nextSegment()
+//     // to avoid conflicting threading
+//     moveOn = true;
+// }
 
 // trans -1 : trigger first fade from main-loop and not from faded-event
 void planeApp::fgMediaFadedOut(int & trans) {
-    ofLogNotice("TRANSITION") << "fgMediaFadedOut  " << trans << "  fgmedia size = " << fgMedia.size();
+    ofLogNotice("TRANSITION") << "\t" << ofGetFrameNum() << "\t" << "fgMediaFadedOut  " << trans << "  fgmedia size = " << fgMedia.size();
     
     if (fgMedia.size()>0) {
         
         if (trans == -1) {
             // first call of function, therefore we fade the last fgMedia object
             ofAddListener( (*fgMedia.back()).fadeOutEnd, this, &planeApp::fgMediaFadedOut );
-            ofLogNotice("TRANSITION") << "call outroTransformation() on fgMedia[" << (fgMedia.size()-1) << "]";
+            ofLogNotice("TRANSITION") << "\t" << ofGetFrameNum() << "\t" << "call outroTransformation() on fgMedia[" << (fgMedia.size()-1) << "]";
             ((*fgMedia.back()).*((*fgMedia.back()).outroTransformation))();
 
         } else {
@@ -673,7 +678,7 @@ void planeApp::fgMediaFadedOut(int & trans) {
             if (fgMedia.size()>1) {
                 // fade new last fgMedia object
                 ofAddListener( (*fgMedia[fgMedia.size()-2]).fadeOutEnd, this, &planeApp::fgMediaFadedOut );
-                ofLogNotice("TRANSITION") << "call outroTransformation() on fgMedia[" << (fgMedia.size()-2) << "]";
+                ofLogNotice("TRANSITION") << "\t" << ofGetFrameNum() << "\t" << "call outroTransformation() on fgMedia[" << (fgMedia.size()-2) << "]";
                 ((*fgMedia[fgMedia.size()-2]).*((*fgMedia[fgMedia.size()-2]).outroTransformation))();
             } else {
                 // fade BG now
@@ -688,22 +693,22 @@ void planeApp::fgMediaFadedOut(int & trans) {
     }
 }
 
-void planeApp::fgMediaFadedIn(int & trans) {
-    ofLogNotice("TRANSITION") << "fgMediaFadedIn  " << trans;
-    if (fgMedia.size() > 0) {
-        for (vector<ofPtr<mediaElement> >::iterator it = fgMedia.begin(); it != fgMedia.end(); it++) {
-            if (!(**it).visible) {
-                ofLogNotice("TRANSITION") << "fgMediaFadedIn   " << (**it).file;
-                ofAddListener( (**it).fadeInEnd, this, &planeApp::fgMediaFadedIn );
-                ((**it).*((**it).introTransformation))();
-            }
-        }
-    }
-}
+// void planeApp::fgMediaFadedIn(int & trans) {
+//     ofLogNotice("TRANSITION") << "\t" << ofGetFrameNum() << "\t" << "fgMediaFadedIn  " << trans;
+//     if (fgMedia.size() > 0) {
+//         for (vector<ofPtr<mediaElement> >::iterator it = fgMedia.begin(); it != fgMedia.end(); it++) {
+//             if (!(**it).visible) {
+//                 ofLogNotice("TRANSITION") << "\t" << ofGetFrameNum() << "\t" << "fgMediaFadedIn   " << (**it).file;
+//                 ofAddListener( (**it).fadeInEnd, this, &planeApp::fgMediaFadedIn );
+//                 ((**it).*((**it).introTransformation))();
+//             }
+//         }
+//     }
+// }
 
-void planeApp::bgMediaFadedIn(int & trans) {
-    ofLogNotice("TRANSITION") << "bgMediaFadedIn";
-}
+// void planeApp::bgMediaFadedIn(int & trans) {
+//     ofLogNotice("TRANSITION") << "\t" << ofGetFrameNum() << "\t" << "bgMediaFadedIn";
+// }
 
 void planeApp::blobOnLost(int & blobID) {
     ofLogNotice("BLOB") << "\t" << ofGetFrameNum() << "\t" << blobID << " just got lost";
@@ -728,16 +733,16 @@ void planeApp::blobOnLost(int & blobID) {
         } else if (scene==5) {
             // SHOOTING STARS
             if (segment==0) {
-                int randomShooter = ofRandom(6) + 1;
-                fgMedia.push_back(ofPtr<mediaElement>( new videoElement("video/6_shooting/SSTAR_0" + ofToString(randomShooter) + "-H264-10mbps.mp4")));
+                int randomShooter = ofRandom(26) + 1;
+                fgMedia.push_back(ofPtr<mediaElement>( new videoElement("video/6_shooting/SSTAR_" + ofToString(randomShooter,2,'0') + "-photoJPEG.mov")));
                 (*fgMedia[fgMedia.size()-1]).setDisplay(ofRandom(projectionW-100), ofRandom(projectionH-100), true);
                 (*fgMedia[fgMedia.size()-1]).moveAcross( blobs[blobID].velocity.x, blobs[blobID].velocity.y, projectionW, projectionH, true);
                 (*fgMedia[fgMedia.size()-1]).reset();
             } else if (segment==1) {
                 float randdeg = ofRandom(-5.f, 5.f);
                 for (int i=0; i<10; i++) {
-                    int randomShooter = ofRandom(6) + 1;
-                    fgMedia.push_back(ofPtr<mediaElement>( new videoElement("video/6_shooting/SSTAR_0" + ofToString(randomShooter) + "-H264-10mbps.mp4")));
+                    int randomShooter = ofRandom(26) + 1;
+                    fgMedia.push_back(ofPtr<mediaElement>( new videoElement("video/6_shooting/SSTAR_" + ofToString(randomShooter,2,'0') + "-photoJPEG.mov")));
                     (*fgMedia[fgMedia.size()-1]).setDisplay(ofRandom(projectionW-100), ofRandom(projectionH-100), true);
                     (*fgMedia[fgMedia.size()-1]).moveAcross( randdeg, 45.f, projectionW, true);
                     (*fgMedia[fgMedia.size()-1]).reset();
@@ -1136,8 +1141,6 @@ void planeApp::beginSegment() {
     // }
 
     transition = false;
-    // int tmp = 1;
-    // bgMediaFadedIn(tmp);
 }
 
 void planeApp::endSegment(int direction) {
@@ -1218,6 +1221,8 @@ void planeApp::nextSegment(int direction) {
 void planeApp::initSegment(){
 
     ofLogNotice("TRANSITION") << "\t" << ofGetFrameNum() << "\t" << "initSegment()";
+
+    configureBlobserver();
 
     if (sceneChange) fgMedia.clear();   // delete all foreground videos
     success = false;
@@ -1733,7 +1738,8 @@ void planeApp::drawRawData(int x, int y, float scale){
     ofRect(x,y,blobserverW*scale,blobserverH*scale);
 
     // write information
-    string rawInfo = "port: \t\t" + ofToString(PORT);
+    string rawInfo = "port: \t\t" + ofToString(MYPORT);
+    rawInfo += "\nBLOBSERVER: \t" + ofToString(BLOBSERVERIP) + " (" + ofToString(BLOBPORT) + ")";
     rawInfo += "\nosc active: \t" + ofToString(oscActive ? "true" : "false");
     rawInfo += "\nosc last msg: \t" + ofToString(oscLastMsgTimer) + " sec";
     rawInfo += "\nexposure: \t" + ofToString(cameraExposure,5);
@@ -1830,9 +1836,89 @@ bool planeApp::allBlobsAlignedWith(ofPoint &p) {
     return allAligned;
 }
 
+void planeApp::configureBlobserver() {
+
+    ofLogNotice("TRANSITION") << "\t" << ofGetFrameNum() << "\t" << "configureBlobserver()";
+
+    // standard setting:
+    bool erratic = false;  // else slow movements
+    bool allowLessFP = false;        // allow more false positives
+    
+    if (scene==0) {                 // IDLE
+    
+    } else if (scene==1) {          // STARS
+        
+        if (segment==0) {               // STAND STILL
+        } else if (segment==1) {        // STAND STILL SOME MORE
+        } else if (segment==2) {        // KEEP THE DISTANCE
+        } else if (segment==3) {        // KEEP THE DISTANCE P2
+        }
+
+    } else if (scene==2) {          // REVOLUTION
+
+        if (segment==0) {               // SPIN
+            erratic = true;
+        } else if (segment==1) {        // LET GO
+        }
+
+    } else if (scene==3) {          // SUN
+
+        if (segment==0) {               // STAND ON ONE LEG
+        } else if (segment==1) {        // HOP
+            erratic = true;
+            allowLessFP = true;
+        } else if (segment==2) {        // HOP IN UNISON
+            erratic = true;
+            allowLessFP = true;
+        } else if (segment==3) {        // FREEZE
+        } else if (segment==4) {        // RUN EVERYWHERE
+        } else if (segment==5) {        // FREEZE
+        }
+
+    } else if (scene==4) {          // ALIGNMENT
+
+        if (segment==0) {               // LINE UP IN FRONT OF ME
+        } else if (segment==1) {        // FOLLOW ME
+        } else if (segment==2) {        // STEP OUT OF THE LINE
+        } else if (segment==3) {        // STEP INTO THE LINE
+        } else if (segment==4) {        // STEP OUT OF THE LINE
+        } else if (segment==5) {        // STEP INTO THE LINE
+        } else if (segment==6) {        // DISPERSE SLOWLY
+        }
+
+    } else if (scene==5) {          // SHOOTING STARS
+        erratic = true;
+        allowLessFP = true;
+        if (segment==0) {               // MOVE LIKE A SHOOTING STAR
+        } else if (segment==1) {        // DROP
+        }
+
+    }
+
+    if (erratic) {
+        // ERRATIC FAST MOVEMENTS, allow for jumping, running, etc.
+        sendOscMsgToHog("setParameter", "processNoiseCov", pow(10, 0));
+        sendOscMsgToHog("setParameter", "measurementNoiseCov", pow(10, 10));
+    } else {
+        // NORMAL SETTING : SLOW MOVEMENTS, don't allow for erratic movements
+        sendOscMsgToHog("setParameter", "processNoiseCov", pow(10, -8));
+        sendOscMsgToHog("setParameter", "measurementNoiseCov", pow(10, -6));
+    }
+
+    if (allowLessFP) {
+        // ALLOW FOR LESS FALSE POSITIVES (jumping)
+        sendOscMsgToHog("setParameter", "margin", 0.3);
+    } else {
+        // NORMAL SETTING : MARGIN
+        sendOscMsgToHog("setParameter", "margin", 0.0);
+    }
+
+}
+
 
 void planeApp::exit() {
     // do some destructing here
+    // sendOscMsg("signOut", MYIP); // don't send disconnect, else blobserver terminates
     ofLogNotice() << "goodbye";
 }
 
@@ -1841,6 +1927,35 @@ void planeApp::exit() {
 void planeApp::keyPressed(int key){
 
 }
+
+
+
+
+void planeApp::sendOscMsg(string addr, string v1, int v2) {
+    ofxOscMessage m;
+    m.setAddress( "/blobserver/"+addr );
+    m.addStringArg(v1);
+    m.addIntArg(v2);
+    sender.sendMessage( m );
+    ofLogNotice("OSC") << "\t\t" << ofGetFrameNum() << "\t" << "send OSC: /blobserver/" << addr << " " << v1 << " " << v2;
+    m.clear();
+}
+
+
+
+void planeApp::sendOscMsgToHog(string addr, string v1, float v2) {
+    ofxOscMessage m;
+    m.setAddress( "/blobserver/"+addr );
+    m.addStringArg(MYIP);
+    m.addIntArg(hogFlowId);
+    m.addStringArg(hogFlowName);
+    m.addStringArg(v1);
+    m.addFloatArg(v2);
+    sender.sendMessage( m );
+    ofLogNotice("OSC") << "\t\t" << ofGetFrameNum() << "\t" << "send OSC: /blobserver/" << addr << " " << v1 << " " << v2;
+    m.clear();
+}
+
 
 //--------------------------------------------------------------
 void planeApp::keyReleased(int key){

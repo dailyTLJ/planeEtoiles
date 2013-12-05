@@ -15,11 +15,11 @@ videoElement::videoElement(string filename, bool _blend) {
 
 videoElement::~videoElement() {
     // cout << "~videoElement() " << endl;
-    // cout << "~videoElement() : kill video " << this->file << endl;
+    ofLogNotice("videoElement") << ofGetFrameNum() << "\t" << "destructor " << file;
 }
 
 void videoElement::loadMovie(string filename) {
-    ofLogNotice("videoElement") << ofGetFrameNum() << "\t" << "loadMovie " << filename;
+    ofLogNotice("videoElement") << ofGetFrameNum() << "\t" << "loadMovie " << file;
     this->file = filename;
     movie->loadMovie(filename);
     this->w = movie->getWidth();

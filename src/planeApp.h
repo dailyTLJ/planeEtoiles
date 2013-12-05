@@ -12,7 +12,10 @@
 #include "imageElement.h"
 
 // listen to blobserver on port 9000
-#define PORT 9000
+#define MYPORT 9000
+#define BLOBPORT 9002
+#define BLOBSERVERIP "192.168.2.12"
+#define MYIP "192.168.2.39"
 
 class sceneInfo {
     public:
@@ -33,6 +36,9 @@ class planeApp : public ofBaseApp{
 		void exit();
 
 		void receiveOsc();
+		void sendOscMsg(string addr, string v1, int v2);
+		void sendOscMsgToHog(string addr, string v1, float v2);
+
 
 		void initScenes();
 		void setPerspective();
@@ -64,13 +70,14 @@ class planeApp : public ofBaseApp{
 
 		void endSegment(int direction = 1);	// 1. trigger fgMediaFadedOut 
 		void fgMediaFadedOut(int & trans);  // 2. call outroTransformation calls on FG and BG media
-		void bgMediaFadedOut(int & trans);	// 3. all elements faded out, moveOn = true
+		// void bgMediaFadedOut(int & trans);	// 3. all elements faded out, moveOn = true
 		void bgMediaSwap(int & trans);		// 
 		void nextSegment(int direction = 1);// 4. pick the next segment
 		void initSegment();					// 5. initialize the new segment, create new fgvideos
+		void configureBlobserver();
 		void beginSegment();				// 6. after flash, fade in BG
-		void bgMediaFadedIn(int & trans);	// 7. reinit blobs, introtransformation of videos
-		void fgMediaFadedIn(int & trans);
+		// void bgMediaFadedIn(int & trans);	// 7. reinit blobs, introtransformation of videos
+		// void fgMediaFadedIn(int & trans);
 
 
 		void keyPressed(int key);
@@ -145,6 +152,7 @@ class planeApp : public ofBaseApp{
 		int bgsubtractorCnt;
 		int bgsubtractorFlowId;
 		int hogFlowId;
+		string hogFlowName;
 		float bgsubtractorVel;	
 		float bgsubtractorAvVel;
 		float hogAvVel;
@@ -161,6 +169,7 @@ class planeApp : public ofBaseApp{
 		ofParameterGroup paramSc5;
         ofParameter<ofColor> flashColor;
 		ofxOscReceiver receiver;
+		ofxOscSender sender;
 
 		ofParameter<float> freezeMaxVel;
 		ofParameter<int> freezeMinTime;
