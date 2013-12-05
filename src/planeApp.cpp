@@ -84,6 +84,8 @@ void planeApp::setup(){
     bgsubtractorAvVel = 0.f;
     hogAvVel = 0.f;
 
+    followMe = 0.f;
+
     siteW.addListener(this,&planeApp::recalculatePerspective);
 	siteH.addListener(this,&planeApp::recalculatePerspective);
 
@@ -138,6 +140,8 @@ void planeApp::setup(){
     paramSc4.setName("Sc4 Alignment");
     paramSc4.add(alignmentMaxDist.set( "Alignm MaxDist", 50, 0, 200));
     paramSc4.add(alignmentTransition.set( "Alignm Transition", 10, 0, 20));
+    paramSc4.add(followMeSpeed.set( "followMeSpeed", 0.002, 0, 0.02));
+    paramSc4.add(followMeRadius.set( "followMeRadius", 300, 0, 500));
     gui.add(paramSc4);
 
     // paramSc5.setName("Sc5 Combustion");
@@ -566,7 +570,13 @@ void planeApp::update(){
             }
         // } else if (scene==3 && segment==5) {
         //     if (ofRandom(100)<2) (*fgMedia[0]).bounce();
-        } else if (!transition && segmentClock > alignmentTransition && scene==4 && blobs.size()>0) {
+        } else if (scene==4 && segment==1) {
+            // FOLLOW ME
+            followMe += followMeSpeed;
+            (*fgMedia[0]).position.x = projectionW/2 + sin(followMe) * followMeRadius;
+        }
+        if ( scene==4 && segment<6 && !transition && segmentClock > alignmentTransition && blobsOnStage>0) {
+
             // check if all are aligned
             bool allAligned = allBlobsAlignedWith((*fgMedia[0]).position);
 
@@ -574,9 +584,9 @@ void planeApp::update(){
                 if (!success) {
                     // aligned
                     success = true;
-                    string alignmentGlow = "video/5_eclipse/ECLIPSE_alignment-glow-01-animation.mov";
+                    string alignmentGlow = "video/5_eclipse/LIGHT-photoJPEG.mov";
                     fgMedia.push_back(ofPtr<mediaElement>( new videoElement(alignmentGlow) ));
-                    (*fgMedia[fgMedia.size()-1]).setDisplay(projectionW/2, projectionH/2, true);
+                    (*fgMedia[fgMedia.size()-1]).setDisplay((*fgMedia[0]).position.x, (*fgMedia[0]).position.y, true);
                     (*fgMedia[fgMedia.size()-1]).reset(true);
                     (*fgMedia[fgMedia.size()-1]).autoDestroy(true);
                 }
@@ -921,17 +931,16 @@ void planeApp::blobEnterStage(int & blobID) {
         } else if (scene==4) {
             // PLANETS
             ofLogNotice("BLOB") << "\t" << ofGetFrameNum() << "\t" << "blobEnterStage()\t\t" << blobID << " (planet)";
-            int randomPlanet = ofRandom(23) + 1;
-            // int randomPlanet = ofRandom(3) + 18;
-            fgMedia.push_back(ofPtr<mediaElement>( new imageElement("video/5_eclipse/PLANET_" + ofToString(randomPlanet)+".png", 0.5f)));
-            // fgMedia.push_back(ofPtr<mediaElement>( new videoElement("video/5_eclipse/PLANET_"+ofToString(randomPlanet)+".mov")));
+            int planedId[] = { 6, 9, 13, 15, 18, 19,20, 22, 23 };
+            int randomPlanet = ofRandom(sizeof(planedId) / sizeof(planedId[0]));
+            // P_13-qtPNG.mov
+            fgMedia.push_back(ofPtr<mediaElement>( new videoElement("video/5_eclipse/P_" + ofToString(planedId[randomPlanet])+"-qtPNG.mov", true)));
             blobs[blobID].mediaLink = fgMedia[fgMedia.size()-1];
             blobs[blobID].videoTrace = true;
             float x = offsetX + blobs[blobID].position.x * mapSiteW;
             float y = offsetY + blobs[blobID].position.y *mapSiteH;
             (*fgMedia[fgMedia.size()-1]).setDisplay(x, y, true);
             (*fgMedia[fgMedia.size()-1]).reset();
-            // (*fgMedia[fgMedia.size()-1]).introTransformation = &mediaElement::moveInFromSide;
 
             if (segment==0 && segmentClock < alignmentTransition) {
                 (*fgMedia[fgMedia.size()-1]).moveInFromSide(projectionW/2,projectionH/2);
@@ -1025,11 +1034,13 @@ void planeApp::videoFollowBlob(int & blobID) {
         if (vid != NULL) {
             // tcout() << "blob " << blobID << " \t\tfound vid" << endl;
 
-            if (scene==4 && (segment==2 || segment==3)) {
-                // PLANETS aligned on horizontal, move left right
-                bx = offsetX + blobs[blobID].position.x * mapSiteW;
-                by = offsetY + projectionH/2.0;
-            } else if (scene==4 && (segment==4 || segment==5)) {
+            // if (scene==4 && (segment==2 || segment==3)) {
+            //     // PLANETS aligned on horizontal, move left right
+            //     bx = offsetX + blobs[blobID].position.x * mapSiteW;
+            //     by = offsetY + projectionH/2.0;
+            // } else 
+
+            if (scene==4 && (segment>1 && segment<6)) {
                 // PLANETS aligned on vertical, move up down
                 by = offsetX + blobs[blobID].position.x * mapSiteW * (16.0/9.0);
                 bx = offsetX + projectionW/2.0;
@@ -1042,6 +1053,11 @@ void planeApp::videoFollowBlob(int & blobID) {
                 (*vid).setDisplay( bx, by, true);
             } else {
                 (*vid).goal.set( bx, by );
+            }
+            // opacity
+            if (scene==4 && segment==6) {
+                float d = ofDist(bx, by, projectionW/2, projectionH/2);
+                (*vid).opMax = ((projectionW/2) - d) / (projectionW/2);
             }
         }
         // update position of sparkly bridge
@@ -1246,18 +1262,18 @@ void planeApp::initSegment(){
         }
 
     } else if (scene==4) {
-        // ECLIPSE. create white/black MAIN PLANET
-        fgMedia.push_back(ofPtr<mediaElement>( new mediaElement()));
-        (*fgMedia[fgMedia.size()-1]).setDisplay( projectionW/2, projectionH/2, 400, 400 );
-        // (*fgMedia[fgMedia.size()-1]).outroTransformation = &mediaElement::scaleAway;
-        if (sceneChange) (*fgMedia[fgMedia.size()-1]).reset(false);
-        else (*fgMedia[fgMedia.size()-1]).reset();
-        (*fgMedia[fgMedia.size()-1]).blend = false;
-        if (segment>6) {
-            (*fgMedia[fgMedia.size()-1]).clr = ofColor(0, 0, 0);
-            (*fgMedia[fgMedia.size()-1]).moveInFromSide(projectionW/2,projectionH/2);
-        } else {
-            
+        if (sceneChange) {
+            // ECLIPSE. create white/black MAIN PLANET
+            fgMedia.push_back(ofPtr<mediaElement>( new imageElement("video/5_eclipse/WHITE_PLANET.png")));
+            (*fgMedia[fgMedia.size()-1]).setDisplay( projectionW/2, projectionH/2, true );
+            (*fgMedia[fgMedia.size()-1]).reset();
+            // (*fgMedia[fgMedia.size()-1]).opacity = 0.8;
+            (*fgMedia[fgMedia.size()-1]).fadeTo(0.8);
+        } else if (segment==2) {
+            (*fgMedia[0]).setDisplay( projectionW/2, projectionH/2, true );
+        } else if (segment==6) {
+            // disperse
+            (*fgMedia[0]).fadeOut(0.01, 1.0, true);
         }
     }
 
@@ -1505,7 +1521,11 @@ void planeApp::drawScreen(int x, int y, float scale){
 
     string instruction = scenes[scene].instructions[language][segment];
     ofFill(); ofSetColor(255);
-    fontBg.drawString(instruction, x+20, y+projectionH*scale*0.8);
+    if (scene==4 && segment==1) {
+        fontBg.drawString(instruction, x+(*fgMedia[0]).position.x*scale, y+projectionH*scale*0.8);
+    } else {
+        fontBg.drawString(instruction, x+20, y+projectionH*scale*0.8);
+    }
 
     if (flash) {
         ofEnableAlphaBlending();
@@ -1791,15 +1811,20 @@ void planeApp::drawTopDown(int x, int y, float scale, bool detailed) {
 
 
 bool planeApp::allBlobsAlignedWith(ofPoint &p) {
+    if (blobsOnStage<=0) 
+        return false;
+
     bool allAligned = true;
     for(std::map<int, Blob>::iterator it = blobs.begin(); it != blobs.end(); ++it){
         Blob* b = &it->second;
-        float x = offsetX + b->position.x * mapSiteW;
-        float y = offsetY + b->position.y * mapSiteH;
-        float d = ofDist(x, y, p.x, p.y);
-        if (d > alignmentMaxDist) {
-            allAligned = false;
-            break;
+        if (b->onStage) {
+            float x = offsetX + b->position.x * mapSiteW;
+            // float y = offsetY + b->position.y * mapSiteH;
+            float d = ofDist(x, 0, p.x, 0);
+            if (d > alignmentMaxDist) {
+                allAligned = false;
+                break;
+            }
         }
     }
     return allAligned;

@@ -14,6 +14,7 @@ mediaElement::mediaElement() {
     this->clr = ofColor(255, 255, 255);
     this->opacityChange = 0.01f;
     this->opacity = 1.f;
+    this->opMax = 1.f;
     this->fading = false;
     this->scaling = false;
     this->centered = false;
@@ -105,7 +106,7 @@ void mediaElement::draw(int x, int y, float _scale) {
     if (!hide) {
         ofPushMatrix();
         ofTranslate(x + position.x * _scale, y + position.y * _scale );
-        ofFill(); ofSetColor(clr.r, clr.g, clr.b, int(255*opacity));
+        ofFill(); ofSetColor(clr.r, clr.g, clr.b, int(255*opacity*opMax));
         ofCircle(0, 0, this->w * (scale+addSc) * _scale * 0.5);
         ofPopMatrix();
     }
@@ -175,7 +176,7 @@ void mediaElement::fade(float speed) {
 }
 
 void mediaElement::fadeOut() {
-    ofLogNotice("mediaElement") << ofGetFrameNum() << "\t" << "fadeOut()";
+    ofLogNotice("mediaElement") << "\t" << ofGetFrameNum() << "\t" << "fadeOut()";
     if (hide) opacity = 0.01;       // set to low value, so there is at least one procession step
                                     // else endless feedback loop to event fgMediaFadedOut would be created
     fadeOut(0.01);
@@ -183,6 +184,12 @@ void mediaElement::fadeOut() {
 
 void mediaElement::fadeIn() {
     fadeIn(0.01);
+}
+
+void mediaElement::fadeTo(float _opMax) {
+    ofLogNotice("mediaElement") << "\t" << ofGetFrameNum() << "\t" << "fadeTo() " << _opMax;
+    opMax = _opMax;
+    fadeIn();
 }
 
 void mediaElement::fadeOut(float speed, float op, bool destroy) {

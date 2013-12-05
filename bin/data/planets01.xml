@@ -43,10 +43,13 @@
 		<runJudgeTime>24</runJudgeTime>
 		<runHogThr>1.17347</runHogThr>
 		<runBgsThr>8</runBgsThr>
+	<runActThr>5</runActThr>
 	</Sc3_Sun>
 	<Sc4_Alignment>
 		<Alignm_MaxDist>200</Alignm_MaxDist>
 		<Alignm_Transition>10</Alignm_Transition>
+	<followMeSpeed>0.00612245</followMeSpeed>
+		<followMeRadius>303</followMeRadius>
 	</Sc4_Alignment>
 	<Sc5_Combustion/>
 <HUMANS_AND_PLANETS/>

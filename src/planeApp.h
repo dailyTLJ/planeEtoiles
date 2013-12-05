@@ -196,6 +196,9 @@ class planeApp : public ofBaseApp{
 
 		ofParameter<int> alignmentMaxDist;
 		ofParameter<int> alignmentTransition;
+		ofParameter<float> followMeSpeed;
+		ofParameter<int> followMeRadius;
+		float followMe;
 
 		std::vector< ofPtr<mediaElement> > fgMedia;
 		ofPtr<mediaElement> bgMedia;

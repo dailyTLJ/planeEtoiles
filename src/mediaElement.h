@@ -29,6 +29,7 @@ class mediaElement
         void fade(float speed);
         void fadeOut();
         void fadeIn();
+        void fadeTo(float _opMax);
         void fadeOut(float speed, float op = 1.0, bool destroy = false);
         void fadeIn(float speed);
 
@@ -59,6 +60,7 @@ class mediaElement
         bool visible;
         float opacityChange;
         float opacity;
+        float opMax;
         bool moveElement;
         float moveSpeed;
         ofPoint velocity;
