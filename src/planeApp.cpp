@@ -12,7 +12,7 @@ void planeApp::setup(){
 
     ofLogNotice("START") << "\t" << ofGetFrameNum() << "\t" << "setup"; 
 
-    ofSetLogLevel(OF_LOG_NOTICE);
+    ofSetLogLevel(OF_LOG_VERBOSE);
     // OF_LOG_VERBOSE 
     // OF_LOG_NOTICE 
     // OF_LOG_WARNING 
@@ -28,6 +28,7 @@ void planeApp::setup(){
 
     ofSetLogLevel("BLOB", OF_LOG_VERBOSE);
     ofSetLogLevel("TRANSITION", OF_LOG_WARNING);
+    ofSetLogLevel("OSC", OF_LOG_WARNING);
     ofSetLogLevel("interaction", OF_LOG_WARNING);
     ofSetLogLevel("videoElement", OF_LOG_VERBOSE);
     ofSetLogLevel("mediaElement", OF_LOG_VERBOSE);
@@ -2020,7 +2021,7 @@ void planeApp::keyReleased(int key){
 
     if (key>='0' && key<='5') {
         int s = int(key) - int('0');
-        ofLogNotice() << "key input = " << key << " scene = " << s;
+        ofLogNotice("KEY") << "\t\t" << ofGetFrameNum() << "\t" << "==============>" << key << " scene = " << s;
         jumpToScene(s);
     }
 

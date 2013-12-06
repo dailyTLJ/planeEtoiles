@@ -19,8 +19,17 @@ videoElement::~videoElement() {
 }
 
 void videoElement::loadMovie(string filename) {
-    ofLogNotice("videoElement") << ofGetFrameNum() << "\t" << "loadMovie " << file;
+    ofLogNotice("videoElement") << ofGetFrameNum() << "\t" << "stop\t'" << file << "'";
+    movie->stop();
+    ofLogNotice("videoElement") << ofGetFrameNum() << "\t" << "close\t'" << file << "'";
     this->file = filename;
+    movie->close();
+    // delete(movie);
+    ofLogNotice("videoElement") << ofGetFrameNum() << "\t" << "clear pointer\t'" << file << "'";
+    movie = ofPtr<ofVideoPlayer>();
+    ofLogNotice("videoElement") << ofGetFrameNum() << "\t" << "new pointer\t'" << file << "'";
+    movie = ofPtr<ofVideoPlayer>( new ofVideoPlayer() );
+    ofLogNotice("videoElement") << ofGetFrameNum() << "\t" << "loadMovie\t'" << file << "'";
     movie->loadMovie(filename);
     this->w = movie->getWidth();
     this->h = movie->getHeight();
@@ -31,7 +40,7 @@ void videoElement::loadMovie(string filename) {
 void videoElement::play(bool loop) {
     movie->play();
     movie->setLoopState( loop ? OF_LOOP_NORMAL : OF_LOOP_NONE );
-    ofLogNotice("videoElement") << ofGetFrameNum() << "\t" << "play  setLoopState " << loop;
+    // ofLogNotice("videoElement") << ofGetFrameNum() << "\t" << "play  setLoopState " << loop;
 }
 
 void videoElement::pause(bool v) {
@@ -47,16 +56,16 @@ void videoElement::update() {
         if (this->selfdestroy) {
             this->dead = true;
             if (this->movieEndTrigger) {
-                ofLogNotice("videoElement") << ofGetFrameNum() << "\t" << "movieisdone, selfdestroy " << file;
+                ofLogNotice("videoElement") << ofGetFrameNum() << "\t" << "movieisdone, selfdestroy\t" << file;
                 ofNotifyEvent(fadeOutEnd,this->w,this);
             }
         } else if (this->movieEndTrigger && loopFile!="") {
-            ofLogNotice("videoElement") << ofGetFrameNum() << "\t" << "movieisdone, loopfile " << file;
+            ofLogNotice("videoElement") << ofGetFrameNum() << "\t" << "movieisdone, loopfile\t" << loopFile;
             loadMovie(loopFile);
             loopFile = "";
             play(true);
         } else if (this->movieEndTrigger) {
-            ofLogNotice("videoElement") << ofGetFrameNum() << "\t" << "movieisdone, fadeoutend " << file;
+            ofLogNotice("videoElement") << ofGetFrameNum() << "\t" << "movieisdone, fadeoutend\t" << file;
             ofNotifyEvent(fadeOutEnd,this->w,this);
         }
     }
