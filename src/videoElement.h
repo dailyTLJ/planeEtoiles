@@ -31,7 +31,8 @@ class videoElement: public mediaElement
         
         float displaySpeed;
 
-        
+        bool loadLoopFileNow;
+        bool setFileDeadNow;
 
 
     protected:

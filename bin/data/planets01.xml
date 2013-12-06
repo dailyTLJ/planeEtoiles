@@ -1,6 +1,6 @@
 <HUMANS_AND_PLANETS>
 	<autoplay>0</autoplay>
-	<Transition_Flash_Color>255, 200, 100, 255</Transition_Flash_Color>
+	<Transition_Flash_Color>255, 200, 100, 0</Transition_Flash_Color>
 	<Global>
 		<Site_Width>500</Site_Width>
 		<Site_Length>700</Site_Length>

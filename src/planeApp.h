@@ -140,6 +140,8 @@ class planeApp : public ofBaseApp{
 		int flashCnt;
 		int flashMax;
 
+		bool shootingRain;
+
 		bool drawBridge;
 		float bridgeX;
 		float bridgeY;
@@ -210,8 +212,9 @@ class planeApp : public ofBaseApp{
 		float followMe;
 
 		std::vector< ofPtr<mediaElement> > fgMedia;
-		ofPtr<mediaElement> bgMedia;
+		std::vector< ofPtr<mediaElement> > bgMedia;
 		ofPtr<mediaElement> nebula;
+		int bgMediaId;
 		// std::map<int, std::vector<ofPtr<mediaElement> > > bgVideos;
 
 };

@@ -10,25 +10,27 @@ videoElement::videoElement(string filename, bool _blend) {
                                             // because of alpha-fix in ofGstVideoPlayer.cpp
     this->blend = _blend;
     this->rotation = 0;
+    this->setFileDeadNow = false;
+    this->loadLoopFileNow = false;
     this->loadMovie(filename);
 }
 
 videoElement::~videoElement() {
     // cout << "~videoElement() " << endl;
-    ofLogNotice("videoElement") << ofGetFrameNum() << "\t" << "destructor " << file;
+    // ofLogNotice("videoElement") << ofGetFrameNum() << "\t" << "destructor " << file;
 }
 
 void videoElement::loadMovie(string filename) {
-    ofLogNotice("videoElement") << ofGetFrameNum() << "\t" << "stop\t'" << file << "'";
-    movie->stop();
-    ofLogNotice("videoElement") << ofGetFrameNum() << "\t" << "close\t'" << file << "'";
+    // ofLogNotice("videoElement") << ofGetFrameNum() << "\t" << "stop\t'" << file << "'";
+    // movie->stop();
+    // ofLogNotice("videoElement") << ofGetFrameNum() << "\t" << "close\t'" << file << "'";
     this->file = filename;
-    movie->close();
-    // delete(movie);
-    ofLogNotice("videoElement") << ofGetFrameNum() << "\t" << "clear pointer\t'" << file << "'";
-    movie = ofPtr<ofVideoPlayer>();
-    ofLogNotice("videoElement") << ofGetFrameNum() << "\t" << "new pointer\t'" << file << "'";
-    movie = ofPtr<ofVideoPlayer>( new ofVideoPlayer() );
+    // movie->close();
+    // // delete(movie);
+    // ofLogNotice("videoElement") << ofGetFrameNum() << "\t" << "clear pointer\t'" << file << "'";
+    // movie = ofPtr<ofVideoPlayer>();
+    // ofLogNotice("videoElement") << ofGetFrameNum() << "\t" << "new pointer\t'" << file << "'";
+    // movie = ofPtr<ofVideoPlayer>( new ofVideoPlayer() );
     ofLogNotice("videoElement") << ofGetFrameNum() << "\t" << "loadMovie\t'" << file << "'";
     movie->loadMovie(filename);
     this->w = movie->getWidth();
@@ -49,24 +51,46 @@ void videoElement::pause(bool v) {
 
 void videoElement::update() {
     mediaElement::update();
+    if (loadLoopFileNow) {
+        ofLogNotice("videoElement") << ofGetFrameNum() << "\t" << "loadLoopFileNow\t" << loopFile;
+        loadLoopFileNow = false;
+        loadMovie(loopFile);
+        loopFile = "";
+        play(true);
+    }
+    if (setFileDeadNow) {
+        setFileDeadNow = false;
+        this->dead = true;
+    }
+
     movie->update();
     
     if (movie->getIsMovieDone()) {
         // cout << "movie " << file << " ended,  destroy: " << this->selfdestroy << endl;
         if (this->selfdestroy) {
-            this->dead = true;
+            play(true);
+            setFileDeadNow = true;
+            // this->dead = true;
             if (this->movieEndTrigger) {
-                ofLogNotice("videoElement") << ofGetFrameNum() << "\t" << "movieisdone, selfdestroy\t" << file;
+                ofLogNotice("videoElement") << ofGetFrameNum() << "\t" << "movieisdone, selfdestroy trigger\t" << file;
                 ofNotifyEvent(fadeOutEnd,this->w,this);
+            } else {
+                ofLogNotice("videoElement") << ofGetFrameNum() << "\t" << "movieisdone, selfdestroy\t" << file;
+                movie->update();
             }
         } else if (this->movieEndTrigger && loopFile!="") {
-            ofLogNotice("videoElement") << ofGetFrameNum() << "\t" << "movieisdone, loopfile\t" << loopFile;
-            loadMovie(loopFile);
-            loopFile = "";
             play(true);
+            movie->update();
+            ofLogNotice("videoElement") << ofGetFrameNum() << "\t" << "movieisdone, loopfile\t" << loopFile;
+            loadLoopFileNow = true;
+            // loadMovie(loopFile);
+            // loopFile = "";
+            // play(true);
         } else if (this->movieEndTrigger) {
+            play(true); // when set to unpaused, it won't trigger the GStreamer Critical unref error?
             ofLogNotice("videoElement") << ofGetFrameNum() << "\t" << "movieisdone, fadeoutend\t" << file;
             ofNotifyEvent(fadeOutEnd,this->w,this);
+            // this->dead = true;
         }
     }
 }
@@ -86,7 +110,7 @@ void videoElement::finishMovie() {
 
 void videoElement::finishMovie(float _speed) {
     // end transformation for 0-IDLE video = play fast to end
-    ofLogNotice("videoElement") << ofGetFrameNum() << "\t" << file << " finishMovie()";
+    ofLogNotice("videoElement") << ofGetFrameNum() << "\t" << "finishMovie()\t" << file ;
     // if (hide) 
     movieEndTrigger = true;
     movie->setLoopState(OF_LOOP_NONE);

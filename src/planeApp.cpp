@@ -12,7 +12,7 @@ void planeApp::setup(){
 
     ofLogNotice("START") << "\t" << ofGetFrameNum() << "\t" << "setup"; 
 
-    ofSetLogLevel(OF_LOG_VERBOSE);
+    ofSetLogLevel(OF_LOG_NOTICE);
     // OF_LOG_VERBOSE 
     // OF_LOG_NOTICE 
     // OF_LOG_WARNING 
@@ -26,8 +26,8 @@ void planeApp::setup(){
     // ofLogError()
     // ofLogFatalError()
 
-    ofSetLogLevel("BLOB", OF_LOG_VERBOSE);
-    ofSetLogLevel("TRANSITION", OF_LOG_WARNING);
+    ofSetLogLevel("BLOB", OF_LOG_WARNING);
+    ofSetLogLevel("TRANSITION", OF_LOG_VERBOSE);
     ofSetLogLevel("OSC", OF_LOG_WARNING);
     ofSetLogLevel("interaction", OF_LOG_WARNING);
     ofSetLogLevel("videoElement", OF_LOG_VERBOSE);
@@ -68,6 +68,7 @@ void planeApp::setup(){
     flash = false;
     flashCnt = 0;
     flashMax = 20;
+    bgMediaId = 0;
 
     drawBridge = false;
     bridgeX = 5;
@@ -89,6 +90,7 @@ void planeApp::setup(){
     hogAvVel = 0.f;
 
     followMe = 0.f;
+    shootingRain = false;
 
     siteW.addListener(this,&planeApp::recalculatePerspective);
 	siteH.addListener(this,&planeApp::recalculatePerspective);
@@ -202,9 +204,6 @@ void planeApp::recalculatePerspective(int & v) {
 
 void planeApp::setPerspective() {
     int skew = 0;
-    // 800x600  scale 0.4 >> 320x240   minus 64x128
-    // float in[] = {skew,0,blobserverW-skew,0,blobserverW,blobserverH,0,blobserverH};
-    // float in[] = {180,180,660,140,410,300,0,320};
     float in[] = {260-78,140-16,600-78,210-16,380-78,300-16,-150-78,300-16};
     float out[] = {0,0,siteW,0,siteW,siteH,0,siteH};
 
@@ -232,15 +231,16 @@ void planeApp::initScenes(){
 	masterClock = 0;
 
 
-    nebula = ofPtr<mediaElement>( 
-        new videoElement("video/NEBULA-H264-10mbps.mp4"));
+    nebula = ofPtr<mediaElement>( new videoElement("video/NEBULA-H264-10mbps.mp4"));
     nebula->reset(true);
-    bgMedia = ofPtr<mediaElement>( 
-        // new videoElement("video/BACKGROUND-1_loop-H264_10mpbs.mp4"));
-        new videoElement("video/IDLE_MODE_11-half-1-H264-10mbps.mp4"));
-    // bgMedia->reset(true);
-    // bgMedia->outroTransformation = &mediaElement::finishFast; 
-    // ofAddListener( bgMedia->fadeOutEnd, this, &planeApp::bgMediaSwap );
+
+    bgMedia.push_back(ofPtr<mediaElement>( new videoElement("video/IDLE_MODE_11-half-1-H264-10mbps.mp4",false)));       // 0
+    bgMedia.push_back(ofPtr<mediaElement>( new videoElement("video/IDLE_MODE_13_blue-anim-H264-10mbps.mp4",false)));    // 1
+    bgMedia.push_back(ofPtr<mediaElement>( new videoElement("video/IDLE_MODE_13_white-anim-H264-10mbps.mp4",false)));   // 2
+    bgMedia.push_back(ofPtr<mediaElement>( new videoElement("video/IDLE_MODE_13_yellow-anim-H264-10mbps.mp4",false)));  // 3
+    bgMedia.push_back(ofPtr<mediaElement>( new videoElement("video/BACKGROUND-1_intro-H264_10mpbs.mp4",false)));        // 4
+    bgMedia.push_back(ofPtr<mediaElement>( new videoElement("video/BACKGROUND-1_loop-H264_10mpbs.mp4",false)));         // 5
+    bgMedia.push_back(ofPtr<mediaElement>( new videoElement("video/4_sun/SUN_15-intro-photoJPEG.mov",false)));          // 6
 
 
     sceneInfo idle;
@@ -504,17 +504,21 @@ void planeApp::update(){
         }
 
         nebula->update();
-        bgMedia->update();
+        (*bgMedia[bgMediaId]).update();
 
         vector<ofPtr<mediaElement> >::iterator iter = fgMedia.begin();
         while (iter != fgMedia.end()) {
             (**iter).update();
             if ((**iter).dead) {
-                ofLogNotice("videoElement") << "\t" << ofGetFrameNum() << "\t" << "delete video " << (**iter).file;
+                ofLogNotice("videoElement") << ofGetFrameNum() << "\t" << "delete video " << (**iter).file;
                 iter = fgMedia.erase(iter);
             } else {
                 ++iter;
             }
+            // if (!(**iter).dead) {
+            //     (**iter).update();
+            // }
+            // ++iter;
         }
 
         // animation related
@@ -536,11 +540,6 @@ void planeApp::update(){
                         (*fgMedia[planetCnt]).loadMovie("video/3_revolution/REV_OUT-photoJPEG.mov");
                         (*fgMedia[planetCnt]).reset(true);
                         (*fgMedia[planetCnt]).autoDestroy(true);
-                        // if (planetCnt<=0) {
-                        //     (*fgMedia[planetCnt]).movieEndTrigger = true;
-                        //     ofAddListener( (*fgMedia[planetCnt]).fadeOutEnd, this, &planeApp::bgMediaSwap );
-                        //     //success = true;
-                        // }
                     } else if (planetCnt==-1) {
                         success = true;
                     }
@@ -600,6 +599,20 @@ void planeApp::update(){
                 success = false;
             }
         }
+        if (scene == 5) {
+            if (shootingRain) {
+                float randdeg = ofRandom(-5.f, 5.f);
+                for (int i=0; i<50; i++) {
+                    int randomShooter = ofRandom(26) + 1;
+                    fgMedia.push_back(ofPtr<mediaElement>( new videoElement("video/6_shooting/SSTAR_" + ofToString(randomShooter,2,'0') + "-photoJPEG.mov")));
+                    (*fgMedia[fgMedia.size()-1]).setDisplay(ofRandom(projectionW-100), ofRandom(projectionH-100), true);
+                    (*fgMedia[fgMedia.size()-1]).moveAcross( randdeg, 45.f, projectionW, true);
+                    (*fgMedia[fgMedia.size()-1]).reset();
+                    // (*fgMedia[fgMedia.size()-1]).movie->setFrame(i);
+                }
+                shootingRain = false;
+            }
+        }
 
     }
 
@@ -607,48 +620,38 @@ void planeApp::update(){
 
 void planeApp::bgMediaSwap(int & trans) {
 
-    if (scene==0 && (bgMedia->id==-1 || bgMedia->id==2)) {
+    if (scene==0 && ((*bgMedia[bgMediaId]).id==-1 || (*bgMedia[bgMediaId]).id==5)) {
         ofLogNotice("TRANSITION") << "\t" << ofGetFrameNum() << "\t" << "bgMediaSwap\t\t\tidle " << trans;
-        int randomIdle = ofRandom(4);
-        switch (randomIdle) {
-            case 0: bgMedia->loadMovie("video/IDLE_MODE_11-half-1-H264-10mbps.mp4");
-                    break;
-            case 1: bgMedia->loadMovie("video/IDLE_MODE_13_blue-anim-H264-10mbps.mp4");
-                    break;
-            case 2: bgMedia->loadMovie("video/IDLE_MODE_13_white-anim-H264-10mbps.mp4");
-                    break;
-            default:
-            case 3: bgMedia->loadMovie("video/IDLE_MODE_13_yellow-anim-H264-10mbps.mp4");
-        }
-        bgMedia->id = 0;
-        bgMedia->reset(true);   // play right away
-        bgMedia->movieEndTrigger=false;
-        bgMedia->outroTransformation = &mediaElement::finishMovie; 
-        ofAddListener( bgMedia->fadeOutEnd, this, &planeApp::bgMediaSwap );
-    } else if (scene==0 && bgMedia->id==0) {
+        bgMediaId = ofRandom(4);
+        (*bgMedia[bgMediaId]).id = bgMediaId;
+        (*bgMedia[bgMediaId]).reset(true);   // play right away
+        (*bgMedia[bgMediaId]).movieEndTrigger=false;
+        (*bgMedia[bgMediaId]).outroTransformation = &mediaElement::finishMovie; 
+        ofAddListener( (*bgMedia[bgMediaId]).fadeOutEnd, this, &planeApp::bgMediaSwap );
+    } else if (scene==0 && (*bgMedia[bgMediaId]).id<4) {
         ofLogNotice("TRANSITION") << "\t" << ofGetFrameNum() << "\t" << "bgMediaSwap\t\t\tstarry intro " << trans;
-        bgMedia->loadMovie("video/BACKGROUND-1_intro-H264_10mpbs.mp4");
-        bgMedia->id = 1;
-        bgMedia->reset(true);
-        bgMedia->finishMovie(1.0);
-        bgMedia->movieEndTrigger=true;
-        ofAddListener( bgMedia->fadeOutEnd, this, &planeApp::bgMediaSwap );
-    } else if (scene==2 && bgMedia->id==2) {
+        bgMediaId = 4;
+        (*bgMedia[bgMediaId]).id = bgMediaId;
+        (*bgMedia[bgMediaId]).reset(true);
+        (*bgMedia[bgMediaId]).finishMovie(1.0);
+        // (*bgMedia[bgMediaId]).movieEndTrigger=true;
+        ofAddListener( (*bgMedia[bgMediaId]).fadeOutEnd, this, &planeApp::bgMediaSwap );
+    } else if (scene==2 && (*bgMedia[bgMediaId]).id==5) {
         ofLogNotice("TRANSITION") << "\t" << ofGetFrameNum() << "\t" << "bgMediaSwap\t\t\tsun intro " << trans;
-        bgMedia->loadMovie("video/4_sun/SUN_15-intro-photoJPEG.mov");
-        bgMedia->id = 3;
-        bgMedia->reset(true);
-        bgMedia->finishMovie(1.0);
-        bgMedia->movieEndTrigger=true;
-        ofAddListener( bgMedia->fadeOutEnd, this, &planeApp::bgMediaSwap );
+        bgMediaId = 6;
+        (*bgMedia[bgMediaId]).id = bgMediaId;
+        (*bgMedia[bgMediaId]).reset(true);
+        (*bgMedia[bgMediaId]).finishMovie(1.0);
+        // (*bgMedia[bgMediaId]).movieEndTrigger=true;
+        ofAddListener( (*bgMedia[bgMediaId]).fadeOutEnd, this, &planeApp::bgMediaSwap );
     } else {
         if (trans!=-2) nextSegment(1);
         ofLogNotice("TRANSITION") << "\t" << ofGetFrameNum() << "\t" << "bgMediaSwap\t\t\tstarry bg " << trans;
-        bgMedia->loadMovie("video/BACKGROUND-1_loop-H264_10mpbs.mp4");
-        bgMedia->id = 2;
-        bgMedia->reset(true);
-        bgMedia->movieEndTrigger=false;
-        ofRemoveListener( bgMedia->fadeOutEnd, this, &planeApp::bgMediaSwap );
+        bgMediaId = 5;
+        (*bgMedia[bgMediaId]).id = bgMediaId;
+        (*bgMedia[bgMediaId]).reset(true);
+        (*bgMedia[bgMediaId]).movieEndTrigger=false;
+        ofRemoveListener( (*bgMedia[bgMediaId]).fadeOutEnd, this, &planeApp::bgMediaSwap );
     }
 
 }
@@ -683,13 +686,13 @@ void planeApp::fgMediaFadedOut(int & trans) {
                 ((*fgMedia[fgMedia.size()-2]).*((*fgMedia[fgMedia.size()-2]).outroTransformation))();
             } else {
                 // fade BG now
-                if (scene==0) ((*bgMedia).*((*bgMedia).outroTransformation))();
+                if (scene==0) ((*bgMedia[bgMediaId]).*((*bgMedia[bgMediaId]).outroTransformation))();
                 else moveOn = true;
             }
         }
     } else {
         // fade BG now
-        if (scene==0) ((*bgMedia).*((*bgMedia).outroTransformation))();
+        if (scene==0) ((*bgMedia[bgMediaId]).*((*bgMedia[bgMediaId]).outroTransformation))();
         else moveOn = true;
     }
 }
@@ -740,15 +743,7 @@ void planeApp::blobOnLost(int & blobID) {
                 (*fgMedia[fgMedia.size()-1]).moveAcross( blobs[blobID].velocity.x, blobs[blobID].velocity.y, projectionW, projectionH, true);
                 (*fgMedia[fgMedia.size()-1]).reset();
             } else if (segment==1) {
-                float randdeg = ofRandom(-5.f, 5.f);
-                for (int i=0; i<10; i++) {
-                    int randomShooter = ofRandom(26) + 1;
-                    fgMedia.push_back(ofPtr<mediaElement>( new videoElement("video/6_shooting/SSTAR_" + ofToString(randomShooter,2,'0') + "-photoJPEG.mov")));
-                    (*fgMedia[fgMedia.size()-1]).setDisplay(ofRandom(projectionW-100), ofRandom(projectionH-100), true);
-                    (*fgMedia[fgMedia.size()-1]).moveAcross( randdeg, 45.f, projectionW, true);
-                    (*fgMedia[fgMedia.size()-1]).reset();
-                    // (*fgMedia[fgMedia.size()-1]).movie->setFrame(i);
-                }
+                shootingRain = true;    // triggered within update()
             }
         }
     }
@@ -848,14 +843,15 @@ void planeApp::blobOnFreeze(int & blobID) {
                 // create star on location of blob
                 int randomStar = ofRandom(3) + 2;
                 fgMedia.push_back(ofPtr<mediaElement>( new videoElement("video/2_stars/STAR_" + ofToString(randomStar)+"-intro-photoJPEG.mov")));
+                // fgMedia.push_back(ofPtr<mediaElement>( new videoElement("video/2_stars/STAR_" + ofToString(randomStar)+"-loop-photoJPEG.mov")));
                 blobs[blobID].mediaLink = fgMedia[fgMedia.size()-1];
                 (*fgMedia[fgMedia.size()-1]).id = randomStar;   // save video-id
                 (*fgMedia[fgMedia.size()-1]).loopFile = "video/2_stars/STAR_" + ofToString(randomStar)+"-loop-photoJPEG.mov";
                 (*fgMedia[fgMedia.size()-1]).setDisplay(offsetX + blobs[blobID].position.x * mapSiteW, offsetY + blobs[blobID].position.y * mapSiteH, true);
                 (*fgMedia[fgMedia.size()-1]).reset();
+                // (*fgMedia[fgMedia.size()-1]).autoDestroy(true);
                 (*fgMedia[fgMedia.size()-1]).finishMovie(1.0);
-                (*fgMedia[fgMedia.size()-1]).movieEndTrigger=true;
-                (*fgMedia[fgMedia.size()-1]).outroTransformation = &mediaElement::scaleAway;
+                // (*fgMedia[fgMedia.size()-1]).outroTransformation = &mediaElement::scaleAway;
                 if (segment==1) successCnt++;
             }
         } else if (scene==3) {
@@ -1164,6 +1160,7 @@ void planeApp::endSegment(int direction) {
         } else {
             int tmp = -1;
             fgMediaFadedOut(tmp);   // TODO clean up, just need to hand back ref. of integer
+            // moveOn = true;
         }
 
         transition = true;
@@ -1225,7 +1222,10 @@ void planeApp::initSegment(){
 
     configureBlobserver();
 
-    if (sceneChange) fgMedia.clear();   // delete all foreground videos
+    if (sceneChange) {
+        ofLogNotice("TRANSITION") << "\t" << ofGetFrameNum() << "\t" << "cleared " << fgMedia.size() << " fgMedia videos";
+        fgMedia.clear();   // delete all foreground videos
+    }
     success = false;
     successCnt = 0;
     activityCnt = 0;
@@ -1260,8 +1260,13 @@ void planeApp::initSegment(){
             (*fgMedia[fgMedia.size()-1]).setDisplay(projectionW/2,projectionH/2, true);
             (*fgMedia[fgMedia.size()-1]).reset();
         } else if (segment==3) {
+
             (*fgMedia[0]).loadMovie("video/4_sun/SUN_run_loop-1-qtPNG.mov");
             (*fgMedia[0]).reset();
+            // (*fgMedia[0]).dead = true;
+            // fgMedia.push_back(ofPtr<mediaElement>( new videoElement("video/4_sun/SUN_run_loop-1-qtPNG.mov",false)));
+            // (*fgMedia[fgMedia.size()-1]).setDisplay(projectionW/2,projectionH/2, true);
+            // (*fgMedia[fgMedia.size()-1]).reset();
         } else if (segment==4) {
             // RUN EVERYWHERE
             (*fgMedia[0]).movie->setSpeed(1.0);
@@ -1471,18 +1476,18 @@ void planeApp::drawScreen(int x, int y, float scale){
 
     nebula->draw(x,y,scale);
     ofEnableBlendMode(OF_BLENDMODE_ADD);
-    bgMedia->draw(x,y,scale);
+    (*bgMedia[bgMediaId]).draw(x,y,scale);
 
     // foreground videos
     for (vector<ofPtr<mediaElement> >::iterator it = fgMedia.begin(); it != fgMedia.end(); ++it) {
-        if ((**it).blend) (**it).draw(x, y, scale);   //  
+        if (!(**it).dead && (**it).blend) (**it).draw(x, y, scale);   //  
     }
     ofDisableBlendMode();
 
     // foreground videos, without BLENDING mode
     ofEnableAlphaBlending();
     for (vector<ofPtr<mediaElement> >::iterator it = fgMedia.begin(); it != fgMedia.end(); ++it) {
-        if (!(**it).blend) (**it).draw(x, y, scale);
+        if (!(**it).dead && !(**it).blend) (**it).draw(x, y, scale);
     }
 
     // draw starBridge dummies
@@ -1535,8 +1540,8 @@ void planeApp::drawScreen(int x, int y, float scale){
 
     if (flash) {
         ofEnableAlphaBlending();
-        int alpha = (flashCnt < flashMax/2) ? 255*(flashCnt/(flashMax/2.f)) : 255*(flashMax - flashCnt)/(flashMax/2.f);
-        ofSetColor(flashColor.get().r,flashColor.get().g,flashColor.get().b,alpha); ofFill();
+        float alpha = (flashCnt < flashMax/2) ? (flashCnt/(flashMax/2.f)) : (flashMax - flashCnt)/(flashMax/2.f);
+        ofSetColor(flashColor.get().r,flashColor.get().g,flashColor.get().b,flashColor.get().a*alpha); ofFill();
         ofRect(x,y,projectionW*scale,projectionH*scale);
         ofDisableAlphaBlending();
     }
@@ -1988,7 +1993,7 @@ void planeApp::keyReleased(int key){
         ofLogNotice() << "bridgeY \t" << bridgeY;
     }
     if (key == OF_KEY_RIGHT){
-        endSegment(1);
+        if (!transition) endSegment(1);
     }
     if (key == ' ') {
         autoplay = !autoplay;
@@ -2032,6 +2037,8 @@ void planeApp::keyReleased(int key){
         (*fgMedia[fgMedia.size()-1]).reset(true);
         (*fgMedia[fgMedia.size()-1]).autoDestroy(true);
     }
+
+    if (key=='r') shootingRain = true;
 }
 
 //--------------------------------------------------------------
