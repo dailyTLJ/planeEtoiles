@@ -118,7 +118,7 @@ class Blob {
         int maxLifetime;
         bool updated;	// updated by last sample ?
 
-        // trail analysis
+        // analysis
         bool frozen;            //
         bool properFreeze;      // after a threshold of time
         bool overFrozen;

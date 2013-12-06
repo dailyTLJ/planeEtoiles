@@ -160,11 +160,11 @@ void Blob::analyzeNeighbors(std::map<int, ofPoint> neighborLocation, float distS
                     ofNotifyEvent(onSteady,pair,this);
                 } else {
                     n->steadyTimer = ofGetUnixTime() - n->steadyStart;
-                    if (n->steadyTimer >= steadyReward && !n->steadyRewarded) {
-                        n->steadyRewarded = true;
-                        ofNotifyEvent(onSteadyReward,pair,this);
-                        steadyRewarded = true;
-                    }
+                    // if (n->steadyTimer >= steadyReward && !n->steadyRewarded) {
+                    //     n->steadyRewarded = true;
+                    //     ofNotifyEvent(onSteadyReward,pair,this);
+                    //     steadyRewarded = true;
+                    // }
                 }
             } else {
                 if (n->steadyDistance) {

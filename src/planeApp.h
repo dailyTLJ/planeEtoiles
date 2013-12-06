@@ -68,7 +68,7 @@ class planeApp : public ofBaseApp{
 		void jumpToScene(int s);
 		bool allBlobsAlignedWith(ofPoint &p);
 
-		void endSegment(int direction = 1);	// 1. trigger fgMediaFadedOut 
+		void endSegment(int direction = 1);	// 1. trigger fgMediaFadedOut or moveOn
 		void fgMediaFadedOut(int & trans);  // 2. call outroTransformation calls on FG and BG media
 		// void bgMediaFadedOut(int & trans);	// 3. all elements faded out, moveOn = true
 		void bgMediaSwap(int & trans);		// 
@@ -89,6 +89,8 @@ class planeApp : public ofBaseApp{
 		void windowResized(int w, int h);
 		void dragEvent(ofDragInfo dragInfo);
 		void gotMessage(ofMessage msg);
+
+		void printDebugInfo();
 
 		std::stringstream coutput;
 
