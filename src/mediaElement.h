@@ -21,8 +21,10 @@ class mediaElement
         virtual void reset(bool vis = true);
         
         void setDisplay(int x, int y);
+        void setDisplay(ofPoint p);
         void setDisplay(int x, int y, float _scale);
         void setDisplay(int x, int y, bool _centered);
+        void setDisplay(ofPoint p, bool _centered);
         void setDisplay(int x, int y, int w, int h);
         void setDisplay(int x, int y, int w, int h, bool _centered);
 

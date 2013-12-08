@@ -63,10 +63,12 @@ class planeApp : public ofBaseApp{
 		void videoFollowBlob(int & blobID);
 		void blobEnterStage(int & blobID);
 		void blobLeaveStage(int & blobID);
+		
 
 		void positionRevolutions();
 		void jumpToScene(int s);
 		bool allBlobsAlignedWith(ofPoint &p);
+		ofPoint blobMapToScreen(ofPoint &o);
 
 		void endSegment(int direction = 1);	// 1. trigger fgMediaFadedOut or moveOn
 		void fgMediaFadedOut(int & trans);  // 2. call outroTransformation calls on FG and BG media

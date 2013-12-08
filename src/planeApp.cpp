@@ -774,7 +774,7 @@ void planeApp::blobOnLost(int & blobID) {
                 else if (activityCnt > activityColorCh) videoEnd = "_fullscale-red-posterized-qtPNG.mov";
                 string newVideoName = "video/4_sun/SUN_explosion-" + ofToString(randomExpl,2,'0') + videoEnd;
                 fgMedia.push_back(ofPtr<mediaElement>( new videoElement(newVideoName,false)));
-                (*fgMedia[fgMedia.size()-1]).setDisplay(offsetX + blobs[blobID].position.x * mapSiteW, offsetY + blobs[blobID].position.y * mapSiteH, true);
+                (*fgMedia[fgMedia.size()-1]).setDisplay(blobMapToScreen(blobs[blobID].position), true);
                 (*fgMedia[fgMedia.size()-1]).autoDestroy(true);
                 (*fgMedia[fgMedia.size()-1]).reset();
                 if (segment==2) (*fgMedia[0]).bounce(); // sun video = [0]
@@ -917,7 +917,8 @@ void planeApp::blobBreakSteady(Pair & pair) {
 
 void planeApp::blobOnFreeze(int & blobID) {
     if (!transition) {
-        ofLogNotice("BLOB") << "\t" << ofGetFrameNum() << "\t" << "blobOnFreeze()\t" << blobID;
+        ofPoint p = blobMapToScreen(blobs[blobID].position);
+        ofLogNotice("BLOB") << "\t" << ofGetFrameNum() << "\t" << "blobOnFreeze()\t" << blobID << " at " << int(p.x) << "|" << int(p.y);
         if (scene==1) {
             if ((segment==0 || segment==1) && blobs[blobID].onStage) {
                 // STAND STILL
@@ -928,7 +929,7 @@ void planeApp::blobOnFreeze(int & blobID) {
                 blobs[blobID].mediaLink = fgMedia[fgMedia.size()-1];
                 (*fgMedia[fgMedia.size()-1]).id = randomStar;   // save video-id
                 (*fgMedia[fgMedia.size()-1]).loopFile = "video/2_stars/STAR_" + ofToString(randomStar)+"-loop-photoJPEG.mov";
-                (*fgMedia[fgMedia.size()-1]).setDisplay(offsetX + blobs[blobID].position.x * mapSiteW, offsetY + blobs[blobID].position.y * mapSiteH, true);
+                (*fgMedia[fgMedia.size()-1]).setDisplay(blobMapToScreen(blobs[blobID].position), true);
                 (*fgMedia[fgMedia.size()-1]).reset();
                 // (*fgMedia[fgMedia.size()-1]).autoDestroy(true);
                 (*fgMedia[fgMedia.size()-1]).finishMovie(1.0);
@@ -950,6 +951,9 @@ void planeApp::blobOnFreeze(int & blobID) {
         }
     }
 }
+
+
+
 void planeApp::blobUnFreeze(int & blobID) {
     if (!transition) {
         if (scene==1) {
@@ -972,14 +976,46 @@ void planeApp::blobUnFreeze(int & blobID) {
 void planeApp::blobOverFreeze(int & blobID) {
     if (!transition) {
         if (scene==1) {
-            if (segment==1) {
-                ofLogNotice("BLOB") << "\t" << ofGetFrameNum() << "\t" << "blobOverFreeze()\t\t" << blobID;
-                // rewarding star animation video, placed at star position
-                string bonusVideo = "video/2_stars/HAND animation-QTAnimation.mov";
+            if (segment==1 && blobs[blobID].onStage && blobs[blobID].mediaLink != NULL) {
+                string constellations[] = { "CONSTELLATION_1-photoJPEG.mov", 
+                "CONSTELLATION_2-photoJPEG.mov", "CONSTELLATION_3-photoJPEG.mov", 
+                "CONSTELLATION_4-photoJPEG.mov", "CONSTELLATION_5-photoJPEG.mov", 
+                "CONSTELLATION_6-photoJPEG.mov", "CONSTELLATION_7-photoJPEG.mov", 
+                "CONSTELLATION_BOAT-photoJPEG.mov", "CONSTELLATION_CAR-photoJPEG.mov",
+                "CONSTELLATION_CASSEROLLE-photoJPEG.mov", "CONSTELLATION_CUBE-photoJPEG.mov",
+                "CONSTELLATION_FISH-photoJPEG.mov", "CONSTELLATION_HAND-photoJPEG.mov",
+                "CONSTELLATION_HEART2-photoJPEG.mov", "CONSTELLATION_HOUSE-photoJPEG.mov",
+                "CONSTELLATION_MERMAID-photoJPEG.mov", "CONSTELLATION_STICKBOY-photoJPEG.mov" };
+
+                int constOrigin[][2] = { {70,518}, 
+                {71,159}, {458,180}, 
+                {882,716}, {190,378}, 
+                {146,238}, {46,54},
+                {382,46}, {174,44},
+                {44,86}, {36,74},
+                {264,188}, {564,450},
+                {60,50}, {220,332}, 
+                {176,58}, {120,428} };
+
+                // play constellation video, as reward, position based on first star
+                int randomConst = ofRandom(sizeof(constellations) / sizeof(constellations[0]));
+                randomConst = 7;
+
+                ofPtr<mediaElement> starVid = blobs[blobID].mediaLink; 
+                ofPoint p = blobMapToScreen(blobs[blobID].position);
+                if (starVid != NULL) p = starVid->position;
+                ofLogNotice("BLOB") << "\t" << ofGetFrameNum() << "\t" << "blobOverFreeze()\t\t" << blobID << " at " << int(p.x) << "|" << int(p.y);
+                string bonusVideo = "video/2_stars/" + constellations[randomConst];
                 fgMedia.push_back(ofPtr<mediaElement>( new videoElement(bonusVideo) ));
-                float x = offsetX + blobs[blobID].position.x * mapSiteW;
-                float y = offsetY + blobs[blobID].position.y * mapSiteH;
-                (*fgMedia[fgMedia.size()-1]).setDisplay(x, y);
+                if (p.x > projectionW/2) {      // flip video if necesssary
+                    p.x += constOrigin[randomConst][0];
+                    p.y -= constOrigin[randomConst][1];
+                    (*fgMedia[fgMedia.size()-1]).w*=-1;
+                } else {
+                    p.x -= constOrigin[randomConst][0];
+                    p.y -= constOrigin[randomConst][1];
+                }
+                (*fgMedia[fgMedia.size()-1]).setDisplay(p);
                 (*fgMedia[fgMedia.size()-1]).reset(true);
                 (*fgMedia[fgMedia.size()-1]).autoDestroy(true);
 
@@ -1019,9 +1055,7 @@ void planeApp::blobEnterStage(int & blobID) {
             fgMedia.push_back(ofPtr<mediaElement>( new videoElement("video/5_eclipse/P_" + ofToString(planedId[randomPlanet])+"-qtPNG.mov", true)));
             blobs[blobID].mediaLink = fgMedia[fgMedia.size()-1];
             blobs[blobID].videoTrace = true;
-            float x = offsetX + blobs[blobID].position.x * mapSiteW;
-            float y = offsetY + blobs[blobID].position.y *mapSiteH;
-            (*fgMedia[fgMedia.size()-1]).setDisplay(x, y, true);
+            (*fgMedia[fgMedia.size()-1]).setDisplay(blobMapToScreen(blobs[blobID].position), true);
             (*fgMedia[fgMedia.size()-1]).reset();
 
             if (segment==0 && segmentClock < alignmentTransition) {
@@ -1113,27 +1147,25 @@ void planeApp::videoFollowBlob(int & blobID) {
     if (!transition) {
         ofPtr<mediaElement> vid = blobs[blobID].mediaLink; 
         // update position
-        float bx;
-        float by;
+        ofPoint p;
         if (vid != NULL) {
 
             if (scene==4 && (segment>1 && segment<6)) {
                 // PLANETS aligned on vertical, move up down
-                by = offsetX + blobs[blobID].position.x * mapSiteW * (16.0/9.0);
-                bx = offsetX + projectionW/2.0;
+                p.y = blobMapToScreen(blobs[blobID].position).x * (16.0/9,0);
+                p.x = offsetX + projectionW/2.0;
             } else {
-                bx = offsetX + blobs[blobID].position.x * mapSiteW;
-                by = offsetY + blobs[blobID].position.y *mapSiteH;
+                p = blobMapToScreen(blobs[blobID].position);
             }
             // set position
             if (!(*vid).moveElement) {
-                (*vid).setDisplay( bx, by, true);
+                (*vid).setDisplay( p, true);
             } else {
-                (*vid).goal.set( bx, by );
+                (*vid).goal.set( p );
             }
             // set opacity
             if (scene==4 && segment==6) {
-                float d = ofDist(bx, by, projectionW/2, projectionH/2);
+                float d = ofDist(p.x, p.y, projectionW/2, projectionH/2);
                 (*vid).opMax = ((projectionW/2) - d) / (projectionW/2);
             }
         }
@@ -1151,19 +1183,18 @@ void planeApp::videoFollowBlob(int & blobID) {
             }
 
             if (bridge != NULL) {
-                float bx2 = offsetX + blobs[blob2ID].position.x * mapSiteW;
-                float by2 = offsetY + blobs[blob2ID].position.y *mapSiteH;
-                float rot = -ofRadToDeg(atan2(bx2-bx,by2-by)) + 90;
+                ofPoint p2 = blobMapToScreen(blobs[blob2ID].position);
+                float rot = -ofRadToDeg(atan2(p2.x-p.x,p2.y-p.y)) + 90;
                 float tx = bridgeX;
                 float ty = bridgeY;
                 float tz = sqrt( pow(tx,2) + pow(ty,2) );
                 float addRot = ofRadToDeg(atan2(tx,-ty));
-                float cx = bx - tz*sin(ofDegToRad(rot+addRot));
-                float cy = by + tz*cos(ofDegToRad(rot+addRot));
+                float cx = p.x - tz*sin(ofDegToRad(rot+addRot));
+                float cy = p.y + tz*cos(ofDegToRad(rot+addRot));
 
                 (*bridge).setDisplay( cx, cy, false);
                 (*bridge).bridgeUpdated = true;;
-                (*bridge).w = ofDist(bx, by, bx2, by2) + tx*2;
+                (*bridge).w = ofDist(p.x, p.y, p2.x, p2.y) + tx*2;
                 // (*bridge).h = ty*2;
                 (*bridge).rotation = rot;
                 // tcout() << "bridge udpate\t" << blobID << ":" << blob2ID << "\t" << bx << "|" << by << "  rot: " << rot << endl;
@@ -1592,10 +1623,10 @@ void planeApp::drawScreen(int x, int y, float scale){
                 if (nb->steadyDistance) {
                     // draw a line between blob and steady neighbor
                     ofNoFill(); ofSetColor(255);
-                    float p1x = x + (offsetX + b->position.x * mapSiteW) * scale;
-                    float p1y = y + (offsetY + b->position.y * mapSiteH) * scale;
-                    float p2x = x + (offsetX + blobs[nb->id].position.x * mapSiteW) * scale;
-                    float p2y = y + (offsetY + blobs[nb->id].position.y * mapSiteH) * scale;
+                    float p1x = x + blobMapToScreen(b->position).x * scale;
+                    float p1y = y + blobMapToScreen(b->position).y * scale;
+                    float p2x = x + blobMapToScreen(blobs[nb->id].position).x * scale;
+                    float p2y = y + blobMapToScreen(blobs[nb->id].position).y * scale;
 
                     float rot = -ofRadToDeg(atan2(p2x-p1x,p2y-p1y)) + 90;
                     float tx = bridgeX;
@@ -1922,7 +1953,7 @@ bool planeApp::allBlobsAlignedWith(ofPoint &p) {
     for(std::map<int, Blob>::iterator it = blobs.begin(); it != blobs.end(); ++it){
         Blob* b = &it->second;
         if (b->onStage) {
-            float x = offsetX + b->position.x * mapSiteW;
+            float x = blobMapToScreen(b->position).x;
             // float y = offsetY + b->position.y * mapSiteH;
             float d = ofDist(x, 0, p.x, 0);
             if (d > alignmentMaxDist) {
@@ -1933,6 +1964,17 @@ bool planeApp::allBlobsAlignedWith(ofPoint &p) {
     }
     return allAligned;
 }
+
+
+ofPoint planeApp::blobMapToScreen(ofPoint &o) {
+    ofPoint p;
+    p.x = offsetX + o.x * mapSiteW;
+    p.y = offsetY + o.y * mapSiteH;
+    return p;
+}
+
+
+
 
 void planeApp::configureBlobserver() {
 

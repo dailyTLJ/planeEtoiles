@@ -208,9 +208,19 @@ void mediaElement::setDisplay(int x, int y) {
     this->setDisplay(x, y, 1.0f);
 }
 
+void mediaElement::setDisplay(ofPoint p) {
+    this->setDisplay(p.x, p.y, 1.0f);
+}
+
 void mediaElement::setDisplay(int x, int y, bool _centered) {
     this->scale = 1.0f;
     this->setDisplay(x, y, 1.0f);
+    this->centered = _centered;
+}
+
+void mediaElement::setDisplay(ofPoint p, bool _centered) {
+    this->scale = 1.0f;
+    this->setDisplay(p.x, p.y, 1.0f);
     this->centered = _centered;
 }
 

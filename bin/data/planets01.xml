@@ -21,7 +21,7 @@
 	<Distance_StdDev_Thresh>10</Distance_StdDev_Thresh>
 	<Freeze_MinVel>0.602041</Freeze_MinVel>
 		<Freeze_MinTime>1</Freeze_MinTime>
-		<Freeze_MaxTime>14</Freeze_MaxTime>
+		<Freeze_MaxTime>3</Freeze_MaxTime>
 		<Dist_StdDev>20</Dist_StdDev>
 		<Movement_Thr>0.1</Movement_Thr>
 		<NewStar_Max>30</NewStar_Max>
@@ -59,9 +59,9 @@
 		<Map_Site_to_Viz_Width>2</Map_Site_to_Viz_Width>
 		<Map_Site_to_Viz_Height>2</Map_Site_to_Viz_Height>
 		<Offset_X>0</Offset_X>
-		<Offset_Y>0</Offset_Y>
+		<Offset_Y>500</Offset_Y>
 	<Map_Width>2.02041</Map_Width>
-		<Map_Height>3.73469</Map_Height>
-	<Stage_Radius>201</Stage_Radius>
+		<Map_Height>2.04082</Map_Height>
+	<Stage_Radius>313</Stage_Radius>
 	</Dimension>
 </HUMANS_AND_PLANETS>
