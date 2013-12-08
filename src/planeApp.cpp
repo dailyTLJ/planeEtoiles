@@ -31,7 +31,7 @@ void planeApp::setup(){
     ofSetLogLevel("TRANSITION", OF_LOG_WARNING);
     ofSetLogLevel("OSC", OF_LOG_WARNING);
     ofSetLogLevel("interaction", OF_LOG_WARNING);
-    ofSetLogLevel("videoElement", OF_LOG_WARNING);
+    ofSetLogLevel("videoElement", OF_LOG_VERBOSE);
     ofSetLogLevel("mediaElement", OF_LOG_WARNING);
 
 	ofTrueTypeFont::setGlobalDpi(72);
@@ -454,6 +454,13 @@ void planeApp::update(){
                 }
             }
             hogAvVel = (blobsOnStage>0) ? totalVel/blobsOnStage : 0;
+
+            it = blobs.begin();
+            while (it != blobs.end()) {
+                Blob* b = &it->second;
+                b->updateVideo();
+                it++;
+            }
         }
 
         // SCHEDULING
@@ -812,7 +819,7 @@ void planeApp::blobSteady(Pair & pair) {
                 string videoFile = "video/2_stars/STAR_"+ofToString((*vid1).id)+"-glow-photoJPEG.mov";
                 if ((*vid1).file != videoFile) {
                     ofLogNotice("BLOB") << "\t" << ofGetFrameNum() << "\t" << "blob " << pair.blob1 << " \t\tsparklier";
-                    (*vid1).loadMovie("video/2_stars/STAR_"+ofToString((*vid1).id)+"-glow-photoJPEG.mov");
+                    (*vid1).loadMovie(videoFile);
                     (*vid1).reset();
                 }
             }
@@ -820,7 +827,7 @@ void planeApp::blobSteady(Pair & pair) {
                 string videoFile = "video/2_stars/STAR_"+ofToString((*vid2).id)+"-glow-photoJPEG.mov";
                 if ((*vid2).file != videoFile) {
                     ofLogNotice("BLOB") << "\t" << ofGetFrameNum() << "\t" << "blob " << pair.blob2 << " \t\ttsparklier";
-                    (*vid2).loadMovie("video/2_stars/STAR_"+ofToString((*vid2).id)+"-glow-photoJPEG.mov");
+                    (*vid2).loadMovie(videoFile);
                     (*vid2).reset();
                 }
             }
@@ -878,14 +885,14 @@ void planeApp::blobBreakSteady(Pair & pair) {
         ofPtr<mediaElement> vid2 = blobs[pair.blob2].mediaLink;
 
         // replace video with normal star
-        if (vid1 != NULL) {
+        if (vid1 != NULL && !blobs[pair.blob1].steadyRewarded) {
             string videoFile = "video/2_stars/STAR_" + ofToString((*vid1).id)+"-loop-photoJPEG.mov";
             if ((*vid1).file != videoFile) {
                 (*vid1).loadMovie("video/2_stars/STAR_" + ofToString((*vid1).id)+"-loop-photoJPEG.mov");
                 (*vid1).reset();
             }
         }
-        if (vid2 != NULL) {
+        if (vid2 != NULL && !blobs[pair.blob2].steadyRewarded) {
             string videoFile = "video/2_stars/STAR_" + ofToString((*vid2).id)+"-loop-photoJPEG.mov";
             if ((*vid2).file != videoFile) {
                 (*vid2).loadMovie("video/2_stars/STAR_" + ofToString((*vid2).id)+"-loop-photoJPEG.mov");
@@ -1144,7 +1151,7 @@ void planeApp::positionRevolutions() {
 
 void planeApp::videoFollowBlob(int & blobID) {
     // find videoElement
-    if (!transition) {
+    if (!transition && blobs[blobID].onStage) {
         ofPtr<mediaElement> vid = blobs[blobID].mediaLink; 
         // update position
         ofPoint p;
@@ -1181,8 +1188,11 @@ void planeApp::videoFollowBlob(int & blobID) {
                     break;
                 }
             }
+            // update only if both blobs still exist!
+            std::map<int,Blob>::iterator iter1 = blobs.find(blobID);
+            std::map<int,Blob>::iterator iter2 = blobs.find(blob2ID);
 
-            if (bridge != NULL) {
+            if (bridge != NULL && iter1 != blobs.end() && iter2 != blobs.end() ) {
                 ofPoint p2 = blobMapToScreen(blobs[blob2ID].position);
                 float rot = -ofRadToDeg(atan2(p2.x-p.x,p2.y-p.y)) + 90;
                 float tx = bridgeX;
@@ -1223,8 +1233,14 @@ void planeApp::blobUnlink(int & blobID) {
     // delete bridge video if it exists
     for (vector<ofPtr<mediaElement> >::iterator it = fgMedia.begin(); it != fgMedia.end(); it++) {
         if ((**it).bridgeVideo && ((**it).bridgeBlobID[0]==blobID || (**it).bridgeBlobID[1]==blobID)) {
-            ofLogNotice("BLOB")  << "\t\t\tunlinked bridge\t" << (**it).bridgeBlobID[0] << " " << (**it).bridgeBlobID[1];
-            (**it).dead = true;
+            
+            string videoFile = "video/2_stars/LINK_01-outro-photoJPEG.mov";
+            if ((**it).file != videoFile) {
+                ofLogNotice("BLOB")  << "\t\t\tunlinked bridge\t" << (**it).bridgeBlobID[0] << " " << (**it).bridgeBlobID[1];
+                (**it).loadMovie("video/2_stars/LINK_01-outro-photoJPEG.mov");
+                (**it).reset(true);
+                (**it).autoDestroy(true);
+            }
         }
     }
 }

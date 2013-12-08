@@ -129,6 +129,7 @@ void Blob::analyzeNeighbors(std::map<int, ofPoint> neighborLocation, float distS
         n->updated = false;
     }
 
+    vector<Pair> breakMe;
     // update with new location data
     for(std::map<int, ofPoint>::iterator it = neighborLocation.begin(); it != neighborLocation.end(); ++it){
         int nid = it->first;
@@ -171,8 +172,7 @@ void Blob::analyzeNeighbors(std::map<int, ofPoint> neighborLocation, float distS
                     n->steadyDistance = false;
                     n->steadyTimer = 0;
                     n->steadyRewarded = false;
-                    ofNotifyEvent(onBreakSteady, pair, this);
-                    steadyRewarded = false;     // this needs to come after the notifyEvent!
+                    breakMe.push_back(pair);
                 }
             }
 
@@ -180,6 +180,20 @@ void Blob::analyzeNeighbors(std::map<int, ofPoint> neighborLocation, float distS
         }
     }
 
+    // set the blobs global steadyRewarded var, based on steadyRewarded-info from all neighbors
+    bool stillSteady = false;
+    for(std::map<int, Neighbor>::iterator it = neighbors.begin(); it != neighbors.end(); ++it){
+        Neighbor* n = &it->second;
+        if (n->steadyRewarded) stillSteady = true;
+    }
+    if (!stillSteady && steadyRewarded) {
+        steadyRewarded = false;     // this needs to come after the notifyEvent!
+    }
+
+    // now trigger breaksteady, because its knows if to switch the star video as well
+    for(vector<Pair>::iterator it = breakMe.begin(); it != breakMe.end(); ++it){
+        ofNotifyEvent(onBreakSteady, (*it), this);
+    }
 
     // delete not updated neighbors, because they are gone!
     std::map<int,Neighbor>::iterator it = neighbors.begin();
@@ -216,9 +230,7 @@ ofPoint Blob::transformPerspective(ofPoint& v){
 void Blob::update(int minLostTime){
 	if(this->updated == false) {
 		this->lifetime--;
-		return;
-	} else {
-        if (videoTrace) ofNotifyEvent(updatePosition, this->id, this);
+		return; 
     }
     this->lifetime = this->maxLifetime;
 	this->updated = false;
@@ -231,6 +243,10 @@ void Blob::update(int minLostTime){
     } else {
         lost = false;
     }
+}
+
+void Blob::updateVideo() {
+    if (isAlive() && videoTrace) ofNotifyEvent(updatePosition, this->id, this);
 }
 
 //--------------------------------------------------------------

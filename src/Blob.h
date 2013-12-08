@@ -155,6 +155,7 @@ class Blob {
         void analyzeNeighbors(std::map<int, ofPoint> neighborLocation, float distStdDevThr, int steadyReward);
         ofPoint transformPerspective(ofPoint& v);
         void update(int minLostTime);
+        void updateVideo();
         bool isAlive();
 
         cv::Mat* perspectiveMat;
