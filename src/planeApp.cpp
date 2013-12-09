@@ -37,9 +37,10 @@ void planeApp::setup(){
 
 	ofTrueTypeFont::setGlobalDpi(72);
 
-    fontBg.loadFont("Mercury Bold.otf", 36, true, true);
-    fontBg.setLineHeight(30.0f);
-    fontBg.setLetterSpacing(1.037);
+    // fontBg.loadFont("Mercury Bold.otf", 36, true, true);
+    fontBg.loadFont("CircularStd-Book.otf", 80, true, true);
+    fontBg.setLineHeight(80.0f);
+    // fontBg.setLetterSpacing(1.037);
 
     fontSm.loadFont("Mercury Bold.otf", 20, true, true);
 	fontSm.setLineHeight(16.0f);
@@ -1000,7 +1001,6 @@ void planeApp::blobOverFreeze(int & blobID) {
 
                 // play constellation video, as reward, position based on first star
                 int randomConst = ofRandom(sizeof(constellations) / sizeof(constellations[0]));
-                randomConst = 7;
 
                 ofPtr<mediaElement> starVid = blobs[blobID].mediaLink; 
                 ofPoint p = blobMapToScreen(blobs[blobID].position);
