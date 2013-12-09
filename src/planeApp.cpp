@@ -28,11 +28,12 @@ void planeApp::setup(){
     // ofLogFatalError()
 
     ofSetLogLevel("BLOB", OF_LOG_VERBOSE);
-    ofSetLogLevel("TRANSITION", OF_LOG_VERBOSE);
-    ofSetLogLevel("OSC", OF_LOG_VERBOSE);
-    ofSetLogLevel("interaction", OF_LOG_VERBOSE);
-    ofSetLogLevel("videoElement", OF_LOG_VERBOSE);
-    ofSetLogLevel("mediaElement", OF_LOG_VERBOSE);
+    ofSetLogLevel("BRIDGE", OF_LOG_WARNING);
+    ofSetLogLevel("TRANSITION", OF_LOG_WARNING);
+    ofSetLogLevel("OSC", OF_LOG_WARNING);
+    ofSetLogLevel("interaction", OF_LOG_WARNING);
+    ofSetLogLevel("videoElement", OF_LOG_WARNING);
+    ofSetLogLevel("mediaElement", OF_LOG_WARNING);
 
 	ofTrueTypeFont::setGlobalDpi(72);
 
@@ -645,19 +646,19 @@ void planeApp::update(){
                 std::map<int,Blob>::iterator iter1 = blobs.find(blob1);
                 if( iter1 == blobs.end() ) {     
                     // blob instance doesnt exist
-                    ofLogError("BLOB") << "\t" << ofGetFrameNum() << "\t" << "DEAD BRIDGE blob 1: " << blob1 << "-" << blob2;
+                    ofLogVerbose("BRIDGE") << "\t" << ofGetFrameNum() << "\t" << "DEAD BRIDGE blob 1: " << blob1 << "-" << blob2;
                 } else {
                     if (blobs[blob1].position.x == 0) {
-                        ofLogError("BLOB") << "\t" << ofGetFrameNum() << "\t" << "BRIDGE BLOB AT 0 X -  blob 1: " << blob1 << "-" << blob2;
+                        ofLogVerbose("BRIDGE") << "\t" << ofGetFrameNum() << "\t" << "BRIDGE BLOB AT 0 X -  blob 1: " << blob1 << "-" << blob2;
                     }
                 }
                 std::map<int,Blob>::iterator iter2 = blobs.find(blob2);
                 if( iter2 == blobs.end() ) {     
                     // blob instance doesnt exist
-                    ofLogError("BLOB") << "\t" << ofGetFrameNum() << "\t" << "DEAD BRIDGE blob 2: " << blob1 << "-" << blob2;
+                    ofLogVerbose("BRIDGE") << "\t" << ofGetFrameNum() << "\t" << "DEAD BRIDGE blob 2: " << blob1 << "-" << blob2;
                 } else {
                     if (blobs[blob2].position.x == 0) {
-                        ofLogError("BLOB") << "\t" << ofGetFrameNum() << "\t" << "BRIDGE BLOB AT 0 X -  blob 2: " << blob1 << "-" << blob2;
+                        ofLogVerbose("BRIDGE") << "\t" << ofGetFrameNum() << "\t" << "BRIDGE BLOB AT 0 X -  blob 2: " << blob1 << "-" << blob2;
                     }
                 }
             }
@@ -829,7 +830,7 @@ void planeApp::blobSteady(Pair & pair) {
             if (vid1 != NULL) {
                 string videoFile = "video/2_stars/STAR_"+ofToString((*vid1).id)+"-glow-photoJPEG.mov";
                 if ((*vid1).file != videoFile) {
-                    ofLogNotice("BLOB") << "\t" << ofGetFrameNum() << "\t" << "blob " << pair.blob1 << " \t\tsparklier";
+                    ofLogNotice("BLOB") << "\t" << ofGetFrameNum() << "\t\t\t" << "make blob " << pair.blob1 << " sparklier";
                     (*vid1).loadMovie(videoFile);
                     (*vid1).reset();
                 }
@@ -837,7 +838,7 @@ void planeApp::blobSteady(Pair & pair) {
             if (vid2 != NULL) {
                 string videoFile = "video/2_stars/STAR_"+ofToString((*vid2).id)+"-glow-photoJPEG.mov";
                 if ((*vid2).file != videoFile) {
-                    ofLogNotice("BLOB") << "\t" << ofGetFrameNum() << "\t" << "blob " << pair.blob2 << " \t\ttsparklier";
+                    ofLogNotice("BLOB") << "\t" << ofGetFrameNum() << "\t\t\t" << "make blob " << pair.blob2 << " sparklier";
                     (*vid2).loadMovie(videoFile);
                     (*vid2).reset();
                 }
@@ -855,14 +856,14 @@ void planeApp::blobSteady(Pair & pair) {
             }
 
             if (!exists) {
-                ofLogNotice("BLOB") << "\t" << ofGetFrameNum() << "\t" << "\t\tadd video bridge";
+                ofLogNotice("BLOB") << "\t" << ofGetFrameNum()  << "\t\t\t" << "add video bridge";
                 string newVideoName = "video/2_stars/LINK_01-loop-photoJPEG.mov";
                 fgMedia.push_back(ofPtr<mediaElement>( new videoElement(newVideoName)));
                 (*fgMedia[fgMedia.size()-1]).reset();
                 (*fgMedia[fgMedia.size()-1]).bridge(b1->id, b2->id);
                 ofNotifyEvent( blobs[pair.blob1].updatePosition, pair.blob1, &blobs[pair.blob1] );
             } else {
-                ofLogNotice("BLOB") << "\t" << ofGetFrameNum() << "\t" << "\t\tbridge already exists";
+                ofLogNotice("BLOB") << "\t" << ofGetFrameNum()  << "\t\t\t" << "bridge already exists";
             }
         }
     }
@@ -910,22 +911,8 @@ void planeApp::blobBreakSteady(Pair & pair) {
                 (*vid2).reset();
             }
         }
-        // delete bridge video if it exists
-        bool found = false;
-        for (vector<ofPtr<mediaElement> >::iterator it = fgMedia.begin(); it != fgMedia.end(); it++) {
-            if ((**it).bridgeVideo && (**it).bridgeBlobID[0]==pair.blob1 && (**it).bridgeBlobID[1]==pair.blob2) {
-                string videoFile = "video/2_stars/LINK_01-outro-photoJPEG.mov";
-                if ((**it).file != videoFile) {
-                    ofLogNotice("BLOB") << "\t" << ofGetFrameNum() << "\t" << "\t\t\tunlinked bridge";
-                    // (**it).dead = true;
-                    found = true;
-                    (**it).loadMovie("video/2_stars/LINK_01-outro-photoJPEG.mov");
-                    (**it).reset(true);
-                    (**it).autoDestroy(true);
-                }
-            }
-        }
-        if (!found) ofLogNotice("BLOB") << "\t" << ofGetFrameNum() << "\t" << "\t\t\tbridge not found";
+
+        bridgeUnlink(pair);
 
     }
 }
@@ -1196,29 +1183,39 @@ void planeApp::videoFollowBlob(int & blobID) {
                 if ((**it).bridgeVideo && !(**it).bridgeUpdated && ((**it).bridgeBlobID[0]==blobID || (**it).bridgeBlobID[1]==blobID)) {
                     bridge = (*it);
                     blob2ID = (**it).bridgeBlobID[0]==blobID ? (**it).bridgeBlobID[1] : (**it).bridgeBlobID[0];
-                    break;
+                    
+                    // update only if both blobs still exist!
+                    std::map<int,Blob>::iterator iter1 = blobs.find(blobID);
+                    std::map<int,Blob>::iterator iter2 = blobs.find(blob2ID);
+
+                    // update only if bridge is not in self-destroy mode already
+                    if (bridge != NULL && iter1 != blobs.end() && iter2 != blobs.end() && !(**it).selfdestroy) {
+                        ofPoint p2 = blobMapToScreen(blobs[blob2ID].position);
+                        float rot = -ofRadToDeg(atan2(p2.x-p.x,p2.y-p.y)) + 90;
+                        float tx = bridgeX;
+                        float ty = bridgeY;
+                        float tz = sqrt( pow(tx,2) + pow(ty,2) );
+                        float addRot = ofRadToDeg(atan2(tx,-ty));
+                        float cx = p.x - tz*sin(ofDegToRad(rot+addRot));
+                        float cy = p.y + tz*cos(ofDegToRad(rot+addRot));
+
+                        (*bridge).setDisplay( cx, cy, false);
+                        (*bridge).bridgeUpdated = true;;
+                        (*bridge).w = ofDist(p.x, p.y, p2.x, p2.y) + tx*2;
+                        (*bridge).rotation = rot;
+                        ofLogVerbose("BRIDGE") << "\t" << ofGetFrameNum() << "\t" << "update bridge position " << blobID << "-" << blob2ID << "  to " << p.x << "|" << p.y << " w: "<< (*bridge).w;
+                    } else {
+                        if (bridge == NULL) {
+                            ofLogVerbose("BRIDGE") << "\t" << ofGetFrameNum() << "\t" << "can't update bridge position, bridge==NULL " << blobID << "-" << blob2ID;
+                        } else if (iter1 == blobs.end()) {
+                            ofLogVerbose("BRIDGE") << "\t" << ofGetFrameNum() << "\t" << "can't update bridge position, iter1 doesn't exist " << blobID << "-" << blob2ID;
+                        } else if (iter2 == blobs.end()) {
+                            ofLogVerbose("BRIDGE") << "\t" << ofGetFrameNum() << "\t" << "can't update bridge position, iter2 doesn't exist " << blobID << "-" << blob2ID;
+                        } else if ((**it).selfdestroy) {
+                            ofLogVerbose("BRIDGE") << "\t" << ofGetFrameNum() << "\t" << "can't update bridge position, already selfdestroy " << blobID << "-" << blob2ID;
+                        }
+                    }
                 }
-            }
-            // update only if both blobs still exist!
-            std::map<int,Blob>::iterator iter1 = blobs.find(blobID);
-            std::map<int,Blob>::iterator iter2 = blobs.find(blob2ID);
-
-            if (bridge != NULL && iter1 != blobs.end() && iter2 != blobs.end() ) {
-                ofPoint p2 = blobMapToScreen(blobs[blob2ID].position);
-                float rot = -ofRadToDeg(atan2(p2.x-p.x,p2.y-p.y)) + 90;
-                float tx = bridgeX;
-                float ty = bridgeY;
-                float tz = sqrt( pow(tx,2) + pow(ty,2) );
-                float addRot = ofRadToDeg(atan2(tx,-ty));
-                float cx = p.x - tz*sin(ofDegToRad(rot+addRot));
-                float cy = p.y + tz*cos(ofDegToRad(rot+addRot));
-
-                (*bridge).setDisplay( cx, cy, false);
-                (*bridge).bridgeUpdated = true;;
-                (*bridge).w = ofDist(p.x, p.y, p2.x, p2.y) + tx*2;
-                // (*bridge).h = ty*2;
-                (*bridge).rotation = rot;
-                // tcout() << "bridge udpate\t" << blobID << ":" << blob2ID << "\t" << bx << "|" << by << "  rot: " << rot << endl;
             }
         }
     }
@@ -1244,20 +1241,38 @@ void planeApp::blobUnlink(int & blobID) {
         }
     }
 
-    // delete bridge video if it exists
+    bridgeUnlink(blobID);
+}
+
+void planeApp::bridgeUnlink(int & blobID) {
+    // find bridges for blobID, and send them to be unlinked
     for (vector<ofPtr<mediaElement> >::iterator it = fgMedia.begin(); it != fgMedia.end(); it++) {
         if ((**it).bridgeVideo && ((**it).bridgeBlobID[0]==blobID || (**it).bridgeBlobID[1]==blobID)) {
-            
+            Pair pair = Pair( min((**it).bridgeBlobID[0],(**it).bridgeBlobID[1]), max((**it).bridgeBlobID[0],(**it).bridgeBlobID[1]) );
+            bridgeUnlink(pair);
+        }
+    }
+}
+
+void planeApp::bridgeUnlink(Pair & pair) {
+    // delete bridge video if it exists
+    bool found = false;
+    for (vector<ofPtr<mediaElement> >::iterator it = fgMedia.begin(); it != fgMedia.end(); it++) {
+        if ((**it).bridgeVideo && (**it).bridgeBlobID[0]==pair.blob1 && (**it).bridgeBlobID[1]==pair.blob2) {
             string videoFile = "video/2_stars/LINK_01-outro-photoJPEG.mov";
             if ((**it).file != videoFile) {
-                ofLogNotice("BLOB") << "\t" << ofGetFrameNum() << "\tunlinked bridge\t" << (**it).bridgeBlobID[0] << " " << (**it).bridgeBlobID[1];
+                ofLogNotice("BRIDGE") << "\t" << ofGetFrameNum() << "\tunlinked bridge\t" << (**it).bridgeBlobID[0] << " " << (**it).bridgeBlobID[1];
+                int oldW = (**it).w;
+                int oldH = (**it).h;
                 (**it).loadMovie("video/2_stars/LINK_01-outro-photoJPEG.mov");
+                (**it).w = oldW;
+                (**it).h = oldH;
                 (**it).reset(true);
                 (**it).autoDestroy(true);
             }
         }
     }
-
+    if (!found) ofLogNotice("BRIDGE") << "\t" << ofGetFrameNum() << "\t" << "\t\t\tbridge not found";
 }
 
 void planeApp::beginSegment() {

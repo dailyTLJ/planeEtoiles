@@ -266,8 +266,8 @@ void Blob::updateVideo() {
 bool Blob::isAlive(){
 	if(this->lifetime > 0) {
         if (position.x == 0 && position.y == 0) {
-            ofLogNotice("BLOB") << "\t" << ofGetFrameNum() << "\t" << "isAlive() - position 0|0";
-            return false;
+            ofLogNotice("BLOB") << "\t" << ofGetFrameNum() << "\t" << this->id << " isAlive() - position 0|0";
+            // return false;
         }
 		return true;
 	} else {

@@ -57,6 +57,8 @@ class planeApp : public ofBaseApp{
 		void blobUnFreeze(int & blobID);
 		void blobOverFreeze(int & blobID);
 		void blobUnlink(int & blobID);
+		void bridgeUnlink(int & blobID);
+		void bridgeUnlink(Pair & pair);
 		void blobSteady(Pair & pair);
 		void blobSteadyReward(Pair & pair);
 		void blobBreakSteady(Pair & pair);
