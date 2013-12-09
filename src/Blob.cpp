@@ -38,12 +38,12 @@ void Blob::follow(float x, float y, float frameW, float frameH, float stageRadiu
     // } else this->onEdge = false;
 
     // average Y position
-    int y_mean_max = max(y_mean, MAX_HISTORY);
-    float sum = _rawPos.y;
-    for (int i=0; i<y_mean_max-1; i++) {
-        sum += history[history.size()-1-i].point.y;
+    int y_mean_min = min(y_mean, int(rawHistory.size()));
+    float sum = y;
+    for (int i=0; i<y_mean_min-1; i++) {
+        sum += rawHistory[rawHistory.size()-1-i].point.y;
     }
-    float avgY = sum / (float) y_mean_max;
+    float avgY = sum / (float) y_mean_min;
     ofPoint avgP;
     avgP.set(_rawPos.x, avgY);
 
@@ -266,7 +266,7 @@ void Blob::updateVideo() {
 bool Blob::isAlive(){
 	if(this->lifetime > 0) {
         if (position.x == 0 && position.y == 0) {
-            ofLogNotice("BLOB") << "\t\t" << ofGetFrameNum() << "\t" << "isAlive() - position 0|0";
+            ofLogNotice("BLOB") << "\t" << ofGetFrameNum() << "\t" << "isAlive() - position 0|0";
             return false;
         }
 		return true;

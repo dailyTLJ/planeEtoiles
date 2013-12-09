@@ -31,7 +31,7 @@ void videoElement::loadMovie(string filename) {
     // movie = ofPtr<ofVideoPlayer>();
     // ofLogNotice("videoElement") << ofGetFrameNum() << "\t" << "new pointer\t'" << file << "'";
     // movie = ofPtr<ofVideoPlayer>( new ofVideoPlayer() );
-    ofLogNotice("videoElement") << "\t" << ofGetFrameNum() << "\t" << "loadMovie\t'" << file << "'";
+    ofLogNotice("videoElement") << ofGetFrameNum() << "\t" << "loadMovie\t'" << file << "'";
     movie->loadMovie(filename);
     this->w = movie->getWidth();
     this->h = movie->getHeight();

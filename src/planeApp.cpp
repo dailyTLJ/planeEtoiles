@@ -28,11 +28,11 @@ void planeApp::setup(){
     // ofLogFatalError()
 
     ofSetLogLevel("BLOB", OF_LOG_VERBOSE);
-    ofSetLogLevel("TRANSITION", OF_LOG_WARNING);
-    ofSetLogLevel("OSC", OF_LOG_WARNING);
-    ofSetLogLevel("interaction", OF_LOG_WARNING);
+    ofSetLogLevel("TRANSITION", OF_LOG_VERBOSE);
+    ofSetLogLevel("OSC", OF_LOG_VERBOSE);
+    ofSetLogLevel("interaction", OF_LOG_VERBOSE);
     ofSetLogLevel("videoElement", OF_LOG_VERBOSE);
-    ofSetLogLevel("mediaElement", OF_LOG_WARNING);
+    ofSetLogLevel("mediaElement", OF_LOG_VERBOSE);
 
 	ofTrueTypeFont::setGlobalDpi(72);
 
@@ -165,6 +165,13 @@ void planeApp::setup(){
     receiver.setup(MYPORT);
 	ofLogNotice("OSC") << "\t\t" << ofGetFrameNum() << "\t" << "sending osc messages to " << BLOBSERVERIP << " on port " << BLOBPORT;
     sender.setup( BLOBSERVERIP, BLOBPORT );
+
+
+    // clear receiver
+    while(receiver.hasWaitingMessages()){
+        ofxOscMessage m;
+        receiver.getNextMessage(&m);
+    }
 
     sendOscMsg("signIn", MYIP, MYPORT);
 
@@ -1518,7 +1525,7 @@ void planeApp::receiveOsc(){
                 // create new blob instance
                 newBlob = true;
 				blobs[blobid].id = blobid;
-                ofLogNotice("BLOB") << "\t" << ofGetFrameNum() << "\t" << "New Blob\t" << blobid;
+                ofLogNotice("BLOB") << "\t" << ofGetFrameNum() << "\t" << "receiveOsc()\tNew Blob\t" << blobid;
                 blobs[blobid].perspectiveMat = &this->perspectiveMat;
                 // add Events, so blobs can report back to planeApp
                 ofAddListener( blobs[blobid].onLost, this, &planeApp::blobOnLost );
@@ -1600,8 +1607,10 @@ void planeApp::draw(){
         gui.draw();
 
         // MAIN VISUALS SCREEN
-        if (testMode) this->drawTopDown(1440, 0, 1, drawBlobDetail);
-        else this->drawScreen(1440, 0, 1);
+        if (testMode) {
+            this->drawRawData(1490, 50, 2);
+            this->drawTopDown(1490, 850, 2, drawBlobDetail);
+        } else this->drawScreen(1440, 0, 1);
 
         ofFill(); ofSetColor(255);
         ofDrawBitmapString(ofToString(ofGetFrameRate()), 10, 10);
@@ -1933,7 +1942,9 @@ void planeApp::drawTopDown(int x, int y, float scale, bool detailed) {
         Blob* b = &it->second;
         ofBeginShape();
         for (vector<TimedPoint>::iterator it = b->history.begin() ; it != b->history.end(); ++it) {
-            ofVertex( x + (*it).point.x*scale, y + (*it).point.y*scale );
+            if ((*it).point.x > 0 && (*it).point.y > 0) {
+                ofVertex( x + (*it).point.x*scale, y + (*it).point.y*scale );
+            }
         }
         ofEndShape();
     }
@@ -2163,6 +2174,9 @@ void planeApp::keyReleased(int key){
     }
     if (key == ' ') {
         autoplay = !autoplay;
+    }
+    if (key == 't') {
+        testMode = !testMode;
     }
     if(key == 's') {
 		gui.saveToFile("planets01.xml");
