@@ -115,8 +115,8 @@ class planeApp : public ofBaseApp{
 		ofPoint steles[8];
 		ofPoint steles_topdown[8];
 
-		bool fullscreen;	
-
+		bool fullscreen;
+		
 		// SEQUENCING	 
 		bool processing;
 		bool oscMsgReceived;
@@ -125,6 +125,7 @@ class planeApp : public ofBaseApp{
 		int oscLastMsgTimer;
 		int oscLastMsgTimerMax;
         ofxToggle autoplay; 			 // advance to next segment by itself
+        ofxToggle testMode; 
 		int scene;
 		int segment;
 		int segmentChange;
@@ -194,6 +195,7 @@ class planeApp : public ofBaseApp{
 		ofParameter<int> offsetX;
 		ofParameter<int> offsetY;
 		ofParameter<int> stageRadius;
+		ofParameter<int> y_mean;
 
 		ofParameter<int> newStarMax;
 		// ofParameter<int> newStarBonus;

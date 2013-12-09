@@ -29,7 +29,7 @@ void Blob::init(){
 }
 
 //--------------------------------------------------------------
-void Blob::follow(float x, float y, float frameW, float frameH, float stageRadius){
+void Blob::follow(float x, float y, float frameW, float frameH, float stageRadius, int y_mean){
     this->_rawPos.set(x, y);
 
     // on Edge?
@@ -37,7 +37,18 @@ void Blob::follow(float x, float y, float frameW, float frameH, float stageRadiu
     //     this->onEdge = true;
     // } else this->onEdge = false;
 
-    this->position = transformPerspective(this->_rawPos);
+    // average Y position
+    int y_mean_max = max(y_mean, MAX_HISTORY);
+    float sum = _rawPos.y;
+    for (int i=0; i<y_mean_max-1; i++) {
+        sum += history[history.size()-1-i].point.y;
+    }
+    float avgY = sum / (float) y_mean_max;
+    ofPoint avgP;
+    avgP.set(_rawPos.x, avgY);
+
+    this->position = transformPerspective(avgP);
+    // this->position = transformPerspective(this->_rawPos);
 
     // on Stage?
     bool tmp = false;
@@ -79,38 +90,39 @@ void Blob::setVelocity(float dx, float dy){
 
 //--------------------------------------------------------------
 void Blob::analyze(float freezeMaxVel, float freezeMinTime, float freezeMaxTime, float movingThr) {
-    if(this->vel < freezeMaxVel) {
-        if(!frozen) {
-            frozen = true;
-            frozenStart = ofGetUnixTime();
-            frozenTimer = 0;
-        } else {
-            frozenTimer = ofGetUnixTime() - frozenStart;
-            if (frozenTimer >= freezeMinTime && !properFreeze && !lost) {
-                properFreeze = true;
-                ofNotifyEvent(onFreeze,this->id,this);
-            }
-            if (frozenTimer >= freezeMaxTime && !overFrozen && !lost) {
-                overFrozen = true;
-                ofNotifyEvent(overFreeze, this->id, this);
-            }
-        }
-    } else {
-        if(frozen) {
-            frozen = false;
-            frozenTimer = 0;
-        }
-        if(properFreeze) {
-            properFreeze = false;
-            ofNotifyEvent(unFreeze,this->id,this);
-        }
-        if(overFrozen) {
-            overFrozen = false;
-        }
-    }
-
-    // compute mean of velocity history
+    // only analyse freeze state, once the blob is old enough
     if(this->velHistory.size() >= VELOCITY_HISTORY ) {
+
+        if(this->vel < freezeMaxVel) {
+            if(!frozen) {
+                frozen = true;
+                frozenStart = ofGetUnixTime();
+                frozenTimer = 0;
+            } else {
+                frozenTimer = ofGetUnixTime() - frozenStart;
+                if (frozenTimer >= freezeMinTime && !properFreeze && !lost) {
+                    properFreeze = true;
+                    ofNotifyEvent(onFreeze,this->id,this);
+                } else if (frozenTimer >= freezeMaxTime && !overFrozen && !lost) {
+                    overFrozen = true;
+                    ofNotifyEvent(overFreeze, this->id, this);
+                }
+            }
+        } else {
+            if(frozen) {
+                frozen = false;
+                frozenTimer = 0;
+            }
+            if(properFreeze) {
+                properFreeze = false;
+                ofNotifyEvent(unFreeze,this->id,this);
+            }
+            if(overFrozen) {
+                overFrozen = false;
+            }
+        }
+
+        // compute mean of velocity history
         float sum = 0;
         for (std::vector<float>::iterator it = this->velHistory.begin(); it != this->velHistory.end(); ++it) {
             sum += *it;
@@ -129,8 +141,9 @@ void Blob::analyzeNeighbors(std::map<int, ofPoint> neighborLocation, float distS
         n->updated = false;
     }
 
-    vector<Pair> breakMe;
-    // update with new location data
+    vector<Pair> breakMe;   // store the neighbor-connections that are broken, to trigger them later
+
+    // update neighbors with new location data
     for(std::map<int, ofPoint>::iterator it = neighborLocation.begin(); it != neighborLocation.end(); ++it){
         int nid = it->first;
         if(nid != this-> id) {
@@ -161,6 +174,8 @@ void Blob::analyzeNeighbors(std::map<int, ofPoint> neighborLocation, float distS
                     ofNotifyEvent(onSteady,pair,this);
                 } else {
                     n->steadyTimer = ofGetUnixTime() - n->steadyStart;
+
+                    // STEADY DISTANCE REWARD
                     // if (n->steadyTimer >= steadyReward && !n->steadyRewarded) {
                     //     n->steadyRewarded = true;
                     //     ofNotifyEvent(onSteadyReward,pair,this);
@@ -214,8 +229,6 @@ void Blob::analyzeNeighbors(std::map<int, ofPoint> neighborLocation, float distS
 //--------------------------------------------------------------
 ofPoint Blob::transformPerspective(ofPoint& v){
 
-    // float pv[2] = {v.x, v.y};
-
     vector<cv::Point2f> pre, post;
     pre.push_back(cv::Point2f(v.x, v.y));
 
@@ -252,6 +265,10 @@ void Blob::updateVideo() {
 //--------------------------------------------------------------
 bool Blob::isAlive(){
 	if(this->lifetime > 0) {
+        if (position.x == 0 && position.y == 0) {
+            ofLogNotice("BLOB") << "\t\t" << ofGetFrameNum() << "\t" << "isAlive() - position 0|0";
+            return false;
+        }
 		return true;
 	} else {
 		return false;

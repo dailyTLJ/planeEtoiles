@@ -100,6 +100,7 @@ void planeApp::setup(){
 	gui.setup("HUMANS AND PLANETS", "planets01.xml", 1104,190);
     gui.setDefaultBackgroundColor( ofColor(0,0,50) );
     gui.add(autoplay.setup("autoplay", false)); 
+    gui.add(testMode.setup("testMode", false)); 
     gui.add(flashColor.set("Transition Flash Color",ofColor(255,200,100),ofColor(0,0),ofColor(255,255)));
 
     paramBasic.setName("Dimension"); 
@@ -110,6 +111,7 @@ void planeApp::setup(){
     paramBasic.add(mapSiteH.set( "Map Height", 2, 0, 4));
     paramBasic.add(offsetX.set( "Offset X", 0, -500, 500));
     paramBasic.add(offsetY.set( "Offset Y", 0, -500, 500));
+    paramBasic.add(y_mean.set( "Y Interpolation", 5, 1, 15));
     gui.add(paramBasic);
 
     // paramTiming.setName("Timing");
@@ -511,51 +513,6 @@ void planeApp::update(){
             }
         }
 
-        nebula->update();
-        (*bgMedia[bgMediaId]).update();
-
-        vector<ofPtr<mediaElement> >::iterator iter = fgMedia.begin();
-        while (iter != fgMedia.end()) {
-            // check if video is BRIDGE and if both blobs are still alive, else release
-            if ((**iter).bridgeVideo) {
-                int blob1 = (**iter).bridgeBlobID[0];
-                int blob2 = (**iter).bridgeBlobID[1];
-                // ofLogNotice("BLOB") << "\t" << ofGetFrameNum() << "\t" << "bridgeVideo " << blob1 << " / " << blob2;
-
-                std::map<int,Blob>::iterator iter1 = blobs.find(blob1);
-                if( iter1 == blobs.end() ) {     
-                    // blob instance doesnt exist
-                    ofLogError("BLOB") << "\t" << ofGetFrameNum() << "\t" << "DEAD BRIDGE blob 1: " << blob1 << "-" << blob2;
-                } else {
-                    if (blobs[blob1].position.x == 0) {
-                        ofLogError("BLOB") << "\t" << ofGetFrameNum() << "\t" << "BRIDGE BLOB AT 0 X -  blob 1: " << blob1 << "-" << blob2;
-                    }
-                }
-                std::map<int,Blob>::iterator iter2 = blobs.find(blob2);
-                if( iter2 == blobs.end() ) {     
-                    // blob instance doesnt exist
-                    ofLogError("BLOB") << "\t" << ofGetFrameNum() << "\t" << "DEAD BRIDGE blob 2: " << blob1 << "-" << blob2;
-                } else {
-                    if (blobs[blob2].position.x == 0) {
-                        ofLogError("BLOB") << "\t" << ofGetFrameNum() << "\t" << "BRIDGE BLOB AT 0 X -  blob 2: " << blob1 << "-" << blob2;
-                    }
-                }
-            }
-
-            (**iter).update();
-            if ((**iter).dead) {
-                ofLogNotice("videoElement") << ofGetFrameNum() << "\t" << "delete video " << (**iter).file;
-                iter = fgMedia.erase(iter);
-            } else {
-                ++iter;
-            }
-            // if (!(**iter).dead) {
-            //     (**iter).update();
-            // }
-            // ++iter;
-
-        }
-
 
         // bool found = false;
         // for (vector<ofPtr<mediaElement> >::iterator it = fgMedia.begin(); it != fgMedia.end(); it++) {
@@ -666,10 +623,57 @@ void planeApp::update(){
             }
         }
 
+        // VIDEO 
+        nebula->update();
+        (*bgMedia[bgMediaId]).update();
+
+        vector<ofPtr<mediaElement> >::iterator iter = fgMedia.begin();
+        while (iter != fgMedia.end()) {
+            // check if video is BRIDGE and if both blobs are still alive, else release
+            if ((**iter).bridgeVideo) {
+                int blob1 = (**iter).bridgeBlobID[0];
+                int blob2 = (**iter).bridgeBlobID[1];
+                // ofLogNotice("BLOB") << "\t" << ofGetFrameNum() << "\t" << "bridgeVideo " << blob1 << " / " << blob2;
+
+                std::map<int,Blob>::iterator iter1 = blobs.find(blob1);
+                if( iter1 == blobs.end() ) {     
+                    // blob instance doesnt exist
+                    ofLogError("BLOB") << "\t" << ofGetFrameNum() << "\t" << "DEAD BRIDGE blob 1: " << blob1 << "-" << blob2;
+                } else {
+                    if (blobs[blob1].position.x == 0) {
+                        ofLogError("BLOB") << "\t" << ofGetFrameNum() << "\t" << "BRIDGE BLOB AT 0 X -  blob 1: " << blob1 << "-" << blob2;
+                    }
+                }
+                std::map<int,Blob>::iterator iter2 = blobs.find(blob2);
+                if( iter2 == blobs.end() ) {     
+                    // blob instance doesnt exist
+                    ofLogError("BLOB") << "\t" << ofGetFrameNum() << "\t" << "DEAD BRIDGE blob 2: " << blob1 << "-" << blob2;
+                } else {
+                    if (blobs[blob2].position.x == 0) {
+                        ofLogError("BLOB") << "\t" << ofGetFrameNum() << "\t" << "BRIDGE BLOB AT 0 X -  blob 2: " << blob1 << "-" << blob2;
+                    }
+                }
+            }
+
+            (**iter).update();
+            if ((**iter).dead) {
+                ofLogNotice("videoElement") << ofGetFrameNum() << "\t" << "delete video " << (**iter).file;
+                iter = fgMedia.erase(iter);
+            } else {
+                ++iter;
+            }
+            // if (!(**iter).dead) {
+            //     (**iter).update();
+            // }
+            // ++iter;
+
+        }
+
     }
 
 }
 
+/* define the current bg videofile, depending on scene and segment */
 void planeApp::bgMediaSwap(int & trans) {
 
     if (scene==0 && ((*bgMedia[bgMediaId]).id==-1 || (*bgMedia[bgMediaId]).id==5)) {
@@ -1214,12 +1218,14 @@ void planeApp::videoFollowBlob(int & blobID) {
 }
 
 void planeApp::blobUnlink(int & blobID) {
-    // making sure, a blob goes to die and untethers all connections
+    // making sure, a blob goes to die and untethers all video connections
     ofLogNotice("BLOB") << "\t" << ofGetFrameNum() << "\t" << "blobUnlink() \t" << blobID << "\tmediaLink: " << blobs[blobID].mediaLink;
+    
     for (vector<ofPtr<mediaElement> >::iterator it = fgMedia.begin(); it != fgMedia.end(); it++) {
         if (*it == blobs[blobID].mediaLink) {
             ofPtr<mediaElement> vid = blobs[blobID].mediaLink; 
             if (scene==1 && segment<2) {
+                // STARS: fade out frozen stars
                 (**it).fadeOut(0.001, 0.5, true);
                 ofLogNotice("BLOB") << "\t" << ofGetFrameNum() << "\t" << "\t\t\tunlinked blob and fadeOut ";
             } else {
@@ -1230,19 +1236,21 @@ void planeApp::blobUnlink(int & blobID) {
             break;
         }
     }
+
     // delete bridge video if it exists
     for (vector<ofPtr<mediaElement> >::iterator it = fgMedia.begin(); it != fgMedia.end(); it++) {
         if ((**it).bridgeVideo && ((**it).bridgeBlobID[0]==blobID || (**it).bridgeBlobID[1]==blobID)) {
             
             string videoFile = "video/2_stars/LINK_01-outro-photoJPEG.mov";
             if ((**it).file != videoFile) {
-                ofLogNotice("BLOB")  << "\t\t\tunlinked bridge\t" << (**it).bridgeBlobID[0] << " " << (**it).bridgeBlobID[1];
+                ofLogNotice("BLOB") << "\t" << ofGetFrameNum() << "\tunlinked bridge\t" << (**it).bridgeBlobID[0] << " " << (**it).bridgeBlobID[1];
                 (**it).loadMovie("video/2_stars/LINK_01-outro-photoJPEG.mov");
                 (**it).reset(true);
                 (**it).autoDestroy(true);
             }
         }
     }
+
 }
 
 void planeApp::beginSegment() {
@@ -1528,7 +1536,7 @@ void planeApp::receiveOsc(){
             }
             // update blob with new values
             Blob* b = &blobs.find(blobid)->second;
-            b->follow(posx + blobW/2.0, posy + blobH*0.8, siteW, siteH, stageRadius);
+            b->follow(posx + blobW/2.0, posy + blobH*0.8, siteW, siteH, stageRadius, y_mean);
             b->setVelocity(velx, vely);
             // b->analyze(freezeMaxVel, freezeMinTime, freezeMaxTime, movingThr);    //
             b->age = age;
@@ -1591,8 +1599,9 @@ void planeApp::draw(){
 
         gui.draw();
 
-
-        this->drawScreen(1440, 0, 1);
+        // MAIN VISUALS SCREEN
+        if (testMode) this->drawTopDown(1440, 0, 1, drawBlobDetail);
+        else this->drawScreen(1440, 0, 1);
 
         ofFill(); ofSetColor(255);
         ofDrawBitmapString(ofToString(ofGetFrameRate()), 10, 10);
