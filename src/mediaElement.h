@@ -40,6 +40,7 @@ class mediaElement
         virtual void finishMovie();
         virtual void finishMovie(float _speed = 5.0);
         virtual void scaleAway();
+        virtual void play(bool loop = true);
         void moveInFromTop();
         void moveInFromSide(int centerx, int centery);
 

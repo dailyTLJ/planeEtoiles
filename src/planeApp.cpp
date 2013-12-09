@@ -92,7 +92,7 @@ void planeApp::setup(){
     hogAvVel = 0.f;
 
     followMe = 0.f;
-    shootingRain = false;
+    shootingPointer = 0;
 
     siteW.addListener(this,&planeApp::recalculatePerspective);
 	siteH.addListener(this,&planeApp::recalculatePerspective);
@@ -616,20 +616,6 @@ void planeApp::update(){
                 success = false;
             }
         }
-        if (scene == 5) {
-            if (shootingRain) {
-                float randdeg = ofRandom(-5.f, 5.f);
-                for (int i=0; i<50; i++) {
-                    int randomShooter = ofRandom(26) + 1;
-                    fgMedia.push_back(ofPtr<mediaElement>( new videoElement("video/6_shooting/SSTAR_" + ofToString(randomShooter,2,'0') + "-photoJPEG.mov")));
-                    (*fgMedia[fgMedia.size()-1]).setDisplay(ofRandom(projectionW-100), ofRandom(projectionH-100), true);
-                    (*fgMedia[fgMedia.size()-1]).moveAcross( randdeg, 45.f, projectionW, true);
-                    (*fgMedia[fgMedia.size()-1]).reset();
-                    // (*fgMedia[fgMedia.size()-1]).movie->setFrame(i);
-                }
-                shootingRain = false;
-            }
-        }
 
         // VIDEO 
         nebula->update();
@@ -801,13 +787,23 @@ void planeApp::blobOnLost(int & blobID) {
         } else if (scene==5) {
             // SHOOTING STARS
             if (segment==0) {
-                int randomShooter = ofRandom(26) + 1;
-                fgMedia.push_back(ofPtr<mediaElement>( new videoElement("video/6_shooting/SSTAR_" + ofToString(randomShooter,2,'0') + "-photoJPEG.mov")));
-                (*fgMedia[fgMedia.size()-1]).setDisplay(ofRandom(projectionW-100), ofRandom(projectionH-100), true);
-                (*fgMedia[fgMedia.size()-1]).moveAcross( blobs[blobID].velocity.x, blobs[blobID].velocity.y, projectionW, projectionH, true);
-                (*fgMedia[fgMedia.size()-1]).reset();
+                // int randomShooter = ofRandom(26) + 1;
+                // fgMedia.push_back(ofPtr<mediaElement>( new videoElement("video/6_shooting/SSTAR_" + ofToString(randomShooter,2,'0') + "-photoJPEG.mov")));
+                // (*fgMedia[fgMedia.size()-1]).setDisplay(ofRandom(projectionW-100), ofRandom(projectionH-100), true);
+                // (*fgMedia[fgMedia.size()-1]).moveAcross( blobs[blobID].velocity.x, blobs[blobID].velocity.y, projectionW, projectionH, true);
+                // (*fgMedia[fgMedia.size()-1]).reset();
+                if (++shootingPointer>=fgMedia.size()) shootingPointer=0;
+                (*fgMedia[shootingPointer]).setDisplay(ofRandom(projectionW-100), ofRandom(projectionH-100), true);
+                (*fgMedia[shootingPointer]).moveAcross( blobs[blobID].velocity.x, blobs[blobID].velocity.y, projectionW, projectionH, false);
+                (*fgMedia[shootingPointer]).reset();
             } else if (segment==1) {
-                shootingRain = true;    // triggered within update()
+                float randdeg = ofRandom(-5.f, 5.f);
+                for (int i=0; i<10; i++) {
+                    if (++shootingPointer >= fgMedia.size()) shootingPointer=0;
+                    (*fgMedia[shootingPointer]).setDisplay(ofRandom(projectionW-100), ofRandom(projectionH-100), true);
+                    (*fgMedia[shootingPointer]).moveAcross( randdeg, 45.f, projectionW, false);
+                    (*fgMedia[shootingPointer]).reset();
+                }
             }
         }
     }
@@ -1157,7 +1153,7 @@ void planeApp::videoFollowBlob(int & blobID) {
 
             if (scene==4 && (segment>1 && segment<6)) {
                 // PLANETS aligned on vertical, move up down
-                p.y = blobMapToScreen(blobs[blobID].position).x * (16.0/9,0);
+                p.y = blobMapToScreen(blobs[blobID].position).x * (16.0/9.0);
                 p.x = offsetX + projectionW/2.0;
             } else {
                 p = blobMapToScreen(blobs[blobID].position);
@@ -1455,6 +1451,15 @@ void planeApp::initSegment(){
             // disperse
             (*fgMedia[0]).fadeOut(0.01, 1.0, true);
         }
+    } else if (scene==5 && sceneChange) {
+        for (int i=0; i<50; i++) {
+            int randomShooter = ofRandom(26) + 1;
+            fgMedia.push_back(ofPtr<mediaElement>( new videoElement("video/6_shooting/SSTAR_" + ofToString(randomShooter,2,'0') + "-photoJPEG.mov")));
+            (*fgMedia[fgMedia.size()-1]).setDisplay(-200,-500);
+            (*fgMedia[fgMedia.size()-1]).play(false);
+            (*fgMedia[fgMedia.size()-1]).reset();
+        }
+        shootingPointer = 0;
     }
 
 }
@@ -2088,12 +2093,12 @@ void planeApp::configureBlobserver() {
 
     if (erratic) {
         // ERRATIC FAST MOVEMENTS, allow for jumping, running, etc.
-        sendOscMsgToHog("setParameter", "processNoiseCov", pow(10, 0));
-        sendOscMsgToHog("setParameter", "measurementNoiseCov", pow(10, 10));
+        sendOscMsgToHog("setParameter", "processNoiseCov", pow(10, -2));
+        sendOscMsgToHog("setParameter", "measurementNoiseCov", pow(10, -8));
     } else {
         // NORMAL SETTING : SLOW MOVEMENTS, don't allow for erratic movements
-        sendOscMsgToHog("setParameter", "processNoiseCov", pow(10, -8));
-        sendOscMsgToHog("setParameter", "measurementNoiseCov", pow(10, -6));
+        sendOscMsgToHog("setParameter", "processNoiseCov", pow(10, -5));
+        sendOscMsgToHog("setParameter", "measurementNoiseCov", pow(10, -3));
     }
 
     if (allowLessFP) {
@@ -2225,7 +2230,6 @@ void planeApp::keyReleased(int key){
         jumpToScene(s);
     }
 
-    if (key=='r') shootingRain = true;
 }
 
 //--------------------------------------------------------------

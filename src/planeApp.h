@@ -147,7 +147,7 @@ class planeApp : public ofBaseApp{
 		int flashCnt;
 		int flashMax;
 
-		bool shootingRain;
+		int shootingPointer;
 
 		bool drawBridge;
 		float bridgeX;

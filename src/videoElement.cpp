@@ -171,7 +171,8 @@ void videoElement::moveAcross(float vx, float vy, int maxw, int maxh, bool destr
     this->position.set( maxw/2 - maxRadius*1.5 * sin(ofDegToRad(rotation)), maxh/2 + maxRadius*1.5 * cos(ofDegToRad(rotation)) );
     this->velocity.set( v * sin(ofDegToRad(rotation)), -v * cos(ofDegToRad(rotation)) );
     rotation -= 90;
-    autoDestroy(destr);
+    // autoDestroy(destr);
+    this->selfdestroy = destr;
 }
 
 // set at what speed a moving star should shoot across the screen, top down
@@ -180,7 +181,8 @@ void videoElement::moveAcross(float vx, float vy, int maxw, bool destr) {
     this->velocity.set(vx,vy);
     this->position.set( ofRandom(maxw), -500 - ofRandom(300) );
     rotation = 90 - ofRadToDeg(atan2(vx, vy));
-    autoDestroy(destr);
+    // autoDestroy(destr);
+    this->selfdestroy = destr;
 }
 
 
