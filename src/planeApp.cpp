@@ -1613,14 +1613,14 @@ void planeApp::draw(){
         this->drawTopDown(offsx, offsy, 0.5, drawBlobDetail);
 
         offsy = 10;
-        offsx += 300;
+        offsx += 260;
         this->drawAnalysis(offsx, offsy, 0.35);
 
         offsy = 10;
         offsx += 390;
         this->drawScreen(offsx, offsy, 0.35);
 
-        offsx += 400;
+        offsx += 440;
         this->drawControlInfo(offsx, offsy);
 
         gui.draw();
@@ -1656,9 +1656,9 @@ void planeApp::drawScreen(int x, int y, float scale){
         ofRect(x,y,projectionW*scale,projectionH*scale);
     }
 
-    nebula->draw(x+projectionOffsetX,y,scale);
+    nebula->draw(x+projectionOffsetX*scale,y,scale);
     ofEnableBlendMode(OF_BLENDMODE_ADD);
-    (*bgMedia[bgMediaId]).draw(x+projectionOffsetX,y,scale);
+    (*bgMedia[bgMediaId]).draw(x+projectionOffsetX*scale,y,scale);
 
     // foreground videos
     for (vector<ofPtr<mediaElement> >::iterator it = fgMedia.begin(); it != fgMedia.end(); ++it) {
@@ -1927,7 +1927,7 @@ void planeApp::drawRawData(int x, int y, float scale){
 
     // write information
     string rawInfo = "port: \t\t" + ofToString(MYPORT);
-    rawInfo += "\nBLOBSERVER: \t" + ofToString(BLOBSERVERIP) + " (" + ofToString(BLOBPORT) + ")";
+    rawInfo += "\nBLOBSERVER: \t" + ofToString(BLOBSERVERIP); //  + " (" + ofToString(BLOBPORT) + ")";
     rawInfo += "\nosc active: \t" + ofToString(oscActive ? "true" : "false");
     rawInfo += "\nosc last msg: \t" + ofToString(oscLastMsgTimer,2) + " sec";
     rawInfo += "\nexposure: \t" + ofToString(cameraExposure,5);
