@@ -21,8 +21,10 @@ class mediaElement
         virtual void reset(bool vis = true);
         
         void setDisplay(int x, int y);
+        void setDisplay(ofPoint p);
         void setDisplay(int x, int y, float _scale);
         void setDisplay(int x, int y, bool _centered);
+        void setDisplay(ofPoint p, bool _centered);
         void setDisplay(int x, int y, int w, int h);
         void setDisplay(int x, int y, int w, int h, bool _centered);
 
@@ -38,6 +40,7 @@ class mediaElement
         virtual void finishMovie();
         virtual void finishMovie(float _speed = 5.0);
         virtual void scaleAway();
+        virtual void play(bool loop = true);
         void moveInFromTop();
         void moveInFromSide(int centerx, int centery);
 

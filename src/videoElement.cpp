@@ -10,17 +10,28 @@ videoElement::videoElement(string filename, bool _blend) {
                                             // because of alpha-fix in ofGstVideoPlayer.cpp
     this->blend = _blend;
     this->rotation = 0;
+    this->setFileDeadNow = false;
+    this->loadLoopFileNow = false;
     this->loadMovie(filename);
 }
 
 videoElement::~videoElement() {
     // cout << "~videoElement() " << endl;
-    // cout << "~videoElement() : kill video " << this->file << endl;
+    // ofLogNotice("videoElement") << ofGetFrameNum() << "\t" << "destructor " << file;
 }
 
 void videoElement::loadMovie(string filename) {
-    ofLogNotice("videoElement") << ofGetFrameNum() << "\t" << "loadMovie " << filename;
+    // ofLogNotice("videoElement") << ofGetFrameNum() << "\t" << "stop\t'" << file << "'";
+    // movie->stop();
+    // ofLogNotice("videoElement") << ofGetFrameNum() << "\t" << "close\t'" << file << "'";
     this->file = filename;
+    // movie->close();
+    // // delete(movie);
+    // ofLogNotice("videoElement") << ofGetFrameNum() << "\t" << "clear pointer\t'" << file << "'";
+    // movie = ofPtr<ofVideoPlayer>();
+    // ofLogNotice("videoElement") << ofGetFrameNum() << "\t" << "new pointer\t'" << file << "'";
+    // movie = ofPtr<ofVideoPlayer>( new ofVideoPlayer() );
+    ofLogNotice("videoElement") << ofGetFrameNum() << "\t" << "loadMovie\t'" << file << "'";
     movie->loadMovie(filename);
     this->w = movie->getWidth();
     this->h = movie->getHeight();
@@ -31,7 +42,7 @@ void videoElement::loadMovie(string filename) {
 void videoElement::play(bool loop) {
     movie->play();
     movie->setLoopState( loop ? OF_LOOP_NORMAL : OF_LOOP_NONE );
-    ofLogNotice("videoElement") << ofGetFrameNum() << "\t" << "play  setLoopState " << loop;
+    // ofLogNotice("videoElement") << ofGetFrameNum() << "\t" << "play  setLoopState " << loop;
 }
 
 void videoElement::pause(bool v) {
@@ -40,24 +51,46 @@ void videoElement::pause(bool v) {
 
 void videoElement::update() {
     mediaElement::update();
+    if (loadLoopFileNow) {
+        ofLogNotice("videoElement") << ofGetFrameNum() << "\t" << "loadLoopFileNow\t" << loopFile;
+        loadLoopFileNow = false;
+        loadMovie(loopFile);
+        loopFile = "";
+        play(true);
+    }
+    if (setFileDeadNow) {
+        setFileDeadNow = false;
+        this->dead = true;
+    }
+
     movie->update();
     
     if (movie->getIsMovieDone()) {
         // cout << "movie " << file << " ended,  destroy: " << this->selfdestroy << endl;
         if (this->selfdestroy) {
-            this->dead = true;
+            play(true);
+            setFileDeadNow = true;
+            // this->dead = true;
             if (this->movieEndTrigger) {
-                ofLogNotice("videoElement") << ofGetFrameNum() << "\t" << "movieisdone, selfdestroy " << file;
+                ofLogNotice("videoElement") << ofGetFrameNum() << "\t" << "movieisdone, selfdestroy trigger\t" << file;
                 ofNotifyEvent(fadeOutEnd,this->w,this);
+            } else {
+                ofLogNotice("videoElement") << ofGetFrameNum() << "\t" << "movieisdone, selfdestroy\t" << file;
+                movie->update();
             }
         } else if (this->movieEndTrigger && loopFile!="") {
-            ofLogNotice("videoElement") << ofGetFrameNum() << "\t" << "movieisdone, loopfile " << file;
-            loadMovie(loopFile);
-            loopFile = "";
             play(true);
+            movie->update();
+            ofLogNotice("videoElement") << ofGetFrameNum() << "\t" << "movieisdone, loopfile\t" << loopFile;
+            loadLoopFileNow = true;
+            // loadMovie(loopFile);
+            // loopFile = "";
+            // play(true);
         } else if (this->movieEndTrigger) {
-            ofLogNotice("videoElement") << ofGetFrameNum() << "\t" << "movieisdone, fadeoutend " << file;
+            play(true); // when set to unpaused, it won't trigger the GStreamer Critical unref error?
+            ofLogNotice("videoElement") << ofGetFrameNum() << "\t" << "movieisdone, fadeoutend\t" << file;
             ofNotifyEvent(fadeOutEnd,this->w,this);
+            // this->dead = true;
         }
     }
 }
@@ -77,7 +110,7 @@ void videoElement::finishMovie() {
 
 void videoElement::finishMovie(float _speed) {
     // end transformation for 0-IDLE video = play fast to end
-    ofLogNotice("videoElement") << ofGetFrameNum() << "\t" << file << " finishMovie()";
+    ofLogNotice("videoElement") << ofGetFrameNum() << "\t" << "finishMovie()\t" << file ;
     // if (hide) 
     movieEndTrigger = true;
     movie->setLoopState(OF_LOOP_NONE);
@@ -138,7 +171,8 @@ void videoElement::moveAcross(float vx, float vy, int maxw, int maxh, bool destr
     this->position.set( maxw/2 - maxRadius*1.5 * sin(ofDegToRad(rotation)), maxh/2 + maxRadius*1.5 * cos(ofDegToRad(rotation)) );
     this->velocity.set( v * sin(ofDegToRad(rotation)), -v * cos(ofDegToRad(rotation)) );
     rotation -= 90;
-    autoDestroy(destr);
+    // autoDestroy(destr);
+    this->selfdestroy = destr;
 }
 
 // set at what speed a moving star should shoot across the screen, top down
@@ -147,7 +181,8 @@ void videoElement::moveAcross(float vx, float vy, int maxw, bool destr) {
     this->velocity.set(vx,vy);
     this->position.set( ofRandom(maxw), -500 - ofRandom(300) );
     rotation = 90 - ofRadToDeg(atan2(vx, vy));
-    autoDestroy(destr);
+    // autoDestroy(destr);
+    this->selfdestroy = destr;
 }
 
 

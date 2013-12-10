@@ -12,7 +12,12 @@
 #include "imageElement.h"
 
 // listen to blobserver on port 9000
-#define PORT 9000
+#define MYPORT 9000
+#define BLOBPORT 9002
+// #define BLOBSERVERIP "192.168.2.12"
+#define BLOBSERVERIP "192.168.2.12"
+// #define MYIP "192.168.2.39"
+#define MYIP "10.10.44.21"
 
 class sceneInfo {
     public:
@@ -33,6 +38,9 @@ class planeApp : public ofBaseApp{
 		void exit();
 
 		void receiveOsc();
+		void sendOscMsg(string addr, string v1, int v2);
+		void sendOscMsgToHog(string addr, string v1, float v2);
+
 
 		void initScenes();
 		void setPerspective();
@@ -51,26 +59,31 @@ class planeApp : public ofBaseApp{
 		void blobUnFreeze(int & blobID);
 		void blobOverFreeze(int & blobID);
 		void blobUnlink(int & blobID);
+		void bridgeUnlink(int & blobID);
+		void bridgeUnlink(Pair & pair);
 		void blobSteady(Pair & pair);
 		void blobSteadyReward(Pair & pair);
 		void blobBreakSteady(Pair & pair);
 		void videoFollowBlob(int & blobID);
 		void blobEnterStage(int & blobID);
 		void blobLeaveStage(int & blobID);
+		
 
 		void positionRevolutions();
 		void jumpToScene(int s);
 		bool allBlobsAlignedWith(ofPoint &p);
+		ofPoint blobMapToScreen(ofPoint &o);
 
-		void endSegment(int direction = 1);	// 1. trigger fgMediaFadedOut 
+		void endSegment(int direction = 1);	// 1. trigger fgMediaFadedOut or moveOn
 		void fgMediaFadedOut(int & trans);  // 2. call outroTransformation calls on FG and BG media
-		void bgMediaFadedOut(int & trans);	// 3. all elements faded out, moveOn = true
+		// void bgMediaFadedOut(int & trans);	// 3. all elements faded out, moveOn = true
 		void bgMediaSwap(int & trans);		// 
 		void nextSegment(int direction = 1);// 4. pick the next segment
 		void initSegment();					// 5. initialize the new segment, create new fgvideos
+		void configureBlobserver();
 		void beginSegment();				// 6. after flash, fade in BG
-		void bgMediaFadedIn(int & trans);	// 7. reinit blobs, introtransformation of videos
-		void fgMediaFadedIn(int & trans);
+		// void bgMediaFadedIn(int & trans);	// 7. reinit blobs, introtransformation of videos
+		// void fgMediaFadedIn(int & trans);
 
 
 		void keyPressed(int key);
@@ -83,12 +96,15 @@ class planeApp : public ofBaseApp{
 		void dragEvent(ofDragInfo dragInfo);
 		void gotMessage(ofMessage msg);
 
+		void printDebugInfo();
+
 		std::stringstream coutput;
 
 		int language;
 
 		int projectionW;
         int projectionH;
+        int projectionOffsetX;
         int blobserverW;
         int blobserverH;
         int blobW;
@@ -104,16 +120,17 @@ class planeApp : public ofBaseApp{
 		ofPoint steles[8];
 		ofPoint steles_topdown[8];
 
-		bool fullscreen;	
-
+		bool fullscreen;
+		
 		// SEQUENCING	 
 		bool processing;
 		bool oscMsgReceived;
 		bool oscActive;
-		int oscLastMsg;
-		int oscLastMsgTimer;
-		int oscLastMsgTimerMax;
+		float oscLastMsg;
+		float oscLastMsgTimer;
+		float oscLastMsgTimerMax;
         ofxToggle autoplay; 			 // advance to next segment by itself
+        ofxToggle testMode; 
 		int scene;
 		int segment;
 		int segmentChange;
@@ -133,6 +150,8 @@ class planeApp : public ofBaseApp{
 		int flashCnt;
 		int flashMax;
 
+		int shootingPointer;
+
 		bool drawBridge;
 		float bridgeX;
 		float bridgeY;
@@ -145,6 +164,7 @@ class planeApp : public ofBaseApp{
 		int bgsubtractorCnt;
 		int bgsubtractorFlowId;
 		int hogFlowId;
+		string hogFlowName;
 		float bgsubtractorVel;	
 		float bgsubtractorAvVel;
 		float hogAvVel;
@@ -161,6 +181,7 @@ class planeApp : public ofBaseApp{
 		ofParameterGroup paramSc5;
         ofParameter<ofColor> flashColor;
 		ofxOscReceiver receiver;
+		ofxOscSender sender;
 
 		ofParameter<float> freezeMaxVel;
 		ofParameter<int> freezeMinTime;
@@ -179,6 +200,7 @@ class planeApp : public ofBaseApp{
 		ofParameter<int> offsetX;
 		ofParameter<int> offsetY;
 		ofParameter<int> stageRadius;
+		ofParameter<int> y_mean;
 
 		ofParameter<int> newStarMax;
 		// ofParameter<int> newStarBonus;
@@ -201,8 +223,9 @@ class planeApp : public ofBaseApp{
 		float followMe;
 
 		std::vector< ofPtr<mediaElement> > fgMedia;
-		ofPtr<mediaElement> bgMedia;
+		std::vector< ofPtr<mediaElement> > bgMedia;
 		ofPtr<mediaElement> nebula;
+		int bgMediaId;
 		// std::map<int, std::vector<ofPtr<mediaElement> > > bgVideos;
 
 };

@@ -118,7 +118,7 @@ class Blob {
         int maxLifetime;
         bool updated;	// updated by last sample ?
 
-        // trail analysis
+        // analysis
         bool frozen;            //
         bool properFreeze;      // after a threshold of time
         bool overFrozen;
@@ -149,12 +149,13 @@ class Blob {
         Blob();
         ~Blob();
         void init();
-        void follow(float x, float y, float frameW = 500, float frameH = 500, float stageRadius = 200);
+        void follow(float x, float y, float frameW = 500, float frameH = 500, float stageRadius = 200, int y_mean = 5);
         void setVelocity(float dx, float dy);
         void analyze(float freezeMinVel, float freezeMinTime, float freezeMaxTime, float movingThr);
         void analyzeNeighbors(std::map<int, ofPoint> neighborLocation, float distStdDevThr, int steadyReward);
         ofPoint transformPerspective(ofPoint& v);
         void update(int minLostTime);
+        void updateVideo();
         bool isAlive();
 
         cv::Mat* perspectiveMat;
