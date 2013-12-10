@@ -11,12 +11,11 @@
 source helpers.sh
 
 # cd ../data
-# blobserver -C basler_rec.xml
+# blobserver -C basler_rec.xml -p 9102
 blobserver -C basler_rec.xml $@ &
+# blobserver -C basler_rec.xml -f 10 $@ &
 
 sleep 5
-# shmvid /tmp/blobserver_1_hog_0 &
-# shmvid /tmp/blobserver_2_bgsubtractor_0
 shmvid /tmp/blobserver_1_hog_0
 
 #gst-launch-0.10 shmsrc socket-path=/tmp/blobserver_output_2 ! \

@@ -29,20 +29,24 @@
             </Param>
             <Param>
                 <Name>autoExposure</Name>
-                <Value>300 200 200 100 64 32 0.05</Value>
+                <Value>300 200 200 100 128 32 0.05</Value>
             </Param>
             <Param>
                 <Name>gain</Name>
-                <Value>500</Value>
+                <Value>0</Value>
             </Param>
             <Param>
-                <Name>invertRGB</Name>
-                <Value>1</Value>
+                <Name>crop</Name>
+                <Value>78 16 500 300</Value>
             </Param>
             <Param>
                 <Name>framerate</Name>
-                <Value>15</Value>
+                <Value>30</Value>
             </Param>
+<!--             <Param>
+                <Name>save</Name>
+                <Value>1 1 /home/planeblob/Documents/grabs/tmp/</Value>
+            </Param> -->
         </Source>
         <Actuator>
             <Type>Actuator_Hog</Type>
@@ -53,7 +57,8 @@
             <Param>
                 <Name>modelFilename</Name>
                 <!-- <Value>models/model_8x8_bw.xml</Value> -->
-                <Value>models/model_nov8.xml</Value>
+                <!-- <Value>models/model_nov8.xml</Value> -->
+                <Value>models/model_nov29d_cell8_bin9_block1.xml</Value>
             </Param>
             <Param>
                 <Name>maxTimePerFrame</Name>
@@ -78,7 +83,7 @@
             </Param>
             <Param>
                 <Name>blockSize</Name>
-                <Value>size_3x3</Value>
+                <Value>size_1x1</Value>
             </Param>
             <Param>
                 <Name>cellSize</Name>
@@ -90,24 +95,31 @@
             </Param>
             <Param>
                 <Name>margin</Name>
-                <Value>0.8</Value>
+                <Value>0.0</Value>
             </Param>
             <Param>
                 <Name>lifetime</Name>
-                <Value>15</Value>
+                <Value>10</Value>
             </Param>
             <Param>
                 <Name>keepOldBlobs</Name>
                 <Value>0 0</Value>
             </Param>
-
+            <Param>
+                <Name>maxTrackDistance</Name>
+                <Value>100</Value>
+            </Param>
+            <Param>
+                <Name>occlusionDistance</Name>
+                <Value>32</Value>
+            </Param>
             <Param>
                 <Name>processNoiseCov</Name>
-                <Value>1e-4</Value>
+                <Value>1e-7</Value>
             </Param>
             <Param>
                 <Name>measurementNoiseCov</Name>
-                <Value>1e-2</Value>
+                <Value>1e-4</Value>
             </Param>
             <Param>
                 <Name>saveSamples</Name>
@@ -119,7 +131,7 @@
             </Param>
         </Actuator>
     </Flow>
-    <Flow>
+<!--     <Flow>
         <Source>
             <Type>Source_2D_Shmdata</Type>
             <Subsource>0</Subsource>
@@ -147,7 +159,7 @@
                 <Value>15</Value>
             </Param>
         </Actuator>
-    </Flow>
+    </Flow> -->
     <Flow>
         <Source>
             <Type>Source_2D_Shmdata</Type>
@@ -158,6 +170,7 @@
         </Actuator>
         <Client>
             <Address>10.10.44.21</Address>
+            <!-- <Address>localhost</Address> -->
             <Port>9000</Port>
         </Client>
         <Server>

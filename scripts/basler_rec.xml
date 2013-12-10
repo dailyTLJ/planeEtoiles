@@ -8,11 +8,6 @@
                 <Value>/tmp/switcher_default_video_video-0</Value>
             </Param>
             <Param>
-                <Name>mask</Name>
-                <!-- <Value>models/mask1_steles.png</Value> -->
-                <!-- <Value>models/mask1.png</Value> -->
-            </Param>
-            <Param>
                 <Name>scale</Name>
                 <Value>1</Value>
             </Param>
@@ -20,10 +15,10 @@
                 <Name>rotation</Name>
                 <Value>0.0</Value>
             </Param>
-            <Param>
+<!--             <Param>
                 <Name>crop</Name>
                 <Value>78 16 500 300</Value>
-            </Param>
+            </Param> -->
 <!--             <Param>
                 <Name>gammaCorrection</Name>
                 <Value>0.5</Value>
@@ -76,12 +71,20 @@
                 <Value>45</Value>
             </Param>
             <Param>
+                <Name>maxTrackDistance</Name>
+                <Value>100</Value>
+            </Param>
+            <Param>
+                <Name>occlusionDistance</Name>
+                <Value>32</Value>
+            </Param>
+            <Param>
                 <Name>processNoiseCov</Name>
-                <Value>1e-2</Value>
+                <Value>1e-7</Value>
             </Param>
             <Param>
                 <Name>measurementNoiseCov</Name>
-                <Value>1e-1</Value>
+                <Value>1e-4</Value>
             </Param>
             <Param>
                 <Name>margin</Name>
@@ -89,7 +92,7 @@
             </Param>
             <Param>
                 <Name>lifetime</Name>
-                <Value>9</Value>
+                <Value>10</Value>
             </Param>
             <Param>
                 <Name>maxTimePerFrame</Name>
@@ -118,7 +121,7 @@
             </Param>
         </Actuator>
     </Flow>
-    <Flow>
+<!--     <Flow>
         <Source>
             <Type>Source_2D_Shmdata</Type>
             <Subsource>0</Subsource>
@@ -146,7 +149,7 @@
                 <Value>15</Value>
             </Param>
         </Actuator>
-    </Flow>
+    </Flow> -->
     <Flow>
         <Source>
             <Type>Source_2D_Shmdata</Type>
@@ -156,8 +159,8 @@
             <Type>Actuator_Nop</Type>
         </Actuator>
         <Client>
-            <!-- <Address>10.10.44.21</Address> -->
-            <Address>192.168.2.39</Address>
+            <Address>10.10.44.21</Address>
+            <!-- <Address>192.168.2.39</Address> -->
             <Port>9000</Port>
         </Client>
         <Server>

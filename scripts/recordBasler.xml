@@ -33,7 +33,7 @@
             </Param>
             <Param>
                 <Name>gain</Name>
-                <Value>500</Value>
+                <Value>0</Value>
             </Param>
             <Param>
                 <Name>invertRGB</Name>
@@ -41,17 +41,17 @@
             </Param>
             <Param>
                 <Name>framerate</Name>
-                <Value>15</Value>
+                <Value>30</Value>
             </Param>
             <Param>
                 <Name>save</Name>
-                <Value>1 900 /home/planeblob/Documents/grabs/tmp/weekend_nov15-17</Value>
+                <Value>1 1 /home/planeblob/Documents/grabs/tmp/</Value>
             </Param>
         </Source>
-<!--         <Actuator>
-            <Type>Actuator_Nop</Type>
-        </Actuator> -->
         <Actuator>
+            <Type>Actuator_Nop</Type>
+        </Actuator>
+ <!--        <Actuator>
             <Type>Actuator_Hog</Type>
             <Param>
                 <Name>verbose</Name>
@@ -59,7 +59,6 @@
             </Param>
             <Param>
                 <Name>modelFilename</Name>
-                <!-- <Value>models/model_8x8_bw.xml</Value> -->
                 <Value>models/model_nov8.xml</Value>
             </Param>
             <Param>
@@ -81,7 +80,6 @@
             <Param>
                 <Name>roiSize</Name>
                 <Value>size_80x160</Value>
-                <!-- <Value>size_64x128</Value> -->
             </Param>
             <Param>
                 <Name>blockSize</Name>
@@ -124,7 +122,7 @@
                 <Value>120</Value>
             </Param>
         </Actuator>
-        <Client>
+ -->        <Client>
             <Address>localhost</Address>
             <Port>9000</Port>
         </Client>
