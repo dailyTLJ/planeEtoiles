@@ -78,8 +78,9 @@ void planeApp::setup(){
     bridgeX = 5;
     bridgeY = 55;
 
-    projectionW = 1080;
+    projectionW = 1200;
     projectionH = 1920;
+    projectionOffsetX = 60;
     blobserverW = 500;
     blobserverH = 300;
     blobW = 80;
@@ -1655,9 +1656,9 @@ void planeApp::drawScreen(int x, int y, float scale){
         ofRect(x,y,projectionW*scale,projectionH*scale);
     }
 
-    nebula->draw(x,y,scale);
+    nebula->draw(x+projectionOffsetX,y,scale);
     ofEnableBlendMode(OF_BLENDMODE_ADD);
-    (*bgMedia[bgMediaId]).draw(x,y,scale);
+    (*bgMedia[bgMediaId]).draw(x+projectionOffsetX,y,scale);
 
     // foreground videos
     for (vector<ofPtr<mediaElement> >::iterator it = fgMedia.begin(); it != fgMedia.end(); ++it) {

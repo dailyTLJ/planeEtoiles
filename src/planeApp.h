@@ -104,6 +104,7 @@ class planeApp : public ofBaseApp{
 
 		int projectionW;
         int projectionH;
+        int projectionOffsetX;
         int blobserverW;
         int blobserverH;
         int blobW;
