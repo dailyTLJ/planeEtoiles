@@ -14,8 +14,10 @@
 // listen to blobserver on port 9000
 #define MYPORT 9000
 #define BLOBPORT 9002
+// #define BLOBSERVERIP "192.168.2.12"
 #define BLOBSERVERIP "192.168.2.12"
-#define MYIP "192.168.2.39"
+// #define MYIP "192.168.2.39"
+#define MYIP "10.10.44.21"
 
 class sceneInfo {
     public:
@@ -123,9 +125,9 @@ class planeApp : public ofBaseApp{
 		bool processing;
 		bool oscMsgReceived;
 		bool oscActive;
-		int oscLastMsg;
-		int oscLastMsgTimer;
-		int oscLastMsgTimerMax;
+		float oscLastMsg;
+		float oscLastMsgTimer;
+		float oscLastMsgTimerMax;
         ofxToggle autoplay; 			 // advance to next segment by itself
         ofxToggle testMode; 
 		int scene;

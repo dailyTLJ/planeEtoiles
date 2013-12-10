@@ -1,6 +1,6 @@
 <HUMANS_AND_PLANETS>
 	<autoplay>0</autoplay>
-	<Transition_Flash_Color>255, 200, 100, 0</Transition_Flash_Color>
+	<Transition_Flash_Color>255, 200, 100, 255</Transition_Flash_Color>
 	<Global>
 		<Site_Width>500</Site_Width>
 		<Site_Length>700</Site_Length>
@@ -63,5 +63,7 @@
 	<Map_Width>2.02041</Map_Width>
 		<Map_Height>2.04082</Map_Height>
 	<Stage_Radius>313</Stage_Radius>
+	<Y_Interpolation>5</Y_Interpolation>
 	</Dimension>
+<testMode>0</testMode>
 </HUMANS_AND_PLANETS>

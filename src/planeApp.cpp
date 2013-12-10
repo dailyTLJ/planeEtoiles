@@ -27,11 +27,11 @@ void planeApp::setup(){
     // ofLogError()
     // ofLogFatalError()
 
-    ofSetLogLevel("BLOB", OF_LOG_VERBOSE);
+    ofSetLogLevel("BLOB", OF_LOG_WARNING);
     ofSetLogLevel("BRIDGE", OF_LOG_WARNING);
-    ofSetLogLevel("TRANSITION", OF_LOG_WARNING);
+    ofSetLogLevel("TRANSITION", OF_LOG_VERBOSE);
     ofSetLogLevel("OSC", OF_LOG_WARNING);
-    ofSetLogLevel("interaction", OF_LOG_WARNING);
+    ofSetLogLevel("interaction", OF_LOG_VERBOSE);
     ofSetLogLevel("videoElement", OF_LOG_WARNING);
     ofSetLogLevel("mediaElement", OF_LOG_WARNING);
 
@@ -58,7 +58,8 @@ void planeApp::setup(){
 	mouseButtonState = "";
 
     fullscreen = false;
-    ofSetWindowPosition(0,0);
+    // ofSetWindowPosition(0,0);
+
     success = false;
     successCnt = 0;
     blobsOnStage = 0;
@@ -99,7 +100,7 @@ void planeApp::setup(){
 	siteH.addListener(this,&planeApp::recalculatePerspective);
 
 
-	gui.setup("HUMANS AND PLANETS", "planets01.xml", 1104,190);
+	gui.setup("HUMANS AND PLANETS", "planets01.xml", 1604,190);
     gui.setDefaultBackgroundColor( ofColor(0,0,50) );
     gui.add(autoplay.setup("autoplay", false)); 
     gui.add(testMode.setup("testMode", false)); 
@@ -276,15 +277,15 @@ void planeApp::initScenes(){
     stars.instructions[1][0] = "Ne bougez plus";
     stars.analysis[0] = "* Velocity < FreezeMaxVel\n* frozenTimer > freezeMinTime\n-> 20 sec";
     stars.length[0] = 20;
-    stars.instructions[0][1] = "Try new spots to light up more stars";
+    stars.instructions[0][1] = "Try new spots \nto light up more stars";
     stars.instructions[1][1] = "Essayez de nouveaux \nendroits pour allumer \nplus d'étoiles";
     stars.analysis[1] = "* Velocity < FreezeMaxVel\n* frozenTimer > freezeMinTime\n* frozenTimer < freezeMaxTime\n+ Star Animation at end of freezeMaxTime\n-> newStarMax stars || 40 sec";
     stars.length[1] = 40;
-    stars.instructions[0][2] = "Walk with someone. \nKeep the same distance between you.\n(No hands!)";
+    stars.instructions[0][2] = "Walk with someone. \nKeep the same distance\n between you.\n(No hands!)";
     stars.instructions[1][2] = "Marchez avec un partenaire\nGardez la même distance entre vous\n(Sans les mains!)";
     stars.analysis[2] = "* velocity history > movingThr \n* distance history < distStdDevThr\n-> 45 sec";
     stars.length[2] = 45;
-    stars.instructions[0][3] = "Walk with \nsomeone. \nMake eye \ncontact. \nKeep the \ndistance.";
+    stars.instructions[0][3] = "Walk with someone. \nMake eye contact. \nKeep the distance.";
     stars.instructions[1][3] = "Marchez avec un partenaire \nGardez la même distance entre vous \nRegardez-vous dans les yeux";
     stars.analysis[3] = "* velocity history > movingThr \n* distance history < distStdDevThr\n-> 60 sec";
     stars.length[3] = 60;
@@ -296,7 +297,7 @@ void planeApp::initScenes(){
     revolution.name = "Revolution";
     revolution.no = n;
     revolution.segments = 2;
-    revolution.instructions[0][0] = "Take someone's hand \nSpin and lean out as far as possible";
+    revolution.instructions[0][0] = "Take someone's hand \nSpin and lean out \nas far as possible";
     revolution.instructions[1][0] = "Tenez les mains de votre partenaire \nTournez";
     revolution.analysis[0] = "* \n-> 20 sec";
     revolution.length[0] = 20;
@@ -344,7 +345,7 @@ void planeApp::initScenes(){
     eclipse.name = "Alignment";
     eclipse.no = n;
     eclipse.segments = 7;
-    eclipse.instructions[0][0] = "Now line-up in front of me";
+    eclipse.instructions[0][0] = "Now line-up in \nfront of me";
     eclipse.instructions[1][0] = "Faites une file face à moi.";
     eclipse.analysis[0] = "- \n-> 20 sec";
     eclipse.length[0] = 20;
@@ -368,8 +369,8 @@ void planeApp::initScenes(){
     eclipse.instructions[1][5] = "Revenez dans la file.";
     eclipse.analysis[5] = "* x == main.x\n-> 10 sec";
     eclipse.length[5] = 10;
-    eclipse.instructions[0][6] = "Disperse very slowly towards the edges.";
-    eclipse.instructions[1][6] = "Dispersez-vous lentement vers l'extérieur.";
+    eclipse.instructions[0][6] = "Disperse very slowly \ntowards the edges.";
+    eclipse.instructions[1][6] = "Dispersez-vous lentement \nvers l'extérieur.";
     eclipse.analysis[6] = "* edge-proximity = opacity \n-> 15 sec";
     eclipse.length[6] = 15;
     scenes[n] = eclipse;
@@ -417,12 +418,12 @@ void planeApp::update(){
         oscMsgReceived = false;
         this->receiveOsc();
 
-        if (!oscMsgReceived) {
-            oscLastMsgTimer = ofGetUnixTime() - oscLastMsg;
-            if (oscActive && oscLastMsgTimer > oscLastMsgTimerMax) {
+        //if () {
+            oscLastMsgTimer = ofGetElapsedTimef() - oscLastMsg;
+            if (!oscMsgReceived && oscActive && oscLastMsgTimer > oscLastMsgTimerMax) {
                 oscActive = false;
             }
-        }
+        //}
 
         if (oscMsgReceived) {
 
@@ -775,7 +776,8 @@ void planeApp::blobOnLost(int & blobID) {
             activityCnt++;
             if (segment==1 || segment==2) {
                 int randomExpl = ofRandom(7) + 1;
-                string videoEnd = "_fullscale-posterized-qtPNG.mov";
+                // string videoEnd = "_fullscale-posterized-qtPNG.mov";
+                string videoEnd = "_fullscale-blue-posterized-qtPNG.mov";
                 if (activityCnt > activityColorCh*2) videoEnd = "_fullscale-blue-posterized-qtPNG.mov";
                 else if (activityCnt > activityColorCh) videoEnd = "_fullscale-red-posterized-qtPNG.mov";
                 string newVideoName = "video/4_sun/SUN_explosion-" + ofToString(randomExpl,2,'0') + videoEnd;
@@ -1473,7 +1475,7 @@ void planeApp::receiveOsc(){
 	while(receiver.hasWaitingMessages()){
         oscMsgReceived = true;
         if (!oscActive) oscActive =true;
-        oscLastMsg = ofGetUnixTime();
+        oscLastMsg = ofGetElapsedTimef();
 
 		// get the next message
 		ofxOscMessage m;
@@ -1601,7 +1603,7 @@ void planeApp::draw(){
 
         ofBackground(0,50,150);
         // ofBackground(0);
-        int offsx = 10; int offsy = 10;
+        int offsx = 500; int offsy = 10;
 
         ofFill(); ofSetColor(255);
         ofDrawBitmapString(ofToString(ofGetFrameRate()), offsx, offsy);
@@ -1627,13 +1629,19 @@ void planeApp::draw(){
         gui.draw();
 
         // MAIN VISUALS SCREEN
+        ofPushMatrix();
+        ofTranslate(0,2100);
+        ofRotateZ(-90);
         if (testMode) {
-            this->drawRawData(1490, 50, 2);
-            this->drawTopDown(1490, 850, 2, drawBlobDetail);
-        } else this->drawScreen(1440, 0, 1);
+            // this->drawRawData(1490, 50, 2);
+            // this->drawTopDown(1490, 850, 2, drawBlobDetail);
+            this->drawRawData(0, 50, 2);
+            this->drawTopDown(0, 850, 2, drawBlobDetail);
+        } else this->drawScreen(0, 0, 1);
 
         ofFill(); ofSetColor(255);
         ofDrawBitmapString(ofToString(ofGetFrameRate()), 10, 10);
+        ofPopMatrix();
 
     }
 }
@@ -1809,7 +1817,7 @@ void planeApp::drawAnalysis(int x, int y, float scale){
                         Neighbor* nb = &iter->second;
                         if (nb->steadyDistance) ofSetColor(255); else ofSetColor(0);
                         ofDrawBitmapString(ofToString(nb->id), bx+70, by-5);
-                        ofRect(bx+120, by+20, nb->distance[0]*0.2, -10);
+                        ofRect(bx+120, by-5, nb->distance[0]*0.2, -10);
                         by += 15;
                     }
 
@@ -1924,7 +1932,7 @@ void planeApp::drawRawData(int x, int y, float scale){
     string rawInfo = "port: \t\t" + ofToString(MYPORT);
     rawInfo += "\nBLOBSERVER: \t" + ofToString(BLOBSERVERIP) + " (" + ofToString(BLOBPORT) + ")";
     rawInfo += "\nosc active: \t" + ofToString(oscActive ? "true" : "false");
-    rawInfo += "\nosc last msg: \t" + ofToString(oscLastMsgTimer) + " sec";
+    rawInfo += "\nosc last msg: \t" + ofToString(oscLastMsgTimer,2) + " sec";
     rawInfo += "\nexposure: \t" + ofToString(cameraExposure,5);
     rawInfo += "\nbgs blob cnt: \t" + ofToString(bgsubtractorCnt);
     rawInfo += "\nbgs avg vel: \t" + ofToString(bgsubtractorAvVel,2);
@@ -2024,7 +2032,7 @@ bool planeApp::allBlobsAlignedWith(ofPoint &p) {
 
 ofPoint planeApp::blobMapToScreen(ofPoint &o) {
     ofPoint p;
-    p.x = offsetX + o.x * mapSiteW;
+    p.x = projectionW - (offsetX + o.x * mapSiteW);
     p.y = offsetY + o.y * mapSiteH;
     return p;
 }
