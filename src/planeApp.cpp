@@ -1321,6 +1321,9 @@ void planeApp::endSegment(int direction) {
             (*fgMedia[fgMedia.size()-1]).autoDestroy(true);
             (*fgMedia[fgMedia.size()-1]).movieEndTrigger=true;
             ofAddListener( (*fgMedia[fgMedia.size()-1]).fadeOutEnd, this, &planeApp::bgMediaSwap );
+        } else if (scene==5) {
+            moveOn = true;
+            sceneChange = true;
         } else {
             int tmp = -1;
             fgMediaFadedOut(tmp);   // TODO clean up, just need to hand back ref. of integer
@@ -1717,8 +1720,11 @@ void planeApp::drawScreen(int x, int y, float scale){
     if (scene==4 && segment==1) {
         fontBg.drawString(instruction, x+(*fgMedia[0]).position.x*scale, y+projectionH*scale*0.8);
     } else {
-        fontBg.drawString(instruction, x+20, y+projectionH*scale*0.8);
+        fontBg.drawString(instruction, x+100*scale, y+projectionH*scale*0.8);
     }
+    fontSm.drawString(scenes[scene].analysis[segment], x+100*scale, y+(projectionH-150)*scale);
+    fontBg.drawString(ofToString(segmentClock), x+(projectionW-200)*scale, y+(projectionH-200)*scale);
+    fontSm.drawString(ofToString(success ? "true" : "false"), x+(projectionW-200)*scale, y+(projectionH-150)*scale);
 
     if (flash) {
         ofEnableAlphaBlending();
@@ -2044,13 +2050,16 @@ void planeApp::configureBlobserver() {
     // standard setting:
     bool erratic = false;  // else slow movements
     bool allowLessFP = false;        // allow more false positives
+    bool slow = false;              // extra slow?
     
     if (scene==0) {                 // IDLE
     
     } else if (scene==1) {          // STARS
         
         if (segment==0) {               // STAND STILL
+            slow = true;
         } else if (segment==1) {        // STAND STILL SOME MORE
+            slow = true;
         } else if (segment==2) {        // KEEP THE DISTANCE
         } else if (segment==3) {        // KEEP THE DISTANCE P2
         }
@@ -2060,6 +2069,7 @@ void planeApp::configureBlobserver() {
         if (segment==0) {               // SPIN
             erratic = true;
         } else if (segment==1) {        // LET GO
+            erratic = true;
         }
 
     } else if (scene==3) {          // SUN
@@ -2096,14 +2106,18 @@ void planeApp::configureBlobserver() {
 
     }
 
-    if (erratic) {
+    if (slow) {
+        // 
+        sendOscMsgToHog("setParameter", "processNoiseCov", pow(10, -9));
+        sendOscMsgToHog("setParameter", "measurementNoiseCov", pow(10, -6));
+    } else if (erratic) {
         // ERRATIC FAST MOVEMENTS, allow for jumping, running, etc.
-        sendOscMsgToHog("setParameter", "processNoiseCov", pow(10, -2));
-        sendOscMsgToHog("setParameter", "measurementNoiseCov", pow(10, -8));
+        sendOscMsgToHog("setParameter", "processNoiseCov", pow(10, -3));
+        sendOscMsgToHog("setParameter", "measurementNoiseCov", pow(10, -7));
     } else {
         // NORMAL SETTING : SLOW MOVEMENTS, don't allow for erratic movements
-        sendOscMsgToHog("setParameter", "processNoiseCov", pow(10, -5));
-        sendOscMsgToHog("setParameter", "measurementNoiseCov", pow(10, -3));
+        sendOscMsgToHog("setParameter", "processNoiseCov", pow(10, -7));
+        sendOscMsgToHog("setParameter", "measurementNoiseCov", pow(10, -4));
     }
 
     if (allowLessFP) {
