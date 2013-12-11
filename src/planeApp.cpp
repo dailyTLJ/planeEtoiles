@@ -478,10 +478,15 @@ void planeApp::update(){
             }
 
             // ANALYSIS
-            std::map<int, ofPoint> blobPositions;
+            // std::map<int, ofPoint> blobPositions;
+            // for(std::map<int, Blob>::iterator it = blobs.begin(); it != blobs.end(); ++it){
+            //     Blob* b = &it->second;
+            //     blobPositions[b->id] = b->position;
+            // }
+            std::map<int, tinyNeighbor> blobPositions;
             for(std::map<int, Blob>::iterator it = blobs.begin(); it != blobs.end(); ++it){
                 Blob* b = &it->second;
-                blobPositions[b->id] = b->position;
+                blobPositions[b->id].set(b->position, b->movingMean, b->onStage);
             }
             for(std::map<int, Blob>::iterator it = blobs.begin(); it != blobs.end(); ++it){
                 Blob* b = &it->second;
