@@ -96,7 +96,7 @@ class planeApp : public ofBaseApp{
 		void windowResized(int w, int h);
 		void dragEvent(ofDragInfo dragInfo);
 		void gotMessage(ofMessage msg);
-		void guiFloatChange(const void * sender, float & v);
+		void guiNebulaChange(int & v);
 
 		void printDebugInfo();
 
@@ -184,7 +184,7 @@ class planeApp : public ofBaseApp{
 		ofParameterGroup paramSc5;
 		ofParameterGroup paramBlob;
         ofParameter<ofColor> flashColor;
-        ofParameter<float> nebulaOpacity;
+        ofParameter<int> nebulaOpacity;
 		ofxOscReceiver receiver;
 		ofxOscSender sender;
 
@@ -240,6 +240,7 @@ class planeApp : public ofBaseApp{
 		std::vector< ofPtr<mediaElement> > bgMedia;
 		ofPtr<mediaElement> nebula;
 		ofImage instructionImg;
+		ofFbo fbo;
 		int bgMediaId;
 		// std::map<int, std::vector<ofPtr<mediaElement> > > bgVideos;
 

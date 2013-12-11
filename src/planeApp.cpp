@@ -13,7 +13,8 @@ void planeApp::setup(){
     ofSetFrameRate(30);
     ofLogNotice("START") << "\t" << ofGetFrameNum() << "\t" << "setup";
 
-    ofSetLogLevel(OF_LOG_ERROR);
+    ofSetLogLevel(OF_LOG_SILENT);
+    ofLogNotice("START") << "\t" << ofGetFrameNum() << "\t" << "setup3";
     // OF_LOG_VERBOSE
     // OF_LOG_NOTICE
     // OF_LOG_WARNING
@@ -26,6 +27,7 @@ void planeApp::setup(){
     // ofLogWarning()
     // ofLogError()
     // ofLogFatalError()
+    ofLogNotice("START") << "\t" << ofGetFrameNum() << "\t" << "0";
 
     ofSetLogLevel("BLOB", OF_LOG_VERBOSE);
     ofSetLogLevel("BRIDGE", OF_LOG_WARNING);
@@ -49,8 +51,8 @@ void planeApp::setup(){
 	fontSm.setLineHeight(16.0f);
 	fontSm.setLetterSpacing(1.037);
 
-    instructionImg.loadImage("img/placeholder_letgo.jpg");
 
+    ofLogNotice("START") << "\t" << ofGetFrameNum() << "\t" << "1";
     projectorOn = false;
     language = 1;
     processing = true;
@@ -65,7 +67,7 @@ void planeApp::setup(){
 
     fullscreen = false;
     // ofSetWindowPosition(0,0);
-
+    ofLogNotice("START") << "\t" << ofGetFrameNum() << "\t" << "2";
     success = false;
     successCnt = 0;
     blobsOnStage = 0;
@@ -105,17 +107,16 @@ void planeApp::setup(){
 
     siteW.addListener(this,&planeApp::recalculatePerspective);
 	siteH.addListener(this,&planeApp::recalculatePerspective);
-
+    // nebulaOpacity.addListener(this,&planeApp::guiNebulaChange);
+    ofLogNotice("START") << "\t" << ofGetFrameNum() << "\t" << "3";
 
     if (!projectorOn) gui.setup("HUMANS AND PLANETS", "planets01.xml", 1104,190);
-	else gui.setup("HUMANS AND PLANETS", "planets01.xml", 1604,190);
+    else gui.setup("HUMANS AND PLANETS", "planets01.xml", 1604,190);
     gui.setDefaultBackgroundColor( ofColor(0,0,50) );
     gui.add(autoplay.setup("autoplay", false));
     gui.add(testMode.setup("testMode", false));
     gui.add(minLostTime.set("Min LostTime", 1, 0, 50));
-    nebulaOpacity.set("Nebula Opacity", 0.5, 0, 1.0);
-    nebulaOpacity.addListener(this,&planeApp::guiFloatChange);
-    gui.add(nebulaOpacity);
+    gui.add(nebulaOpacity.set("Nebula Opacity", 50, 0, 100));
     gui.add(flashColor.set("Transition Flash Color",ofColor(255,200,100),ofColor(0,0),ofColor(255,255)));
 
     paramBasic.setName("Dimension");
@@ -180,7 +181,7 @@ void planeApp::setup(){
     // paramSc5.setName("Sc5 Combustion");
     // gui.add(paramSc5);
 
-
+    ofLogNotice("START") << "\t" << ofGetFrameNum() << "\t" << "4";
     gui.setSize(200,500);
     gui.loadFromFile("planets01.xml");
 
@@ -198,10 +199,19 @@ void planeApp::setup(){
     }
 
     sendOscMsg("signIn", MYIP, MYPORT);
-
+    ofLogNotice("START") << "\t" << ofGetFrameNum() << "\t" << "5";
 
     // init
     this->initScenes();
+
+    instructionImg.loadImage("img/placeholder_letgo.jpg");
+
+    ofLogNotice("START") << "\t" << ofGetFrameNum() << "\t" "allocate FBO";
+    fbo.allocate(projectionW, projectionH, GL_RGBA);
+    ofLogNotice("START") << "\t" << ofGetFrameNum() << "\t" "clear FBO";
+    fbo.begin();
+    ofClear(0,0,0,0);
+    fbo.end();
 
     // compute the perspectiveTransformation
     // to map from blob-coordinates to the top-down view
@@ -267,7 +277,7 @@ void planeApp::initScenes(){
 
     nebula = ofPtr<mediaElement>( new videoElement("video/NEBULA-H264-10mbps.mp4"));
     nebula->reset(true);
-    nebula->opMax = nebulaOpacity;
+    nebula->opMax = nebulaOpacity/100.f;
 
     bgMedia.push_back(ofPtr<mediaElement>( new videoElement("video/IDLE_MODE_11-half-1-H264-10mbps.mp4",false)));       // 0
     bgMedia.push_back(ofPtr<mediaElement>( new videoElement("video/IDLE_MODE_13_blue-anim-H264-10mbps.mp4",false)));    // 1
@@ -695,6 +705,21 @@ void planeApp::update(){
             // }
             // ++iter;
 
+        }
+
+        // FBO
+        if (scene==4) {
+            // draw everything into fbo
+            fbo.begin();
+                ofBackground(0,0,0,0);
+                ofEnableBlendMode(OF_BLENDMODE_ADD);
+                ofSetColor(255,255,255,255);
+                for (vector<ofPtr<mediaElement> >::iterator it = fgMedia.begin(); it != fgMedia.end(); ++it) {
+                    // if (!(**it).dead) (**it).draw(0, 0, 1);   //
+                    // (**it).draw(0, 0, 1);
+                }
+                ofDisableBlendMode();
+            fbo.end();
         }
 
     }
@@ -1734,65 +1759,41 @@ void planeApp::drawScreen(int x, int y, float scale){
         ofRect(x,y,projectionW*scale,projectionH*scale);
     }
 
+
+    // BACKGROUND VIDEOS
     // nebula->draw(x+projectionOffsetX*scale,y,scale);
     ofEnableBlendMode(OF_BLENDMODE_ADD);
     // (*bgMedia[bgMediaId]).draw(x+projectionOffsetX*scale,y,scale);
-
-    // foreground videos
-    for (vector<ofPtr<mediaElement> >::iterator it = fgMedia.begin(); it != fgMedia.end(); ++it) {
-        if (!(**it).dead && (**it).blend) (**it).draw(x, y, scale);   //
-    }
     ofDisableBlendMode();
 
-    // foreground videos, without BLENDING mode
-    ofEnableAlphaBlending();
-    for (vector<ofPtr<mediaElement> >::iterator it = fgMedia.begin(); it != fgMedia.end(); ++it) {
-        if (!(**it).dead && !(**it).blend) (**it).draw(x, y, scale);
+
+    // FOREGROUND VIDEOS
+    if (scene==4) {
+        // draw FBO only
+        ofEnableBlendMode(OF_BLENDMODE_ALPHA);
+        fbo.draw(x,y, projectionW*scale, projectionH*scale);
+        ofDisableBlendMode();
+
+    } else {
+
+        // foreground videos, with BLENDING
+        ofEnableBlendMode(OF_BLENDMODE_ADD);
+        for (vector<ofPtr<mediaElement> >::iterator it = fgMedia.begin(); it != fgMedia.end(); ++it) {
+            if (!(**it).dead && (**it).blend) (**it).draw(x, y, scale);   //
+        }
+        ofDisableBlendMode();
+
+        // foreground videos, without BLENDING mode
+        ofEnableAlphaBlending();
+        for (vector<ofPtr<mediaElement> >::iterator it = fgMedia.begin(); it != fgMedia.end(); ++it) {
+            if (!(**it).dead && !(**it).blend) (**it).draw(x, y, scale);
+        }
+        ofDisableAlphaBlending();
     }
 
-    // // draw starBridge dummies
-    // // extra things to draw?
-    // if (drawBridge && scene==1 && segment>1) {
-    //     for(std::map<int, Blob>::iterator it = blobs.begin(); it != blobs.end(); ++it){
-    //         Blob* b = &it->second;
-    //         for(std::map<int, Neighbor>::iterator iter = b->neighbors.begin(); iter != b->neighbors.end(); ++iter){
-    //             Neighbor* nb = &iter->second;
-    //             if (nb->steadyDistance) {
-    //                 // draw a line between blob and steady neighbor
-    //                 ofNoFill(); ofSetColor(255);
-    //                 float p1x = x + blobMapToScreen(b->position).x * scale;
-    //                 float p1y = y + blobMapToScreen(b->position).y * scale;
-    //                 float p2x = x + blobMapToScreen(blobs[nb->id].position).x * scale;
-    //                 float p2y = y + blobMapToScreen(blobs[nb->id].position).y * scale;
-
-    //                 float rot = -ofRadToDeg(atan2(p2x-p1x,p2y-p1y)) + 90;
-    //                 float tx = bridgeX;
-    //                 float ty = bridgeY;
-    //                 float tz = sqrt( pow(tx,2) + pow(ty,2) );
-    //                 float addRot = ofRadToDeg(atan2(tx,-ty));
-    //                 float cx = p1x - tz*sin(ofDegToRad(rot+addRot));
-    //                 float cy = p1y + tz*cos(ofDegToRad(rot+addRot));
-    //                 float rw = ofDist(p1x, p1y, p2x, p2y) + tx*2;
-    //                 float rh = ty*2;
-
-    //                 ofLine( p1x, p1y, p2x, p2y );
-    //                 ofPushMatrix();
-    //                 ofTranslate(cx,cy);
-    //                 ofRotateZ(rot);
-    //                 ofRect( 0, 0, rw, rh );
-    //                 ofPopMatrix();
-    //                 // ofLine(x + b->position.x*scale, y + b->position.y*scale, x + blobs[nb->id].position.x*scale, y + blobs[nb->id].position.y*scale);
-    //             }
-    //         }
-    //     }
-    // }
 
 
-    ofDisableAlphaBlending();
     // INSTRUCTIONS
-
-    // instructionImg
-
     string in_img = scenes[scene].instructionImg[language][segment];
 
     if (in_img.length() < 2) {
@@ -1813,7 +1814,8 @@ void planeApp::drawScreen(int x, int y, float scale){
 
             ofSetColor(255);
             if (scene==4 && segment==1) {
-                fontBg.drawString(instruction, x+(*fgMedia[0]).position.x*scale, y+ypos*scale);
+                // FOLLOW ME
+                fontBg.drawString((*it), x+ ((*fgMedia[0]).position.x -  - textR.width/2)*scale, y+ypos*scale);
             } else {
                 fontBg.drawString((*it), x+ (projectionW/2 - textR.width/2)*scale, y+ypos*scale);
             }
@@ -2260,10 +2262,10 @@ void planeApp::keyPressed(int key){
 
 }
 
-void planeApp::guiFloatChange(const void * sender, float & v) {
+void planeApp::guiNebulaChange(int & v) {
     ofLogError() << "\t\t" << ofGetFrameNum() << "\t" << "guiFloatChange() " << v;
     // change nebula
-    nebula->opMax = nebulaOpacity;
+    nebula->opMax = nebulaOpacity/100.f;
 }
 
 
