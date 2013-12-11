@@ -13,7 +13,7 @@ void planeApp::setup(){
     ofSetFrameRate(30);
     ofLogNotice("START") << "\t" << ofGetFrameNum() << "\t" << "setup";
 
-    ofSetLogLevel(OF_LOG_SILENT);
+    ofSetLogLevel(OF_LOG_WARNING);
     ofLogNotice("START") << "\t" << ofGetFrameNum() << "\t" << "setup3";
     // OF_LOG_VERBOSE
     // OF_LOG_NOTICE
@@ -107,7 +107,7 @@ void planeApp::setup(){
 
     siteW.addListener(this,&planeApp::recalculatePerspective);
 	siteH.addListener(this,&planeApp::recalculatePerspective);
-    // nebulaOpacity.addListener(this,&planeApp::guiNebulaChange);
+    
     ofLogNotice("START") << "\t" << ofGetFrameNum() << "\t" << "3";
 
     if (!projectorOn) gui.setup("HUMANS AND PLANETS", "planets01.xml", 1104,190);
@@ -278,6 +278,7 @@ void planeApp::initScenes(){
     nebula = ofPtr<mediaElement>( new videoElement("video/NEBULA-H264-10mbps.mp4"));
     nebula->reset(true);
     nebula->opMax = nebulaOpacity/100.f;
+    nebulaOpacity.addListener(this,&planeApp::guiNebulaChange);
 
     bgMedia.push_back(ofPtr<mediaElement>( new videoElement("video/IDLE_MODE_11-half-1-H264-10mbps.mp4",false)));       // 0
     bgMedia.push_back(ofPtr<mediaElement>( new videoElement("video/IDLE_MODE_13_blue-anim-H264-10mbps.mp4",false)));    // 1
@@ -1766,9 +1767,9 @@ void planeApp::drawScreen(int x, int y, float scale){
 
 
     // BACKGROUND VIDEOS
-    // nebula->draw(x+projectionOffsetX*scale,y,scale);
     ofEnableBlendMode(OF_BLENDMODE_ADD);
-    // (*bgMedia[bgMediaId]).draw(x+projectionOffsetX*scale,y,scale);
+    nebula->draw(x+projectionOffsetX*scale,y,scale);
+    (*bgMedia[bgMediaId]).draw(x+projectionOffsetX*scale,y,scale);
     ofDisableBlendMode();
 
 
@@ -2268,10 +2269,14 @@ void planeApp::keyPressed(int key){
 }
 
 void planeApp::guiNebulaChange(int & v) {
-    ofLogError() << "\t\t" << ofGetFrameNum() << "\t" << "guiFloatChange() " << v;
-    // change nebula
+    ofLogNotice() << "\t\t" << ofGetFrameNum() << "\t" << "guiNebulaChange() " << v;
     nebula->opMax = nebulaOpacity/100.f;
 }
+
+    // try {
+    // } catch(exception& e){
+    //     ofLogError() << e.what();
+    // }
 
 
 void planeApp::printDebugInfo() {
