@@ -95,6 +95,7 @@ class planeApp : public ofBaseApp{
 		void windowResized(int w, int h);
 		void dragEvent(ofDragInfo dragInfo);
 		void gotMessage(ofMessage msg);
+		void guiFloatChange(const void * sender, float & v);
 
 		void printDebugInfo();
 
@@ -182,6 +183,7 @@ class planeApp : public ofBaseApp{
 		ofParameterGroup paramSc5;
 		ofParameterGroup paramBlob;
         ofParameter<ofColor> flashColor;
+        ofParameter<float> nebulaOpacity;
 		ofxOscReceiver receiver;
 		ofxOscSender sender;
 

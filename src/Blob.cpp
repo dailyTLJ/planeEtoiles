@@ -15,6 +15,8 @@ void Blob::init(){
 	this->lifetime = this->maxLifetime;
 	this->updated = true;
 
+    this->lost = false;
+    this->occluded = false;
     this->vel = 0;
     this->onStage = false;
 	this->frozen = false;

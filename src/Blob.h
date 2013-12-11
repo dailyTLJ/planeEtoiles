@@ -125,6 +125,7 @@ class Blob {
         int frozenStart;
         int frozenTimer;
         bool lost; 
+        bool occluded;
         
         ofEvent<int> onLost;
         ofEvent<int> onCreate;
