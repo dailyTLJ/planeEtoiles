@@ -20,19 +20,19 @@
 		<Bonus_every_X_Stars>5</Bonus_every_X_Stars>
 	<Distance_StdDev_Thresh>10</Distance_StdDev_Thresh>
 	<Freeze_MinVel>0.602041</Freeze_MinVel>
-		<Freeze_MinTime>1</Freeze_MinTime>
+		<Freeze_MinTime>2</Freeze_MinTime>
 		<Freeze_MaxTime>10</Freeze_MaxTime>
-		<Dist_StdDev>7.44898</Dist_StdDev>
-		<Movement_Thr>0.377551</Movement_Thr>
-		<NewStar_Max>30</NewStar_Max>
+		<Dist_StdDev>12.2449</Dist_StdDev>
+		<Movement_Thr>1.23469</Movement_Thr>
+		<NewStar_Max>40</NewStar_Max>
 		<Bonus_every>5</Bonus_every>
-	<Freeze_MaxVel>0.918367</Freeze_MaxVel>
+	<Freeze_MaxVel>0.244898</Freeze_MaxVel>
 	<Dist_Reward>10</Dist_Reward>
 	</Sc1_Stars>
 	<Sc2_Revolutions>
 		<spinSuccess>5</spinSuccess>
-		<spinJudgeTime>176</spinJudgeTime>
-		<spinFailure>2</spinFailure>
+		<spinJudgeTime>122</spinJudgeTime>
+		<spinFailure>5</spinFailure>
 	</Sc2_Revolutions>
 	<Sc3_Sun>
 		<Edge_Margin>21</Edge_Margin>
@@ -40,14 +40,14 @@
 	<Activity_Color_Change>13</Activity_Color_Change>
 	<freezeJudgeTime>180</freezeJudgeTime>
 		<freezeVideoSpeedMap>0.1</freezeVideoSpeedMap>
-		<runJudgeTime>24</runJudgeTime>
-		<runHogThr>2.09184</runHogThr>
+		<runJudgeTime>34</runJudgeTime>
+		<runHogThr>2.65306</runHogThr>
 		<runBgsThr>8</runBgsThr>
-	<runActThr>7</runActThr>
+	<runActThr>6</runActThr>
 	</Sc3_Sun>
 	<Sc4_Alignment>
-		<Alignm_MaxDist>108</Alignm_MaxDist>
-		<Alignm_Transition>10</Alignm_Transition>
+		<Alignm_MaxDist>77</Alignm_MaxDist>
+		<Alignm_Transition>3</Alignm_Transition>
 	<followMeSpeed>0.00612245</followMeSpeed>
 		<followMeRadius>303</followMeRadius>
 	</Sc4_Alignment>
@@ -59,11 +59,21 @@
 		<Map_Site_to_Viz_Width>2</Map_Site_to_Viz_Width>
 		<Map_Site_to_Viz_Height>2</Map_Site_to_Viz_Height>
 		<Offset_X>0</Offset_X>
-		<Offset_Y>500</Offset_Y>
-	<Map_Width>2.02041</Map_Width>
-		<Map_Height>2.04082</Map_Height>
-	<Stage_Radius>313</Stage_Radius>
+		<Offset_Y>326</Offset_Y>
+	<Map_Width>2.36735</Map_Width>
+		<Map_Height>2.79592</Map_Height>
+	<Stage_Radius>280</Stage_Radius>
 	<Y_Interpolation>5</Y_Interpolation>
 	</Dimension>
 <testMode>0</testMode>
+<configBlobserver>1</configBlobserver>
+	<Blobserver>
+		<NORMAL_noise>7</NORMAL_noise>
+		<SLOW_noise>9</SLOW_noise>
+		<ERRATIC_noise>3</ERRATIC_noise>
+		<NORMAL_measurement>4</NORMAL_measurement>
+		<SLOW_measurement>6</SLOW_measurement>
+		<ERRATIC_measurement>7</ERRATIC_measurement>
+	</Blobserver>
+<Min_LostTime>6</Min_LostTime>
 </HUMANS_AND_PLANETS>

@@ -27,7 +27,7 @@ void planeApp::setup(){
     // ofLogError()
     // ofLogFatalError()
 
-    ofSetLogLevel("BLOB", OF_LOG_WARNING);
+    ofSetLogLevel("BLOB", OF_LOG_VERBOSE);
     ofSetLogLevel("BRIDGE", OF_LOG_WARNING);
     ofSetLogLevel("TRANSITION", OF_LOG_VERBOSE);
     ofSetLogLevel("OSC", OF_LOG_WARNING);
@@ -101,10 +101,12 @@ void planeApp::setup(){
 	siteH.addListener(this,&planeApp::recalculatePerspective);
 
 
-	gui.setup("HUMANS AND PLANETS", "planets01.xml", 1604,190);
+    gui.setup("HUMANS AND PLANETS", "planets01.xml", 1104,190);
+	// gui.setup("HUMANS AND PLANETS", "planets01.xml", 1604,190);
     gui.setDefaultBackgroundColor( ofColor(0,0,50) );
     gui.add(autoplay.setup("autoplay", false)); 
     gui.add(testMode.setup("testMode", false)); 
+    gui.add(minLostTime.set( "Min LostTime", 1, 0, 50));
     gui.add(flashColor.set("Transition Flash Color",ofColor(255,200,100),ofColor(0,0),ofColor(255,255)));
 
     paramBasic.setName("Dimension"); 
@@ -114,10 +116,19 @@ void planeApp::setup(){
     paramBasic.add(mapSiteW.set( "Map Width", 2, 0, 4));
     paramBasic.add(mapSiteH.set( "Map Height", 2, 0, 4));
     paramBasic.add(offsetX.set( "Offset X", 0, -500, 500));
-    paramBasic.add(offsetY.set( "Offset Y", 0, -500, 500));
+    paramBasic.add(offsetY.set( "Offset Y", 0, -500, 1000));
     paramBasic.add(y_mean.set( "Y Interpolation", 5, 1, 15));
     gui.add(paramBasic);
 
+    paramBlob.setName("Blobserver"); 
+    gui.add(configBlobserver.setup("configBlobserver", false)); 
+    paramBlob.add(noiseNormal.set( "NORMAL noise", 7, 0, 10));
+    paramBlob.add(noiseSlow.set( "SLOW noise", 9, 0, 10));
+    paramBlob.add(noiseErratic.set( "ERRATIC noise", 3, 0, 10));
+    paramBlob.add(measurementNormal.set( "NORMAL measurement", 4, 0, 10));
+    paramBlob.add(measurementSlow.set( "SLOW measurement", 6, 0, 10));
+    paramBlob.add(measurementErratic.set( "ERRATIC measurement", 7, 0, 10));
+    gui.add(paramBlob);
     // paramTiming.setName("Timing");
     // gui.add(paramTiming);
 
@@ -139,7 +150,7 @@ void planeApp::setup(){
     gui.add(paramSc2);
 
     paramSc3.setName("Sc3 Sun");
-    paramSc3.add(minLostTime.set( "Min LostTime", 1, 0, 10));
+
     // paramSc3.add(edgeMargin.set( "Edge Margin", 50, 0, 150));
     paramSc3.add(activityColorCh.set( "Activity Color Change", 10, 0, 30));
     paramSc3.add(freezeJudgeTime.set( "freezeJudgeTime", 180, 0, 240));
@@ -1321,9 +1332,15 @@ void planeApp::endSegment(int direction) {
             (*fgMedia[fgMedia.size()-1]).autoDestroy(true);
             (*fgMedia[fgMedia.size()-1]).movieEndTrigger=true;
             ofAddListener( (*fgMedia[fgMedia.size()-1]).fadeOutEnd, this, &planeApp::bgMediaSwap );
-        } else if (scene==5) {
+        } else if (scene==4) {
+            // fade out all planets
+            for (vector<ofPtr<mediaElement> >::iterator it = fgMedia.begin(); it != fgMedia.end(); ++it) {
+                if (!(**it).dead) ((((**it)).*((**it)).outroTransformation))();
+            }
             moveOn = true;
-            sceneChange = true;
+        } else if (scene==5) {
+            // dont' fade out all shooting stars
+            moveOn = true;
         } else {
             int tmp = -1;
             fgMediaFadedOut(tmp);   // TODO clean up, just need to hand back ref. of integer
@@ -1603,7 +1620,9 @@ void planeApp::draw(){
 
         ofBackground(0,50,150);
         // ofBackground(0);
-        int offsx = 500; int offsy = 10;
+        // int offsx = 500; 
+        int offsx = 10; 
+        int offsy = 10;
 
         ofFill(); ofSetColor(255);
         ofDrawBitmapString(ofToString(ofGetFrameRate()), offsx, offsy);
@@ -1659,9 +1678,9 @@ void planeApp::drawScreen(int x, int y, float scale){
         ofRect(x,y,projectionW*scale,projectionH*scale);
     }
 
-    nebula->draw(x+projectionOffsetX*scale,y,scale);
+    // nebula->draw(x+projectionOffsetX*scale,y,scale);
     ofEnableBlendMode(OF_BLENDMODE_ADD);
-    (*bgMedia[bgMediaId]).draw(x+projectionOffsetX*scale,y,scale);
+    // (*bgMedia[bgMediaId]).draw(x+projectionOffsetX*scale,y,scale);
 
     // foreground videos
     for (vector<ofPtr<mediaElement> >::iterator it = fgMedia.begin(); it != fgMedia.end(); ++it) {
@@ -2045,87 +2064,93 @@ ofPoint planeApp::blobMapToScreen(ofPoint &o) {
 
 void planeApp::configureBlobserver() {
 
-    ofLogNotice("TRANSITION") << "\t" << ofGetFrameNum() << "\t" << "configureBlobserver()";
+    if (configBlobserver) {
 
-    // standard setting:
-    bool erratic = false;  // else slow movements
-    bool allowLessFP = false;        // allow more false positives
-    bool slow = false;              // extra slow?
-    
-    if (scene==0) {                 // IDLE
-    
-    } else if (scene==1) {          // STARS
+        ofLogNotice("TRANSITION") << "\t" << ofGetFrameNum() << "\t" << "configureBlobserver()";
+
+        // standard setting:
+        bool erratic = false;  // else slow movements
+        bool allowLessFP = false;        // allow more false positives
+        bool slow = false;              // extra slow?
         
-        if (segment==0) {               // STAND STILL
+        if (scene==0) {                 // IDLE
+        
+        } else if (scene==1) {          // STARS
             slow = true;
-        } else if (segment==1) {        // STAND STILL SOME MORE
+            
+            if (segment==0) {               // STAND STILL
+                slow = true;
+            } else if (segment==1) {        // STAND STILL SOME MORE
+                slow = true;
+            } else if (segment==2) {        // KEEP THE DISTANCE
+            } else if (segment==3) {        // KEEP THE DISTANCE P2
+            }
+
+        } else if (scene==2) {          // REVOLUTION
+
+            if (segment==0) {               // SPIN
+                erratic = true;
+            } else if (segment==1) {        // LET GO
+                erratic = true;
+            }
+
+        } else if (scene==3) {          // SUN
+
+            if (segment==0) {               // STAND ON ONE LEG
+            } else if (segment==1) {        // HOP
+                erratic = true;
+                allowLessFP = true;
+            } else if (segment==2) {        // HOP IN UNISON
+                erratic = true;
+                allowLessFP = true;
+            } else if (segment==3) {        // FREEZE
+            } else if (segment==4) {        // RUN EVERYWHERE
+            } else if (segment==5) {        // FREEZE
+            }
+
+        } else if (scene==4) {          // ALIGNMENT
+
             slow = true;
-        } else if (segment==2) {        // KEEP THE DISTANCE
-        } else if (segment==3) {        // KEEP THE DISTANCE P2
-        }
 
-    } else if (scene==2) {          // REVOLUTION
+            if (segment==0) {               // LINE UP IN FRONT OF ME
+            } else if (segment==1) {        // FOLLOW ME
+            } else if (segment==2) {        // STEP OUT OF THE LINE
+            } else if (segment==3) {        // STEP INTO THE LINE
+            } else if (segment==4) {        // STEP OUT OF THE LINE
+            } else if (segment==5) {        // STEP INTO THE LINE
+            } else if (segment==6) {        // DISPERSE SLOWLY
+            }
 
-        if (segment==0) {               // SPIN
-            erratic = true;
-        } else if (segment==1) {        // LET GO
-            erratic = true;
-        }
-
-    } else if (scene==3) {          // SUN
-
-        if (segment==0) {               // STAND ON ONE LEG
-        } else if (segment==1) {        // HOP
+        } else if (scene==5) {          // SHOOTING STARS
             erratic = true;
             allowLessFP = true;
-        } else if (segment==2) {        // HOP IN UNISON
-            erratic = true;
-            allowLessFP = true;
-        } else if (segment==3) {        // FREEZE
-        } else if (segment==4) {        // RUN EVERYWHERE
-        } else if (segment==5) {        // FREEZE
+            if (segment==0) {               // MOVE LIKE A SHOOTING STAR
+            } else if (segment==1) {        // DROP
+            }
+
         }
 
-    } else if (scene==4) {          // ALIGNMENT
-
-        if (segment==0) {               // LINE UP IN FRONT OF ME
-        } else if (segment==1) {        // FOLLOW ME
-        } else if (segment==2) {        // STEP OUT OF THE LINE
-        } else if (segment==3) {        // STEP INTO THE LINE
-        } else if (segment==4) {        // STEP OUT OF THE LINE
-        } else if (segment==5) {        // STEP INTO THE LINE
-        } else if (segment==6) {        // DISPERSE SLOWLY
+        if (slow) {
+            // 
+            sendOscMsgToHog("setParameter", "processNoiseCov", pow(10, -noiseSlow));
+            sendOscMsgToHog("setParameter", "measurementNoiseCov", pow(10, -measurementSlow));
+        } else if (erratic) {
+            // ERRATIC FAST MOVEMENTS, allow for jumping, running, etc.
+            sendOscMsgToHog("setParameter", "processNoiseCov", pow(10, -noiseErratic));
+            sendOscMsgToHog("setParameter", "measurementNoiseCov", pow(10, -measurementErratic));
+        } else {
+            // NORMAL SETTING : SLOW MOVEMENTS, don't allow for erratic movements
+            sendOscMsgToHog("setParameter", "processNoiseCov", pow(10, -noiseNormal));
+            sendOscMsgToHog("setParameter", "measurementNoiseCov", pow(10, -measurementNormal));
         }
 
-    } else if (scene==5) {          // SHOOTING STARS
-        erratic = true;
-        allowLessFP = true;
-        if (segment==0) {               // MOVE LIKE A SHOOTING STAR
-        } else if (segment==1) {        // DROP
+        if (allowLessFP) {
+            // ALLOW FOR LESS FALSE POSITIVES (jumping)
+            // sendOscMsgToHog("setParameter", "margin", 0.3);
+        } else {
+            // NORMAL SETTING : MARGIN
+            sendOscMsgToHog("setParameter", "margin", 0.0);
         }
-
-    }
-
-    if (slow) {
-        // 
-        sendOscMsgToHog("setParameter", "processNoiseCov", pow(10, -9));
-        sendOscMsgToHog("setParameter", "measurementNoiseCov", pow(10, -6));
-    } else if (erratic) {
-        // ERRATIC FAST MOVEMENTS, allow for jumping, running, etc.
-        sendOscMsgToHog("setParameter", "processNoiseCov", pow(10, -3));
-        sendOscMsgToHog("setParameter", "measurementNoiseCov", pow(10, -7));
-    } else {
-        // NORMAL SETTING : SLOW MOVEMENTS, don't allow for erratic movements
-        sendOscMsgToHog("setParameter", "processNoiseCov", pow(10, -7));
-        sendOscMsgToHog("setParameter", "measurementNoiseCov", pow(10, -4));
-    }
-
-    if (allowLessFP) {
-        // ALLOW FOR LESS FALSE POSITIVES (jumping)
-        sendOscMsgToHog("setParameter", "margin", 0.3);
-    } else {
-        // NORMAL SETTING : MARGIN
-        sendOscMsgToHog("setParameter", "margin", 0.0);
     }
 
 }

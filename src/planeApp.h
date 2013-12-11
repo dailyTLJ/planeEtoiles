@@ -179,6 +179,7 @@ class planeApp : public ofBaseApp{
 		ofParameterGroup paramSc3;
 		ofParameterGroup paramSc4;
 		ofParameterGroup paramSc5;
+		ofParameterGroup paramBlob;
         ofParameter<ofColor> flashColor;
 		ofxOscReceiver receiver;
 		ofxOscSender sender;
@@ -221,6 +222,15 @@ class planeApp : public ofBaseApp{
 		ofParameter<float> followMeSpeed;
 		ofParameter<int> followMeRadius;
 		float followMe;
+
+		ofxToggle configBlobserver; 
+		ofParameter<int> noiseSlow;
+		ofParameter<int> noiseNormal;
+		ofParameter<int> noiseErratic;
+
+		ofParameter<int> measurementSlow;
+		ofParameter<int> measurementNormal;
+		ofParameter<int> measurementErratic;
 
 		std::vector< ofPtr<mediaElement> > fgMedia;
 		std::vector< ofPtr<mediaElement> > bgMedia;
