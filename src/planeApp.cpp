@@ -49,6 +49,8 @@ void planeApp::setup(){
 	fontSm.setLineHeight(16.0f);
 	fontSm.setLetterSpacing(1.037);
 
+    instructionImg.loadImage("img/placeholder_letgo.jpg");
+
     projectorOn = false;
     language = 1;
     processing = true;
@@ -322,7 +324,9 @@ void planeApp::initScenes(){
     revolution.analysis[0] = "* \n-> 20 sec";
     revolution.length[0] = 20;
     revolution.instructions[0][1] = "Let go";
+    revolution.instructionImg[0][1] = "placeholder_letgo.jpg";
     revolution.instructions[1][1] = "Lâchez tout";
+    revolution.instructionImg[1][1] = "placeholder_letgo.jpg";
     revolution.analysis[1] = "* \n-> 20 sec";
     revolution.length[1] = 20;
     scenes[n] = revolution;
@@ -346,7 +350,9 @@ void planeApp::initScenes(){
     sun.analysis[2] = "* onLost event\n-> 20 sec";
     sun.length[2] = 20;
     sun.instructions[0][3] = "Freeze";
+    sun.instructionImg[0][3] = "placeholder_stop.jpg";
     sun.instructions[1][3] = "Stop!";
+    sun.instructionImg[1][3] = "placeholder_stop.jpg";
     sun.analysis[3] = "* velocity < freezeMaxVel\n-> 20 sec || all frozen";
     sun.length[3] = 20;
     sun.instructions[0][4] = "Run in every\ndirection at once.";
@@ -354,7 +360,9 @@ void planeApp::initScenes(){
     sun.analysis[4] = "* \n-> 40 sec";
     sun.length[4] = 40;
     sun.instructions[0][5] = "Freeze!";
+    sun.instructionImg[0][5] = "placeholder_stop.jpg";
     sun.instructions[1][5] = "Stop!";
+    sun.instructionImg[1][5] = "placeholder_stop.jpg";
     sun.analysis[5] = "* velocity < freezeMaxVel\n-> 20 sec || all frozen";
     sun.length[5] = 13;
     scenes[n] = sun;
@@ -410,7 +418,9 @@ void planeApp::initScenes(){
     shooting.analysis[1] = "* onLost event\n-> 15 sec";
     shooting.length[1] = 15;
     shooting.instructions[0][2] = "Look at the sky\nExhale";
+    shooting.instructionImg[0][2] = "placeholder_exhale.jpg";
     shooting.instructions[1][2] = "Regardez le ciel\nExpirez";
+    shooting.instructionImg[1][2] = "placeholder_exhale.jpg";
     shooting.analysis[2] = "- \n-> 15 sec";
     shooting.length[2] = 15;
     shooting.instructions[0][3] = "Stand up";
@@ -807,7 +817,7 @@ void planeApp::blobOnLost(int & blobID) {
                 (*fgMedia[fgMedia.size()-1]).setDisplay(blobMapToScreen(blobs[blobID].position), true);
                 (*fgMedia[fgMedia.size()-1]).autoDestroy(true);
                 (*fgMedia[fgMedia.size()-1]).reset();
-                if (segment==2) (*fgMedia[0]).bounce(); // sun video = [0]
+                // if (segment==2) (*fgMedia[0]).bounce(); // sun video = [0]
             }
         } else if (scene==5) {
             // SHOOTING STARS
@@ -1453,6 +1463,14 @@ void planeApp::initSegment(){
     flash = true;       //
     segmentStart = ofGetUnixTime();
 
+    // INSTRUCTION IMAGE, if present
+    string in_img = scenes[scene].instructionImg[language][segment];
+    if (in_img.length() > 2) {
+        instructionImg.loadImage("img/" + in_img);
+        // instructionImg.loadImage("img/placeholder_stop.jpg");
+        ofLogNotice("TRANSITION") << "\t" << ofGetFrameNum() << "\t" << "load instruction image " << in_img;
+    }
+
     // add FG videos
     if (scene==2) {
         // REVOLUTIONS
@@ -1732,68 +1750,86 @@ void planeApp::drawScreen(int x, int y, float scale){
         if (!(**it).dead && !(**it).blend) (**it).draw(x, y, scale);
     }
 
-    // draw starBridge dummies
-    // extra things to draw?
-    if (drawBridge && scene==1 && segment>1) {
-        for(std::map<int, Blob>::iterator it = blobs.begin(); it != blobs.end(); ++it){
-            Blob* b = &it->second;
-            for(std::map<int, Neighbor>::iterator iter = b->neighbors.begin(); iter != b->neighbors.end(); ++iter){
-                Neighbor* nb = &iter->second;
-                if (nb->steadyDistance) {
-                    // draw a line between blob and steady neighbor
-                    ofNoFill(); ofSetColor(255);
-                    float p1x = x + blobMapToScreen(b->position).x * scale;
-                    float p1y = y + blobMapToScreen(b->position).y * scale;
-                    float p2x = x + blobMapToScreen(blobs[nb->id].position).x * scale;
-                    float p2y = y + blobMapToScreen(blobs[nb->id].position).y * scale;
+    // // draw starBridge dummies
+    // // extra things to draw?
+    // if (drawBridge && scene==1 && segment>1) {
+    //     for(std::map<int, Blob>::iterator it = blobs.begin(); it != blobs.end(); ++it){
+    //         Blob* b = &it->second;
+    //         for(std::map<int, Neighbor>::iterator iter = b->neighbors.begin(); iter != b->neighbors.end(); ++iter){
+    //             Neighbor* nb = &iter->second;
+    //             if (nb->steadyDistance) {
+    //                 // draw a line between blob and steady neighbor
+    //                 ofNoFill(); ofSetColor(255);
+    //                 float p1x = x + blobMapToScreen(b->position).x * scale;
+    //                 float p1y = y + blobMapToScreen(b->position).y * scale;
+    //                 float p2x = x + blobMapToScreen(blobs[nb->id].position).x * scale;
+    //                 float p2y = y + blobMapToScreen(blobs[nb->id].position).y * scale;
 
-                    float rot = -ofRadToDeg(atan2(p2x-p1x,p2y-p1y)) + 90;
-                    float tx = bridgeX;
-                    float ty = bridgeY;
-                    float tz = sqrt( pow(tx,2) + pow(ty,2) );
-                    float addRot = ofRadToDeg(atan2(tx,-ty));
-                    float cx = p1x - tz*sin(ofDegToRad(rot+addRot));
-                    float cy = p1y + tz*cos(ofDegToRad(rot+addRot));
-                    float rw = ofDist(p1x, p1y, p2x, p2y) + tx*2;
-                    float rh = ty*2;
+    //                 float rot = -ofRadToDeg(atan2(p2x-p1x,p2y-p1y)) + 90;
+    //                 float tx = bridgeX;
+    //                 float ty = bridgeY;
+    //                 float tz = sqrt( pow(tx,2) + pow(ty,2) );
+    //                 float addRot = ofRadToDeg(atan2(tx,-ty));
+    //                 float cx = p1x - tz*sin(ofDegToRad(rot+addRot));
+    //                 float cy = p1y + tz*cos(ofDegToRad(rot+addRot));
+    //                 float rw = ofDist(p1x, p1y, p2x, p2y) + tx*2;
+    //                 float rh = ty*2;
 
-                    ofLine( p1x, p1y, p2x, p2y );
-                    ofPushMatrix();
-                    ofTranslate(cx,cy);
-                    ofRotateZ(rot);
-                    ofRect( 0, 0, rw, rh );
-                    ofPopMatrix();
-                    // ofLine(x + b->position.x*scale, y + b->position.y*scale, x + blobs[nb->id].position.x*scale, y + blobs[nb->id].position.y*scale);
-                }
-            }
-        }
-    }
+    //                 ofLine( p1x, p1y, p2x, p2y );
+    //                 ofPushMatrix();
+    //                 ofTranslate(cx,cy);
+    //                 ofRotateZ(rot);
+    //                 ofRect( 0, 0, rw, rh );
+    //                 ofPopMatrix();
+    //                 // ofLine(x + b->position.x*scale, y + b->position.y*scale, x + blobs[nb->id].position.x*scale, y + blobs[nb->id].position.y*scale);
+    //             }
+    //         }
+    //     }
+    // }
 
 
     ofDisableAlphaBlending();
     // INSTRUCTIONS
-    int ypos = 1742;
-    int textLineH = 40;
-    ofFill(); 
-    string instruction = scenes[scene].instructions[language][segment];
-    vector< string > instructionLine = ofSplitString(instruction, "\n");
-    
-    for (vector<string>::iterator it = instructionLine.begin() ; it != instructionLine.end(); ++it) {
-    
-        ofRectangle textR = fontBg.getStringBoundingBox((*it),0, 0);
 
-        // background for testing, positioning of text
-        // ofSetColor(255,0,0);
-        // ofRect(x+ (projectionW/2 - textR.width/2)*scale, y+(ypos-textLineH)*scale, textR.width*scale, textR.height*scale);
+    // instructionImg
 
-        ofSetColor(255);
-        if (scene==4 && segment==1) {
-            fontBg.drawString(instruction, x+(*fgMedia[0]).position.x*scale, y+ypos*scale);
-        } else {
-            fontBg.drawString((*it), x+ (projectionW/2 - textR.width/2)*scale, y+ypos*scale);
+    string in_img = scenes[scene].instructionImg[language][segment];
+
+    if (in_img.length() < 2) {
+
+        int ypos = 1742;
+        int textLineH = 40;
+        ofFill();
+        string instruction = scenes[scene].instructions[language][segment];
+        vector< string > instructionLine = ofSplitString(instruction, "\n");
+
+        for (vector<string>::iterator it = instructionLine.begin() ; it != instructionLine.end(); ++it) {
+
+            ofRectangle textR = fontBg.getStringBoundingBox((*it),0, 0);
+
+            // background for testing, positioning of text
+            // ofSetColor(255,0,0);
+            // ofRect(x+ (projectionW/2 - textR.width/2)*scale, y+(ypos-textLineH)*scale, textR.width*scale, textR.height*scale);
+
+            ofSetColor(255);
+            if (scene==4 && segment==1) {
+                fontBg.drawString(instruction, x+(*fgMedia[0]).position.x*scale, y+ypos*scale);
+            } else {
+                fontBg.drawString((*it), x+ (projectionW/2 - textR.width/2)*scale, y+ypos*scale);
+            }
+            ypos += textLineH;
         }
-        ypos += textLineH;
+
+    } else {
+        ofEnableBlendMode(OF_BLENDMODE_ADD);
+        ofFill();
+        // ofSetColor(255,0,0);
+        // ofRect(x+400*scale, y+300*scale, 500*scale, 1000*scale);
+        ofSetColor(255,255,255);
+        instructionImg.draw(x,y, projectionW*scale, projectionH*scale);
+        ofDisableBlendMode();
     }
+
 
     // extra debug information
     fontSm.drawString(scenes[scene].analysis[segment], x+100*scale, y+(projectionH-150)*scale);

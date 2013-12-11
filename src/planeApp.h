@@ -26,6 +26,7 @@ class sceneInfo {
         int segments;
         int length[7];
         string instructions[2][7];
+        string instructionImg[2][7];
         string analysis[7];
 };
 
@@ -238,6 +239,7 @@ class planeApp : public ofBaseApp{
 		std::vector< ofPtr<mediaElement> > fgMedia;
 		std::vector< ofPtr<mediaElement> > bgMedia;
 		ofPtr<mediaElement> nebula;
+		ofImage instructionImg;
 		int bgMediaId;
 		// std::map<int, std::vector<ofPtr<mediaElement> > > bgVideos;
 
