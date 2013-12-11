@@ -31,7 +31,7 @@ void planeApp::setup(){
     ofSetLogLevel("BRIDGE", OF_LOG_WARNING);
     ofSetLogLevel("TRANSITION", OF_LOG_VERBOSE);
     ofSetLogLevel("OSC", OF_LOG_WARNING);
-    ofSetLogLevel("interaction", OF_LOG_VERBOSE);
+    ofSetLogLevel("interaction", OF_LOG_WARNING);
     ofSetLogLevel("videoElement", OF_LOG_WARNING);
     ofSetLogLevel("mediaElement", OF_LOG_WARNING);
 
@@ -46,6 +46,7 @@ void planeApp::setup(){
 	fontSm.setLineHeight(16.0f);
 	fontSm.setLetterSpacing(1.037);
 
+    projectorOn = true;
     language = 0;
     processing = true;
     oscMsgReceived = false;
@@ -101,8 +102,8 @@ void planeApp::setup(){
 	siteH.addListener(this,&planeApp::recalculatePerspective);
 
 
-    gui.setup("HUMANS AND PLANETS", "planets01.xml", 1104,190);
-	// gui.setup("HUMANS AND PLANETS", "planets01.xml", 1604,190);
+    if (!projectorOn) gui.setup("HUMANS AND PLANETS", "planets01.xml", 1104,190);
+	else gui.setup("HUMANS AND PLANETS", "planets01.xml", 1604,190);
     gui.setDefaultBackgroundColor( ofColor(0,0,50) );
     gui.add(autoplay.setup("autoplay", false)); 
     gui.add(testMode.setup("testMode", false)); 
@@ -122,11 +123,11 @@ void planeApp::setup(){
 
     paramBlob.setName("Blobserver"); 
     gui.add(configBlobserver.setup("configBlobserver", false)); 
-    paramBlob.add(noiseNormal.set( "NORMAL noise", 7, 0, 10));
     paramBlob.add(noiseSlow.set( "SLOW noise", 9, 0, 10));
-    paramBlob.add(noiseErratic.set( "ERRATIC noise", 3, 0, 10));
-    paramBlob.add(measurementNormal.set( "NORMAL measurement", 4, 0, 10));
     paramBlob.add(measurementSlow.set( "SLOW measurement", 6, 0, 10));
+    paramBlob.add(noiseNormal.set( "NORMAL noise", 7, 0, 10));
+    paramBlob.add(measurementNormal.set( "NORMAL measurement", 4, 0, 10));
+    paramBlob.add(noiseErratic.set( "ERRATIC noise", 3, 0, 10));
     paramBlob.add(measurementErratic.set( "ERRATIC measurement", 7, 0, 10));
     gui.add(paramBlob);
     // paramTiming.setName("Timing");
@@ -138,8 +139,8 @@ void planeApp::setup(){
     paramSc1.add(freezeMaxTime.set( "Freeze MaxTime",10, 0, 30 ));
     paramSc1.add(newStarMax.set( "NewStar Max", 30, 1, 40));
     // paramSc1.add(newStarBonus.set( "Bonus every", 5, 1, 40));
-    paramSc1.add(distStdDevThr.set( "Dist StdDev", 10, 0, 20));
-    paramSc1.add(movingThr.set( "Movement Thr", 0.1, 0, 2));
+    paramSc1.add(distStdDevThr.set( "Dist StdDev", 10, 0, 50));
+    paramSc1.add(movingThr.set( "Movement Thr", 0.1, 0, 3));
     paramSc1.add(steadyRewardTime.set( "Dist Reward", 2, 0, 10));
     gui.add(paramSc1);
 
@@ -557,6 +558,7 @@ void planeApp::update(){
                     // set planetCnt based on activityCnt
                     if (activityCnt >= spinSuccess) planetCnt++;
                     else if (activityCnt < spinFailure) planetCnt--;
+                    if (activityCnt==0) planetCnt=0;
                     if (planetCnt>5) planetCnt = 5;
                     else if (planetCnt<0) planetCnt = 0;
                     if (oldCnt!=planetCnt) positionRevolutions();
@@ -581,6 +583,11 @@ void planeApp::update(){
                 float videoSpeed = (hogAvVel<0.1) ? 0.1 : 0.1+hogAvVel*freezeVideoSpeedMap;
                 (*fgMedia[0]).movie->setSpeed(videoSpeed);
                 ofLogNotice("interaction") << "\t" << ofGetFrameNum() << "\t" << "\tfreezeJudge:\thogAvVel " << hogAvVel << " (" << blobsOnStage << ")\tvideoSpeed " << videoSpeed;
+            }
+            if (hogAvVel < freezeMaxVel) {
+                success = true;
+            } else {
+                success = false;
             }
         } else if (scene==3 && segment==4) {
             if (!transition && ofGetFrameNum()%runJudgeTime==0) {
@@ -949,16 +956,22 @@ void planeApp::blobOnFreeze(int & blobID) {
                 if (segment==1) successCnt++;
             }
         } else if (scene==3) {
-            if ((segment==4 || segment==6) && !success) {
+            if ((segment==3 || segment==5)) {
                 // FREEZE!
                 // check if all blobs are frozen
                 // frozen
-                bool allFrozen = true;
-                for(std::map<int, Blob>::iterator it = blobs.begin(); it != blobs.end(); ++it){
-                    Blob* b = &it->second;
-                    if (!b->frozen && b->onStage) allFrozen = false;
-                }
-                if (allFrozen) success = true;
+                // if (hogAvVel < freezeMaxVel) {
+                //     success = true;
+                // } else {
+                //     success = false;
+                // }
+
+                // bool allFrozen = true;
+                // for(std::map<int, Blob>::iterator it = blobs.begin(); it != blobs.end(); ++it){
+                //     Blob* b = &it->second;
+                //     if (!b->frozen && b->onStage) allFrozen = false;
+                // }
+                // if (allFrozen) success = true;
             }
         }
     }
@@ -981,6 +994,10 @@ void planeApp::blobUnFreeze(int & blobID) {
                     blobs[blobID].mediaLink = ofPtr<mediaElement>();
                 }
             }
+        } else if (scene==3) {
+            // if ((segment==3 || segment==5)) {
+            //     success = false;
+            // }
         }
     }
 }
@@ -1117,8 +1134,16 @@ void planeApp::positionRevolutions() {
 
         // there should only be 5 fgMedia elements
         for (unsigned int i=0; i<fgMedia.size(); i++) {
+            bool prevHide = (*fgMedia[i]).hide;
             (*fgMedia[i]).hide = true;
-            if (i < planetCnt) (*fgMedia[i]).hide = false;
+            if (i < planetCnt) {
+                (*fgMedia[i]).hide = false;
+                (*fgMedia[i]).fadeIn();
+            } else {
+                if (prevHide != true) {
+                    (*fgMedia[i]).fadeOut();
+                }
+            }
             (*fgMedia[i]).rotation = 0;
         }
 
@@ -1165,6 +1190,10 @@ void planeApp::videoFollowBlob(int & blobID) {
                 // PLANETS aligned on vertical, move up down
                 p.y = blobMapToScreen(blobs[blobID].position).x * (16.0/9.0);
                 p.x = offsetX + projectionW/2.0;
+            } else if (scene==4 && segment==0) {
+                // PLANETS aligned on horizontal
+                p.y = projectionH/2;
+                p.x = blobMapToScreen(blobs[blobID].position).x;
             } else {
                 p = blobMapToScreen(blobs[blobID].position);
             }
@@ -1440,7 +1469,7 @@ void planeApp::initSegment(){
         // SUN, load sun as fgMedia
         if (sceneChange) {
             
-            fgMedia.push_back(ofPtr<mediaElement>( new videoElement("video/4_sun/SUN_stand_jump-loop_1-qtPNG.mov",false)));
+            fgMedia.push_back(ofPtr<mediaElement>( new videoElement("video/4_sun/SUN_stand_jump-loop_2-qtPNG.mov",false)));
             (*fgMedia[fgMedia.size()-1]).setDisplay(projectionW/2,projectionH/2, true);
             (*fgMedia[fgMedia.size()-1]).reset();
         } else if (segment==3) {
@@ -1620,8 +1649,8 @@ void planeApp::draw(){
 
         ofBackground(0,50,150);
         // ofBackground(0);
-        // int offsx = 500; 
-        int offsx = 10; 
+        int offsx = 500; 
+        if(!projectorOn) offsx = 10; 
         int offsy = 10;
 
         ofFill(); ofSetColor(255);
@@ -2055,7 +2084,8 @@ bool planeApp::allBlobsAlignedWith(ofPoint &p) {
 ofPoint planeApp::blobMapToScreen(ofPoint &o) {
     ofPoint p;
     p.x = projectionW - (offsetX + o.x * mapSiteW);
-    p.y = offsetY + o.y * mapSiteH;
+    // p.y = offsetY + o.y * mapSiteH;
+    p.y = projectionH - (offsetY + o.y * mapSiteW);
     return p;
 }
 

@@ -1,5 +1,5 @@
 <HUMANS_AND_PLANETS>
-	<autoplay>1</autoplay>
+	<autoplay>0</autoplay>
 	<Transition_Flash_Color>255, 200, 100, 0</Transition_Flash_Color>
 	<Global>
 		<Site_Width>500</Site_Width>
@@ -22,28 +22,28 @@
 	<Freeze_MinVel>0.602041</Freeze_MinVel>
 		<Freeze_MinTime>2</Freeze_MinTime>
 		<Freeze_MaxTime>10</Freeze_MaxTime>
-		<Dist_StdDev>12.2449</Dist_StdDev>
-		<Movement_Thr>1.23469</Movement_Thr>
+		<Dist_StdDev>36.2245</Dist_StdDev>
+		<Movement_Thr>1.5</Movement_Thr>
 		<NewStar_Max>40</NewStar_Max>
 		<Bonus_every>5</Bonus_every>
-	<Freeze_MaxVel>0.244898</Freeze_MaxVel>
+	<Freeze_MaxVel>0.321429</Freeze_MaxVel>
 	<Dist_Reward>10</Dist_Reward>
 	</Sc1_Stars>
 	<Sc2_Revolutions>
-		<spinSuccess>5</spinSuccess>
-		<spinJudgeTime>122</spinJudgeTime>
-		<spinFailure>5</spinFailure>
+		<spinSuccess>3</spinSuccess>
+		<spinJudgeTime>68</spinJudgeTime>
+		<spinFailure>1</spinFailure>
 	</Sc2_Revolutions>
 	<Sc3_Sun>
 		<Edge_Margin>21</Edge_Margin>
 	<Min_LostTime>1</Min_LostTime>
 	<Activity_Color_Change>13</Activity_Color_Change>
-	<freezeJudgeTime>180</freezeJudgeTime>
+	<freezeJudgeTime>75</freezeJudgeTime>
 		<freezeVideoSpeedMap>0.1</freezeVideoSpeedMap>
-		<runJudgeTime>34</runJudgeTime>
-		<runHogThr>2.65306</runHogThr>
+		<runJudgeTime>30</runJudgeTime>
+		<runHogThr>2.70408</runHogThr>
 		<runBgsThr>8</runBgsThr>
-	<runActThr>6</runActThr>
+	<runActThr>3</runActThr>
 	</Sc3_Sun>
 	<Sc4_Alignment>
 		<Alignm_MaxDist>77</Alignm_MaxDist>
@@ -75,5 +75,5 @@
 		<SLOW_measurement>6</SLOW_measurement>
 		<ERRATIC_measurement>7</ERRATIC_measurement>
 	</Blobserver>
-<Min_LostTime>6</Min_LostTime>
+<Min_LostTime>1</Min_LostTime>
 </HUMANS_AND_PLANETS>

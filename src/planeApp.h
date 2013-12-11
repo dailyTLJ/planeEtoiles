@@ -102,6 +102,7 @@ class planeApp : public ofBaseApp{
 
 		int language;
 
+		bool projectorOn;
 		int projectionW;
         int projectionH;
         int projectionOffsetX;
