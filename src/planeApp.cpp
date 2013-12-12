@@ -29,12 +29,12 @@ void planeApp::setup(){
     // ofLogFatalError()
     ofLogNotice("START") << "\t" << ofGetFrameNum() << "\t" << "0";
 
-    ofSetLogLevel("BLOB", OF_LOG_VERBOSE);
+    ofSetLogLevel("BLOB", OF_LOG_WARNING);
     ofSetLogLevel("BRIDGE", OF_LOG_WARNING);
     ofSetLogLevel("TRANSITION", OF_LOG_VERBOSE);
     ofSetLogLevel("OSC", OF_LOG_WARNING);
     ofSetLogLevel("interaction", OF_LOG_WARNING);
-    ofSetLogLevel("videoElement", OF_LOG_VERBOSE);
+    ofSetLogLevel("videoElement", OF_LOG_WARNING);
     ofSetLogLevel("mediaElement", OF_LOG_WARNING);
 
 	ofTrueTypeFont::setGlobalDpi(72);
@@ -168,8 +168,8 @@ void planeApp::setup(){
     paramSc3.add(minLostHop.set("MinLost HOP", 1, 0, 10));
     paramSc3.add(activityColorCh.set( "Activity Color Change", 10, 0, 30));
     paramSc3.add(freezeAllMaxVel.set( "FreezeAllMaxVel",0.1, 0, 3.0 ));
-    paramSc3.add(freezeJudgeTime.set( "freezeJudgeTime", 180, 0, 240));
-    paramSc3.add(freezeVideoSpeedMap.set( "freezeVideoSpeedMap", 0.1, 0, 1));
+    // paramSc3.add(freezeJudgeTime.set( "freezeJudgeTime", 180, 0, 240));
+    // paramSc3.add(freezeVideoSpeedMap.set( "freezeVideoSpeedMap", 0.1, 0, 1));
     paramSc3.add(runJudgeTime.set( "runJudgeTime", 80, 0, 240));
     paramSc3.add(runHogThr.set( "runHogThr", 1.0, 0, 10));
     paramSc3.add(runBgsThr.set( "runBgsThr", 3.0, 0, 10));
@@ -581,6 +581,10 @@ void planeApp::update(){
                     endSegment(1);
                 }
             }
+        } else if (scene==4) {
+            if (autoplay && success && !transition) {
+                // TODO
+            }
         }
 
 
@@ -630,25 +634,25 @@ void planeApp::update(){
             }
         } else if (scene==3 && (segment==3 || segment==5)) {
             // FREEZE
-            if (!transition && ofGetFrameNum()%freezeJudgeTime==0) {
-                // hogAvVel influences displaySpeed of sun-movie
-                float videoSpeed = (hogAvVel<0.1) ? 0.1 : 0.1+hogAvVel*freezeVideoSpeedMap;
-                (*fgMedia[0]).movie->setSpeed(videoSpeed);
-                ofLogNotice("interaction") << "\t" << ofGetFrameNum() << "\t" << "\tfreezeJudge:\thogAvVel " << hogAvVel << " (" << blobsOnStage << ")\tvideoSpeed " << videoSpeed;
-            }
-            if (hogAvVel < freezeAllMaxVel) {
-                success = true;
-            } else {
-                success = false;
-            }
+            // if (!transition && ofGetFrameNum()%freezeJudgeTime==0) {
+            //     // hogAvVel influences displaySpeed of sun-movie
+            //     float videoSpeed = (hogAvVel<0.1) ? 0.1 : 0.1+hogAvVel*freezeVideoSpeedMap;
+            //     (*fgMedia[0]).movie->setSpeed(videoSpeed);
+            //     ofLogNotice("interaction") << "\t" << ofGetFrameNum() << "\t" << "\tfreezeJudge:\thogAvVel " << hogAvVel << " (" << blobsOnStage << ")\tvideoSpeed " << videoSpeed;
+            // }
+            // if (hogAvVel < freezeAllMaxVel) {
+            //     success = true;
+            // } else {
+            //     success = false;
+            // }
         } else if (scene==3 && segment==4) {
             if (!transition && ofGetFrameNum()%runJudgeTime==0) {
                 // hogAvVel, bgsubtractorAvVel, activityCnt
-                // SUN_run_surface-9-qtPNG.mov
+                // SUN_run_surface-8-blue-qtPNG.mov
                 if (hogAvVel > runHogThr || bgsubtractorAvVel > runBgsThr || activityCnt > runActThr) {
                     // activity!
-                    int rndSun = ofRandom(16)+1;
-                    fgMedia.push_back(ofPtr<mediaElement>( new videoElement("video/4_sun/SUN_run_surface-"+ofToString(rndSun)+"-qtPNG.mov",false)));
+                    int rndSun = ofRandom(12)+1;
+                    fgMedia.push_back(ofPtr<mediaElement>( new videoElement("video/4_sun/SUN_run_surface-"+ofToString(rndSun)+"-blue-qtPNG.mov",false)));
                     (*fgMedia[fgMedia.size()-1]).setDisplay(projectionW/2,projectionH/2, true);
                     (*fgMedia[fgMedia.size()-1]).reset();
                     (*fgMedia[fgMedia.size()-1]).autoDestroy(true);
@@ -859,9 +863,10 @@ void planeApp::blobOnLost(int & blobID) {
             if (segment==1 || segment==2) {
                 int randomExpl = ofRandom(7) + 1;
                 // string videoEnd = "_fullscale-posterized-qtPNG.mov";
-                string videoEnd = "_fullscale-blue-posterized-qtPNG.mov";
-                if (activityCnt > activityColorCh*2) videoEnd = "_fullscale-blue-posterized-qtPNG.mov";
-                else if (activityCnt > activityColorCh) videoEnd = "_fullscale-red-posterized-qtPNG.mov";
+                // SUN_explosion-02_fullscale-blue-posterized-centered-qtPNG.mov
+                string videoEnd = "_fullscale-blue-posterized-centered-qtPNG.mov";
+                // if (activityCnt > activityColorCh*2) videoEnd = "_fullscale-blue-posterized-qtPNG.mov";
+                // else if (activityCnt > activityColorCh) videoEnd = "_fullscale-red-posterized-qtPNG.mov";
                 string newVideoName = "video/4_sun/SUN_explosion-" + ofToString(randomExpl,2,'0') + videoEnd;
                 fgMedia.push_back(ofPtr<mediaElement>( new videoElement(newVideoName,false)));
                 (*fgMedia[fgMedia.size()-1]).setDisplay(blobMapToScreen(blobs[blobID].position), true);
@@ -1027,11 +1032,11 @@ void planeApp::blobOnFreeze(int & blobID) {
                 // FREEZE!
                 // check if all blobs are frozen
                 // frozen
-                // if (hogAvVel < freezeMaxVel) {
-                //     success = true;
-                // } else {
-                //     success = false;
-                // }
+                if (hogAvVel < freezeMaxVel) {
+                    success = true;
+                } else {
+                    success = false;
+                }
 
                 // bool allFrozen = true;
                 // for(std::map<int, Blob>::iterator it = blobs.begin(); it != blobs.end(); ++it){
@@ -1396,7 +1401,7 @@ void planeApp::endSegment(int direction) {
     segmentChange = direction;
 
     // ONLY DO BG-VIDEO TRANSITIONS IF A SCENE CHANGE IS COMING UP!
-    if (segment+segmentChange >= scenes[scene].segments || segment+segmentChange < 0) {
+    if ((segment+segmentChange >= scenes[scene].segments || segment+segmentChange < 0) && scene!=3) {
         sceneChange = true;
 
         if (scene==1 && segment==3) {
@@ -1426,6 +1431,7 @@ void planeApp::endSegment(int direction) {
             (*fgMedia[fgMedia.size()-1]).autoDestroy(true);
             (*fgMedia[fgMedia.size()-1]).movieEndTrigger=true;
             ofAddListener( (*fgMedia[fgMedia.size()-1]).fadeOutEnd, this, &planeApp::bgMediaSwap );
+
         } else if (scene==4) {
             // fade out all planets
             for (vector<ofPtr<mediaElement> >::iterator it = fgMedia.begin(); it != fgMedia.end(); ++it) {
@@ -1444,8 +1450,27 @@ void planeApp::endSegment(int direction) {
         transition = true;
     } else {
         // if no BG fading is necessary, simply move on to the next segment
-        sceneChange = false;
-        moveOn = true;
+        if (scene==3 && (segment==3 || segment==5)) {
+            ofLogNotice("TRANSITION") << "\t" << ofGetFrameNum() << "\t" << "sunfreeze red";
+            int randomFreezeSurface = ofRandom(4) + 1;
+            //"SUN_freeze_3-qtPNG.mov";
+            string newVideoName = "video/4_sun/SUN_freeze_" + ofToString(randomFreezeSurface) + "-qtPNG.mov";
+
+            (*fgMedia[0]).loadMovie(newVideoName);
+            (*fgMedia[0]).reset();
+
+            // fgMedia.push_back(ofPtr<mediaElement>( new videoElement(newVideoName,false)));
+            // (*fgMedia[fgMedia.size()-1]).setDisplay(projectionW/2,projectionH/2, true);
+            // (*fgMedia[fgMedia.size()-1]).reset();
+            if (segment==5) (*fgMedia[fgMedia.size()-1]).autoDestroy(true);
+            else (*fgMedia[fgMedia.size()-1]).finishMovie(1.0);
+            (*fgMedia[fgMedia.size()-1]).movieEndTrigger=true;
+            ofAddListener( (*fgMedia[fgMedia.size()-1]).fadeOutEnd, this, &planeApp::bgMediaSwap );
+            if(segment==5) sceneChange = true;
+        } else {
+            sceneChange = false;
+            moveOn = true;
+        }
     }
 }
 
@@ -1555,7 +1580,8 @@ void planeApp::initSegment(){
             // (*fgMedia[fgMedia.size()-1]).reset();
         } else if (segment==4) {
             // RUN EVERYWHERE
-            (*fgMedia[0]).movie->setSpeed(1.0);
+            (*fgMedia[0]).loadMovie("video/4_sun/SUN_run_loop-1-qtPNG.mov");
+            (*fgMedia[0]).reset();
         }
 
     } else if (scene==4) {

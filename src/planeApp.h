@@ -25,9 +25,16 @@ class sceneInfo {
         int no;
         int segments;
         int length[7];
+        int minLength[7];
         string instructions[2][7];
         string instructionImg[2][7];
         string analysis[7];
+
+        sceneInfo() {
+        	for (int i=0; i<7; i++) {
+        		minLength[i] = 4;
+        	}
+        }
 };
 
 class planeApp : public ofBaseApp{

@@ -33,6 +33,7 @@
 		<spinSuccess>3</spinSuccess>
 		<spinJudgeTime>68</spinJudgeTime>
 		<spinFailure>1</spinFailure>
+	<MinLost_SPIN>1</MinLost_SPIN>
 	</Sc2_Revolutions>
 	<Sc3_Sun>
 		<Edge_Margin>21</Edge_Margin>
@@ -45,6 +46,7 @@
 		<runBgsThr>8</runBgsThr>
 	<runActThr>3</runActThr>
 	<FreezeAllMaxVel>0.596939</FreezeAllMaxVel>
+	<MinLost_HOP>1</MinLost_HOP>
 	</Sc3_Sun>
 	<Sc4_Alignment>
 		<Alignm_MaxDist>77</Alignm_MaxDist>
@@ -52,7 +54,9 @@
 	<followMeSpeed>0.00612245</followMeSpeed>
 		<followMeRadius>303</followMeRadius>
 	</Sc4_Alignment>
-	<Sc5_Combustion/>
+	<Sc5_Combustion>
+		<MinLost_SHOOT>1</MinLost_SHOOT>
+	</Sc5_Combustion>
 <HUMANS_AND_PLANETS/>
 	<Dimension>
 		<Site_Width>500</Site_Width>
@@ -63,7 +67,7 @@
 		<Offset_Y>326</Offset_Y>
 	<Map_Width>2.36735</Map_Width>
 		<Map_Height>2.79592</Map_Height>
-	<Stage_Radius>280</Stage_Radius>
+	<Stage_Radius>257</Stage_Radius>
 	<Y_Interpolation>5</Y_Interpolation>
 	</Dimension>
 <testMode>0</testMode>
