@@ -30,7 +30,7 @@
 	<Dist_Reward>10</Dist_Reward>
 	</Sc1_Stars>
 	<Sc2_Revolutions>
-		<spinSuccess>3</spinSuccess>
+		<spinSuccess>1</spinSuccess>
 		<spinJudgeTime>53</spinJudgeTime>
 		<spinFailure>2</spinFailure>
 	<MinLost_SPIN>1</MinLost_SPIN>
@@ -85,4 +85,6 @@
 
 <drawFbo>0</drawFbo>
 	<displayDebug>0</displayDebug>
+<inactivity_timer>30</inactivity_timer>
+	<Min_Segm_Length>3</Min_Segm_Length>
 </HUMANS_AND_PLANETS>

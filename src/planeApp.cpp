@@ -29,12 +29,12 @@ void planeApp::setup(){
     // ofLogFatalError()
     ofLogNotice("START") << "\t" << ofGetFrameNum() << "\t" << "0";
 
-    ofSetLogLevel("BLOB", OF_LOG_WARNING);
-    ofSetLogLevel("BRIDGE", OF_LOG_WARNING);
+    ofSetLogLevel("BLOB", OF_LOG_VERBOSE);
+    ofSetLogLevel("BRIDGE", OF_LOG_VERBOSE);
     ofSetLogLevel("TRANSITION", OF_LOG_VERBOSE);
-    ofSetLogLevel("OSC", OF_LOG_WARNING);
-    ofSetLogLevel("interaction", OF_LOG_WARNING);
-    ofSetLogLevel("videoElement", OF_LOG_WARNING);
+    ofSetLogLevel("OSC", OF_LOG_VERBOSE);
+    ofSetLogLevel("interaction", OF_LOG_VERBOSE);
+    ofSetLogLevel("videoElement", OF_LOG_VERBOSE);
     ofSetLogLevel("mediaElement", OF_LOG_WARNING);
 
 	ofTrueTypeFont::setGlobalDpi(72);
@@ -648,32 +648,109 @@ void planeApp::update(){
 
         // animation related
         if (scene==2) {
-            // REVOLUTIONS
+
+
+            // SPIN
+            // if (!transition && ofGetFrameNum()%spinJudgeTime==0) {
+            //     if (segment==0) {
+            //         int oldCnt = planetCnt;
+            //         // set planetCnt based on activityCnt
+            //         if (activityCnt >= spinSuccess) planetCnt++;
+            //         else if (activityCnt < spinFailure) planetCnt--;
+            //         if (activityCnt==0) planetCnt=0;
+            //         if (planetCnt>5) planetCnt = 5;
+            //         if (planetCnt>blobsOnStage/2) planetCnt = blobsOnStage/2;
+            //         else if (planetCnt<0) planetCnt = 0;
+            //         if (oldCnt==0 && planetCnt==1 && !resetClock) {
+            //             // first pair spinning, reset timer!
+            //             resetClock = true;
+            //             segmentStart = ofGetUnixTime();
+            //             ofLogNotice("interaction") << "\t" << ofGetFrameNum() << "\t" << "\treset segmentClock to " << segmentClock;
+            //         }
+            //         if (oldCnt!=planetCnt) positionRevolutions();
+            //     } else if (segment==1) {
+            //         int oldCnt = planetCnt;
+            //         if (activityCnt < spinFailure) planetCnt--;
+            //         if (planetCnt<oldCnt && planetCnt>=0) {
+            //             (*fgMedia[planetCnt]).loadMovie("video/3_revolution/REV_OUT-photoJPEG.mov");
+            //             (*fgMedia[planetCnt]).reset(true);
+            //             (*fgMedia[planetCnt]).autoDestroy(true);
+            //         } else if (planetCnt==-1) {
+            //             success = true;
+            //         }
+            //     }
+            //     ofLogNotice("interaction") << "\t" << ofGetFrameNum() << "\t" << "\tactivityCnt\t" << activityCnt << "\tplanetCnt\t" << planetCnt;
+            //     activityCnt = 0;
+            // }
+
+            // SPIN TAKE 2
+
+
             if (!transition && ofGetFrameNum()%spinJudgeTime==0) {
+                ofLogNotice("interaction") << "\t" << ofGetFrameNum() << "\t" << "\tspinJudgeTime";
                 if (segment==0) {
                     int oldCnt = planetCnt;
                     // set planetCnt based on activityCnt
                     if (activityCnt >= spinSuccess) planetCnt++;
                     else if (activityCnt < spinFailure) planetCnt--;
+
                     if (activityCnt==0) planetCnt=0;
-                    if (planetCnt>5) planetCnt = 5;
                     if (planetCnt>blobsOnStage/2) planetCnt = blobsOnStage/2;
+                    if (planetCnt>5) planetCnt = 5;
                     else if (planetCnt<0) planetCnt = 0;
+
                     if (oldCnt==0 && planetCnt==1 && !resetClock) {
                         // first pair spinning, reset timer!
                         resetClock = true;
-                        segmentClock-=10;
-                        if (segmentClock<0) segmentClock=0;
+                        segmentStart = ofGetUnixTime();
                         ofLogNotice("interaction") << "\t" << ofGetFrameNum() << "\t" << "\treset segmentClock to " << segmentClock;
                     }
-                    if (oldCnt!=planetCnt) positionRevolutions();
+
+                    if (oldCnt!=planetCnt) {
+
+                        if (planetCnt>oldCnt) {
+                            // ADD PLANETS
+                            string videoFile;
+                            int videoPick = ofRandom(5) + 1;
+                            videoFile = "video/3_revolution/REV_0"+ofToString(videoPick)+"-photoJPEG.mov";
+                            fgMedia.push_back(ofPtr<mediaElement>( new videoElement(videoFile,true)));
+                            (*fgMedia[fgMedia.size()-1]).reset(true);
+                        } else {
+                            ofLogNotice("interaction") << "\t" << ofGetFrameNum() << "\t" << "\ttake away planet";
+                            // TAKE AWAY PLANETS
+                            if (fgMedia.size()>0) {
+                                for (unsigned int i=fgMedia.size()-1; i>=0; i--) {
+                                    ofLogNotice("interaction") << "\t" << ofGetFrameNum() << "\t" << "\ttake away planet " << i;
+                                    if (!(*fgMedia[i]).selfdestroy) {
+                                        (*fgMedia[i]).loadMovie("video/3_revolution/REV_OUT-photoJPEG.mov");
+                                        (*fgMedia[i]).reset(true);
+                                        (*fgMedia[i]).autoDestroy(true);
+                                        if (i>=planetCnt) break;
+                                    }
+                                }
+                            }
+                        }
+
+                        positionRevolutions();
+                    }
+
                 } else if (segment==1) {
                     int oldCnt = planetCnt;
                     if (activityCnt < spinFailure) planetCnt--;
                     if (planetCnt<oldCnt && planetCnt>=0) {
-                        (*fgMedia[planetCnt]).loadMovie("video/3_revolution/REV_OUT-photoJPEG.mov");
-                        (*fgMedia[planetCnt]).reset(true);
-                        (*fgMedia[planetCnt]).autoDestroy(true);
+                        ofLogNotice("interaction") << "\t" << ofGetFrameNum() << "\t" << "\ttake away planet";
+                        if (fgMedia.size()>0) {
+                            for (unsigned int i=fgMedia.size()-1; i>=0; i--) {
+                                ofLogNotice("interaction") << "\t" << ofGetFrameNum() << "\t" << "\ttake away planet " << i;
+                                if (!(*fgMedia[i]).selfdestroy) {
+                                    (*fgMedia[i]).loadMovie("video/3_revolution/REV_OUT-photoJPEG.mov");
+                                    (*fgMedia[i]).reset(true);
+                                    (*fgMedia[i]).autoDestroy(true);
+                                    if (i>=planetCnt) break;
+                                }
+                            }
+                        }
+                        if (planetCnt==0) success = true;
                     } else if (planetCnt==-1) {
                         success = true;
                     }
@@ -681,6 +758,8 @@ void planeApp::update(){
                 ofLogNotice("interaction") << "\t" << ofGetFrameNum() << "\t" << "\tactivityCnt\t" << activityCnt << "\tplanetCnt\t" << planetCnt;
                 activityCnt = 0;
             }
+
+
         } else if (scene==3 && (segment==2 || segment==4)) {
             // FREEZE
             // if (!transition && ofGetFrameNum()%freezeJudgeTime==0) {
@@ -1292,30 +1371,73 @@ void planeApp::blobOnCreate(int & blobID) {
 //
 void planeApp::positionRevolutions() {
 
-    if (fgMedia.size()>=5 ) {
+    // if (fgMedia.size()>=5 ) {
+    //     // REVOLUTION
+
+    //     // there should only be 5 fgMedia elements
+    //     for (unsigned int i=0; i<fgMedia.size(); i++) {
+    //         bool prevHide = (*fgMedia[i]).hide;
+    //         (*fgMedia[i]).hide = true;
+    //         if (i < planetCnt) {
+    //             (*fgMedia[i]).hide = false;
+    //             // (*fgMedia[i]).fadeIn();
+    //         } else {
+    //             if (prevHide != true) {
+    //                 // (*fgMedia[i]).fadeOut();
+    //             }
+    //         }
+    //         (*fgMedia[i]).rotation = 0;
+    //     }
+
+    //     // positioning
+    //     switch (planetCnt) {
+    //         case 1:     (*fgMedia[0]).setDisplay(projectionW/2, projectionH/2, true);
+    //                     break;
+    //         case 2:     (*fgMedia[0]).setDisplay(projectionW/2, projectionH/2 - 350, true);
+    //                     (*fgMedia[1]).setDisplay(projectionW/2, projectionH/2 + 350, true);
+    //                     break;
+    //         case 3:     (*fgMedia[0]).setDisplay(projectionW/2, projectionH/2 - 550, true);
+    //                     (*fgMedia[1]).setDisplay(projectionW/2, projectionH/2, true);
+    //                     (*fgMedia[2]).setDisplay(projectionW/2, projectionH/2 + 550, true);
+    //                     break;
+    //         case 4:     (*fgMedia[0]).setDisplay(projectionW/2-100, projectionH/2 - 550, true);
+    //                     (*fgMedia[1]).setDisplay(projectionW/2+100, projectionH/2 - 200, true);
+    //                     (*fgMedia[2]).setDisplay(projectionW/2-100, projectionH/2 + 200, true);
+    //                     (*fgMedia[3]).setDisplay(projectionW/2+100, projectionH/2 + 550, true);
+    //                     break;
+    //         case 5:     (*fgMedia[0]).setDisplay(projectionW/2, projectionH/2, true);
+    //                     (*fgMedia[1]).setDisplay(projectionW/2-200, projectionH/2 - 350, true);
+    //                     (*fgMedia[1]).rotation = -45;
+    //                     (*fgMedia[2]).setDisplay(projectionW/2+200, projectionH/2 - 350, true);
+    //                     (*fgMedia[2]).rotation = 45;
+    //                     (*fgMedia[3]).setDisplay(projectionW/2-200, projectionH/2 + 350, true);
+    //                     (*fgMedia[3]).rotation = 45;
+    //                     (*fgMedia[4]).setDisplay(projectionW/2+200, projectionH/2 + 350, true);
+    //                     (*fgMedia[4]).rotation = -45;
+    //                     break;
+    //     }
+    // }
+
+    // SPIN TAKE 2
+
+    if (fgMedia.size()>=1 ) {
+        ofLogNotice("interaction") << "\t" << ofGetFrameNum() << "\t" << "positionRevolutions() \t planetCnt: " << planetCnt << " fgM: " << fgMedia.size();
         // REVOLUTION
 
         // there should only be 5 fgMedia elements
         for (unsigned int i=0; i<fgMedia.size(); i++) {
-            bool prevHide = (*fgMedia[i]).hide;
-            (*fgMedia[i]).hide = true;
-            if (i < planetCnt) {
-                (*fgMedia[i]).hide = false;
-                // (*fgMedia[i]).fadeIn();
-            } else {
-                if (prevHide != true) {
-                    // (*fgMedia[i]).fadeOut();
-                }
-            }
             (*fgMedia[i]).rotation = 0;
         }
+        ofLogNotice("interaction") << "\t" << ofGetFrameNum() << "\t" << "positionRevolutions() \t planetCnt: " << planetCnt << " fgM: " << fgMedia.size();
 
         // positioning
         switch (planetCnt) {
             case 1:     (*fgMedia[0]).setDisplay(projectionW/2, projectionH/2, true);
+        ofLogNotice("interaction") << "\t" << ofGetFrameNum() << "\t" << "positionRevolutions() position 1";
                         break;
             case 2:     (*fgMedia[0]).setDisplay(projectionW/2, projectionH/2 - 350, true);
                         (*fgMedia[1]).setDisplay(projectionW/2, projectionH/2 + 350, true);
+        ofLogNotice("interaction") << "\t" << ofGetFrameNum() << "\t" << "positionRevolutions() position 2";
                         break;
             case 3:     (*fgMedia[0]).setDisplay(projectionW/2, projectionH/2 - 550, true);
                         (*fgMedia[1]).setDisplay(projectionW/2, projectionH/2, true);
@@ -1337,6 +1459,7 @@ void planeApp::positionRevolutions() {
                         (*fgMedia[4]).rotation = -45;
                         break;
         }
+        ofLogNotice("interaction") << "\t" << ofGetFrameNum() << "\t" << "positionRevolutions() done";
     }
 
 }
@@ -1570,17 +1693,21 @@ void planeApp::endSegment(int direction) {
         } else if (scene==2 && segment==0) {
             // don't move to LET GO if there are no more planets on the screen
             if (planetCnt ==0) {
+                ofLogNotice("TRANSITION") << "\t" << ofGetFrameNum() << "\t" << "endSegment()   planetCnt 0 ";
                 segment+=2;
                 sceneChange = true;
                 bgMediaSwap(scene);
             } else {
+                sceneChange = false;
                 moveOn = true;
+                ofLogNotice("TRANSITION") << "\t" << ofGetFrameNum() << "\t" << "endSegment()   planetCnt " << planetCnt;
             }
         } else {
             sceneChange = false;
             moveOn = true;
         }
     }
+    ofLogNotice("TRANSITION") << "\t" << ofGetFrameNum() << "\t" << "endSegment()   sceneChange " << sceneChange;
 }
 
 void planeApp::jumpToScene(int s) {
@@ -1669,23 +1796,22 @@ void planeApp::initSegment(){
 
     // add FG videos
     if (scene==2) {
-        // REVOLUTIONS
-        if (sceneChange) {
-            for (int i=0; i<5; i++) {
-                string videoFile;
-                int videoPick = i+1;
-                videoFile = "video/3_revolution/REV_0"+ofToString(videoPick)+"-photoJPEG.mov";
-                fgMedia.push_back(ofPtr<mediaElement>( new videoElement(videoFile,true)));
-                (*fgMedia[i]).reset(true);
-            }
-        } else {
-            for (int i=0; i<5; i++) {
-                if (segment==1 && i>=planetCnt) (*fgMedia[i]).dead = true;
-            }
-        }
+        // SPIN
+        // if (sceneChange) {
+        //     for (int i=0; i<5; i++) {
+        //         string videoFile;
+        //         int videoPick = i+1;
+        //         videoFile = "video/3_revolution/REV_0"+ofToString(videoPick)+"-photoJPEG.mov";
+        //         fgMedia.push_back(ofPtr<mediaElement>( new videoElement(videoFile,true)));
+        //         (*fgMedia[i]).reset(true);
+        //     }
+        // } else {
+        //     for (int i=0; i<5; i++) {
+        //         if (segment==1 && i>=planetCnt) (*fgMedia[i]).dead = true;
+        //     }
+        // }
+        // positionRevolutions();  // to position and turn on/off videos
 
-
-        positionRevolutions();  // to position and turn on/off videos
     } else if (scene==3) {
         // SUN, load sun as fgMedia
         if (sceneChange) {
