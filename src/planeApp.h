@@ -26,7 +26,7 @@ class sceneInfo {
         int segments;
         int length[7];
         int minLength[7];
-        string instructions[2][7];
+        string instructions[3][7];
         string instructionImg[2][7];
         string analysis[7];
 

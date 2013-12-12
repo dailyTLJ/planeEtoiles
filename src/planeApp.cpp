@@ -109,7 +109,7 @@ void planeApp::setup(){
 
     siteW.addListener(this,&planeApp::recalculatePerspective);
 	siteH.addListener(this,&planeApp::recalculatePerspective);
-    
+
     ofLogNotice("START") << "\t" << ofGetFrameNum() << "\t" << "3";
 
     if (!projectorOn) gui.setup("HUMANS AND PLANETS", "planets01.xml", 1104,190);
@@ -309,6 +309,7 @@ void planeApp::initScenes(){
     idle.analysis[0] = "* detection";
     idle.instructions[0][0] = "Come closer";
     idle.instructions[1][0] = "Approchez";
+    idle.instructions[2][0] = "Approchez";
     idle.length[0] = -1;
     scenes[n] = idle;
 
@@ -321,18 +322,22 @@ void planeApp::initScenes(){
     stars.segments = 4;
     stars.instructions[0][0] = "Stand still";
     stars.instructions[1][0] = "Ne bougez plus";
+    stars.instructions[2][0] = "Ne bougez plus";
     stars.analysis[0] = "* Velocity < FreezeMaxVel\n* frozenTimer > freezeMinTime\n-> 10 sec";
     stars.length[0] = 10;
     stars.instructions[0][1] = "Try new spots\nto light up more stars";
     stars.instructions[1][1] = "Posez-vous à de nouveaux endroits\npour allumer de nouvelles étoiles";
+    stars.instructions[2][1] = "Posez-vous a de nouveaux endroits\npour allumer de nouvelles etoiles";
     stars.analysis[1] = "* Velocity < FreezeMaxVel\n* frozenTimer > freezeMinTime\n* frozenTimer < freezeMaxTime\n+ Star Animation at end of freezeMaxTime\n-> newStarMax stars || 40 sec";
     stars.length[1] = 40;
     stars.instructions[0][2] = "Walk with someone\nKeep the same distance\nbetween you\n(No hands!)";
     stars.instructions[1][2] = "Marchez avec quelqu'un\nGardez toujours le même écart\n(Sans les mains!)";
+    stars.instructions[2][2] = "Marchez avec quelqu'un\nGardez toujours le meme ecart\n(Sans les mains!)";
     stars.analysis[2] = "* velocity history > movingThr\n* distance history < distStdDevThr\n-> 40 sec";
     stars.length[2] = 40;
     stars.instructions[0][3] = "Walk with someone\nMake eye contact\nKeep the distance";
     stars.instructions[1][3] = "Marchez avec quelqu'un\nRegardez-vous dans les yeux\nGardez toujours le même écart";
+    stars.instructions[2][3] = "Marchez avec quelqu'un\nRegardez-vous dans les yeux\nGardez toujours le meme ecart";
     stars.analysis[3] = "* velocity history > movingThr\n* distance history < distStdDevThr\n-> 30 sec";
     stars.length[3] = 30;
     scenes[n] = stars;
@@ -345,11 +350,13 @@ void planeApp::initScenes(){
     revolution.segments = 2;
     revolution.instructions[0][0] = "Take someone's hand\nSpin and lean out\nas far as possible";
     revolution.instructions[1][0] = "Prenez quelqu'un par les mains\nTournez ensemble en laissant tomber\nvos têtes vers l'arrière";
+    revolution.instructions[2][0] = "Prenez quelqu'un par les mains\nTournez ensemble en laissant tomber\nvos tetes vers l'arriere";
     revolution.analysis[0] = "* \n-> 20 sec";
     revolution.length[0] = 20;
     revolution.instructions[0][1] = "Let go";
     revolution.instructionImg[0][1] = "placeholder_letgo.jpg";
     revolution.instructions[1][1] = "Lâchez tout";
+    revolution.instructions[2][1] = "Lachez tout";
     revolution.instructionImg[1][1] = "placeholder_letgo.jpg";
     revolution.analysis[1] = "* \n-> 10 sec";
     revolution.length[1] = 10;
@@ -363,10 +370,12 @@ void planeApp::initScenes(){
     sun.segments = 5;
     sun.instructions[0][0] = "Stand on one leg";
     sun.instructions[1][0] = "Tenez-vous sur une jambe";
+    sun.instructions[2][0] = "Tenez-vous sur une jambe";
     sun.analysis[0] = "- \n-> 12 sec";
     sun.length[0] = 12;
     sun.instructions[0][1] = "Hop from one\nspot to the other";
     sun.instructions[1][1] = "Déplacez-vous dans l'espace\nen sautant";
+    sun.instructions[2][1] = "Deplacez-vous dans l'espace\nen sautant";
     sun.analysis[1] = "* onLost event\n-> 20 sec";
     sun.length[1] = 20;
     // sun.instructions[0][2] = "Everyone in unison";
@@ -375,17 +384,20 @@ void planeApp::initScenes(){
     // sun.length[2] = 20;
     sun.instructions[0][2] = "everyone";
     sun.instructionImg[0][2] = "placeholder_stop.jpg";
-    sun.instructions[1][2] = "everyone";
+    sun.instructions[1][2] = "tout le monde";
+    sun.instructions[2][2] = "tout le monde";
     sun.instructionImg[1][2] = "placeholder_stop.jpg";
     sun.analysis[2] = "* velocity < freezeMaxVel\n-> 20 sec || all frozen";
     sun.length[2] = 20;
     sun.instructions[0][3] = "Run in every\ndirection at once.";
     sun.instructions[1][3] = "Courez partout en même temps";
+    sun.instructions[2][3] = "Courez partout en meme temps";
     sun.analysis[3] = "* \n-> 40 sec";
     sun.length[3] = 40;
     sun.instructions[0][4] = "everyone";
     sun.instructionImg[0][4] = "placeholder_stop.jpg";
-    sun.instructions[1][4] = "everyone";
+    sun.instructions[1][4] = "tout le monde";
+    sun.instructions[2][4] = "tout le monde";
     sun.instructionImg[1][4] = "placeholder_stop.jpg";
     sun.analysis[4] = "* velocity < freezeMaxVel\n-> 20 sec || all frozen";
     sun.length[4] = 13;
@@ -399,30 +411,37 @@ void planeApp::initScenes(){
     eclipse.segments = 7;
     eclipse.instructions[0][0] = "Now line-up in\nfront of me";
     eclipse.instructions[1][0] = "Faites une file face à moi";
+    eclipse.instructions[2][0] = "Faites une file face a moi";
     eclipse.analysis[0] = "- \n-> 20 sec";
     eclipse.length[0] = 20;
     eclipse.instructions[0][1] = "Follow me";
     eclipse.instructions[1][1] = "Suivez moi";
+    eclipse.instructions[2][1] = "Suivez moi";
     eclipse.analysis[1] = "\n-> 20 sec";
     eclipse.length[1] = 20;
     eclipse.instructions[0][2] = "Step out of the line";
     eclipse.instructions[1][2] = "Sortez de la file";
+    eclipse.instructions[2][2] = "Sortez de la file";
     eclipse.analysis[2] = "\n-> 10 sec";
     eclipse.length[2] = 10;
     eclipse.instructions[0][3] = "Step into the line";
     eclipse.instructions[1][3] = "Revenez dans la file";
+    eclipse.instructions[2][3] = "Revenez dans la file";
     eclipse.analysis[3] = "* x == main.x\n-> 10 sec";
     eclipse.length[3] = 10;
     eclipse.instructions[0][4] = "Step out of the line";
     eclipse.instructions[1][4] = "Sortez de la file";
+    eclipse.instructions[2][4] = "Sortez de la file";
     eclipse.analysis[4] = "\n-> 10 sec";
     eclipse.length[4] = 10;
     eclipse.instructions[0][5] = "Step into the line";
     eclipse.instructions[1][5] = "Revenez dans la file";
+    eclipse.instructions[2][5] = "Revenez dans la file";
     eclipse.analysis[5] = "* x == main.x\n-> 10 sec";
     eclipse.length[5] = 10;
     eclipse.instructions[0][6] = "Disperse very slowly\ntowards the edges";
     eclipse.instructions[1][6] = "Dispersez-vous\ntrès lentement";
+    eclipse.instructions[2][6] = "Dispersez-vous\ntres lentement";
     eclipse.analysis[6] = "* edge-proximity = opacity\n-> 15 sec";
     eclipse.length[6] = 15;
     scenes[n] = eclipse;
@@ -435,20 +454,24 @@ void planeApp::initScenes(){
     shooting.segments = 3;
     shooting.instructions[0][0] = "Move like a\nshooting star";
     shooting.instructions[1][0] = "Filez comme une étoile";
+    shooting.instructions[2][0] = "Filez comme une etoile";
     shooting.analysis[0] = "* onLost event\n-> 25 sec";
     shooting.length[0] = 25;
     shooting.instructions[0][1] = "Drop to the\nground";
     shooting.instructions[1][1] = "Laissez-vous tomber au sol";
+    shooting.instructions[2][1] = "Laissez-vous tomber au sol";
     shooting.analysis[1] = "* onLost event\n-> 15 sec";
     shooting.length[1] = 15;
     shooting.instructions[0][2] = "";
     shooting.instructionImg[0][2] = "placeholder_exhale.jpg";
     shooting.instructions[1][2] = "";
+    shooting.instructions[2][2] = "";
     shooting.instructionImg[1][2] = "placeholder_exhale.jpg";
     shooting.analysis[2] = "- \n-> 15 sec";
     shooting.length[2] = 15;
     shooting.instructions[0][3] = "Stand up";
     shooting.instructions[1][3] = "Relevez-vous";
+    shooting.instructions[2][3] = "Relevez-vous";
     shooting.analysis[3] = "- \n-> 10 sec";
     shooting.length[3] = 10;
     scenes[n] = shooting;
@@ -1762,71 +1785,71 @@ void planeApp::receiveOsc(){
 //--------------------------------------------------------------
 void planeApp::draw(){
 
-    if (fullscreen) {
+    // if (fullscreen) {
 
-        ofBackground(0);
-        ofPushMatrix();
-        // ofTranslate(0, 1080);
-        // ofRotateZ(-90);
+    //     ofBackground(0);
+    //     ofPushMatrix();
+    //     // ofTranslate(0, 1080);
+    //     // ofRotateZ(-90);
 
-        this->drawScreen(0, 0, 1);
+    //     this->drawScreen(0, 0, 1);
 
-        string instruction = scenes[scene].instructions[language][segment];
-        ofFill(); ofSetColor(255);
-        fontBg.drawString(instruction, 50, 50);
+    //     string instruction = scenes[scene].instructions[language][segment];
+    //     ofFill(); ofSetColor(255);
+    //     fontBg.drawString(instruction, 50, 50);
 
-        ofPopMatrix();
+    //     ofPopMatrix();
 
-        ofFill(); ofSetColor(255);
-        ofDrawBitmapString(ofToString(ofGetFrameRate()), 10, 10);
+    //     ofFill(); ofSetColor(255);
+    //     ofDrawBitmapString(ofToString(ofGetFrameRate()), 10, 10);
 
-    } else {
+    // } else {
 
-        ofBackground(0,50,150);
-        // ofBackground(0);
-        int offsx = 500;
-        if(!projectorOn) offsx = 10;
-        int offsy = 10;
+    //     ofBackground(0,50,150);
+    //     // ofBackground(0);
+    //     int offsx = 500;
+    //     if(!projectorOn) offsx = 10;
+    //     int offsy = 10;
 
-        ofFill(); ofSetColor(255);
-        ofDrawBitmapString(ofToString(ofGetFrameRate()), offsx, offsy);
+    //     ofFill(); ofSetColor(255);
+    //     ofDrawBitmapString(ofToString(ofGetFrameRate()), offsx, offsy);
 
-        offsy += 20;
+    //     offsy += 20;
 
-        this->drawRawData(offsx, offsy, 0.5);
+    //     this->drawRawData(offsx, offsy, 0.5);
 
-        offsy += 260 + 10;
-        this->drawTopDown(offsx, offsy, 0.5, drawBlobDetail);
+    //     offsy += 260 + 10;
+    //     this->drawTopDown(offsx, offsy, 0.5, drawBlobDetail);
 
-        offsy = 10;
-        offsx += 260;
-        this->drawAnalysis(offsx, offsy, 0.35);
+    //     offsy = 10;
+    //     offsx += 260;
+    //     this->drawAnalysis(offsx, offsy, 0.35);
 
-        offsy = 10;
-        offsx += 390;
-        this->drawScreen(offsx, offsy, 0.35);
+    //     offsy = 10;
+    //     offsx += 390;
+    //     this->drawScreen(offsx, offsy, 0.35);
 
-        offsx += 440;
-        this->drawControlInfo(offsx, offsy);
+    //     offsx += 440;
+    //     this->drawControlInfo(offsx, offsy);
 
-        gui.draw();
+    //     gui.draw();
 
-        // MAIN VISUALS SCREEN
-        ofPushMatrix();
-        ofTranslate(0,2100);
-        ofRotateZ(-90);
-        if (testMode) {
-            // this->drawRawData(1490, 50, 2);
-            // this->drawTopDown(1490, 850, 2, drawBlobDetail);
-            this->drawRawData(0, 50, 2);
-            this->drawTopDown(0, 850, 2, drawBlobDetail);
-        } else this->drawScreen(0, 0, 1);
+    //     // MAIN VISUALS SCREEN
+    //     ofPushMatrix();
+    //     ofTranslate(0,2100);
+    //     ofRotateZ(-90);
+    //     if (testMode) {
+    //         // this->drawRawData(1490, 50, 2);
+    //         // this->drawTopDown(1490, 850, 2, drawBlobDetail);
+    //         this->drawRawData(0, 50, 2);
+    //         this->drawTopDown(0, 850, 2, drawBlobDetail);
+    //     } else this->drawScreen(0, 0, 1);
 
-        ofFill(); ofSetColor(255);
-        ofDrawBitmapString(ofToString(ofGetFrameRate()), 10, 10);
-        ofPopMatrix();
+    //     ofFill(); ofSetColor(255);
+    //     ofDrawBitmapString(ofToString(ofGetFrameRate()), 10, 10);
+    //     ofPopMatrix();
 
-    }
+    // }
 }
 
 
@@ -1882,21 +1905,27 @@ void planeApp::drawScreen(int x, int y, float scale){
     }
 
 
-    
+
     // INSTRUCTIONS
     string in_img = scenes[scene].instructionImg[language][segment];
 
-    
+
     if (!transition) {
         int ypos = 1742;
         int textLineH = 40;
         ofFill();
         string instruction = scenes[scene].instructions[language][segment];
-        vector< string > instructionLine = ofSplitString(instruction, "\n");
 
+        string measureInst = scenes[scene].instructions[language][segment];
+        if(language==1) measureInst = scenes[scene].instructions[2][segment];
+
+        vector< string > instructionLine = ofSplitString(instruction, "\n");
+        vector< string > measureInstLine = ofSplitString(measureInst, "\n");
+
+        int i = 0;
         for (vector<string>::iterator it = instructionLine.begin() ; it != instructionLine.end(); ++it) {
 
-            ofRectangle textR = fontBg.getStringBoundingBox((*it),0, 0);
+            ofRectangle textR = fontBg.getStringBoundingBox(measureInstLine[i],0, 0);
 
             // background for testing, positioning of text
             // ofSetColor(255,0,0);
@@ -1910,6 +1939,7 @@ void planeApp::drawScreen(int x, int y, float scale){
                 fontBg.drawString((*it), x+ (projectionW/2 - textR.width/2)*scale, y+ypos*scale);
             }
             ypos += textLineH;
+            i++;
         }
     }
     if (in_img.length() > 2) {
