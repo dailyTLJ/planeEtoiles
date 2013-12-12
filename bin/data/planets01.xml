@@ -30,7 +30,7 @@
 	<Dist_Reward>10</Dist_Reward>
 	</Sc1_Stars>
 	<Sc2_Revolutions>
-		<spinSuccess>1</spinSuccess>
+		<spinSuccess>3</spinSuccess>
 		<spinJudgeTime>53</spinJudgeTime>
 		<spinFailure>2</spinFailure>
 	<MinLost_SPIN>1</MinLost_SPIN>

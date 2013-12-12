@@ -102,6 +102,8 @@ void videoElement::reset(bool visible) {
     this->pause(false);
     movie->setSpeed(this->displaySpeed);
     movie->firstFrame();
+    // movie->update();
+    // movie->nextFrame();
 }
 
 void videoElement::finishMovie() {
@@ -141,14 +143,16 @@ void videoElement::draw(int x, int y, float _scale) {
 }
 
 void videoElement::drawElement(float _scale) {
-    ofSetColor(255, 255, 255, int(255*opacity*opMax));
-    float msc = (scale+addSc) * _scale;
-    if (centered) {
-        movie->draw(-w * msc * 0.5, -h * msc * 0.5, w * msc, h * msc);
-    } else {
-        movie->draw(0, 0, w * msc, h * msc);
-    }
-    ofSetColor(255, 255, 255, 255);
+    // if (movie->getCurrentFrame()>0) {
+        ofSetColor(255, 255, 255, int(255*opacity*opMax));
+        float msc = (scale+addSc) * _scale;
+        if (centered) {
+            movie->draw(-w * msc * 0.5, -h * msc * 0.5, w * msc, h * msc);
+        } else {
+            movie->draw(0, 0, w * msc, h * msc);
+        }
+        ofSetColor(255, 255, 255, 255);
+    // }
 }
 
 // set at what speed a moving star should shoot across the screen, in all directions

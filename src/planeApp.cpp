@@ -53,7 +53,7 @@ void planeApp::setup(){
 
 
     ofLogNotice("START") << "\t" << ofGetFrameNum() << "\t" << "1";
-    projectorOn = false;
+    projectorOn = true;
     drawFbo = false;
     language = 1;
     processing = true;
@@ -358,11 +358,11 @@ void planeApp::initScenes(){
     revolution.instructions[2][0] = "Prenez quelqu'un par les mains\nTournez ensemble en laissant tomber\nvos tetes vers l'arriere";
     revolution.analysis[0] = "* \n-> 20 sec";
     revolution.length[0] = 20;
-    revolution.instructions[0][1] = "Let go";
-    revolution.instructionImg[0][1] = "placeholder_letgo.jpg";
-    revolution.instructions[1][1] = "Lâchez tout";
-    revolution.instructions[2][1] = "Lachez tout";
-    revolution.instructionImg[1][1] = "placeholder_letgo.jpg";
+    revolution.instructions[0][1] = "";
+    revolution.instructionImg[0][1] = "LET-GO-BLACK.jpg"; 
+    revolution.instructions[1][1] = "";
+    revolution.instructions[2][1] = "";
+    revolution.instructionImg[1][1] = "LACHEZ-TOUT-BLACK.jpg";
     revolution.analysis[1] = "* \n-> 10 sec";
     revolution.length[1] = 10;
     scenes[n] = revolution;
@@ -388,10 +388,10 @@ void planeApp::initScenes(){
     // sun.analysis[2] = "* onLost event\n-> 20 sec";
     // sun.length[2] = 20;
     sun.instructions[0][2] = "everyone";
-    sun.instructionImg[0][2] = "placeholder_stop.jpg";
+    sun.instructionImg[0][2] = "FREEZE-BLACK.jpg";
     sun.instructions[1][2] = "tout le monde";
     sun.instructions[2][2] = "tout le monde";
-    sun.instructionImg[1][2] = "placeholder_stop.jpg";
+    sun.instructionImg[1][2] = "STOP-BLACK.jpg";
     sun.analysis[2] = "* velocity < freezeMaxVel\n-> 20 sec || all frozen";
     sun.length[2] = 20;
     sun.instructions[0][3] = "Run in every\ndirection at once.";
@@ -400,10 +400,10 @@ void planeApp::initScenes(){
     sun.analysis[3] = "* \n-> 40 sec";
     sun.length[3] = 40;
     sun.instructions[0][4] = "everyone";
-    sun.instructionImg[0][4] = "placeholder_stop.jpg";
+    sun.instructionImg[0][4] = "FREEZE-BLACK.jpg";
     sun.instructions[1][4] = "tout le monde";
     sun.instructions[2][4] = "tout le monde";
-    sun.instructionImg[1][4] = "placeholder_stop.jpg";
+    sun.instructionImg[1][4] = "STOP-BLACK.jpg";
     sun.analysis[4] = "* velocity < freezeMaxVel\n-> 20 sec || all frozen";
     sun.length[4] = 13;
     scenes[n] = sun;
@@ -468,10 +468,10 @@ void planeApp::initScenes(){
     shooting.analysis[1] = "* onLost event\n-> 15 sec";
     shooting.length[1] = 15;
     shooting.instructions[0][2] = "";
-    shooting.instructionImg[0][2] = "placeholder_exhale.jpg";
+    shooting.instructionImg[0][2] = "look-at-the-sky-BLACK.jpg";
     shooting.instructions[1][2] = "";
     shooting.instructions[2][2] = "";
-    shooting.instructionImg[1][2] = "placeholder_exhale.jpg";
+    shooting.instructionImg[1][2] = "regardez-le-ciel-BLACK.jpg";
     shooting.analysis[2] = "- \n-> 15 sec";
     shooting.length[2] = 15;
     shooting.instructions[0][3] = "Stand up";
@@ -1431,7 +1431,7 @@ void planeApp::positionRevolutions() {
         ofLogNotice("interaction") << "\t" << ofGetFrameNum() << "\t" << "positionRevolutions() \t planetCnt: " << planetCnt << " fgM: " << fgMedia.size();
 
         // positioning
-        switch (planetCnt) {
+        switch (fgMedia.size()) {
             case 1:     (*fgMedia[0]).setDisplay(projectionW/2, projectionH/2, true);
         ofLogNotice("interaction") << "\t" << ofGetFrameNum() << "\t" << "positionRevolutions() position 1";
                         break;
@@ -1472,7 +1472,7 @@ void planeApp::videoFollowBlob(int & blobID) {
         ofPoint p;
         if (vid != NULL) {
 
-            if (scene==4 && segment>3) {
+            if (scene==4 && segment>3 && segment<6) {
                 // PLANETS aligned on vertical, move up down
                 p.y = blobMapToScreen(blobs[blobID].position).x * (16.0/9.0);
                 p.x = offsetX + projectionW/2.0;
