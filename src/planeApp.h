@@ -140,6 +140,9 @@ class planeApp : public ofBaseApp{
 		bool sceneChange;
 		int masterClock;
 		int segmentClock;
+		int lastActivityClock;
+		int lastActivity;
+		bool resetClock;
 		int segmentStart;
 		int globalStart;
 		bool moveOn;
@@ -194,6 +197,7 @@ class planeApp : public ofBaseApp{
 		ofParameter<int> freezeMinTime;
 		ofParameter<int> freezeMaxTime;
 		ofParameter<int> minSegmentLength;
+		ofParameter<int> inactivityTimer;
 
 		ofParameter<float> distStdDevThr;
 		ofParameter<float> movingThr;

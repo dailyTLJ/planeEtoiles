@@ -65,6 +65,8 @@ void planeApp::setup(){
 	mouseX = 0;
 	mouseY = 0;
 	mouseButtonState = "";
+    lastActivityClock = ofGetUnixTime();
+    lastActivity = 0;
 
     fullscreen = false;
     // ofSetWindowPosition(0,0);
@@ -120,6 +122,7 @@ void planeApp::setup(){
     gui.add(drawFbo.setup("drawFbo", false));
     gui.add(displayDebug.setup("displayDebug", false));
     gui.add(minLostTime.set("Min LostTime", 1, 0, 10));
+    gui.add(inactivityTimer.set("inactivity timer", 30, 10, 200));
     gui.add(minSegmentLength.set("Min Segm Length", 3, 0, 10));
     gui.add(nebulaOpacity.set("Nebula Opacity", 50, 0, 100));
     gui.add(flashColor.set("Transition Flash Color",ofColor(255,200,100),ofColor(0,0),ofColor(255,255)));
@@ -287,6 +290,7 @@ void planeApp::initScenes(){
 	segment = 0;
 	segmentClock = 0;
 	masterClock = 0;
+    resetClock = false;
 
 
     nebula = ofPtr<mediaElement>( new videoElement("video/NEBULA_131210-H264.mp4"));
@@ -550,6 +554,7 @@ void planeApp::update(){
                     totalVel += sqrt( pow(b->velocity.x,2) + pow(b->velocity.y,2) );
                 }
             }
+            if (blobsOnStage>0) lastActivityClock = ofGetUnixTime();
             hogAvVel = (blobsOnStage>0) ? totalVel/blobsOnStage : 0;
 
             it = blobs.begin();
@@ -563,6 +568,7 @@ void planeApp::update(){
         // SCHEDULING
         masterClock = ofGetUnixTime() - globalStart;
         segmentClock = ofGetUnixTime() - segmentStart;
+        lastActivity = ofGetUnixTime() - lastActivityClock;
         if (flash) {
             flashCnt++;
             if (flashCnt > flashMax) {
@@ -653,6 +659,13 @@ void planeApp::update(){
                     if (planetCnt>5) planetCnt = 5;
                     if (planetCnt>blobsOnStage/2) planetCnt = blobsOnStage/2;
                     else if (planetCnt<0) planetCnt = 0;
+                    if (oldCnt==0 && planetCnt==1 && !resetClock) {
+                        // first pair spinning, reset timer!
+                        resetClock = true;
+                        segmentClock-=10;
+                        if (segmentClock<0) segmentClock=0;
+                        ofLogNotice("interaction") << "\t" << ofGetFrameNum() << "\t" << "\treset segmentClock to " << segmentClock;
+                    }
                     if (oldCnt!=planetCnt) positionRevolutions();
                 } else if (segment==1) {
                     int oldCnt = planetCnt;
@@ -688,10 +701,11 @@ void planeApp::update(){
                 // SUN_run_loop-blue_background-1-qtPNG.mov
                 if (hogAvVel > runHogThr || bgsubtractorAvVel > runBgsThr || activityCnt > runActThr) {
                     // activity!
-                    fgMedia.push_back(ofPtr<mediaElement>( new videoElement("video/4_sun/SUN_run_loop-blue_background-1-qtPNG.mov",false)));
-                    (*fgMedia[fgMedia.size()-1]).setDisplay(projectionW/2,projectionH/2, true);
-                    (*fgMedia[fgMedia.size()-1]).reset();
-                    (*fgMedia[fgMedia.size()-1]).autoDestroy(true);
+                    // ADD BLUE BACKGROUND
+                    // fgMedia.push_back(ofPtr<mediaElement>( new videoElement("video/4_sun/SUN_run_loop-blue_background-1-qtPNG.mov",false)));
+                    // (*fgMedia[fgMedia.size()-1]).setDisplay(projectionW/2,projectionH/2, true);
+                    // (*fgMedia[fgMedia.size()-1]).reset();
+                    // (*fgMedia[fgMedia.size()-1]).autoDestroy(true);
                     int rndSun = ofRandom(12)+1;
                     fgMedia.push_back(ofPtr<mediaElement>( new videoElement("video/4_sun/SUN_run_surface-"+ofToString(rndSun)+"-blue-qtPNG.mov",false)));
                     (*fgMedia[fgMedia.size()-1]).setDisplay(projectionW/2,projectionH/2, true);
@@ -1205,7 +1219,7 @@ void planeApp::blobEnterStage(int & blobID) {
         if (segment==0 && segmentClock < alignmentTransition) {
             (*fgMedia[fgMedia.size()-1]).moveInFromSide(projectionW/2,projectionH/2);
         } else {
-            (*fgMedia[fgMedia.size()-1]).fadeIn();
+            (*fgMedia[fgMedia.size()-1]).fadeIn(0.1);
         }
     }
 }
@@ -1560,10 +1574,7 @@ void planeApp::nextSegment(int direction) {
             if (blobsOnStage==0) scene = 0;
             else scene = 1;
         }
-        if (scene==0) {
-            bgMediaSwap(scene);
-            globalStart = ofGetUnixTime();
-        }
+
     } else if (segment < 0){
         scene--;
         if(scene < 0){
@@ -1571,6 +1582,18 @@ void planeApp::nextSegment(int direction) {
             language = (language==0) ? 1 : 0;
         }
         segment = scenes[scene].segments -1;
+    }
+
+    if (lastActivity > inactivityTimer) {
+        // no activity, got to idle mode
+        ofLogNotice("TRANSITION") << "\t" << ofGetFrameNum() << "\t" << "no activity since " << lastActivity << "sec, go to IDLE";
+        scene = 0;
+        segment = 0;
+    }
+
+    if (scene==0) {
+        bgMediaSwap(scene);
+        globalStart = ofGetUnixTime();
     }
 
     if (sceneChange)
@@ -2162,6 +2185,7 @@ void planeApp::drawControlInfo(int x, int y){
                        // "\n\nAUTOPLAY\t" + ofToString(autoplay ? "true" : "false") +
                        "\n\nTRANSITION\t" + ofToString(transition ? "true" : "false") +
                        "\nGLOBAL TIME\t" + ofToString(masterClock) +
+                       "\nLAST ACTIVITY\t" + ofToString(lastActivity) +
                        "\nSEGMENT TIME\t" + ofToString(segmentClock), x+3, y+10 );
 }
 
