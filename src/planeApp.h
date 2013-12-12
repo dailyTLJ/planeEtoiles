@@ -189,6 +189,7 @@ class planeApp : public ofBaseApp{
 		ofxOscSender sender;
 
 		ofParameter<float> freezeMaxVel;
+		ofParameter<float> freezeAllMaxVel;
 		ofParameter<int> freezeMinTime;
 		ofParameter<int> freezeMaxTime;
 
@@ -210,6 +211,9 @@ class planeApp : public ofBaseApp{
 		ofParameter<int> newStarMax;
 		// ofParameter<int> newStarBonus;
 		ofParameter<int> minLostTime;
+		ofParameter<int> minLostHop;
+		ofParameter<int> minLostSpin;
+		ofParameter<int> minLostShoot;
 
 		ofParameter<int> spinSuccess;
 		ofParameter<int> spinFailure;
@@ -228,6 +232,7 @@ class planeApp : public ofBaseApp{
 		float followMe;
 
 		ofxToggle configBlobserver; 
+		ofxToggle displayDebug; 
 		ofParameter<int> noiseSlow;
 		ofParameter<int> noiseNormal;
 		ofParameter<int> noiseErratic;
@@ -241,6 +246,7 @@ class planeApp : public ofBaseApp{
 		ofPtr<mediaElement> nebula;
 		ofImage instructionImg;
 		ofFbo fbo;
+		ofxToggle drawFbo;
 		int bgMediaId;
 		// std::map<int, std::vector<ofPtr<mediaElement> > > bgVideos;
 

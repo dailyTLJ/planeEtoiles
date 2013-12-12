@@ -44,6 +44,7 @@
 		<runHogThr>2.70408</runHogThr>
 		<runBgsThr>8</runBgsThr>
 	<runActThr>3</runActThr>
+	<FreezeAllMaxVel>0.596939</FreezeAllMaxVel>
 	</Sc3_Sun>
 	<Sc4_Alignment>
 		<Alignm_MaxDist>77</Alignm_MaxDist>
@@ -78,4 +79,6 @@
 <Min_LostTime>1</Min_LostTime>
 <Nebula_Opacity>39</Nebula_Opacity>
 
+<drawFbo>0</drawFbo>
+	<displayDebug>0</displayDebug>
 </HUMANS_AND_PLANETS>

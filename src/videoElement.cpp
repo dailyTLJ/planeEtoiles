@@ -165,7 +165,17 @@ void videoElement::drawElement(float _scale) {
 // set at what speed a moving star should shoot across the screen, in all directions
 void videoElement::moveAcross(float vx, float vy, int maxw, int maxh, bool destr) {
     this->moveElement = true;
-    rotation = ofRadToDeg(atan2(vx, vy)); // 90 - 
+    rotation = ofRadToDeg(atan2(vx, vy));
+    ofLogNotice("videoElement") << ofGetFrameNum() << "\t" << "moveAcross()\t" << rotation ;
+    // limit rotation to  45-135  and  225-315
+    // so that shooting stars only fly left---->right or left<----right
+    if (rotation < -135) rotation = -135;
+    else if (rotation > -45 && rotation <0) rotation = -45;
+    else if (rotation < 45 && rotation >=0) rotation = 45;
+    else if (rotation > 135 && rotation < 180) rotation = 135;
+    else if (rotation >= 180 && rotation <225) rotation = 225;
+    else if (rotation > 315) rotation = 315;
+    ofLogNotice("videoElement") << ofGetFrameNum() << "\t" << "moveAcross()\t >>> " << rotation ;
     float v = 45;
     int maxRadius = max(maxw/2, maxh/2);
     this->position.set( maxw/2 - maxRadius*1.5 * sin(ofDegToRad(rotation)), maxh/2 + maxRadius*1.5 * cos(ofDegToRad(rotation)) );
