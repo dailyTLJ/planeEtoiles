@@ -293,7 +293,7 @@ void planeApp::initScenes(){
     resetClock = false;
 
 
-    nebula = ofPtr<mediaElement>( new videoElement("video/NEBULA_131210-H264.mp4"));
+    nebula = ofPtr<mediaElement>( new videoElement("video/NEBULA_131211-H264.mp4"));
     nebula->reset(true);
     nebula->opMax = nebulaOpacity/100.f;
     nebulaOpacity.addListener(this,&planeApp::guiNebulaChange);
@@ -1134,25 +1134,59 @@ void planeApp::blobOverFreeze(int & blobID) {
     if (!transition) {
         if (scene==1) {
             if (segment==1 && blobs[blobID].onStage && blobs[blobID].mediaLink != NULL) {
-                string constellations[] = { "CONSTELLATION_1-photoJPEG.mov",
-                "CONSTELLATION_2-photoJPEG.mov", "CONSTELLATION_3-photoJPEG.mov",
-                "CONSTELLATION_4-photoJPEG.mov", "CONSTELLATION_5-photoJPEG.mov",
-                "CONSTELLATION_6-photoJPEG.mov", "CONSTELLATION_7-photoJPEG.mov",
-                "CONSTELLATION_BOAT-photoJPEG.mov", "CONSTELLATION_CAR-photoJPEG.mov",
-                "CONSTELLATION_CASSEROLLE-photoJPEG.mov", "CONSTELLATION_CUBE-photoJPEG.mov",
-                "CONSTELLATION_FISH-photoJPEG.mov", "CONSTELLATION_HAND-photoJPEG.mov",
-                "CONSTELLATION_HEART2-photoJPEG.mov", "CONSTELLATION_HOUSE-photoJPEG.mov",
-                "CONSTELLATION_MERMAID-photoJPEG.mov", "CONSTELLATION_STICKBOY-photoJPEG.mov" };
+                string constellations[] = { 
+                "CONSTELLATION_1-photoJPEG.mov",    // ok seahorse
+                // "CONSTELLATION_2-photoJPEG.mov", 
+                // "CONSTELLATION_3-photoJPEG.mov",
+                // "CONSTELLATION_4-photoJPEG.mov", 
+                // "CONSTELLATION_5-photoJPEG.mov",
+                // "CONSTELLATION_6-photoJPEG.mov", 
+                "CONSTELLATION_7-photoJPEG.mov",    // ok 
+                "CONSTELLATION_8-photoJPEG.mov",    // bold ok
+                "CONSTELLATION_9-photoJPEG.mov",    // bold ok
+                "CONSTELLATION_11-photoJPEG.mov",    // bold ok
+                "CONSTELLATION_13-photoJPEG.mov",    // bold ok
+                "CONSTELLATION_14-photoJPEG.mov",    // bold ok
+                // "CONSTELLATION_15-photoJPEG.mov",    // bold ok
+                "CONSTELLATION_16-photoJPEG.mov",    // bold ok
+                // "CONSTELLATION_BOAT-photoJPEG.mov",     
+                "CONSTELLATION_CAR-photoJPEG.mov",
+                "CONSTELLATION_CASSEROLLE-photoJPEG.mov", 
+                // "CONSTELLATION_CUBE-photoJPEG.mov",
+                // "CONSTELLATION_FISH-photoJPEG.mov", 
+                // "CONSTELLATION_HAND-photoJPEG.mov",
+                // "CONSTELLATION_HEART2-photoJPEG.mov", 
+                // "CONSTELLATION_HOUSE-photoJPEG.mov",
+                // "CONSTELLATION_MERMAID-photoJPEG.mov", 
+                // "CONSTELLATION_STICKBOY-photoJPEG.mov"
+                 };
 
-                int constOrigin[][2] = { {70,518},
-                {71,159}, {458,180},
-                {882,716}, {190,378},
-                {146,238}, {46,54},
-                {382,46}, {174,44},
-                {44,86}, {36,74},
-                {264,188}, {564,450},
-                {60,50}, {220,332},
-                {176,58}, {120,428} };
+                int constOrigin[][2] = { 
+                    {70,518},   // 1
+                    // {71,159}, 
+                    // {458,180},  // 3
+                    // {882,716}, 
+                    // {190,378},  // 5
+                    // {146,238},  
+                    {46,54},    // 7
+                    {246,84},    // 8x:264, y:84
+                    {54,228},    // 8x:54, y:228
+                    {448,244},    // 11x:448, y:244
+                    {88,40},    // 13 x:88, y:40
+                    {136,60},    // 14 x:136, y:60
+                    // {96,148},    // 15 x:96, y:148
+                    {38,106},    // 16 x:38, y:106
+                    // {382,46},   
+                    {174,44},
+                    {44,86}, 
+                    // {36,74},
+                    // {264,188}, 
+                    // {564,450},
+                    // {60,50}, 
+                    // {220,332},
+                    // {176,58}, 
+                    // {120,428} 
+                };
 
                 // play constellation video, as reward, position based on first star
                 int randomConst = ofRandom(sizeof(constellations) / sizeof(constellations[0]));
