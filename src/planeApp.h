@@ -156,6 +156,7 @@ class planeApp : public ofBaseApp{
 		int activityCnt;
 		int blobsOnStage;
 		int planetCnt;
+		int pickPlanet;
 		bool flash;				// in between transitions, catch attention
 		int flashCnt;
 		int flashMax;
