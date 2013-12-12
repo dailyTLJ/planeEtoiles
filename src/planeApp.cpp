@@ -53,7 +53,7 @@ void planeApp::setup(){
 
 
     ofLogNotice("START") << "\t" << ofGetFrameNum() << "\t" << "1";
-    projectorOn = true;
+    projectorOn = false;
     drawFbo = false;
     language = 1;
     processing = true;
@@ -104,7 +104,7 @@ void planeApp::setup(){
     bgsubtractorAvVel = 0.f;
     hogAvVel = 0.f;
 
-    followMe = 0.f;
+    followMe = -0.5;
     shootingPointer = 0;
 
     siteW.addListener(this,&planeApp::recalculatePerspective);
@@ -120,6 +120,7 @@ void planeApp::setup(){
     gui.add(drawFbo.setup("drawFbo", false));
     gui.add(displayDebug.setup("displayDebug", false));
     gui.add(minLostTime.set("Min LostTime", 1, 0, 10));
+    gui.add(minSegmentLength.set("Min Segm Length", 3, 0, 10));
     gui.add(nebulaOpacity.set("Nebula Opacity", 50, 0, 100));
     gui.add(flashColor.set("Transition Flash Color",ofColor(255,200,100),ofColor(0,0),ofColor(255,255)));
 
@@ -417,27 +418,27 @@ void planeApp::initScenes(){
     eclipse.instructions[0][1] = "Follow me";
     eclipse.instructions[1][1] = "Suivez moi";
     eclipse.instructions[2][1] = "Suivez moi";
-    eclipse.analysis[1] = "\n-> 20 sec";
-    eclipse.length[1] = 20;
+    eclipse.analysis[1] = "\n-> 22 sec";
+    eclipse.length[1] = 22;
     eclipse.instructions[0][2] = "Step out of the line";
     eclipse.instructions[1][2] = "Sortez de la file";
     eclipse.instructions[2][2] = "Sortez de la file";
-    eclipse.analysis[2] = "\n-> 10 sec";
+    eclipse.analysis[2] = "\n-> 10 sec || out of line";
     eclipse.length[2] = 10;
     eclipse.instructions[0][3] = "Step into the line";
     eclipse.instructions[1][3] = "Revenez dans la file";
     eclipse.instructions[2][3] = "Revenez dans la file";
-    eclipse.analysis[3] = "* x == main.x\n-> 10 sec";
+    eclipse.analysis[3] = "* x == main.x\n-> 10 sec || in line";
     eclipse.length[3] = 10;
     eclipse.instructions[0][4] = "Step out of the line";
     eclipse.instructions[1][4] = "Sortez de la file";
     eclipse.instructions[2][4] = "Sortez de la file";
-    eclipse.analysis[4] = "\n-> 10 sec";
+    eclipse.analysis[4] = "\n-> 10 sec || out of line";
     eclipse.length[4] = 10;
     eclipse.instructions[0][5] = "Step into the line";
     eclipse.instructions[1][5] = "Revenez dans la file";
     eclipse.instructions[2][5] = "Revenez dans la file";
-    eclipse.analysis[5] = "* x == main.x\n-> 10 sec";
+    eclipse.analysis[5] = "* x == main.x\n-> 10 sec || in line";
     eclipse.length[5] = 10;
     eclipse.instructions[0][6] = "Disperse very slowly\ntowards the edges";
     eclipse.instructions[1][6] = "Dispersez-vous\ntrès lentement";
@@ -600,7 +601,7 @@ void planeApp::update(){
         } else if (scene==3) {
             if (segment==2 || segment==4 ) {
                 // FREEZE!
-                if (hogAvVel < freezeMaxVel) {
+                if (hogAvVel < freezeAllMaxVel && segmentClock > 3) {
                     success = true;
                 } else {
                     success = false;
@@ -611,7 +612,15 @@ void planeApp::update(){
                 }
             }
         } else if (scene==4) {
-
+            if (autoplay && success && !transition && segmentClock > minSegmentLength ) {
+                if (segment==2 || segment==4) {
+                    // STEP OUT OF THE LINE
+                    if (blobsOnStage > 0 && !success) endSegment(1);
+                } else if (segment==3 || segment==5) {
+                    // STEP INTO THE LINE
+                    if (success) endSegment(1);
+                }  
+            }
         }
 
 
@@ -700,14 +709,16 @@ void planeApp::update(){
         } else if (scene==4 && segment==1) {
             // FOLLOW ME
             followMe += followMeSpeed;
-            (*fgMedia[0]).position.x = projectionW/2 + sin(followMe) * followMeRadius;
-            if (followMe >= 2*3.135) {
-                if (autoplay && !transition) {
+            if (followMe >= 2*3.14) {
+                (*fgMedia[0]).position.x = projectionW/2;
+                if (followMe > 2*3.6 && autoplay && !transition) {
                     endSegment(1);
                 }
+            } else if (followMe > 0) {
+                (*fgMedia[0]).position.x = projectionW/2 + sin(followMe) * followMeRadius;
             }
         }
-        if ( scene==4 && segment<6 && !transition && segmentClock > alignmentTransition && blobsOnStage>0) {
+        if ( scene==4 && segment<6 && !transition && segmentClock > minSegmentLength && blobsOnStage>0) {
 
             // check if all are aligned
             bool allAligned = allBlobsAlignedWith((*fgMedia[0]).position);
@@ -1582,7 +1593,7 @@ void planeApp::initSegment(){
     success = false;
     successCnt = 0;
     activityCnt = 0;
-    followMe = 0.f;
+    followMe = -0.5;
     if (segment==0) planetCnt = 0;
     flash = true;       //
     segmentStart = ofGetUnixTime();
@@ -1785,71 +1796,71 @@ void planeApp::receiveOsc(){
 //--------------------------------------------------------------
 void planeApp::draw(){
 
-    // if (fullscreen) {
+    if (fullscreen) {
 
-    //     ofBackground(0);
-    //     ofPushMatrix();
-    //     // ofTranslate(0, 1080);
-    //     // ofRotateZ(-90);
+        ofBackground(0);
+        ofPushMatrix();
+        // ofTranslate(0, 1080);
+        // ofRotateZ(-90);
 
-    //     this->drawScreen(0, 0, 1);
+        this->drawScreen(0, 0, 1);
 
-    //     string instruction = scenes[scene].instructions[language][segment];
-    //     ofFill(); ofSetColor(255);
-    //     fontBg.drawString(instruction, 50, 50);
+        string instruction = scenes[scene].instructions[language][segment];
+        ofFill(); ofSetColor(255);
+        fontBg.drawString(instruction, 50, 50);
 
-    //     ofPopMatrix();
+        ofPopMatrix();
 
-    //     ofFill(); ofSetColor(255);
-    //     ofDrawBitmapString(ofToString(ofGetFrameRate()), 10, 10);
+        ofFill(); ofSetColor(255);
+        ofDrawBitmapString(ofToString(ofGetFrameRate()), 10, 10);
 
-    // } else {
+    } else {
 
-    //     ofBackground(0,50,150);
-    //     // ofBackground(0);
-    //     int offsx = 500;
-    //     if(!projectorOn) offsx = 10;
-    //     int offsy = 10;
+        ofBackground(0,50,150);
+        // ofBackground(0);
+        int offsx = 500;
+        if(!projectorOn) offsx = 10;
+        int offsy = 10;
 
-    //     ofFill(); ofSetColor(255);
-    //     ofDrawBitmapString(ofToString(ofGetFrameRate()), offsx, offsy);
+        ofFill(); ofSetColor(255);
+        ofDrawBitmapString(ofToString(ofGetFrameRate()), offsx, offsy);
 
-    //     offsy += 20;
+        offsy += 20;
 
-    //     this->drawRawData(offsx, offsy, 0.5);
+        this->drawRawData(offsx, offsy, 0.5);
 
-    //     offsy += 260 + 10;
-    //     this->drawTopDown(offsx, offsy, 0.5, drawBlobDetail);
+        offsy += 260 + 10;
+        this->drawTopDown(offsx, offsy, 0.5, drawBlobDetail);
 
-    //     offsy = 10;
-    //     offsx += 260;
-    //     this->drawAnalysis(offsx, offsy, 0.35);
+        offsy = 10;
+        offsx += 260;
+        this->drawAnalysis(offsx, offsy, 0.35);
 
-    //     offsy = 10;
-    //     offsx += 390;
-    //     this->drawScreen(offsx, offsy, 0.35);
+        offsy = 10;
+        offsx += 390;
+        this->drawScreen(offsx, offsy, 0.35);
 
-    //     offsx += 440;
-    //     this->drawControlInfo(offsx, offsy);
+        offsx += 440;
+        this->drawControlInfo(offsx, offsy);
 
-    //     gui.draw();
+        gui.draw();
 
-    //     // MAIN VISUALS SCREEN
-    //     ofPushMatrix();
-    //     ofTranslate(0,2100);
-    //     ofRotateZ(-90);
-    //     if (testMode) {
-    //         // this->drawRawData(1490, 50, 2);
-    //         // this->drawTopDown(1490, 850, 2, drawBlobDetail);
-    //         this->drawRawData(0, 50, 2);
-    //         this->drawTopDown(0, 850, 2, drawBlobDetail);
-    //     } else this->drawScreen(0, 0, 1);
+        // MAIN VISUALS SCREEN
+        ofPushMatrix();
+        ofTranslate(0,2100);
+        ofRotateZ(-90);
+        if (testMode) {
+            // this->drawRawData(1490, 50, 2);
+            // this->drawTopDown(1490, 850, 2, drawBlobDetail);
+            this->drawRawData(0, 50, 2);
+            this->drawTopDown(0, 850, 2, drawBlobDetail);
+        } else this->drawScreen(0, 0, 1);
 
-    //     ofFill(); ofSetColor(255);
-    //     ofDrawBitmapString(ofToString(ofGetFrameRate()), 10, 10);
-    //     ofPopMatrix();
+        ofFill(); ofSetColor(255);
+        ofDrawBitmapString(ofToString(ofGetFrameRate()), 10, 10);
+        ofPopMatrix();
 
-    // }
+    }
 }
 
 

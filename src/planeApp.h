@@ -25,16 +25,9 @@ class sceneInfo {
         int no;
         int segments;
         int length[7];
-        int minLength[7];
         string instructions[3][7];
         string instructionImg[2][7];
         string analysis[7];
-
-        sceneInfo() {
-        	for (int i=0; i<7; i++) {
-        		minLength[i] = 4;
-        	}
-        }
 };
 
 class planeApp : public ofBaseApp{
@@ -75,7 +68,7 @@ class planeApp : public ofBaseApp{
 		void videoFollowBlob(int & blobID);
 		void blobEnterStage(int & blobID);
 		void blobLeaveStage(int & blobID);
-		
+
 
 		void positionRevolutions();
 		void jumpToScene(int s);
@@ -85,7 +78,7 @@ class planeApp : public ofBaseApp{
 		void endSegment(int direction = 1);	// 1. trigger fgMediaFadedOut or moveOn
 		void fgMediaFadedOut(int & trans);  // 2. call outroTransformation calls on FG and BG media
 		// void bgMediaFadedOut(int & trans);	// 3. all elements faded out, moveOn = true
-		void bgMediaSwap(int & trans);		// 
+		void bgMediaSwap(int & trans);		//
 		void nextSegment(int direction = 1);// 4. pick the next segment
 		void initSegment();					// 5. initialize the new segment, create new fgvideos
 		void configureBlobserver();
@@ -131,8 +124,8 @@ class planeApp : public ofBaseApp{
 		ofPoint steles_topdown[8];
 
 		bool fullscreen;
-		
-		// SEQUENCING	 
+
+		// SEQUENCING
 		bool processing;
 		bool oscMsgReceived;
 		bool oscActive;
@@ -140,7 +133,7 @@ class planeApp : public ofBaseApp{
 		float oscLastMsgTimer;
 		float oscLastMsgTimerMax;
         ofxToggle autoplay; 			 // advance to next segment by itself
-        ofxToggle testMode; 
+        ofxToggle testMode;
 		int scene;
 		int segment;
 		int segmentChange;
@@ -176,7 +169,7 @@ class planeApp : public ofBaseApp{
 		int bgsubtractorFlowId;
 		int hogFlowId;
 		string hogFlowName;
-		float bgsubtractorVel;	
+		float bgsubtractorVel;
 		float bgsubtractorAvVel;
 		float hogAvVel;
 
@@ -200,6 +193,7 @@ class planeApp : public ofBaseApp{
 		ofParameter<float> freezeAllMaxVel;
 		ofParameter<int> freezeMinTime;
 		ofParameter<int> freezeMaxTime;
+		ofParameter<int> minSegmentLength;
 
 		ofParameter<float> distStdDevThr;
 		ofParameter<float> movingThr;
@@ -239,8 +233,8 @@ class planeApp : public ofBaseApp{
 		ofParameter<int> followMeRadius;
 		float followMe;
 
-		ofxToggle configBlobserver; 
-		ofxToggle displayDebug; 
+		ofxToggle configBlobserver;
+		ofxToggle displayDebug;
 		ofParameter<int> noiseSlow;
 		ofParameter<int> noiseNormal;
 		ofParameter<int> noiseErratic;
