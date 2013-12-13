@@ -56,7 +56,7 @@ void planeApp::setup(){
 
 
     ofLogNotice("START") << "\t" << ofGetFrameNum() << "\t" << "1";
-    projectorOn = false;
+    projectorOn = true;
     language = 1;
     processing = true;
     oscMsgReceived = false;
@@ -971,14 +971,14 @@ void planeApp::fgMediaFadedOut(int & trans) {
 // }
 
 void planeApp::blobOnLost(int & blobID) {
-    ofLogNotice("BLOB") << "\t\t" << ofGetFrameNum() << "\t" << blobID << " just got lost";
+    ofLogNotice("BLOB") << "\t\t" << ofGetFrameNum() << "\t" << blobID << " just got lost  (occl: " << blobs[blobID].occluded << ")";
     if (!transition && blobs[blobID].onStage) {
         if (scene==2) {
             activityCnt++;
-        } else if (scene==3) {
+        } else if (scene==3 && !blobs[blobID].occluded) {
             // SUN explosions
             activityCnt++;
-            if (segment==1 && !blobs[blobID].occluded) {
+            if (segment==1) {
                 int randomExpl = ofRandom(7) + 1;
                 // string videoEnd = "_fullscale-posterized-qtPNG.mov";
                 // SUN_explosion-02_fullscale-blue-posterized-centered-qtPNG.mov
@@ -992,19 +992,14 @@ void planeApp::blobOnLost(int & blobID) {
                 (*fgMedia[fgMedia.size()-1]).reset();
                 // if (segment==2) (*fgMedia[0]).bounce(); // sun video = [0]
             }
-        } else if (scene==5) {
+        } else if (scene==5 && !blobs[blobID].occluded) {
             // SHOOTING STARS
-            if (segment==0 && !blobs[blobID].occluded) {
-                // int randomShooter = ofRandom(26) + 1;
-                // fgMedia.push_back(ofPtr<mediaElement>( new videoElement("video/6_shooting/SSTAR_" + ofToString(randomShooter,2,'0') + "-photoJPEG.mov")));
-                // (*fgMedia[fgMedia.size()-1]).setDisplay(ofRandom(projectionW-100), ofRandom(projectionH-100), true);
-                // (*fgMedia[fgMedia.size()-1]).moveAcross( blobs[blobID].velocity.x, blobs[blobID].velocity.y, projectionW, projectionH, true);
-                // (*fgMedia[fgMedia.size()-1]).reset();
+            if (segment==0) {
                 if (++shootingPointer>=fgMedia.size()) shootingPointer=0;
                 (*fgMedia[shootingPointer]).setDisplay(ofRandom(projectionW-100), ofRandom(projectionH-100), true);
                 (*fgMedia[shootingPointer]).moveAcross( blobs[blobID].velocity.x, blobs[blobID].velocity.y, projectionW, projectionH, false);
                 (*fgMedia[shootingPointer]).reset();
-            } else if (segment==1 && !blobs[blobID].occluded) {
+            } else if (segment==1) {
                 float randdeg = ofRandom(-5.f, 5.f);
                 for (int i=0; i<10; i++) {
                     if (++shootingPointer >= fgMedia.size()) shootingPointer=0;
@@ -1291,7 +1286,7 @@ void planeApp::blobEnterStage(int & blobID) {
             (*fgMedia[fgMedia.size()-1]).fadeIn();
             (*fgMedia[fgMedia.size()-1]).outroTransformation = &mediaElement::scaleAway;
         }
-    } else if (scene==4) {
+    } else if (scene==4 && (!transition)) {
         // PLANETS
         ofLogNotice("BLOB") << "\t\t" << ofGetFrameNum() << "\t" << "blobEnterStage()\t\t" << blobID << " (planet)";
         int planedId[] = { 6, 9, 13, 15, 18, 19,20, 22, 23 };
@@ -1633,10 +1628,17 @@ void planeApp::endSegment(int direction) {
         } else if (scene==4) {
             // fade out all planets
             int i=0;
-            for (vector<ofPtr<mediaElement> >::iterator it = fgMedia.begin(); it != fgMedia.end(); ++it) {
-                if (!(**it).dead) ((((**it)).*((**it)).outroTransformation))();
-                if (i==0) ofAddListener( (**it).fadeOutEnd, this, &planeApp::allFaded );
-                i++;
+            if (fgMedia.size()>0) {
+                for (vector<ofPtr<mediaElement> >::iterator it = fgMedia.begin(); it != fgMedia.end(); ++it) {
+                    if (!(**it).dead) ((((**it)).*((**it)).outroTransformation))();
+                    if (i==0) {
+                        ofLogNotice("TRANSITION") << "\t" << ofGetFrameNum() << "\t" << "add allFaded listener";
+                        ofAddListener( (**it).fadeOutEnd, this, &planeApp::allFaded );
+                    }
+                    i++;
+                }
+            } else {
+                moveOn=true;
             }
         } else if (scene==5) {
             // dont' fade out all shooting stars
@@ -2696,14 +2698,6 @@ void planeApp::keyReleased(int key){
         int s = int(key) - int('0');
         ofLogNotice("KEY") << "\t\t\t" << ofGetFrameNum() << "\t" << "==============>" << key << " scene = " << s;
         jumpToScene(s);
-    }
-
-    if (key=='r' && scene==5) {
-        // shooting star
-        if (++shootingPointer>=fgMedia.size()) shootingPointer=0;
-        // (*fgMedia[shootingPointer]).setDisplay(ofRandom(projectionW-100), ofRandom(projectionH-100), true);
-        (*fgMedia[shootingPointer]).moveAcross( ofRandom(-2.0,2.0), ofRandom(-2.0,2.0), projectionW, projectionH, false);
-        (*fgMedia[shootingPointer]).reset();
     }
 
 }

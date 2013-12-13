@@ -100,7 +100,7 @@ void videoElement::update() {
 
 void videoElement::reset(bool visible) {
     if (mediaLoaded) {
-        ofLogNotice("videoElement") << ofGetFrameNum() << "\t" << "reset video " << file << "  " << visible;
+        // ofLogNotice("videoElement") << ofGetFrameNum() << "\t" << "reset video " << file << "  " << visible;
         mediaElement::reset(visible);
         displaySpeed = 1.f;
         this->pause(false);
@@ -175,10 +175,14 @@ void videoElement::moveAcross(float vx, float vy, int maxw, int maxh, bool destr
     else if (rotation > 135 && rotation < 180) rotation = 135;
     else if (rotation >= 180 && rotation <225) rotation = 225;
     else if (rotation > 315) rotation = 315;
+
+
     ofLogNotice("videoElement") << ofGetFrameNum() << "\t" << "moveAcross()\t >>> " << rotation ;
     float v = 45;
     int maxRadius = max(maxw/2, maxh/2);
     this->position.set( maxw/2 - maxRadius*1.5 * sin(ofDegToRad(rotation)), maxh/2 + maxRadius*1.5 * cos(ofDegToRad(rotation)) );
+    // slightly random, to avoid that all are flying perfectly through the center point of the screen
+    rotation += ofRandom(-7,7);
     this->velocity.set( v * sin(ofDegToRad(rotation)), -v * cos(ofDegToRad(rotation)) );
     rotation -= 90;
     // autoDestroy(destr);
