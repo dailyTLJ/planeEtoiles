@@ -6,9 +6,10 @@ from time import sleep
 import time
 
 
-server = OSCServer( ("10.4.40.28", 9000) )
+# server = OSCServer( ("10.4.40.28", 9000) )
 # server = OSCServer( ("localhost", 9000) )
-blob_flow_id = 2
+server = OSCServer( ("10.10.44.21", 9000) )
+blob_flow_id = 1
 server.timeout = 0
 run = True
 
@@ -28,7 +29,8 @@ server.handle_timeout = types.MethodType(handle_timeout, server)
 
 
 def startMessage(path, tags, args, source):
-    print "\n- - - - - - - - - - - - "
+    if args[1] == blob_flow_id:
+        print "- - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - ", args[0]
 
 def stopMessage(path, tags, args, source):
     pass
@@ -37,11 +39,11 @@ def ignore(path, tags, args, source):
     pass
 
 
-# tags = iiffiii  << hog
-# args = loc_x, loc_y, vel_x, vel_y, id, age, lost
+# tags = iiiffiii  << hog
+# args = id x y vx vy age lost occluded
 # 
 def printBlob(path, tags, args, source):
-    print "\n ", 'id', args[4], "\tloc", args[0], "|", args[1], "\tvel", int(args[2]), "|", int(args[3]), "\tage", args[5], "\tlost", args[6]
+    print 'id', str(args[0]).zfill(10), "\tloc", args[1], "|", args[2], "\tvel", int(args[3]), "|", int(args[4]), "\tage", str(args[5]).zfill(5), "\tlost", str(args[6]).zfill(3), "\toccl", args[7]
 
 def printMsg(path, tags, args, source):
     text = ''.join(path.split("/"))
@@ -79,9 +81,9 @@ def each_frame():
 
 # simulate a "game engine"
 while run:
-    print '.'
+    # print '.'
     # do the game stuff:
-    sleep(1)
+    sleep(0.01)
     # call user script
     each_frame()
 

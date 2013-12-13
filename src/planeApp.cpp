@@ -860,12 +860,16 @@ void planeApp::update(){
             }
 
             (**iter).update();
+            bool deleteJob = false;
             if ((**iter).dead) {
+                deleteJob = true;
                 ofLogNotice("videoElement") << ofGetFrameNum() << "\t" << "delete video " << (**iter).file;
                 iter = fgMedia.erase(iter);
+                ofLogNotice("videoElement") << ofGetFrameNum() << "\t" << "deletet video " << (**iter).file;
             } else {
                 ++iter;
             }
+            if (deleteJob) ofLogNotice("videoElement") << ofGetFrameNum() << "\t" << "DELETED";
             // if (!(**iter).dead) {
             //     (**iter).update();
             // }
@@ -1892,7 +1896,7 @@ void planeApp::receiveOsc(){
 
 		} else if(m.getAddress() == "/blobserver/bgsubtractor"){
 
-            // parse incoming elements:  iiiiffii: id x y size vx vy age lost
+            // parse incoming elements:  iiiiffii: id x y size vx vy age lost 
             int blobid = m.getArgAsInt32(0);
             int posx = m.getArgAsInt32(1);
             int posy = m.getArgAsInt32(2);
@@ -1921,7 +1925,7 @@ void planeApp::receiveOsc(){
             ofLogNotice() << "BROADCAST" << var << ", " << source << ", " << cam << ", " << val;
 
 		} else if(m.getAddress() == "/blobserver/hog" && currentFlowId==hogFlowId){
-			// parse incoming elements:  iiiffii: id x y vx vy age lost
+			// parse incoming elements:  iiiffiii: id x y vx vy age lost occluded
 			int blobid = m.getArgAsInt32(0);
 			int posx = m.getArgAsInt32(1);
 			int posy = m.getArgAsInt32(2);
