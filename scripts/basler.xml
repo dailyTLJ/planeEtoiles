@@ -43,10 +43,10 @@
                 <Name>framerate</Name>
                 <Value>30</Value>
             </Param>
-<!--             <Param>
+            <Param>
                 <Name>save</Name>
                 <Value>1 1 /home/planeblob/Documents/grabs/tmp/</Value>
-            </Param> -->
+            </Param>
         </Source>
         <Actuator>
             <Type>Actuator_Hog</Type>
@@ -56,54 +56,43 @@
             </Param>
             <Param>
                 <Name>modelFilename</Name>
-                <!-- <Value>models/model_8x8_bw.xml</Value> -->
-                <!-- <Value>models/model_nov8.xml</Value> -->
+                <!-- <Value>models/model_nov20g_cell16_bin9_block3.xml</Value> -->
                 <Value>models/model_nov29d_cell8_bin9_block1.xml</Value>
-            </Param>
-            <Param>
-                <Name>maxTimePerFrame</Name>
-                <Value>2e5</Value>
-            </Param>
-            <Param>
-                <Name>maxThreads</Name>
-                <Value>8</Value>
-            </Param>
-            <Param>
-                <Name>mergeDistance</Name>
-                <Value>45</Value>
-            </Param>
-            <Param>
-                <Name>filterSize</Name>
-                <Value>3</Value>
-            </Param>
-            <Param>
-                <Name>roiSize</Name>
-                <Value>size_80x160</Value>
-                <!-- <Value>size_64x128</Value> -->
-            </Param>
-            <Param>
-                <Name>blockSize</Name>
-                <Value>size_1x1</Value>
+                <!-- <Value>models/model_8x8_bw.xml</Value> -->
             </Param>
             <Param>
                 <Name>cellSize</Name>
                 <Value>size_8x8</Value>
+                <!-- <Value>size_12x12</Value> -->
+                <!-- <Value>size_16x16</Value> -->
             </Param>
+<!--             <Param>
+                <Name>cellMaxSize</Name>
+                <Value>size_32x32</Value>
+            </Param>
+            <Param>
+                <Name>cellStep</Name>
+                <Value>size_1.3x1.3</Value>
+            </Param> -->
             <Param>
                 <Name>bins</Name>
                 <Value>9</Value>
+                 <!-- <Value>11</Value> -->
+                <!-- <Value>13</Value>  -->
             </Param>
             <Param>
-                <Name>margin</Name>
-                <Value>0.0</Value>
+                <Name>blockSize</Name>
+                 <Value>size_1x1</Value>
+                <!-- <Value>size_2x2</Value>  -->
+                 <!-- <Value>size_3x3</Value> -->
             </Param>
             <Param>
-                <Name>lifetime</Name>
-                <Value>10</Value>
+                <Name>filterSize</Name>
+                <Value>1</Value>
             </Param>
             <Param>
-                <Name>keepOldBlobs</Name>
-                <Value>0 0</Value>
+                <Name>mergeDistance</Name>
+                <Value>45</Value>
             </Param>
             <Param>
                 <Name>maxTrackDistance</Name>
@@ -120,6 +109,31 @@
             <Param>
                 <Name>measurementNoiseCov</Name>
                 <Value>1e-4</Value>
+            </Param>
+            <Param>
+                <Name>margin</Name>
+                <Value>0</Value>
+            </Param>
+            <Param>
+                <Name>lifetime</Name>
+                <Value>10</Value>
+            </Param>
+            <Param>
+                <Name>maxTimePerFrame</Name>
+                <Value>2e5</Value>
+            </Param>
+            <Param>
+                <Name>maxThreads</Name>
+                <Value>8</Value>
+            </Param>
+            <Param>
+                <Name>roiSize</Name>
+                <Value>size_80x160</Value>
+                <!-- <Value>size_64x128</Value> -->
+            </Param>
+            <Param>
+                <Name>keepOldBlobs</Name>
+                <Value>0 0</Value>
             </Param>
             <Param>
                 <Name>saveSamples</Name>

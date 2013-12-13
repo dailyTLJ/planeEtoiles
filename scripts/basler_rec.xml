@@ -15,10 +15,10 @@
                 <Name>rotation</Name>
                 <Value>0.0</Value>
             </Param>
-<!--             <Param>
+            <Param>
                 <Name>crop</Name>
                 <Value>78 16 500 300</Value>
-            </Param> -->
+            </Param>
 <!--             <Param>
                 <Name>gammaCorrection</Name>
                 <Value>0.5</Value>
