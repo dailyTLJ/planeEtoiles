@@ -7,7 +7,7 @@ class mediaElement
 {
     public:
         mediaElement();
-        ~mediaElement()  { /*cout << "kill media " << this->file << endl;*/ };
+        ~mediaElement();
 
         virtual void update();
         virtual void draw();
@@ -75,6 +75,7 @@ class mediaElement
         bool fadeoutDestroy;
         bool movieEndTrigger;
         bool dead;
+        bool mediaLoaded;
 
         bool bridgeVideo;
         int bridgeBlobID[2];

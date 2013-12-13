@@ -10,10 +10,19 @@ imageElement::imageElement(string filename, float _scale) {
 
 void imageElement::loadImage(string filename, float _scale) {
     this->file = filename;
-    img.loadImage(filename);
+    ofFile fileTest(ofToDataPath(file));
+    if (fileTest.exists()) {
+        img.loadImage(filename);
+        mediaLoaded = true;
+    } else {
+        mediaLoaded = false;
+        ofLogError() << ofGetFrameNum() << "\t" << "file doesn't exist " << file;
+    }
     this->scale = _scale;
-    this->w = img.getWidth() * _scale;
-    this->h = img.getHeight() * _scale;
+    if (mediaLoaded) {
+        this->w = img.getWidth() * _scale;
+        this->h = img.getHeight() * _scale;
+    }
 }
 
 void imageElement::update() {
@@ -37,12 +46,14 @@ void imageElement::draw(int x, int y, float _scale) {
 }
 
 void imageElement::drawElement(float _scale) {
-    ofSetColor(255, 255, 255, int(255*opacity*opMax));
-    float msc = (scale+addSc) * _scale;
-    if (centered) {
-        img.draw(-w * msc * 0.5, -h * msc * 0.5, w * msc, h * msc);
-    } else {
-        img.draw(0, 0, w * msc, h * msc);
+    if (mediaLoaded) {
+        ofSetColor(255, 255, 255, int(255*opacity*opMax));
+        float msc = (scale+addSc) * _scale;
+        if (centered) {
+            img.draw(-w * msc * 0.5, -h * msc * 0.5, w * msc, h * msc);
+        } else {
+            img.draw(0, 0, w * msc, h * msc);
+        }
+        ofSetColor(255, 255, 255, 255);
     }
-    ofSetColor(255, 255, 255, 255);
 }

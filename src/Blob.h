@@ -36,6 +36,20 @@ class Pair {
 };
 
 
+class tinyNeighbor {
+    public:
+        ofPoint position;
+        bool movingMean;
+        bool onStage;
+
+        void set(ofPoint p, bool mm, bool os) {
+            this->position = p;
+            this->movingMean = mm;
+            this->onStage = os;
+        }
+};
+
+
 // to compute the distance between a blob and a neighbor blob
 // it keeps a copy of the distance over time, to judge if distance stays the same
 class Neighbor {
@@ -50,6 +64,8 @@ class Neighbor {
         int steadyStart;
         int steadyTimer;
         bool steadyRewarded;
+        bool movingMean;
+        bool onStage;
 
         Neighbor() {
             steadyStart = 0;
@@ -57,6 +73,8 @@ class Neighbor {
             steadyRewarded = false;
             steadyDistance = false;
             updated = false;
+            movingMean = true;
+            onStage = true;
         }
 
         float getMean() {
@@ -124,8 +142,9 @@ class Blob {
         bool overFrozen;
         int frozenStart;
         int frozenTimer;
-        bool lost; 
-        
+        bool lost;
+        bool occluded;
+
         ofEvent<int> onLost;
         ofEvent<int> onCreate;
         ofEvent<int> onFreeze;
@@ -152,7 +171,8 @@ class Blob {
         void follow(float x, float y, float frameW = 500, float frameH = 500, float stageRadius = 200, int y_mean = 5);
         void setVelocity(float dx, float dy);
         void analyze(float freezeMinVel, float freezeMinTime, float freezeMaxTime, float movingThr);
-        void analyzeNeighbors(std::map<int, ofPoint> neighborLocation, float distStdDevThr, int steadyReward);
+        // void analyzeNeighbors(std::map<int, ofPoint> neighborLocation, float distStdDevThr, int steadyReward);
+        void analyzeNeighbors(std::map<int, tinyNeighbor> neighborLocation, float distStdDevThr, int steadyReward);
         ofPoint transformPerspective(ofPoint& v);
         void update(int minLostTime);
         void updateVideo();

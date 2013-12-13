@@ -15,6 +15,8 @@ void Blob::init(){
 	this->lifetime = this->maxLifetime;
 	this->updated = true;
 
+    this->lost = false;
+    this->occluded = false;
     this->vel = 0;
     this->onStage = false;
 	this->frozen = false;
@@ -133,7 +135,8 @@ void Blob::analyze(float freezeMaxVel, float freezeMinTime, float freezeMaxTime,
 }
 
 //--------------------------------------------------------------
-void Blob::analyzeNeighbors(std::map<int, ofPoint> neighborLocation, float distStdDevThr, int steadyReward){
+void Blob::analyzeNeighbors(std::map<int, tinyNeighbor> neighborLocation, float distStdDevThr, int steadyReward){
+// void Blob::analyzeNeighbors(std::map<int, ofPoint> neighborLocation, float distStdDevThr, int steadyReward){
 
     // set all neighbor-updates to false, to be able to delete inactive ones after
     for(std::map<int, Neighbor>::iterator it = neighbors.begin(); it != neighbors.end(); ++it){
@@ -144,10 +147,12 @@ void Blob::analyzeNeighbors(std::map<int, ofPoint> neighborLocation, float distS
     vector<Pair> breakMe;   // store the neighbor-connections that are broken, to trigger them later
 
     // update neighbors with new location data
-    for(std::map<int, ofPoint>::iterator it = neighborLocation.begin(); it != neighborLocation.end(); ++it){
+    // for(std::map<int, ofPoint>::iterator it = neighborLocation.begin(); it != neighborLocation.end(); ++it){
+    for(std::map<int, tinyNeighbor>::iterator it = neighborLocation.begin(); it != neighborLocation.end(); ++it){
         int nid = it->first;
         if(nid != this-> id) {
-            ofPoint p = it->second;
+            tinyNeighbor tn = it->second;
+            ofPoint p = tn.position;
 
             // check if neighbor already exists in history
             std::map<int, Neighbor>::iterator iter = neighbors.find(nid);
@@ -166,7 +171,7 @@ void Blob::analyzeNeighbors(std::map<int, ofPoint> neighborLocation, float distS
             }
             n->updated = true;
             Pair pair = Pair( min(this->id,n->id), max(this->id,n->id) );
-            if (n->distance.size() >= NEIGHBOR_HISTORY && n->getStdDev() < distStdDevThr && movingMean && onStage) {
+            if (n->distance.size() >= NEIGHBOR_HISTORY && n->getStdDev() < distStdDevThr && movingMean && onStage && tn.movingMean && tn.onStage) {
                 if (!n->steadyDistance) {
                     n->steadyDistance = true;
                     n->steadyStart = ofGetUnixTime();
@@ -243,7 +248,7 @@ ofPoint Blob::transformPerspective(ofPoint& v){
 void Blob::update(int minLostTime){
 	if(this->updated == false) {
 		this->lifetime--;
-		return; 
+		return;
     }
     this->lifetime = this->maxLifetime;
 	this->updated = false;
@@ -267,7 +272,7 @@ bool Blob::isAlive(){
 	if(this->lifetime > 0) {
         if (position.x == 0 && position.y == 0) {
             ofLogNotice("BLOB") << "\t" << ofGetFrameNum() << "\t" << this->id << " isAlive() - position 0|0";
-            // return false;
+            return false;
         }
 		return true;
 	} else {

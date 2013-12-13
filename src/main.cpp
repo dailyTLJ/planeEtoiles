@@ -11,9 +11,8 @@ int main( ){
 	// ofSetupOpenGL(2520,880,OF_GAME_MODE);			// <-------- setup the GL context
 
 
-	ofAppGLFWWindow window;  
-    window.setMultiDisplayFullscreen(true);  
-    // ofSetupOpenGL(&window,900,900,OF_FULLSCREEN);
+	ofAppGLFWWindow window;
+    window.setMultiDisplayFullscreen(true);
     ofSetupOpenGL(&window,1440,900,OF_FULLSCREEN);
     // ofSetupOpenGL(&window,1440,700,OF_WINDOW);
 

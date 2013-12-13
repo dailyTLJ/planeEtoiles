@@ -20,6 +20,7 @@ mediaElement::mediaElement() {
     this->centered = false;
     this->moveElement = false;
     this->velocity.set(0,0);
+    this->mediaLoaded = false;
     goal.set(0,0);
     goalDefined = false;
     blend = true;
@@ -32,6 +33,11 @@ mediaElement::mediaElement() {
     outroTransformation = &mediaElement::fadeOut; 
     introTransformation = &mediaElement::fadeIn;
 }
+
+mediaElement::~mediaElement() {
+    ofLogNotice("mediaElement") << ofGetFrameNum() << "\t" << "destructor " << file;
+}
+
 
 
 void mediaElement::update() {

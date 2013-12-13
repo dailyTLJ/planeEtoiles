@@ -28,7 +28,6 @@ class videoElement: public mediaElement
         void finishMovie(float speed = 5.0);
         void finishMovie();
 
-        
         float displaySpeed;
 
         bool loadLoopFileNow;
