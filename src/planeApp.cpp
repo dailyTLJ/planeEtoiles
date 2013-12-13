@@ -39,13 +39,16 @@ void planeApp::setup(){
 
 	ofTrueTypeFont::setGlobalDpi(72);
 
-    // fontBg.loadFont("Mercury Bold.otf", 36, true, true);
-    // fontBg.loadFont("CircularStd-Book.otf", 80, true, true);
+
     fontBg.loadFont("CircularStd-Book.otf", 34, true, true);
-    // fontBg.setLineHeight(80.0f);
     fontBg.setLineHeight(40.0f);
     fontBg.setLetterSpacing(1.037);
     fontBg.setSpaceSize(0.5);
+
+    fontIdle.loadFont("CircularStd-Book.otf", 46, true, true);
+    fontIdle.setLineHeight(52.0f);
+    fontIdle.setLetterSpacing(1.037);
+    fontIdle.setSpaceSize(0.5);
 
     fontSm.loadFont("Mercury Bold.otf", 20, true, true);
 	fontSm.setLineHeight(16.0f);
@@ -53,7 +56,7 @@ void planeApp::setup(){
 
 
     ofLogNotice("START") << "\t" << ofGetFrameNum() << "\t" << "1";
-    projectorOn = true;
+    projectorOn = false;
     drawFbo = false;
     language = 1;
     processing = true;
@@ -359,7 +362,7 @@ void planeApp::initScenes(){
     revolution.analysis[0] = "* \n-> 20 sec";
     revolution.length[0] = 20;
     revolution.instructions[0][1] = "";
-    revolution.instructionImg[0][1] = "LET-GO-BLACK.jpg"; 
+    revolution.instructionImg[0][1] = "LET-GO-BLACK.jpg";
     revolution.instructions[1][1] = "";
     revolution.instructions[2][1] = "";
     revolution.instructionImg[1][1] = "LACHEZ-TOUT-BLACK.jpg";
@@ -625,7 +628,7 @@ void planeApp::update(){
                 } else if (segment==3 || segment==5) {
                     // STEP INTO THE LINE
                     if (success) endSegment(1);
-                }  
+                }
             }
         }
 
@@ -1213,14 +1216,14 @@ void planeApp::blobOverFreeze(int & blobID) {
     if (!transition) {
         if (scene==1) {
             if (segment==1 && blobs[blobID].onStage && blobs[blobID].mediaLink != NULL) {
-                string constellations[] = { 
+                string constellations[] = {
                 "CONSTELLATION_1-photoJPEG.mov",    // ok seahorse
-                // "CONSTELLATION_2-photoJPEG.mov", 
+                // "CONSTELLATION_2-photoJPEG.mov",
                 // "CONSTELLATION_3-photoJPEG.mov",
-                // "CONSTELLATION_4-photoJPEG.mov", 
+                // "CONSTELLATION_4-photoJPEG.mov",
                 // "CONSTELLATION_5-photoJPEG.mov",
-                // "CONSTELLATION_6-photoJPEG.mov", 
-                "CONSTELLATION_7-photoJPEG.mov",    // ok 
+                // "CONSTELLATION_6-photoJPEG.mov",
+                "CONSTELLATION_7-photoJPEG.mov",    // ok
                 "CONSTELLATION_8-photoJPEG.mov",    // bold ok
                 "CONSTELLATION_9-photoJPEG.mov",    // bold ok
                 "CONSTELLATION_11-photoJPEG.mov",    // bold ok
@@ -1228,25 +1231,25 @@ void planeApp::blobOverFreeze(int & blobID) {
                 "CONSTELLATION_14-photoJPEG.mov",    // bold ok
                 // "CONSTELLATION_15-photoJPEG.mov",    // bold ok
                 "CONSTELLATION_16-photoJPEG.mov",    // bold ok
-                // "CONSTELLATION_BOAT-photoJPEG.mov",     
+                // "CONSTELLATION_BOAT-photoJPEG.mov",
                 "CONSTELLATION_CAR-photoJPEG.mov",
-                "CONSTELLATION_CASSEROLLE-photoJPEG.mov", 
+                "CONSTELLATION_CASSEROLLE-photoJPEG.mov",
                 // "CONSTELLATION_CUBE-photoJPEG.mov",
-                // "CONSTELLATION_FISH-photoJPEG.mov", 
+                // "CONSTELLATION_FISH-photoJPEG.mov",
                 // "CONSTELLATION_HAND-photoJPEG.mov",
-                // "CONSTELLATION_HEART2-photoJPEG.mov", 
+                // "CONSTELLATION_HEART2-photoJPEG.mov",
                 // "CONSTELLATION_HOUSE-photoJPEG.mov",
-                // "CONSTELLATION_MERMAID-photoJPEG.mov", 
+                // "CONSTELLATION_MERMAID-photoJPEG.mov",
                 // "CONSTELLATION_STICKBOY-photoJPEG.mov"
                  };
 
-                int constOrigin[][2] = { 
+                int constOrigin[][2] = {
                     {70,518},   // 1
-                    // {71,159}, 
+                    // {71,159},
                     // {458,180},  // 3
-                    // {882,716}, 
+                    // {882,716},
                     // {190,378},  // 5
-                    // {146,238},  
+                    // {146,238},
                     {46,54},    // 7
                     {246,84},    // 8x:264, y:84
                     {54,228},    // 8x:54, y:228
@@ -1255,16 +1258,16 @@ void planeApp::blobOverFreeze(int & blobID) {
                     {136,60},    // 14 x:136, y:60
                     // {96,148},    // 15 x:96, y:148
                     {38,106},    // 16 x:38, y:106
-                    // {382,46},   
+                    // {382,46},
                     {174,44},
-                    {44,86}, 
+                    {44,86},
                     // {36,74},
-                    // {264,188}, 
+                    // {264,188},
                     // {564,450},
-                    // {60,50}, 
+                    // {60,50},
                     // {220,332},
-                    // {176,58}, 
-                    // {120,428} 
+                    // {176,58},
+                    // {120,428}
                 };
 
                 // play constellation video, as reward, position based on first star
@@ -2108,46 +2111,67 @@ void planeApp::drawScreen(int x, int y, float scale){
         int ypos = 1742;
         int textLineH = 40;
         ofFill();
-        string instruction = scenes[scene].instructions[language][segment];
 
-        string measureInst = scenes[scene].instructions[language][segment];
+        string instruction = scenes[scene].instructions[language][segment];
+        string measureInst = instruction;
+        // hack to allow for french-accented letters to produce correct center-align text-block width
         if(language==1) measureInst = scenes[scene].instructions[2][segment];
 
-        vector< string > instructionLine = ofSplitString(instruction, "\n");
-        vector< string > measureInstLine = ofSplitString(measureInst, "\n");
+        if (scene>0) {
 
-        int i = 0;
-        for (vector<string>::iterator it = instructionLine.begin() ; it != instructionLine.end(); ++it) {
-
-            ofRectangle textR = fontBg.getStringBoundingBox(measureInstLine[i],0, 0);
-
-            // background for testing, positioning of text
-            // ofSetColor(255,0,0);
-            // ofRect(x+ (projectionW/2 - textR.width/2)*scale, y+(ypos-textLineH)*scale, textR.width*scale, textR.height*scale);
 
             ofSetColor(255);
-            if (scene==4 && segment==1) {
-                // FOLLOW ME
-                fontBg.drawString((*it), x+ ((*fgMedia[0]).position.x - textR.width/2)*scale, y+ypos*scale);
-            } else {
-                fontBg.drawString((*it), x+ (projectionW/2 - textR.width/2)*scale, y+ypos*scale);
+            // multiple lines, need to split up, to center-align
+            vector< string > instructionLine = ofSplitString(instruction, "\n");
+            vector< string > measureInstLine = ofSplitString(measureInst, "\n");
+
+            int i = 0;
+            for (vector<string>::iterator it = instructionLine.begin() ; it != instructionLine.end(); ++it) {
+
+                ofRectangle textR = fontBg.getStringBoundingBox(measureInstLine[i],0, 0);
+                if (scene==4 && segment==1) {
+                    // FOLLOW ME
+                    fontBg.drawString((*it), x+ ((*fgMedia[0]).position.x - textR.width/2)*scale, y+ypos*scale);
+                } else {
+                    fontBg.drawString((*it), x+ (projectionW/2 - textR.width/2)*scale, y+ypos*scale);
+                }
+                ypos += textLineH;
+                i++;
             }
-            ypos += textLineH;
-            i++;
+        } else {
+            // IDLE MODE, one liner therefore no need to split
+
+            int animCnt = ofGetFrameNum()%120;
+            float dimAlpha = 0.3;
+            if (animCnt < 30) {
+                ofSetColor(255, int (255*dimAlpha + (animCnt/30.f)*(255*(1-dimAlpha))));
+            } else if (animCnt > 90) {
+                ofSetColor(255, int (255 - ((animCnt-90)/30.f)*(255*(1-dimAlpha))));
+            } else {
+                ofSetColor(255);
+            }
+            ofRectangle textR = fontBg.getStringBoundingBox(measureInst,0,0);
+            fontIdle.drawString(instruction, x+ (projectionW/2 - textR.width/2)*scale, y+ypos*scale);
+
+
+            // ofPushMatrix();
+            // ofTranslate(x+ (projectionW/2 - textR.width/2)*scale, y+ypos*scale);
+            // ofScale(scale, scale, scale);
+            // fontIdle.drawString(instruction, 0, 0);
+            // ofPopMatrix();
         }
     }
+    // INSTRUCTION IMAGES, display always, so that they are visible on transition videos (red sun)
     if (in_img.length() > 2) {
         ofEnableBlendMode(OF_BLENDMODE_ADD);
         ofFill();
-        // ofSetColor(255,0,0);
-        // ofRect(x+400*scale, y+300*scale, 500*scale, 1000*scale);
         ofSetColor(255,255,255);
         instructionImg.draw(x,y, projectionW*scale, projectionH*scale);
         ofDisableBlendMode();
     }
 
+    // extra debug information
     if (displayDebug) {
-        // extra debug information
         fontSm.drawString(scenes[scene].analysis[segment], x+100*scale, y+(projectionH-150)*scale);
         fontBg.drawString(ofToString(segmentClock), x+(projectionW-200)*scale, y+(projectionH-200)*scale);
         fontSm.drawString(ofToString(success ? "true" : "false"), x+(projectionW-200)*scale, y+(projectionH-150)*scale);

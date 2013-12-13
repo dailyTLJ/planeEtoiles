@@ -177,6 +177,7 @@ class planeApp : public ofBaseApp{
 		float hogAvVel;
 
 		ofTrueTypeFont fontBg;
+		ofTrueTypeFont fontIdle;
 		ofTrueTypeFont fontSm;
 		ofxPanel gui;
 		ofParameterGroup paramBasic;
