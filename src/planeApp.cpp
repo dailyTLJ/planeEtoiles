@@ -32,7 +32,7 @@ void planeApp::setup(){
     ofSetLogLevel("BLOB", OF_LOG_VERBOSE);
     ofSetLogLevel("BRIDGE", OF_LOG_VERBOSE);
     ofSetLogLevel("TRANSITION", OF_LOG_VERBOSE);
-    ofSetLogLevel("OSC", OF_LOG_VERBOSE);
+    ofSetLogLevel("OSC", OF_LOG_WARNING);
     ofSetLogLevel("interaction", OF_LOG_VERBOSE);
     ofSetLogLevel("videoElement", OF_LOG_VERBOSE);
     ofSetLogLevel("mediaElement", OF_LOG_VERBOSE);
@@ -513,7 +513,7 @@ void planeApp::update(){
 
             	b->update(minLost);
             	if( !b->isAlive() ) {
-                    ofLogNotice("BLOB") << "\t" << ofGetFrameNum() << "\t" << "dead\t" << b->id;
+                    ofLogNotice("BLOB") << "\t\t" << ofGetFrameNum() << "\t" << "dead\t" << b->id;
                     ofNotifyEvent(b->prepareToDie,b->id,b);
             		blobs.erase(it++);
             	} else {
@@ -631,7 +631,7 @@ void planeApp::update(){
         //     if ((**it).bridgeVideo && (**it).bridgeBlobID[0]==pair.blob1 && (**it).bridgeBlobID[1]==pair.blob2) {
         //         string videoFile = "video/2_stars/LINK_01-outro-photoJPEG.mov";
         //         if ((**it).file != videoFile) {
-        //             ofLogNotice("BLOB") << "\t" << ofGetFrameNum() << "\t" << "\t\t\tunlinked bridge";
+        //             ofLogNotice("BLOB") << "\t\t" << ofGetFrameNum() << "\t" << "\t\t\tunlinked bridge";
         //             // (**it).dead = true;
         //             found = true;
         //             (**it).loadMovie("video/2_stars/LINK_01-outro-photoJPEG.mov");
@@ -837,7 +837,7 @@ void planeApp::update(){
             if ((**iter).bridgeVideo) {
                 int blob1 = (**iter).bridgeBlobID[0];
                 int blob2 = (**iter).bridgeBlobID[1];
-                // ofLogNotice("BLOB") << "\t" << ofGetFrameNum() << "\t" << "bridgeVideo " << blob1 << " / " << blob2;
+                // ofLogNotice("BLOB") << "\t\t" << ofGetFrameNum() << "\t" << "bridgeVideo " << blob1 << " / " << blob2;
 
                 std::map<int,Blob>::iterator iter1 = blobs.find(blob1);
                 if( iter1 == blobs.end() ) {
@@ -912,12 +912,12 @@ void planeApp::bgMediaSwap(int & trans) {
 
 }
 
-// void planeApp::bgMediaFadedOut(int & trans) {
-//     ofLogNotice("TRANSITION") << "\t" << ofGetFrameNum() << "\t" << "bgMediaFadedOut, moveOn = true";
-//     // set moveOn to true, instead of calling nextSegment()
-//     // to avoid conflicting threading
-//     moveOn = true;
-// }
+void planeApp::allFaded(int & trans) {
+    ofLogNotice("TRANSITION") << "\t" << ofGetFrameNum() << "\t" << "allFaded, moveOn = true";
+    // set moveOn to true, instead of calling nextSegment()
+    // to avoid conflicting threading
+    moveOn = true;
+}
 
 // trans -1 : trigger first fade from main-loop and not from faded-event
 void planeApp::fgMediaFadedOut(int & trans) {
@@ -971,7 +971,7 @@ void planeApp::fgMediaFadedOut(int & trans) {
 // }
 
 void planeApp::blobOnLost(int & blobID) {
-    ofLogNotice("BLOB") << "\t" << ofGetFrameNum() << "\t" << blobID << " just got lost";
+    ofLogNotice("BLOB") << "\t\t" << ofGetFrameNum() << "\t" << blobID << " just got lost";
     if (!transition && blobs[blobID].onStage) {
         if (scene==2) {
             activityCnt++;
@@ -1024,7 +1024,7 @@ void planeApp::blobSteady(Pair & pair) {
         Blob* b2 = &blobs[pair.blob2];
 
         if(b1->onStage && b2->onStage) {
-            ofLogNotice("BLOB") << "\t" << ofGetFrameNum() << "\t" << "blobSteady() \t\t" << pair.blob1 << " + " << pair.blob2;
+            ofLogNotice("BLOB") << "\t\t" << ofGetFrameNum() << "\t" << "blobSteady() \t\t" << pair.blob1 << " + " << pair.blob2;
 
 
             // replace video with sparklier star
@@ -1034,7 +1034,7 @@ void planeApp::blobSteady(Pair & pair) {
             if (vid1 != NULL) {
                 string videoFile = "video/2_stars/STAR_"+ofToString((*vid1).id)+"-glow-photoJPEG.mov";
                 if ((*vid1).file != videoFile) {
-                    ofLogNotice("BLOB") << "\t" << ofGetFrameNum() << "\t\t\t" << "make blob " << pair.blob1 << " sparklier";
+                    ofLogNotice("BLOB") << "\t\t" << ofGetFrameNum() << "\t\t\t" << "make blob " << pair.blob1 << " sparklier";
                     (*vid1).loadMovie(videoFile);
                     (*vid1).reset();
                 }
@@ -1042,7 +1042,7 @@ void planeApp::blobSteady(Pair & pair) {
             if (vid2 != NULL) {
                 string videoFile = "video/2_stars/STAR_"+ofToString((*vid2).id)+"-glow-photoJPEG.mov";
                 if ((*vid2).file != videoFile) {
-                    ofLogNotice("BLOB") << "\t" << ofGetFrameNum() << "\t\t\t" << "make blob " << pair.blob2 << " sparklier";
+                    ofLogNotice("BLOB") << "\t\t" << ofGetFrameNum() << "\t\t\t" << "make blob " << pair.blob2 << " sparklier";
                     (*vid2).loadMovie(videoFile);
                     (*vid2).reset();
                 }
@@ -1060,33 +1060,33 @@ void planeApp::blobSteady(Pair & pair) {
             }
 
             if (!exists) {
-                ofLogNotice("BLOB") << "\t" << ofGetFrameNum()  << "\t\t\t" << "add video bridge";
+                ofLogNotice("BLOB") << "\t\t" << ofGetFrameNum()  << "\t\t\t" << "add video bridge";
                 string newVideoName = "video/2_stars/LINK_01-loop-photoJPEG.mov";
                 fgMedia.push_back(ofPtr<mediaElement>( new videoElement(newVideoName)));
                 (*fgMedia[fgMedia.size()-1]).reset();
                 (*fgMedia[fgMedia.size()-1]).bridge(b1->id, b2->id);
                 ofNotifyEvent( blobs[pair.blob1].updatePosition, pair.blob1, &blobs[pair.blob1] );
             } else {
-                ofLogNotice("BLOB") << "\t" << ofGetFrameNum()  << "\t\t\t" << "bridge already exists";
+                ofLogNotice("BLOB") << "\t\t" << ofGetFrameNum()  << "\t\t\t" << "bridge already exists";
             }
         }
     }
 }
 
 void planeApp::blobSteadyReward(Pair & pair) {
-    ofLogNotice("BLOB") << "\t" << ofGetFrameNum() << "\t" << "blobSteadyReward() \t" << pair.blob1 << " + " << pair.blob2;
+    ofLogNotice("BLOB") << "\t\t" << ofGetFrameNum() << "\t" << "blobSteadyReward() \t" << pair.blob1 << " + " << pair.blob2;
     if (!transition && scene==1 && segment>1) {
         // ofPtr<mediaElement> vid1 = blobs[pair.blob1].mediaLink;
         // ofPtr<mediaElement> vid2 = blobs[pair.blob2].mediaLink;
 
         // // replace video with sparklier star
         // if (vid1 != NULL) {
-        //     ofLogNotice("BLOB") << "\t" << ofGetFrameNum() << "\t" << "blob " << pair.blob1 << " \t\tfound vid";
+        //     ofLogNotice("BLOB") << "\t\t" << ofGetFrameNum() << "\t" << "blob " << pair.blob1 << " \t\tfound vid";
         //     (*vid1).loadMovie("video/2_stars/ATTRACTION_star_glow-01-animation.mov");
         //     (*vid1).reset();
         // }
         // if (vid2 != NULL) {
-        //     ofLogNotice("BLOB") << "\t" << ofGetFrameNum() << "\t" << "blob " << pair.blob2 << " \t\tfound vid";
+        //     ofLogNotice("BLOB") << "\t\t" << ofGetFrameNum() << "\t" << "blob " << pair.blob2 << " \t\tfound vid";
         //     (*vid2).loadMovie("video/2_stars/ATTRACTION_star_glow-01-animation.mov");
         //     (*vid2).reset();
         // }
@@ -1095,7 +1095,7 @@ void planeApp::blobSteadyReward(Pair & pair) {
 
 void planeApp::blobBreakSteady(Pair & pair) {
     if (!transition && scene==1 && segment>1) {
-        ofLogNotice("BLOB") << "\t" << ofGetFrameNum() << "\t" << "blobBreakSteady() \t" << pair.blob1 << " + " << pair.blob2;
+        ofLogNotice("BLOB") << "\t\t" << ofGetFrameNum() << "\t" << "blobBreakSteady() \t" << pair.blob1 << " + " << pair.blob2;
 
         ofPtr<mediaElement> vid1 = blobs[pair.blob1].mediaLink;
         ofPtr<mediaElement> vid2 = blobs[pair.blob2].mediaLink;
@@ -1127,7 +1127,7 @@ void planeApp::blobBreakSteady(Pair & pair) {
 void planeApp::blobOnFreeze(int & blobID) {
     if (!transition) {
         ofPoint p = blobMapToScreen(blobs[blobID].position);
-        ofLogNotice("BLOB") << "\t" << ofGetFrameNum() << "\t" << "blobOnFreeze()\t" << blobID << " at " << int(p.x) << "|" << int(p.y);
+        ofLogNotice("BLOB") << "\t\t" << ofGetFrameNum() << "\t" << "blobOnFreeze()\t" << blobID << " at " << int(p.x) << "|" << int(p.y);
         if (scene==1) {
             if ((segment==0 || segment==1) && blobs[blobID].onStage) {
                 // STAND STILL
@@ -1168,7 +1168,7 @@ void planeApp::blobUnFreeze(int & blobID) {
         if (scene==1) {
             if (segment==0 || segment==1) {
                 // STAND STILL
-                ofLogNotice("BLOB") << "\t" << ofGetFrameNum() << "\t" << "blobUnFreeze()\t\t" << blobID;
+                ofLogNotice("BLOB") << "\t\t" << ofGetFrameNum() << "\t" << "blobUnFreeze()\t\t" << blobID;
                 // video fade away
                 // video unlink
                 ofPtr<mediaElement> vid = blobs[blobID].mediaLink;
@@ -1250,7 +1250,7 @@ void planeApp::blobOverFreeze(int & blobID) {
                 ofPtr<mediaElement> starVid = blobs[blobID].mediaLink;
                 ofPoint p = blobMapToScreen(blobs[blobID].position);
                 if (starVid != NULL) p = starVid->position;
-                ofLogNotice("BLOB") << "\t" << ofGetFrameNum() << "\t" << "blobOverFreeze()\t\t" << blobID << " at " << int(p.x) << "|" << int(p.y);
+                ofLogNotice("BLOB") << "\t\t" << ofGetFrameNum() << "\t" << "blobOverFreeze()\t\t" << blobID << " at " << int(p.x) << "|" << int(p.y);
                 string bonusVideo = "video/2_stars/" + constellations[randomConst];
                 fgMedia.push_back(ofPtr<mediaElement>( new videoElement(bonusVideo) ));
                 if (p.x > projectionW/2) {      // flip video if necesssary
@@ -1280,7 +1280,7 @@ void planeApp::blobEnterStage(int & blobID) {
     } else if (scene==1 && !transition) {
         if (segment==2 || segment==3) {
             // KEEP THE DISTANCE
-            ofLogNotice("BLOB") << "\t" << ofGetFrameNum() << "\t" << "blobEnterStage()\t\t" << blobID << " (star)";
+            ofLogNotice("BLOB") << "\t\t" << ofGetFrameNum() << "\t" << "blobEnterStage()\t\t" << blobID << " (star)";
             int randomStar = ofRandom(3) + 2;
             fgMedia.push_back(ofPtr<mediaElement>( new videoElement("video/2_stars/STAR_" + ofToString(randomStar)+"-loop-photoJPEG.mov")));
             blobs[blobID].mediaLink = fgMedia[fgMedia.size()-1];
@@ -1293,7 +1293,7 @@ void planeApp::blobEnterStage(int & blobID) {
         }
     } else if (scene==4) {
         // PLANETS
-        ofLogNotice("BLOB") << "\t" << ofGetFrameNum() << "\t" << "blobEnterStage()\t\t" << blobID << " (planet)";
+        ofLogNotice("BLOB") << "\t\t" << ofGetFrameNum() << "\t" << "blobEnterStage()\t\t" << blobID << " (planet)";
         int planedId[] = { 6, 9, 13, 15, 18, 19,20, 22, 23 };
         int planets = sizeof(planedId) / sizeof(planedId[0]);
         pickPlanet++;
@@ -1319,12 +1319,12 @@ void planeApp::blobLeaveStage(int & blobID) {
         if (scene==1) {
             if (segment==2 || segment==3) {
                 // STAR BRIDGES
-                ofLogNotice("BLOB") << "\t" << ofGetFrameNum() << "\t" << "blobLeaveStage()\t\t" << blobID;
+                ofLogNotice("BLOB") << "\t\t" << ofGetFrameNum() << "\t" << "blobLeaveStage()\t\t" << blobID;
                 this->blobUnlink(blobID);
             }
         } else if (scene==4) {
             // PLANETS
-            ofLogNotice("BLOB") << "\t" << ofGetFrameNum() << "\t" << "blobLeaveStage()\t\t" << blobID;
+            ofLogNotice("BLOB") << "\t\t" << ofGetFrameNum() << "\t" << "blobLeaveStage()\t\t" << blobID;
             this->blobUnlink(blobID);
         }
     }
@@ -1334,7 +1334,7 @@ void planeApp::blobOnCreate(int & blobID) {
 
     if (!transition) {
         // first clean up, all related blob settings
-        ofLogNotice("BLOB") << "\t" << ofGetFrameNum() << "\t" << "blobOnCreate() \t" << blobID;
+        ofLogNotice("BLOB") << "\t\t" << ofGetFrameNum() << "\t" << "blobOnCreate() \t" << blobID;
         this->blobUnlink(blobID);
         blobs[blobID].videoTrace = false;
         blobs[blobID].mediaLink = ofPtr<mediaElement>();  // TODO how to release ofPtr ?
@@ -1521,7 +1521,7 @@ void planeApp::videoFollowBlob(int & blobID) {
 
 void planeApp::blobUnlink(int & blobID) {
     // making sure, a blob goes to die and untethers all video connections
-    ofLogNotice("BLOB") << "\t" << ofGetFrameNum() << "\t" << "blobUnlink() \t" << blobID << "\tmediaLink: " << blobs[blobID].mediaLink;
+    ofLogNotice("BLOB") << "\t\t" << ofGetFrameNum() << "\t" << "blobUnlink() \t" << blobID << "\tmediaLink: " << blobs[blobID].mediaLink;
 
     for (vector<ofPtr<mediaElement> >::iterator it = fgMedia.begin(); it != fgMedia.end(); it++) {
         if (*it == blobs[blobID].mediaLink) {
@@ -1529,10 +1529,10 @@ void planeApp::blobUnlink(int & blobID) {
             if (scene==1 && segment<2) {
                 // STARS: fade out frozen stars
                 (**it).fadeOut(0.001, 0.5, true);
-                ofLogNotice("BLOB") << "\t" << ofGetFrameNum() << "\t" << "\t\t\tunlinked blob and fadeOut ";
+                ofLogNotice("BLOB") << "\t\t" << ofGetFrameNum() << "\t" << "\t\t\tunlinked blob and fadeOut ";
             } else {
                 (**it).dead = true;
-                ofLogNotice("BLOB") << "\t" << ofGetFrameNum() << "\t" << "\t\t\tunlinked blob ";
+                ofLogNotice("BLOB") << "\t\t" << ofGetFrameNum() << "\t" << "\t\t\tunlinked blob ";
             }
             blobs[blobID].mediaLink = ofPtr<mediaElement>();
             break;
@@ -1578,23 +1578,23 @@ void planeApp::beginSegment() {
     ofLogNotice("TRANSITION") << "\t" << ofGetFrameNum() << "\t" << "beginSegment() " << blobs.size();
 
     transition = false;
-    // make new blob connections, to ensure blobs are connected to video elements, if necessary
-    for(std::map<int, Blob>::iterator it = blobs.begin(); it != blobs.end(); ++it){
-        Blob* b = &it->second;
-        ofNotifyEvent(b->onCreate,b->id,b);
-    }
 
-    // for (vector<ofPtr<mediaElement> >::iterator it = fgMedia.begin(); it != fgMedia.end(); it++) {
-    //     ((**it).*((**it).introTransformation))();
-    // }
+    if (scene!=4) {
+        // make new blob connections, to ensure blobs are connected to video elements, if necessary
+        for(std::map<int, Blob>::iterator it = blobs.begin(); it != blobs.end(); ++it){
+            Blob* b = &it->second;
+            ofNotifyEvent(b->onCreate,b->id,b);
+        }
+    }
 
 }
 
+// trigger specific outro transformations for segment / scene 
+//--------------------------------------------------------------
 void planeApp::endSegment(int direction) {
-    endedSegment = true;
     ofLogNotice("TRANSITION") << "\t" << ofGetFrameNum() << "\t" << "endSegment()   " << scene << ":" << segment;
+    endedSegment = true;    // so that instructions are not displayed anymore
     segmentChange = direction;
-    // segmentClock = -1;
 
     // ONLY DO BG-VIDEO TRANSITIONS IF A SCENE CHANGE IS COMING UP!
     if ((segment+segmentChange >= scenes[scene].segments || segment+segmentChange < 0) && scene!=3) {
@@ -1632,11 +1632,12 @@ void planeApp::endSegment(int direction) {
             // moveOn = true;
         } else if (scene==4) {
             // fade out all planets
+            int i=0;
             for (vector<ofPtr<mediaElement> >::iterator it = fgMedia.begin(); it != fgMedia.end(); ++it) {
-                // if (!(**it).dead) ((((**it)).*((**it)).outroTransformation))();
-                if (!(**it).dead) (**it).fadeOut();
+                if (!(**it).dead) ((((**it)).*((**it)).outroTransformation))();
+                if (i==0) ofAddListener( (**it).fadeOutEnd, this, &planeApp::allFaded );
+                i++;
             }
-            moveOn = true;
         } else if (scene==5) {
             // dont' fade out all shooting stars
             moveOn = true;
@@ -1704,6 +1705,8 @@ void planeApp::jumpToScene(int s) {
     else if (oldScene==0 && scene>0) bgMediaSwap(tmp);
 }
 
+// decide what the next segment / scene will be
+//--------------------------------------------------------------
 void planeApp::nextSegment(int direction) {
     ofLogNotice("TRANSITION") << "\t" << ofGetFrameNum() << "\t" << "nextSegment " << direction;
     segment+=direction;
@@ -1940,7 +1943,7 @@ void planeApp::receiveOsc(){
                 // create new blob instance
                 newBlob = true;
 				blobs[blobid].id = blobid;
-                ofLogNotice("BLOB") << "\t" << ofGetFrameNum() << "\t" << "receiveOsc()\tNew Blob\t" << blobid;
+                ofLogNotice("BLOB") << "\t\t" << ofGetFrameNum() << "\t" << "receiveOsc()\tNew Blob\t" << blobid;
                 blobs[blobid].perspectiveMat = &this->perspectiveMat;
                 // add Events, so blobs can report back to planeApp
                 ofAddListener( blobs[blobid].onLost, this, &planeApp::blobOnLost );
@@ -2652,7 +2655,10 @@ void planeApp::keyReleased(int key){
     }
 
     if (key == OF_KEY_RIGHT){
-        if (!transition) endSegment(1);
+        if (!transition) {
+            endSegment(1);
+            ofLogNotice("KEY") << "\t\t\t" << ofGetFrameNum() << "\t" << "==============>" << key << " end segment ";
+        }
     }
     if (key == ' ') {
         autoplay = !autoplay;
@@ -2688,7 +2694,7 @@ void planeApp::keyReleased(int key){
 
     if (key>='0' && key<='5') {
         int s = int(key) - int('0');
-        ofLogNotice("KEY") << "\t\t" << ofGetFrameNum() << "\t" << "==============>" << key << " scene = " << s;
+        ofLogNotice("KEY") << "\t\t\t" << ofGetFrameNum() << "\t" << "==============>" << key << " scene = " << s;
         jumpToScene(s);
     }
 
