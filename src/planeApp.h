@@ -252,9 +252,6 @@ class planeApp : public ofBaseApp{
 		std::vector< ofPtr<mediaElement> > bgMedia;
 		ofPtr<mediaElement> nebula;
 		ofImage instructionImg;
-		ofFbo fbo;
-		ofxToggle drawFbo;
 		int bgMediaId;
-		// std::map<int, std::vector<ofPtr<mediaElement> > > bgVideos;
 
 };

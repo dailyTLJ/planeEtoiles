@@ -57,7 +57,6 @@ void planeApp::setup(){
 
     ofLogNotice("START") << "\t" << ofGetFrameNum() << "\t" << "1";
     projectorOn = false;
-    drawFbo = false;
     language = 1;
     processing = true;
     oscMsgReceived = false;
@@ -122,7 +121,6 @@ void planeApp::setup(){
     gui.setDefaultBackgroundColor( ofColor(0,0,50) );
     gui.add(autoplay.setup("autoplay", false));
     gui.add(testMode.setup("testMode", false));
-    gui.add(drawFbo.setup("drawFbo", false));
     gui.add(displayDebug.setup("displayDebug", false));
     gui.add(minLostTime.set("Min LostTime", 1, 0, 10));
     gui.add(inactivityTimer.set("inactivity timer", 30, 10, 200));
@@ -226,12 +224,6 @@ void planeApp::setup(){
 
     instructionImg.loadImage("img/placeholder_letgo.jpg");
 
-    ofLogNotice("START") << "\t" << ofGetFrameNum() << "\t" "allocate FBO";
-    fbo.allocate(projectionW, projectionH, GL_RGBA);
-    ofLogNotice("START") << "\t" << ofGetFrameNum() << "\t" "clear FBO";
-    fbo.begin();
-    ofClear(0,0,0,0);
-    fbo.end();
 
     // compute the perspectiveTransformation
     // to map from blob-coordinates to the top-down view
@@ -878,21 +870,6 @@ void planeApp::update(){
             // }
             // ++iter;
 
-        }
-
-        // FBO
-        if (scene==4 && drawFbo) {
-            // draw everything into fbo
-            fbo.begin();
-                ofBackground(0,0,0,0);
-                ofEnableBlendMode(OF_BLENDMODE_ADD);
-                ofSetColor(255,255,255,255);
-                for (vector<ofPtr<mediaElement> >::iterator it = fgMedia.begin(); it != fgMedia.end(); ++it) {
-                    if (!(**it).dead && !(**it).blend) (**it).draw(0, 0, 1);   //
-                    // (**it).draw(0, 0, 1);
-                }
-                ofDisableBlendMode();
-            fbo.end();
         }
 
     }
@@ -2083,35 +2060,20 @@ void planeApp::drawScreen(int x, int y, float scale){
 
 
     // FOREGROUND VIDEOS
-    if (scene==4 && drawFbo) {
-        // draw FBO only
-        ofEnableBlendMode(OF_BLENDMODE_ALPHA);
-        fbo.draw(x,y, projectionW*scale, projectionH*scale);
-        ofDisableBlendMode();
 
-        // TODO cleanup. this is for the GLOW effect. in blend mode
-        ofEnableBlendMode(OF_BLENDMODE_ADD);
-        for (vector<ofPtr<mediaElement> >::iterator it = fgMedia.begin(); it != fgMedia.end(); ++it) {
-            if (!(**it).dead && (**it).blend) (**it).draw(x, y, scale);   //
-        }
-        ofDisableBlendMode();
-
-    } else {
-
-        // foreground videos, with BLENDING
-        ofEnableBlendMode(OF_BLENDMODE_ADD);
-        for (vector<ofPtr<mediaElement> >::iterator it = fgMedia.begin(); it != fgMedia.end(); ++it) {
-            if (!(**it).dead && (**it).blend) (**it).draw(x, y, scale);   //
-        }
-        ofDisableBlendMode();
-
-        // foreground videos, without BLENDING mode
-        ofEnableAlphaBlending();
-        for (vector<ofPtr<mediaElement> >::iterator it = fgMedia.begin(); it != fgMedia.end(); ++it) {
-            if (!(**it).dead && !(**it).blend) (**it).draw(x, y, scale);
-        }
-        ofDisableAlphaBlending();
+    // foreground videos, with BLENDING
+    ofEnableBlendMode(OF_BLENDMODE_ADD);
+    for (vector<ofPtr<mediaElement> >::iterator it = fgMedia.begin(); it != fgMedia.end(); ++it) {
+        if (!(**it).dead && (**it).blend) (**it).draw(x, y, scale);   //
     }
+    ofDisableBlendMode();
+
+    // foreground videos, without BLENDING mode
+    ofEnableAlphaBlending();
+    for (vector<ofPtr<mediaElement> >::iterator it = fgMedia.begin(); it != fgMedia.end(); ++it) {
+        if (!(**it).dead && !(**it).blend) (**it).draw(x, y, scale);
+    }
+    ofDisableAlphaBlending();
 
 
 
