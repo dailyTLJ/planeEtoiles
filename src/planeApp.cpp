@@ -1629,6 +1629,7 @@ void planeApp::endSegment(int direction) {
             // make sure, all other fgMedia (planets) is gone already
             for (vector<ofPtr<mediaElement> >::iterator it = fgMedia.begin(); it != fgMedia.end(); ++it) {
                 if (!(**it).dead) ((((**it)).*((**it)).outroTransformation))();
+                else ofLogNotice("TRANSITION") << "\t" << ofGetFrameNum() << "\t\t\t" << "can't outro dead video: " << (**it).file;
             }
 
             fgMedia.push_back(ofPtr<mediaElement>( new videoElement("video/2_stars/ATTRACTION_outro-photoJPEG.mov")));
@@ -1730,6 +1731,7 @@ void planeApp::nextSegment(int direction) {
     ofLogNotice("TRANSITION") << "\t" << ofGetFrameNum() << "\t" << "nextSegment " << direction;
     segment+=direction;
 
+    // MOVE ON TO NEW SCENE
     if(scene == -1 || segment >= scenes[scene].segments) {
         scene++;
         segment = 0;
@@ -1748,11 +1750,21 @@ void planeApp::nextSegment(int direction) {
         segment = scenes[scene].segments -1;
     }
 
+    if (scene==2 && segment>1) {
+        // skip KEEP DISTANCE if only 1 blob
+        if (blobsOnStage<2) {
+            scene++;
+            segment = 0;
+            sceneChange = true;
+        }
+    }
+
     if (lastActivity > inactivityTimer) {
         // no activity, got to idle mode
         ofLogNotice("TRANSITION") << "\t" << ofGetFrameNum() << "\t" << "no activity since " << lastActivity << "sec, go to IDLE";
         scene = 0;
         segment = 0;
+        sceneChange = true;
     }
 
     if (scene==0) {
