@@ -13,7 +13,7 @@ void planeApp::setup(){
     ofSetFrameRate(30);
     ofLogNotice("START") << "\t" << ofGetFrameNum() << "\t" << "setup";
 
-    ofSetLogLevel(OF_LOG_WARNING);
+    ofSetLogLevel(OF_LOG_NOTICE);
     ofLogNotice("START") << "\t" << ofGetFrameNum() << "\t" << "setup3";
     // OF_LOG_VERBOSE
     // OF_LOG_NOTICE
@@ -35,7 +35,7 @@ void planeApp::setup(){
     ofSetLogLevel("OSC", OF_LOG_VERBOSE);
     ofSetLogLevel("interaction", OF_LOG_VERBOSE);
     ofSetLogLevel("videoElement", OF_LOG_VERBOSE);
-    ofSetLogLevel("mediaElement", OF_LOG_WARNING);
+    ofSetLogLevel("mediaElement", OF_LOG_VERBOSE);
 
 	ofTrueTypeFont::setGlobalDpi(72);
 
@@ -493,10 +493,10 @@ void planeApp::update(){
         this->receiveOsc();
 
         //if () {
-            oscLastMsgTimer = ofGetElapsedTimef() - oscLastMsg;
-            if (!oscMsgReceived && oscActive && oscLastMsgTimer > oscLastMsgTimerMax) {
-                oscActive = false;
-            }
+        oscLastMsgTimer = ofGetElapsedTimef() - oscLastMsg;
+        if (!oscMsgReceived && oscActive && oscLastMsgTimer > oscLastMsgTimerMax) {
+            oscActive = false;
+        }
         //}
 
         if (oscMsgReceived) {
@@ -860,20 +860,12 @@ void planeApp::update(){
             }
 
             (**iter).update();
-            bool deleteJob = false;
             if ((**iter).dead) {
-                deleteJob = true;
                 ofLogNotice("videoElement") << ofGetFrameNum() << "\t" << "delete video " << (**iter).file;
                 iter = fgMedia.erase(iter);
-                ofLogNotice("videoElement") << ofGetFrameNum() << "\t" << "deletet video " << (**iter).file;
             } else {
                 ++iter;
             }
-            if (deleteJob) ofLogNotice("videoElement") << ofGetFrameNum() << "\t" << "DELETED";
-            // if (!(**iter).dead) {
-            //     (**iter).update();
-            // }
-            // ++iter;
 
         }
 
@@ -1641,7 +1633,8 @@ void planeApp::endSegment(int direction) {
         } else if (scene==4) {
             // fade out all planets
             for (vector<ofPtr<mediaElement> >::iterator it = fgMedia.begin(); it != fgMedia.end(); ++it) {
-                if (!(**it).dead) ((((**it)).*((**it)).outroTransformation))();
+                // if (!(**it).dead) ((((**it)).*((**it)).outroTransformation))();
+                if (!(**it).dead) (**it).fadeOut();
             }
             moveOn = true;
         } else if (scene==5) {
@@ -1868,7 +1861,6 @@ void planeApp::receiveOsc(){
 
 	// check for waiting messages
 	while(receiver.hasWaitingMessages()){
-        oscMsgReceived = true;
         if (!oscActive) oscActive =true;
         oscLastMsg = ofGetElapsedTimef();
 
@@ -1879,6 +1871,8 @@ void planeApp::receiveOsc(){
 		if(m.getAddress() == "/blobserver/startFrame"){
 
             currentFlowId = m.getArgAsInt32(1);
+            if (currentFlowId==hogFlowId) ofLogNotice("OSC") << "\t\t" << ofGetFrameNum() << "\t" << "/blobserver/startFrame " << m.getArgAsInt32(0);
+
             // tcout() << "start frame flow " << flowid << endl;
             if (currentFlowId==bgsubtractorFlowId) {
                 bgsubtractorCnt = 0;
@@ -1886,8 +1880,10 @@ void planeApp::receiveOsc(){
                 bgsubtractorAvVel = 0.f;
             }
 
-		} else if(m.getAddress() == "/blobserver/endFrame"){
+        } else if(m.getAddress() == "/blobserver/endFrame"){
+            oscMsgReceived = true;  // ready to process blob data
             currentFlowId = m.getArgAsInt32(1);
+            if (currentFlowId==hogFlowId) ofLogNotice("OSC") << "\t\t" << ofGetFrameNum() << "\t" << "/blobserver/endFrame";
             // tcout() << "end frame flow " << flowid << endl;
             if (currentFlowId==bgsubtractorFlowId) {
                 bgsubtractorAvVel = (bgsubtractorCnt>0) ? bgsubtractorVel/bgsubtractorCnt : 0;
@@ -1934,6 +1930,7 @@ void planeApp::receiveOsc(){
 			int age = m.getArgAsInt32(5);
             int lost = m.getArgAsInt32(6);
 			int occluded = m.getArgAsInt32(7);
+            ofLogNotice("OSC") << "\t\t" << ofGetFrameNum() << "\t" << "/blobserver/hog\tid: " << blobid << "\t lost:" << lost;
 
 			std::map<int,Blob>::iterator iter = blobs.find(blobid);
             bool newBlob = false;
@@ -2262,32 +2259,29 @@ void planeApp::drawAnalysis(int x, int y, float scale){
                 }
             }
         }
-    } else if (scene==3) {
-        if (segment==1) {
+    } else if (scene==3 || scene==4) {
 
-            // HOP
-            int bx = x + 100; int by = y + 150;
-            ofFill();
-            for(std::map<int, Blob>::iterator it = blobs.begin(); it != blobs.end(); ++it){
-                Blob* b = &it->second;
-                if (b->onStage) {
+        // HOP
+        int bx = x + 100; int by = y + 150;
+        ofFill();
+        for(std::map<int, Blob>::iterator it = blobs.begin(); it != blobs.end(); ++it){
+            Blob* b = &it->second;
+            if (b->onStage) {
 
-                    if(b->lostDuration > 0 && !b->onEdge) ofSetColor(255);  // b->lostDuration < hopLength
-                    else ofSetColor(100);
+                if(b->lostDuration > 0 && !b->onEdge) ofSetColor(255);  // b->lostDuration < hopLength
+                else ofSetColor(100);
 
-                    ofCircle(bx, by, 40);
-                    ofSetColor(0,0,255);
-                    ofDrawBitmapString( ofToString(b->id, 4, '0'), bx-15, by+5);
+                ofCircle(bx, by, 40);
+                ofSetColor(0,0,255);
+                ofDrawBitmapString( ofToString(b->id, 4, '0'), bx-15, by+5);
 
-                    string textStr = "onEdge\t: " + ofToString(b->onEdge ? "true" : "false");
-                    textStr += "\nlost\t: "+ ofToString(b->lostDuration);
-                    textStr += "\noccluded\t: "+ ofToString(b->occluded ? "true" : "false");
-                    ofDrawBitmapStringHighlight(textStr, bx+70, by -20);
+                string textStr = "lost\t: "+ ofToString(b->lostDuration);
+                textStr += "\noccluded: "+ ofToString(b->occluded ? "true" : "false");
+                textStr += "\nvel \t: "+ ofToString(b->vel,2);
+                ofDrawBitmapStringHighlight(textStr, bx+70, by -20);
 
-                    by += 70;
-                }
+                by += 70;
             }
-
         }
 
     } else if (scene==5) {
@@ -2305,9 +2299,8 @@ void planeApp::drawAnalysis(int x, int y, float scale){
                 ofSetColor(0,0,255);
                 ofDrawBitmapString( ofToString(b->id, 4, '0'), bx-15, by+5);
 
-                string textStr = "id\t: " + ofToString(b->id);
-                textStr += "\nlost\t: "+ ofToString(b->lostDuration);
-                textStr += "\noccluded\t: "+ ofToString(b->occluded ? "true" : "false");
+                string textStr = "lost\t: "+ ofToString(b->lostDuration);
+                textStr += "\noccluded: "+ ofToString(b->occluded ? "true" : "false");
                 textStr += "\nvel \t: "+ ofToString(b->vel);
                 ofDrawBitmapStringHighlight(textStr, bx+70, by -20);
 

@@ -34,6 +34,11 @@ mediaElement::mediaElement() {
     introTransformation = &mediaElement::fadeIn;
 }
 
+mediaElement::~mediaElement() {
+    ofLogNotice("mediaElement") << ofGetFrameNum() << "\t" << "destructor " << file;
+}
+
+
 
 void mediaElement::update() {
     bridgeUpdated = false;
