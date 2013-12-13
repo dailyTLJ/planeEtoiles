@@ -147,6 +147,7 @@ class planeApp : public ofBaseApp{
 		int globalStart;
 		bool moveOn;
 		bool transition;
+		bool endedSegment;
 		bool success;			// if people followed the instructions
 		int successCnt;
 		int activityCnt;

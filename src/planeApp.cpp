@@ -79,6 +79,7 @@ void planeApp::setup(){
     activityCnt = 0;
 	drawBlobDetail = false;
     transition = false;
+    endedSegment = false;
     moveOn = false;
     sceneChange = false;
     segmentChange = 1;
@@ -1577,6 +1578,7 @@ void planeApp::bridgeUnlink(Pair & pair) {
 }
 
 void planeApp::beginSegment() {
+    endedSegment = false;
     ofLogNotice("TRANSITION") << "\t" << ofGetFrameNum() << "\t" << "beginSegment() " << blobs.size();
 
     transition = false;
@@ -1593,6 +1595,7 @@ void planeApp::beginSegment() {
 }
 
 void planeApp::endSegment(int direction) {
+    endedSegment = true;
     ofLogNotice("TRANSITION") << "\t" << ofGetFrameNum() << "\t" << "endSegment()   " << scene << ":" << segment;
     segmentChange = direction;
     // segmentClock = -1;
@@ -2080,8 +2083,8 @@ void planeApp::drawScreen(int x, int y, float scale){
     // INSTRUCTIONS
     string in_img = scenes[scene].instructionImg[language][segment];
 
-
-    if (!transition) {
+    // INSTRUCTION TEXT
+    if (!transition && !endedSegment && segmentClock>0) {
         int ypos = 1742;
         int textLineH = 40;
         ofFill();
@@ -2135,6 +2138,7 @@ void planeApp::drawScreen(int x, int y, float scale){
             // ofPopMatrix();
         }
     }
+
     // INSTRUCTION IMAGES, display always, so that they are visible on transition videos (red sun)
     if (in_img.length() > 2) {
         ofEnableBlendMode(OF_BLENDMODE_ADD);

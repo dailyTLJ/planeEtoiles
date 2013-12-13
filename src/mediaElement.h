@@ -75,6 +75,7 @@ class mediaElement
         bool fadeoutDestroy;
         bool movieEndTrigger;
         bool dead;
+        bool mediaLoaded;
 
         bool bridgeVideo;
         int bridgeBlobID[2];
