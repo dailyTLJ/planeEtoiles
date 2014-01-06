@@ -87,4 +87,33 @@
 	<displayDebug>0</displayDebug>
 <inactivity_timer>30</inactivity_timer>
 	<Min_Segm_Length>3</Min_Segm_Length>
-</HUMANS_AND_PLANETS>
+<Sc2_Attraction>
+		<Dist_StdDev>10</Dist_StdDev>
+		<Movement_Thr>0.1</Movement_Thr>
+		<Dist_Reward>2</Dist_Reward>
+	</Sc2_Attraction>
+	<Sc3_Revolutions>
+		<MinLost_SPIN>1</MinLost_SPIN>
+		<spinJudgeTime>180</spinJudgeTime>
+		<spinSuccess>5</spinSuccess>
+		<spinFailure>2</spinFailure>
+	</Sc3_Revolutions>
+	<Sc4_Sun>
+		<MinLost_HOP>1</MinLost_HOP>
+		<Activity_Color_Change>10</Activity_Color_Change>
+		<FreezeAllMaxVel>0.1</FreezeAllMaxVel>
+		<runJudgeTime>80</runJudgeTime>
+		<runHogThr>1</runHogThr>
+		<runBgsThr>3</runBgsThr>
+		<runActThr>5</runActThr>
+	</Sc4_Sun>
+	<Sc5_Eclipse>
+		<Alignm_MaxDist>50</Alignm_MaxDist>
+		<Alignm_Transition>10</Alignm_Transition>
+		<followMeSpeed>0.002</followMeSpeed>
+		<followMeRadius>300</followMeRadius>
+	</Sc5_Eclipse>
+	<Sc6_Combustion>
+		<MinLost_SHOOT>1</MinLost_SHOOT>
+	</Sc6_Combustion>
+</HUMANS_AND_PLANETS>

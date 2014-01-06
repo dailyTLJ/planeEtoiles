@@ -117,6 +117,11 @@ void planeApp::setup(){
 
     ofLogNotice("START") << "\t" << ofGetFrameNum() << "\t" << "3";
 
+    languageGui.setup("LANGUAGE", "languageSelection.xml", 10, 620);
+    languageGui.add(languageRatio.set("French_English_Ratio", 1, 1, 5));
+    languageGui.setSize(200,50);
+    languageGui.loadFromFile("languageSelection.xml");
+
     if (!projectorOn) gui.setup("HUMANS AND PLANETS", "planets01.xml", 1104,190);
     else gui.setup("HUMANS AND PLANETS", "planets01.xml", 1604,190);
     gui.setDefaultBackgroundColor( ofColor(0,0,50) );
@@ -158,19 +163,22 @@ void planeApp::setup(){
     paramSc1.add(freezeMaxTime.set( "Freeze MaxTime",10, 0, 30 ));
     paramSc1.add(newStarMax.set( "NewStar Max", 30, 1, 40));
     // paramSc1.add(newStarBonus.set( "Bonus every", 5, 1, 40));
-    paramSc1.add(distStdDevThr.set( "Dist StdDev", 10, 0, 50));
-    paramSc1.add(movingThr.set( "Movement Thr", 0.1, 0, 3));
-    paramSc1.add(steadyRewardTime.set( "Dist Reward", 2, 0, 10));
     gui.add(paramSc1);
 
-    paramSc2.setName("Sc2 Revolutions");
+    paramSc6.setName("Sc2 Attraction");
+    paramSc6.add(distStdDevThr.set( "Dist StdDev", 10, 0, 50));
+    paramSc6.add(movingThr.set( "Movement Thr", 0.1, 0, 3));
+    paramSc6.add(steadyRewardTime.set( "Dist Reward", 2, 0, 10));
+    gui.add(paramSc6);
+
+    paramSc2.setName("Sc3 Revolutions");
     paramSc2.add(minLostSpin.set("MinLost SPIN", 1, 0, 10));
     paramSc2.add(spinJudgeTime.set( "spinJudgeTime", 180, 0, 240));
     paramSc2.add(spinSuccess.set( "spinSuccess", 5, 0, 10));
     paramSc2.add(spinFailure.set( "spinFailure", 2, 0, 10));
     gui.add(paramSc2);
 
-    paramSc3.setName("Sc3 Sun");
+    paramSc3.setName("Sc4 Sun");
     // paramSc3.add(edgeMargin.set( "Edge Margin", 50, 0, 150));
     paramSc3.add(minLostHop.set("MinLost HOP", 1, 0, 10));
     paramSc3.add(activityColorCh.set( "Activity Color Change", 10, 0, 30));
@@ -183,14 +191,14 @@ void planeApp::setup(){
     paramSc3.add(runActThr.set( "runActThr", 5, 0, 20));
     gui.add(paramSc3);
 
-    paramSc4.setName("Sc4 Alignment");
+    paramSc4.setName("Sc5 Eclipse");
     paramSc4.add(alignmentMaxDist.set( "Alignm MaxDist", 50, 0, 200));
     paramSc4.add(alignmentTransition.set( "Alignm Transition", 10, 0, 20));
     paramSc4.add(followMeSpeed.set( "followMeSpeed", 0.002, 0, 0.02));
     paramSc4.add(followMeRadius.set( "followMeRadius", 300, 0, 500));
     gui.add(paramSc4);
 
-    paramSc5.setName("Sc5 Combustion");
+    paramSc5.setName("Sc6 Combustion");
     paramSc5.add(minLostShoot.set("MinLost SHOOT", 1, 0, 10));
     gui.add(paramSc5);
 
@@ -1733,7 +1741,7 @@ void planeApp::nextSegment(int direction) {
         scene++;
         segment = 0;
         if(scene >= scenes.size()) {
-            language = (language==0) ? 1 : 0;
+            language = (language+1>=languageRatio) ? 0 : language+1;
             if (blobsOnStage==0) scene = 0;
             else scene = 1;
         }
@@ -1741,8 +1749,8 @@ void planeApp::nextSegment(int direction) {
     } else if (segment < 0){
         scene--;
         if(scene < 0){
+            language = (language+1>=languageRatio) ? 0 : language+1;
             scene = scenes.size()-1;
-            language = (language==0) ? 1 : 0;
         }
         segment = scenes[scene].segments -1;
     }
@@ -2044,6 +2052,7 @@ void planeApp::draw(){
         offsx += 440;
         this->drawControlInfo(offsx, offsy);
 
+        languageGui.draw();
         gui.draw();
 
         // MAIN VISUALS SCREEN

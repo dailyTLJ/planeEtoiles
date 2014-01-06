@@ -116,7 +116,8 @@ class planeApp : public ofBaseApp{
 		std::stringstream coutput;
 
 		int language;
-
+		ofParameter<int> languageRatio;
+		
 		bool projectorOn;
 		int projectionW;
         int projectionH;
@@ -194,6 +195,7 @@ class planeApp : public ofBaseApp{
 		ofTrueTypeFont fontIdle;
 		ofTrueTypeFont fontSm;
 		ofxPanel gui;
+		ofxPanel languageGui;
 		ofParameterGroup paramBasic;
 		ofParameterGroup paramTiming;
 		ofParameterGroup paramSc1;
@@ -201,6 +203,7 @@ class planeApp : public ofBaseApp{
 		ofParameterGroup paramSc3;
 		ofParameterGroup paramSc4;
 		ofParameterGroup paramSc5;
+		ofParameterGroup paramSc6;
 		ofParameterGroup paramBlob;
         ofParameter<ofColor> flashColor;
         ofParameter<int> nebulaOpacity;
@@ -210,6 +213,7 @@ class planeApp : public ofBaseApp{
 		ofParameter<float> freezeMaxVel;
 		ofParameter<float> freezeAllMaxVel;
 		ofParameter<int> freezeMinTime;
+
 		ofParameter<int> freezeMaxTime;
 		ofParameter<int> minSegmentLength;
 		ofParameter<int> inactivityTimer;
