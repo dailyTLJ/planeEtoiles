@@ -812,6 +812,14 @@ void planeApp::update(){
                 }
             } else if (followMe > 0) {
                 (*fgMedia[0]).position.x = projectionW/2 + sin(followMe) * followMeRadius;
+                // position GLOW video, if exists
+                if (fgMedia.size() > 0) {
+                    for (unsigned int i=1; i<fgMedia.size(); i++) {
+                        if ((*fgMedia[i]).file == "video/5_eclipse/LIGHT-photoJPEG.mov") {
+                            (*fgMedia[i]).position.x = (*fgMedia[0]).position.x;
+                        }
+                    }
+                }
             }
         }
 
@@ -2701,6 +2709,15 @@ void planeApp::keyReleased(int key){
         int s = int(key) - int('0');
         ofLogNotice("KEY") << "\t\t\t" << ofGetFrameNum() << "\t" << "==============>" << key << " scene = " << s;
         jumpToScene(s);
+    }
+
+    if (key=='g') {
+        // FAKE ALIGNMENT GLOW
+        string alignmentGlow = "video/5_eclipse/LIGHT-photoJPEG.mov";
+        fgMedia.push_back(ofPtr<mediaElement>( new videoElement(alignmentGlow, true) ));
+        (*fgMedia[fgMedia.size()-1]).setDisplay((*fgMedia[0]).position.x, (*fgMedia[0]).position.y, true);
+        (*fgMedia[fgMedia.size()-1]).reset(true);
+        (*fgMedia[fgMedia.size()-1]).autoDestroy(true);
     }
 
 }
