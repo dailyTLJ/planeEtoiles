@@ -30,7 +30,7 @@ void planeApp::setup(){
     ofLogNotice("START") << "\t" << ofGetFrameNum() << "\t" << "0";
 
     ofSetLogLevel("BLOB", OF_LOG_VERBOSE);
-    ofSetLogLevel("BRIDGE", OF_LOG_VERBOSE);
+    ofSetLogLevel("BRIDGE", OF_LOG_WARNING);
     ofSetLogLevel("TRANSITION", OF_LOG_VERBOSE);
     ofSetLogLevel("OSC", OF_LOG_WARNING);
     ofSetLogLevel("interaction", OF_LOG_VERBOSE);
@@ -127,7 +127,7 @@ void planeApp::setup(){
     gui.add(inactivityTimer.set("inactivity timer", 30, 10, 200));
     gui.add(minSegmentLength.set("Min Segm Length", 3, 0, 10));
     gui.add(nebulaOpacity.set("Nebula Opacity", 50, 0, 100));
-    gui.add(flashColor.set("Transition Flash Color",ofColor(255,200,100),ofColor(0,0),ofColor(255,255)));
+    // gui.add(flashColor.set("Transition Flash Color",ofColor(255,200,100),ofColor(0,0),ofColor(255,255)));
 
     paramBasic.setName("Dimension");
     paramBasic.add(siteW.set( "Site Width", 500, 0, 1000));
@@ -1072,9 +1072,14 @@ void planeApp::blobSteady(Pair & pair) {
 
             if (!exists) {
                 ofLogNotice("BLOB") << "\t\t" << ofGetFrameNum()  << "\t\t\t" << "add video bridge";
-                string newVideoName = "video/2_stars/LINK_01-loop-photoJPEG.mov";
+                float distance = ofDist(b1->position.x, b1->position.y, b2->position.x, b2->position.y);
+                int distId = 1;
+                if (distance < 150 ) distId = 3;
+                else if (distance < 400) distId = 2;
+                string newVideoName = "video/2_stars/LINK_0" + ofToString(distId) + "-loop-photoJPEG.mov";
                 fgMedia.push_back(ofPtr<mediaElement>( new videoElement(newVideoName)));
                 (*fgMedia[fgMedia.size()-1]).reset();
+                (*fgMedia[fgMedia.size()-1]).id = distId;
                 (*fgMedia[fgMedia.size()-1]).bridge(b1->id, b2->id);
                 ofNotifyEvent( blobs[pair.blob1].updatePosition, pair.blob1, &blobs[pair.blob1] );
             } else {
@@ -1562,12 +1567,12 @@ void planeApp::bridgeUnlink(Pair & pair) {
     bool found = false;
     for (vector<ofPtr<mediaElement> >::iterator it = fgMedia.begin(); it != fgMedia.end(); it++) {
         if ((**it).bridgeVideo && (**it).bridgeBlobID[0]==pair.blob1 && (**it).bridgeBlobID[1]==pair.blob2) {
-            string videoFile = "video/2_stars/LINK_01-outro-photoJPEG.mov";
+            string videoFile = "video/2_stars/LINK_0" + ofToString((**it).id) + "-outro-photoJPEG.mov";
             if ((**it).file != videoFile) {
                 ofLogNotice("BRIDGE") << "\t" << ofGetFrameNum() << "\tunlinked bridge\t" << (**it).bridgeBlobID[0] << " " << (**it).bridgeBlobID[1];
                 int oldW = (**it).w;
                 int oldH = (**it).h;
-                (**it).loadMovie("video/2_stars/LINK_01-outro-photoJPEG.mov");
+                (**it).loadMovie(videoFile);
                 (**it).w = oldW;
                 (**it).h = oldH;
                 (**it).reset(true);
@@ -2173,13 +2178,13 @@ void planeApp::drawScreen(int x, int y, float scale){
         fontSm.drawString(ofToString(success ? "true" : "false"), x+(projectionW-200)*scale, y+(projectionH-150)*scale);
     }
 
-    if (flash) {
-        ofEnableAlphaBlending();
-        float alpha = (flashCnt < flashMax/2) ? (flashCnt/(flashMax/2.f)) : (flashMax - flashCnt)/(flashMax/2.f);
-        ofSetColor(flashColor.get().r,flashColor.get().g,flashColor.get().b,flashColor.get().a*alpha); ofFill();
-        ofRect(x,y,projectionW*scale,projectionH*scale);
-        ofDisableAlphaBlending();
-    }
+    // if (flash) {
+    //     ofEnableAlphaBlending();
+    //     float alpha = (flashCnt < flashMax/2) ? (flashCnt/(flashMax/2.f)) : (flashMax - flashCnt)/(flashMax/2.f);
+    //     ofSetColor(flashColor.get().r,flashColor.get().g,flashColor.get().b,flashColor.get().a*alpha); ofFill();
+    //     ofRect(x,y,projectionW*scale,projectionH*scale);
+    //     ofDisableAlphaBlending();
+    // }
 }
 
 //--------------------------------------------------------------

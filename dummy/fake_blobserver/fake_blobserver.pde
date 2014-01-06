@@ -14,7 +14,7 @@ ArrayList blobs;
 
 
 int flowID = 1;
-float maxVel = 1;
+float maxVel = 0.1;
 int idCount = 0;
 
 void setup() {
@@ -75,8 +75,8 @@ class Blob {
   
   Blob() {
     id = idCount++;
-    x = random(width);
-    y = random(height);
+    x = width/4 + random(width/2);
+    y = height/4 + random(height/2);
     vx = 0;
     vy = 0;
     occluded = 0;
