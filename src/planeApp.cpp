@@ -514,7 +514,7 @@ void planeApp::update(){
                 Blob* b = &it->second;
 
                 int minLost = minLostTime;
-                if (scene==STARS || scene==CONSTELLATIONS) minLost = minLostSpin;
+                if (scene==STARS || scene==ATTRACTION) minLost = minLostSpin;
                 else if (scene==SUN) minLost = minLostHop;
                 else if (scene==SHOOTING) minLost = minLostShoot;
 
@@ -1030,7 +1030,7 @@ void planeApp::blobOnLost(int & blobID) {
 
 void planeApp::blobSteady(Pair & pair) {
     // add particle trail video between stars
-    if (!transition && scene==CONSTELLATIONS) {
+    if (!transition && scene==ATTRACTION) {
         Blob* b1 = &blobs[pair.blob1];
         Blob* b2 = &blobs[pair.blob2];
 
@@ -1086,7 +1086,7 @@ void planeApp::blobSteady(Pair & pair) {
 
 void planeApp::blobSteadyReward(Pair & pair) {
     ofLogNotice("BLOB") << "\t\t" << ofGetFrameNum() << "\t" << "blobSteadyReward() \t" << pair.blob1 << " + " << pair.blob2;
-    if (!transition && scene==CONSTELLATIONS) {
+    if (!transition && scene==ATTRACTION) {
         // ofPtr<mediaElement> vid1 = blobs[pair.blob1].mediaLink;
         // ofPtr<mediaElement> vid2 = blobs[pair.blob2].mediaLink;
 
@@ -1105,7 +1105,7 @@ void planeApp::blobSteadyReward(Pair & pair) {
 }
 
 void planeApp::blobBreakSteady(Pair & pair) {
-    if (!transition && scene==CONSTELLATIONS) {
+    if (!transition && scene==ATTRACTION) {
         ofLogNotice("BLOB") << "\t\t" << ofGetFrameNum() << "\t" << "blobBreakSteady() \t" << pair.blob1 << " + " << pair.blob2;
 
         ofPtr<mediaElement> vid1 = blobs[pair.blob1].mediaLink;
@@ -1286,7 +1286,7 @@ void planeApp::blobEnterStage(int & blobID) {
         // COME CLOSER, recognition of people == time to move on
         if (!success) success = true;
 
-    } else if (scene==CONSTELLATIONS && !transition) {
+    } else if (scene==ATTRACTION && !transition) {
         // KEEP THE DISTANCE
         ofLogNotice("BLOB") << "\t\t" << ofGetFrameNum() << "\t" << "blobEnterStage()\t\t" << blobID << " (star)";
         int randomStar = ofRandom(3) + 2;
@@ -1323,7 +1323,7 @@ void planeApp::blobEnterStage(int & blobID) {
 
 void planeApp::blobLeaveStage(int & blobID) {
     if (!transition) {
-        if (scene==CONSTELLATIONS) {
+        if (scene==ATTRACTION) {
             // STAR BRIDGES
             ofLogNotice("BLOB") << "\t\t" << ofGetFrameNum() << "\t" << "blobLeaveStage()\t\t" << blobID;
             this->blobUnlink(blobID);
@@ -1478,7 +1478,7 @@ void planeApp::videoFollowBlob(int & blobID) {
             }
         }
         // update position of sparkly bridge
-        if (scene==CONSTELLATIONS) {
+        if (scene==ATTRACTION) {
             // check if bridge exists
             ofPtr<mediaElement> bridge;
             int blob2ID;
@@ -1605,7 +1605,7 @@ void planeApp::endSegment(int direction) {
     if ((segment+segmentChange >= scenes[scene].segments || segment+segmentChange < 0) && scene!=3) {
         sceneChange = true;
 
-        if (scene==CONSTELLATIONS && segment==1) {
+        if (scene==ATTRACTION && segment==1) {
             // STARS ENDING
             // make sure, all other fgMedia (planets) is gone already
             for (vector<ofPtr<mediaElement> >::iterator it = fgMedia.begin(); it != fgMedia.end(); ++it) {
@@ -1742,8 +1742,8 @@ void planeApp::nextSegment(int direction) {
         segment = scenes[scene].segments -1;
     }
 
-    if (scene==CONSTELLATIONS && segment>1) {
-        // skip CONSTELLATIONS if only 1 blob
+    if (scene==ATTRACTION && segment>1) {
+        // skip ATTRACTION if only 1 blob
         if (blobsOnStage<2) {
             scene++;
             segment = 0;
@@ -2243,7 +2243,7 @@ void planeApp::drawAnalysis(int x, int y, float scale){
             }
         }
 
-    } else if (scene==CONSTELLATIONS) {
+    } else if (scene==ATTRACTION) {
 
         // KEEP THE DISTANCE
         int bx = x + 100; int by = y + 150;
@@ -2510,7 +2510,7 @@ void planeApp::configureBlobserver() {
                 slow = true;
             }
 
-        } else if (scene==CONSTELLATIONS) {          // STARS
+        } else if (scene==ATTRACTION) {          // STARS
             slow = true;
 
         } else if (scene==REVOLUTIONS) {          // REVOLUTION

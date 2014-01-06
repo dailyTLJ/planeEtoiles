@@ -23,7 +23,7 @@
 // define scenes
 #define IDLE 			0
 #define STARS 			1
-#define CONSTELLATIONS 	2
+#define ATTRACTION	 	2
 #define REVOLUTIONS 	3
 #define SUN 			4
 #define ECLIPSE 		5
