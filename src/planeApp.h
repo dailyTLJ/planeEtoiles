@@ -19,6 +19,15 @@
 // #define MYIP "192.168.2.39"
 #define MYIP "10.10.44.21"
 
+// define scenes
+#define IDLE 			0
+#define STARS 			1
+#define CONSTELLATIONS 	2
+#define REVOLUTIONS 	3
+#define SUN 			4
+#define ECLIPSE 		5
+#define SHOOTING 		6
+
 class sceneInfo {
     public:
         string name;

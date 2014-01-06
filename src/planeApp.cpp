@@ -56,7 +56,7 @@ void planeApp::setup(){
 
 
     ofLogNotice("START") << "\t" << ofGetFrameNum() << "\t" << "1";
-    projectorOn = true;
+    projectorOn = false;
     language = 1;
     processing = true;
     oscMsgReceived = false;
@@ -200,19 +200,18 @@ void planeApp::setup(){
 
     // OSC SETUP
     try {
-    ofLogNotice("OSC") << "\t\t" << ofGetFrameNum() << "\t" << "listening for osc messages on port " << MYPORT;
-    receiver.setup(MYPORT);
-    ofLogNotice("OSC") << "\t\t" << ofGetFrameNum() << "\t" << "sending osc messages to " << BLOBSERVERIP << " on port " << BLOBPORT;
-    sender.setup( BLOBSERVERIP, BLOBPORT );
+        ofLogNotice("OSC") << "\t\t" << ofGetFrameNum() << "\t" << "listening for osc messages on port " << MYPORT;
+        receiver.setup(MYPORT);
+        ofLogNotice("OSC") << "\t\t" << ofGetFrameNum() << "\t" << "sending osc messages to " << BLOBSERVERIP << " on port " << BLOBPORT;
+        sender.setup( BLOBSERVERIP, BLOBPORT );
 
+        // clear receiver
+        while(receiver.hasWaitingMessages()){
+            ofxOscMessage m;
+            receiver.getNextMessage(&m);
+        }
 
-    // clear receiver
-    while(receiver.hasWaitingMessages()){
-        ofxOscMessage m;
-        receiver.getNextMessage(&m);
-    }
-
-    sendOscMsg("signIn", MYIP, MYPORT);
+        sendOscMsg("signIn", MYIP, MYPORT);
     } catch(exception& e){
         ofLogError() << e.what();
     }
@@ -320,7 +319,7 @@ void planeApp::initScenes(){
     sceneInfo stars;
     stars.name = "Star Links";
     stars.no = n;
-    stars.segments = 4;
+    stars.segments = 2;
     stars.instructions[0][0] = "Stand still";
     stars.instructions[1][0] = "Ne bougez plus";
     stars.instructions[2][0] = "Ne bougez plus";
@@ -331,16 +330,24 @@ void planeApp::initScenes(){
     stars.instructions[2][1] = "Posez-vous a de nouveaux endroits\npour allumer de nouvelles etoiles";
     stars.analysis[1] = "* Velocity < FreezeMaxVel\n* frozenTimer > freezeMinTime\n* frozenTimer < freezeMaxTime\n+ Star Animation at end of freezeMaxTime\n-> newStarMax stars || 40 sec";
     stars.length[1] = 40;
-    stars.instructions[0][2] = "Walk with someone\nKeep the same distance\nbetween you\n(No hands!)";
-    stars.instructions[1][2] = "Marchez avec quelqu'un\nGardez toujours le même écart\n(Sans les mains!)";
-    stars.instructions[2][2] = "Marchez avec quelqu'un\nGardez toujours le meme ecart\n(Sans les mains!)";
-    stars.analysis[2] = "* velocity history > movingThr\n* distance history < distStdDevThr\n-> 40 sec";
-    stars.length[2] = 40;
-    stars.instructions[0][3] = "Walk with someone\nMake eye contact\nKeep the distance";
-    stars.instructions[1][3] = "Marchez avec quelqu'un\nRegardez-vous dans les yeux\nGardez toujours le même écart";
-    stars.instructions[2][3] = "Marchez avec quelqu'un\nRegardez-vous dans les yeux\nGardez toujours le meme ecart";
-    stars.analysis[3] = "* velocity history > movingThr\n* distance history < distStdDevThr\n-> 30 sec";
-    stars.length[3] = 30;
+    scenes[n] = stars;
+
+    n++;
+
+    sceneInfo constellations;
+    stars.name = "Constellations";
+    stars.no = n;
+    stars.segments = 2;  
+    stars.instructions[0][0] = "Walk with someone\nKeep the same distance\nbetween you\n(No hands!)";
+    stars.instructions[1][0] = "Marchez avec quelqu'un\nGardez toujours le même écart\n(Sans les mains!)";
+    stars.instructions[2][0] = "Marchez avec quelqu'un\nGardez toujours le meme ecart\n(Sans les mains!)";
+    stars.analysis[0] = "* velocity history > movingThr\n* distance history < distStdDevThr\n-> 40 sec";
+    stars.length[0] = 40;
+    stars.instructions[0][1] = "Walk with someone\nMake eye contact\nKeep the distance";
+    stars.instructions[1][1] = "Marchez avec quelqu'un\nRegardez-vous dans les yeux\nGardez toujours le même écart";
+    stars.instructions[2][1] = "Marchez avec quelqu'un\nRegardez-vous dans les yeux\nGardez toujours le meme ecart";
+    stars.analysis[1] = "* velocity history > movingThr\n* distance history < distStdDevThr\n-> 30 sec";
+    stars.length[1] = 30;
     scenes[n] = stars;
 
     n++;
@@ -507,9 +514,9 @@ void planeApp::update(){
                 Blob* b = &it->second;
 
                 int minLost = minLostTime;
-                if (scene==2) minLost = minLostSpin;
-                else if (scene==3) minLost = minLostHop;
-                else if (scene==5) minLost = minLostShoot;
+                if (scene==STARS || scene==CONSTELLATIONS) minLost = minLostSpin;
+                else if (scene==SUN) minLost = minLostHop;
+                else if (scene==SHOOTING) minLost = minLostShoot;
 
             	b->update(minLost);
             	if( !b->isAlive() ) {
@@ -584,23 +591,23 @@ void planeApp::update(){
         }
 
         // TRANSITIONING BETWEEN SEGMENT RELATED ACTION
-        if (scene==0) {
+        if (scene==IDLE) {
             // fade out idle-mode video, connect fade-End to transition to next Segment
             if(autoplay && success && !transition) {
-                ofLogNotice("interaction") << "\t" << ofGetFrameNum() << "\t" << "scene 0 success";
+                ofLogNotice("interaction") << "\t" << ofGetFrameNum() << "\t" << "scene " << scene << " success";
                 endSegment(1);
             }
-        } else if (scene==1) {
+        } else if (scene==STARS) {
             if (autoplay && segment==1 && successCnt > newStarMax && !transition) {
-                ofLogNotice("interaction") << "\t" << ofGetFrameNum() << "\t" << "scene 1 segment 1 success";
+                ofLogNotice("interaction") << "\t" << ofGetFrameNum() << "\t" << "scene " << scene << " segment 1 success";
                 endSegment(1);
             }
-        } else if (scene==2 && segment==1) {
+        } else if (scene==REVOLUTIONS && segment==1) {
             if (autoplay && success && !transition) {
-                ofLogNotice("interaction") << "\t" << ofGetFrameNum() << "\t" << "scene 2 segment 1 success";
+                ofLogNotice("interaction") << "\t" << ofGetFrameNum() << "\t" << "scene " << scene << " segment 1 success";
                 endSegment(1);
             }
-        } else if (scene==3) {
+        } else if (scene==SUN) {
             if (segment==2 || segment==4 ) {
                 // FREEZE!
                 if (hogAvVel < freezeAllMaxVel && segmentClock > 3) {
@@ -613,7 +620,7 @@ void planeApp::update(){
                     endSegment(1);
                 }
             }
-        } else if (scene==4) {
+        } else if (scene==ECLIPSE) {
             if (autoplay && success && !transition && segmentClock > minSegmentLength ) {
                 if (segment==2 || segment==4) {
                     // STEP OUT OF THE LINE
@@ -643,7 +650,7 @@ void planeApp::update(){
 
 
         // animation related
-        if (scene==2) {
+        if (scene==REVOLUTIONS) {
 
 
             // SPIN
@@ -756,7 +763,7 @@ void planeApp::update(){
             }
 
 
-        } else if (scene==3 && (segment==2 || segment==4)) {
+        } else if (scene==SUN && (segment==2 || segment==4)) {
             // FREEZE
             // if (!transition && ofGetFrameNum()%freezeJudgeTime==0) {
             //     // hogAvVel influences displaySpeed of sun-movie
@@ -769,7 +776,7 @@ void planeApp::update(){
             // } else {
             //     success = false;
             // }
-        } else if (scene==3 && segment==3) {
+        } else if (scene==SUN && segment==3) {
             if (!transition && ofGetFrameNum()%runJudgeTime==0) {
                 // hogAvVel, bgsubtractorAvVel, activityCnt
                 // SUN_run_surface-8-blue-qtPNG.mov
@@ -795,7 +802,7 @@ void planeApp::update(){
             }
         // } else if (scene==3 && segment==5) {
         //     if (ofRandom(100)<2) (*fgMedia[0]).bounce();
-        } else if (scene==4 && segment==1) {
+        } else if (scene==ECLIPSE && segment==1) {
             // FOLLOW ME
             followMe += followMeSpeed;
             if (followMe >= 2*3.14) {
@@ -807,7 +814,8 @@ void planeApp::update(){
                 (*fgMedia[0]).position.x = projectionW/2 + sin(followMe) * followMeRadius;
             }
         }
-        if ( scene==4 && segment<6 && !transition && segmentClock > minSegmentLength && blobsOnStage>0) {
+
+        if ( scene==ECLIPSE && segment<6 && !transition && segmentClock > minSegmentLength && blobsOnStage>0) {
 
             // check if all are aligned
             bool allAligned = allBlobsAlignedWith((*fgMedia[0]).position);
@@ -876,7 +884,7 @@ void planeApp::update(){
 /* define the current bg videofile, depending on scene and segment */
 void planeApp::bgMediaSwap(int & trans) {
 
-    if (scene==0 && ((*bgMedia[bgMediaId]).id==-1 || (*bgMedia[bgMediaId]).id==5)) {
+    if (scene==IDLE && ((*bgMedia[bgMediaId]).id==-1 || (*bgMedia[bgMediaId]).id==5)) {
         ofLogNotice("TRANSITION") << "\t" << ofGetFrameNum() << "\t" << "bgMediaSwap\t\t\tidle " << trans;
         bgMediaId = ofRandom(4);
         (*bgMedia[bgMediaId]).id = bgMediaId;
@@ -884,7 +892,7 @@ void planeApp::bgMediaSwap(int & trans) {
         (*bgMedia[bgMediaId]).movieEndTrigger=false;
         (*bgMedia[bgMediaId]).outroTransformation = &mediaElement::finishMovie;
         ofAddListener( (*bgMedia[bgMediaId]).fadeOutEnd, this, &planeApp::bgMediaSwap );
-    } else if (scene==0 && (*bgMedia[bgMediaId]).id<4) {
+    } else if (scene==IDLE && (*bgMedia[bgMediaId]).id<4) {
         ofLogNotice("TRANSITION") << "\t" << ofGetFrameNum() << "\t" << "bgMediaSwap\t\t\tstarry intro " << trans;
         bgMediaId = 4;
         (*bgMedia[bgMediaId]).id = bgMediaId;
@@ -892,7 +900,7 @@ void planeApp::bgMediaSwap(int & trans) {
         (*bgMedia[bgMediaId]).finishMovie(1.0);
         // (*bgMedia[bgMediaId]).movieEndTrigger=true;
         ofAddListener( (*bgMedia[bgMediaId]).fadeOutEnd, this, &planeApp::bgMediaSwap );
-    } else if (scene==2 && (*bgMedia[bgMediaId]).id==5) {
+    } else if (scene==REVOLUTIONS && (*bgMedia[bgMediaId]).id==5) {
         ofLogNotice("TRANSITION") << "\t" << ofGetFrameNum() << "\t" << "bgMediaSwap\t\t\tsun intro " << trans;
         bgMediaId = 6;
         (*bgMedia[bgMediaId]).id = bgMediaId;
@@ -942,13 +950,13 @@ void planeApp::fgMediaFadedOut(int & trans) {
                 ((*fgMedia[fgMedia.size()-2]).*((*fgMedia[fgMedia.size()-2]).outroTransformation))();
             } else {
                 // fade BG now
-                if (scene==0) ((*bgMedia[bgMediaId]).*((*bgMedia[bgMediaId]).outroTransformation))();
+                if (scene==IDLE) ((*bgMedia[bgMediaId]).*((*bgMedia[bgMediaId]).outroTransformation))();
                 else moveOn = true;
             }
         }
     } else {
         // fade BG now
-        if (scene==0) ((*bgMedia[bgMediaId]).*((*bgMedia[bgMediaId]).outroTransformation))();
+        if (scene==IDLE) ((*bgMedia[bgMediaId]).*((*bgMedia[bgMediaId]).outroTransformation))();
         else moveOn = true;
     }
 }
@@ -973,9 +981,9 @@ void planeApp::fgMediaFadedOut(int & trans) {
 void planeApp::blobOnLost(int & blobID) {
     ofLogNotice("BLOB") << "\t\t" << ofGetFrameNum() << "\t" << blobID << " just got lost  (occl: " << blobs[blobID].occluded << ")";
     if (!transition && blobs[blobID].onStage) {
-        if (scene==2) {
+        if (scene==REVOLUTIONS) {
             activityCnt++;
-        } else if (scene==3 && !blobs[blobID].occluded) {
+        } else if (scene==SUN && !blobs[blobID].occluded) {
             // SUN explosions
             activityCnt++;
             if (segment==1) {
@@ -992,7 +1000,7 @@ void planeApp::blobOnLost(int & blobID) {
                 (*fgMedia[fgMedia.size()-1]).reset();
                 // if (segment==2) (*fgMedia[0]).bounce(); // sun video = [0]
             }
-        } else if (scene==5 && !blobs[blobID].occluded) {
+        } else if (scene==SHOOTING && !blobs[blobID].occluded) {
             // SHOOTING STARS
             if (segment==0) {
                 if (++shootingPointer>=fgMedia.size()) shootingPointer=0;
@@ -1014,7 +1022,7 @@ void planeApp::blobOnLost(int & blobID) {
 
 void planeApp::blobSteady(Pair & pair) {
     // add particle trail video between stars
-    if (!transition && scene==1 && segment>1) {
+    if (!transition && scene==CONSTELLATIONS) {
         Blob* b1 = &blobs[pair.blob1];
         Blob* b2 = &blobs[pair.blob2];
 
@@ -1070,7 +1078,7 @@ void planeApp::blobSteady(Pair & pair) {
 
 void planeApp::blobSteadyReward(Pair & pair) {
     ofLogNotice("BLOB") << "\t\t" << ofGetFrameNum() << "\t" << "blobSteadyReward() \t" << pair.blob1 << " + " << pair.blob2;
-    if (!transition && scene==1 && segment>1) {
+    if (!transition && scene==CONSTELLATIONS) {
         // ofPtr<mediaElement> vid1 = blobs[pair.blob1].mediaLink;
         // ofPtr<mediaElement> vid2 = blobs[pair.blob2].mediaLink;
 
@@ -1089,7 +1097,7 @@ void planeApp::blobSteadyReward(Pair & pair) {
 }
 
 void planeApp::blobBreakSteady(Pair & pair) {
-    if (!transition && scene==1 && segment>1) {
+    if (!transition && scene==CONSTELLATIONS) {
         ofLogNotice("BLOB") << "\t\t" << ofGetFrameNum() << "\t" << "blobBreakSteady() \t" << pair.blob1 << " + " << pair.blob2;
 
         ofPtr<mediaElement> vid1 = blobs[pair.blob1].mediaLink;
@@ -1123,8 +1131,8 @@ void planeApp::blobOnFreeze(int & blobID) {
     if (!transition) {
         ofPoint p = blobMapToScreen(blobs[blobID].position);
         ofLogNotice("BLOB") << "\t\t" << ofGetFrameNum() << "\t" << "blobOnFreeze()\t" << blobID << " at " << int(p.x) << "|" << int(p.y);
-        if (scene==1) {
-            if ((segment==0 || segment==1) && blobs[blobID].onStage) {
+        if (scene==STARS) {
+            if (blobs[blobID].onStage) {
                 // STAND STILL
                 // create star on location of blob
                 int randomStar = ofRandom(3) + 2;
@@ -1140,7 +1148,7 @@ void planeApp::blobOnFreeze(int & blobID) {
                 // (*fgMedia[fgMedia.size()-1]).outroTransformation = &mediaElement::scaleAway;
                 if (segment==1) successCnt++;
             }
-        } else if (scene==3) {
+        } else if (scene==SUN) {
             if ((segment==2 || segment==4)) {
                 // FREEZE!
                 // check if all blobs are frozen
@@ -1160,20 +1168,18 @@ void planeApp::blobOnFreeze(int & blobID) {
 
 void planeApp::blobUnFreeze(int & blobID) {
     if (!transition) {
-        if (scene==1) {
-            if (segment==0 || segment==1) {
-                // STAND STILL
-                ofLogNotice("BLOB") << "\t\t" << ofGetFrameNum() << "\t" << "blobUnFreeze()\t\t" << blobID;
-                // video fade away
-                // video unlink
-                ofPtr<mediaElement> vid = blobs[blobID].mediaLink;
-                if (vid != NULL) {
-                    // vid->movie->setPaused(true);
-                    vid->fadeOut(0.001, 0.5, true);
-                    blobs[blobID].mediaLink = ofPtr<mediaElement>();
-                }
+        if (scene==STARS) {
+            // STAND STILL
+            ofLogNotice("BLOB") << "\t\t" << ofGetFrameNum() << "\t" << "blobUnFreeze()\t\t" << blobID;
+            // video fade away
+            // video unlink
+            ofPtr<mediaElement> vid = blobs[blobID].mediaLink;
+            if (vid != NULL) {
+                // vid->movie->setPaused(true);
+                vid->fadeOut(0.001, 0.5, true);
+                blobs[blobID].mediaLink = ofPtr<mediaElement>();
             }
-        } else if (scene==3) {
+        } else if (scene==SUN) {
             // if ((segment==3 || segment==5)) {
             //     success = false;
             // }
@@ -1183,7 +1189,7 @@ void planeApp::blobUnFreeze(int & blobID) {
 
 void planeApp::blobOverFreeze(int & blobID) {
     if (!transition) {
-        if (scene==1) {
+        if (scene==STARS) {
             if (segment==1 && blobs[blobID].onStage && blobs[blobID].mediaLink != NULL) {
                 string constellations[] = {
                 "CONSTELLATION_1-photoJPEG.mov",    // ok seahorse
@@ -1268,25 +1274,23 @@ void planeApp::blobOverFreeze(int & blobID) {
 
 void planeApp::blobEnterStage(int & blobID) {
     // then assign the appropriate ones
-    if (scene==0 && !transition) {
+    if (scene==IDLE && !transition) {
         // COME CLOSER, recognition of people == time to move on
         if (!success) success = true;
 
-    } else if (scene==1 && !transition) {
-        if (segment==2 || segment==3) {
-            // KEEP THE DISTANCE
-            ofLogNotice("BLOB") << "\t\t" << ofGetFrameNum() << "\t" << "blobEnterStage()\t\t" << blobID << " (star)";
-            int randomStar = ofRandom(3) + 2;
-            fgMedia.push_back(ofPtr<mediaElement>( new videoElement("video/2_stars/STAR_" + ofToString(randomStar)+"-loop-photoJPEG.mov")));
-            blobs[blobID].mediaLink = fgMedia[fgMedia.size()-1];
-            blobs[blobID].videoTrace = true;
-            (*fgMedia[fgMedia.size()-1]).setDisplay(0, 0, true);
-            (*fgMedia[fgMedia.size()-1]).id = randomStar;
-            (*fgMedia[fgMedia.size()-1]).reset();
-            (*fgMedia[fgMedia.size()-1]).fadeIn();
-            (*fgMedia[fgMedia.size()-1]).outroTransformation = &mediaElement::scaleAway;
-        }
-    } else if (scene==4 && (!transition)) {
+    } else if (scene==CONSTELLATIONS && !transition) {
+        // KEEP THE DISTANCE
+        ofLogNotice("BLOB") << "\t\t" << ofGetFrameNum() << "\t" << "blobEnterStage()\t\t" << blobID << " (star)";
+        int randomStar = ofRandom(3) + 2;
+        fgMedia.push_back(ofPtr<mediaElement>( new videoElement("video/2_stars/STAR_" + ofToString(randomStar)+"-loop-photoJPEG.mov")));
+        blobs[blobID].mediaLink = fgMedia[fgMedia.size()-1];
+        blobs[blobID].videoTrace = true;
+        (*fgMedia[fgMedia.size()-1]).setDisplay(0, 0, true);
+        (*fgMedia[fgMedia.size()-1]).id = randomStar;
+        (*fgMedia[fgMedia.size()-1]).reset();
+        (*fgMedia[fgMedia.size()-1]).fadeIn();
+        (*fgMedia[fgMedia.size()-1]).outroTransformation = &mediaElement::scaleAway;
+    } else if (scene==ECLIPSE && (!transition)) {
         // PLANETS
         ofLogNotice("BLOB") << "\t\t" << ofGetFrameNum() << "\t" << "blobEnterStage()\t\t" << blobID << " (planet)";
         int planedId[] = { 6, 9, 13, 15, 18, 19,20, 22, 23 };
@@ -1311,13 +1315,11 @@ void planeApp::blobEnterStage(int & blobID) {
 
 void planeApp::blobLeaveStage(int & blobID) {
     if (!transition) {
-        if (scene==1) {
-            if (segment==2 || segment==3) {
-                // STAR BRIDGES
-                ofLogNotice("BLOB") << "\t\t" << ofGetFrameNum() << "\t" << "blobLeaveStage()\t\t" << blobID;
-                this->blobUnlink(blobID);
-            }
-        } else if (scene==4) {
+        if (scene==CONSTELLATIONS) {
+            // STAR BRIDGES
+            ofLogNotice("BLOB") << "\t\t" << ofGetFrameNum() << "\t" << "blobLeaveStage()\t\t" << blobID;
+            this->blobUnlink(blobID);
+        } else if (scene==ECLIPSE) {
             // PLANETS
             ofLogNotice("BLOB") << "\t\t" << ofGetFrameNum() << "\t" << "blobLeaveStage()\t\t" << blobID;
             this->blobUnlink(blobID);
@@ -1444,11 +1446,11 @@ void planeApp::videoFollowBlob(int & blobID) {
         ofPoint p;
         if (vid != NULL) {
 
-            if (scene==4 && segment>3 && segment<6) {
+            if (scene==ECLIPSE && segment>3 && segment<6) {
                 // PLANETS aligned on vertical, move up down
                 p.y = blobMapToScreen(blobs[blobID].position).x * (16.0/9.0);
                 p.x = offsetX + projectionW/2.0;
-            } else if (scene==4 && segment<4) {
+            } else if (scene==ECLIPSE && segment<4) {
                 // PLANETS aligned on horizontal
                 p.y = projectionH/2;
                 p.x = blobMapToScreen(blobs[blobID].position).x;
@@ -1462,13 +1464,13 @@ void planeApp::videoFollowBlob(int & blobID) {
                 (*vid).goal.set( p );
             }
             // set opacity
-            if (scene==4 && segment==6) {
+            if (scene==ECLIPSE && segment==6) {
                 float d = ofDist(p.x, p.y, projectionW/2, projectionH/2);
                 (*vid).opMax = ((projectionW/2) - d) / (projectionW/2);
             }
         }
         // update position of sparkly bridge
-        if (scene==1 && segment>1) {
+        if (scene==CONSTELLATIONS) {
             // check if bridge exists
             ofPtr<mediaElement> bridge;
             int blob2ID;
@@ -1521,7 +1523,7 @@ void planeApp::blobUnlink(int & blobID) {
     for (vector<ofPtr<mediaElement> >::iterator it = fgMedia.begin(); it != fgMedia.end(); it++) {
         if (*it == blobs[blobID].mediaLink) {
             ofPtr<mediaElement> vid = blobs[blobID].mediaLink;
-            if (scene==1 && segment<2) {
+            if (scene==STARS) {
                 // STARS: fade out frozen stars
                 (**it).fadeOut(0.001, 0.5, true);
                 ofLogNotice("BLOB") << "\t\t" << ofGetFrameNum() << "\t" << "\t\t\tunlinked blob and fadeOut ";
@@ -1595,7 +1597,7 @@ void planeApp::endSegment(int direction) {
     if ((segment+segmentChange >= scenes[scene].segments || segment+segmentChange < 0) && scene!=3) {
         sceneChange = true;
 
-        if (scene==1 && segment==3) {
+        if (scene==CONSTELLATIONS && segment==1) {
             // STARS ENDING
             // make sure, all other fgMedia (planets) is gone already
             for (vector<ofPtr<mediaElement> >::iterator it = fgMedia.begin(); it != fgMedia.end(); ++it) {
@@ -1610,7 +1612,7 @@ void planeApp::endSegment(int direction) {
             (*fgMedia[fgMedia.size()-1]).movieEndTrigger=true;
             ofAddListener( (*fgMedia[fgMedia.size()-1]).fadeOutEnd, this, &planeApp::fgMediaFadedOut );
 
-        } else if (scene==2 && segment==1) {
+        } else if (scene==REVOLUTIONS && segment==1) {
             // REVOLUTIONS OUTRO TRANSITION VIDEO
             // make sure, all other fgMedia (planets) is gone already
             for (vector<ofPtr<mediaElement> >::iterator it = fgMedia.begin(); it != fgMedia.end(); ++it) {
@@ -1625,7 +1627,7 @@ void planeApp::endSegment(int direction) {
             // ofAddListener( (*fgMedia[fgMedia.size()-1]).fadeOutEnd, this, &planeApp::bgMediaSwap );
             bgMediaSwap(scene);
             // moveOn = true;
-        } else if (scene==4) {
+        } else if (scene==ECLIPSE) {
             // fade out all planets
             int i=0;
             if (fgMedia.size()>0) {
@@ -1640,7 +1642,7 @@ void planeApp::endSegment(int direction) {
             } else {
                 moveOn=true;
             }
-        } else if (scene==5) {
+        } else if (scene==SHOOTING) {
             // dont' fade out all shooting stars
             moveOn = true;
         } else {
@@ -1652,7 +1654,7 @@ void planeApp::endSegment(int direction) {
         transition = true;
     } else {
         // if no BG fading is necessary, simply move on to the next segment
-        if (scene==3 && (segment==2 || segment==4)) {
+        if (scene==SUN && (segment==2 || segment==4)) {
             if (success) {
                 ofLogNotice("TRANSITION") << "\t" << ofGetFrameNum() << "\t" << "sunfreeze red";
                 int randomFreezeSurface = ofRandom(4) + 1;
@@ -1674,7 +1676,7 @@ void planeApp::endSegment(int direction) {
                 moveOn = true;
             }
             if(segment==4) sceneChange = true;
-        } else if (scene==2 && segment==0) {
+        } else if (scene==REVOLUTIONS && segment==0) {
             // don't move to LET GO if there are no more planets on the screen
             if (planetCnt ==0) {
                 ofLogNotice("TRANSITION") << "\t" << ofGetFrameNum() << "\t" << "endSegment()   planetCnt 0 ";
@@ -1703,7 +1705,7 @@ void planeApp::jumpToScene(int s) {
     transition = true;
     initSegment();
     int tmp = -2;
-    if (scene==0) bgMediaSwap(scene);
+    if (scene==IDLE) bgMediaSwap(scene);
     else if (oldScene==0 && scene>0) bgMediaSwap(tmp);
 }
 
@@ -1732,8 +1734,8 @@ void planeApp::nextSegment(int direction) {
         segment = scenes[scene].segments -1;
     }
 
-    if (scene==2 && segment>1) {
-        // skip KEEP DISTANCE if only 1 blob
+    if (scene==CONSTELLATIONS && segment>1) {
+        // skip CONSTELLATIONS if only 1 blob
         if (blobsOnStage<2) {
             scene++;
             segment = 0;
@@ -1749,7 +1751,7 @@ void planeApp::nextSegment(int direction) {
         sceneChange = true;
     }
 
-    if (scene==0) {
+    if (scene==IDLE) {
         bgMediaSwap(scene);
         globalStart = ofGetUnixTime();
     }
@@ -1787,12 +1789,12 @@ void planeApp::initSegment(){
         ofLogNotice("TRANSITION") << "\t" << ofGetFrameNum() << "\t" << "load instruction image " << in_img;
     }
 
-    if (scene==1 && segment<2) {
+    if (scene==STARS && segment<2) {
         (*bgMedia[5]).opMax = 0.35;
     } else (*bgMedia[5]).opMax = 1;
 
     // add FG videos
-    if (scene==2) {
+    if (scene==REVOLUTIONS) {
         // SPIN
         // if (sceneChange) {
         //     for (int i=0; i<5; i++) {
@@ -1809,7 +1811,7 @@ void planeApp::initSegment(){
         // }
         // positionRevolutions();  // to position and turn on/off videos
 
-    } else if (scene==3) {
+    } else if (scene==SUN) {
         // SUN, load sun as fgMedia
         if (sceneChange) {
 
@@ -1830,7 +1832,7 @@ void planeApp::initSegment(){
             (*fgMedia[0]).reset();
         }
 
-    } else if (scene==4) {
+    } else if (scene==ECLIPSE) {
         if (sceneChange) {
             // ECLIPSE. create white/black MAIN PLANET
             fgMedia.push_back(ofPtr<mediaElement>( new imageElement("video/5_eclipse/WHITE_PLANET.png")));
@@ -1844,7 +1846,7 @@ void planeApp::initSegment(){
             // disperse
             (*fgMedia[0]).fadeOut(0.01, 1.0, true);
         }
-    } else if (scene==5 && sceneChange) {
+    } else if (scene==SHOOTING && sceneChange) {
         // preload shooting stars
         for (int i=0; i<50; i++) {
             int randomShooter = ofRandom(26) + 1;
@@ -2112,7 +2114,7 @@ void planeApp::drawScreen(int x, int y, float scale){
             for (vector<string>::iterator it = instructionLine.begin() ; it != instructionLine.end(); ++it) {
 
                 ofRectangle textR = fontBg.getStringBoundingBox(measureInstLine[i],0, 0);
-                if (scene==4 && segment==1) {
+                if (scene==ECLIPSE && segment==1) {
                     // FOLLOW ME
                     fontBg.drawString((*it), x+ ((*fgMedia[0]).position.x - textR.width/2)*scale, y+ypos*scale);
                 } else {
@@ -2182,7 +2184,7 @@ void planeApp::drawAnalysis(int x, int y, float scale){
     fontSm.drawString(analysisTxt, x+20, y + projectionH*scale*0.05);
 
 
-    if (scene==0) {
+    if (scene==IDLE) {
         // IDLE mode
         // draw circle for each blob
         int bx = x + 100; int by = y + 150;
@@ -2201,70 +2203,68 @@ void planeApp::drawAnalysis(int x, int y, float scale){
                 }
             }
         }
-    } else if (scene==1) {
-        if( segment==0 || segment==1 ) {
-            // STAND STILL
-            // draw circle for each blob, and display frozen, frozentimer
-            int bx = x + 100; int by = y + 150;
-            ofFill();
-            for(std::map<int, Blob>::iterator it = blobs.begin(); it != blobs.end(); ++it){
-                Blob* b = &it->second;
-                if (b->onStage) {
-                    if(b->properFreeze) {
-                        if(segment==1 && b->frozenTimer > freezeMaxTime) {
-                            ofSetColor(0);
-                        } else ofSetColor(255);
-                    } else if(b->frozen) ofSetColor(100);
-                    else ofSetColor(50);
+    } else if (scene==STARS) {
+        // STAND STILL
+        // draw circle for each blob, and display frozen, frozentimer
+        int bx = x + 100; int by = y + 150;
+        ofFill();
+        for(std::map<int, Blob>::iterator it = blobs.begin(); it != blobs.end(); ++it){
+            Blob* b = &it->second;
+            if (b->onStage) {
+                if(b->properFreeze) {
+                    if(segment==1 && b->frozenTimer > freezeMaxTime) {
+                        ofSetColor(0);
+                    } else ofSetColor(255);
+                } else if(b->frozen) ofSetColor(100);
+                else ofSetColor(50);
 
-                    ofCircle(bx, by, 50);
-                    ofSetColor(0,0,255);
-                    ofDrawBitmapString( ofToString(b->id, 4, '0'), bx-15, by+5);
+                ofCircle(bx, by, 50);
+                ofSetColor(0,0,255);
+                ofDrawBitmapString( ofToString(b->id, 4, '0'), bx-15, by+5);
 
-                    string textStr = "vel\t\t: " + ofToString(b->vel, 2);
-                    textStr += "\nfrozen\t\t: "+ ofToString(b->frozen ? "true" : "false");
-                    textStr += "\nproperFreeze \t: "+ ofToString(b->properFreeze ? "true" : "false");
-                    textStr += "\noverFrozen \t: "+ ofToString(b->overFrozen ? "true" : "false");
-                    textStr += "\nfrozenTimer \t: " + ofToString(b->frozenTimer);
-                    ofDrawBitmapStringHighlight(textStr, bx+70, by -30);
+                string textStr = "vel\t\t: " + ofToString(b->vel, 2);
+                textStr += "\nfrozen\t\t: "+ ofToString(b->frozen ? "true" : "false");
+                textStr += "\nproperFreeze \t: "+ ofToString(b->properFreeze ? "true" : "false");
+                textStr += "\noverFrozen \t: "+ ofToString(b->overFrozen ? "true" : "false");
+                textStr += "\nfrozenTimer \t: " + ofToString(b->frozenTimer);
+                ofDrawBitmapStringHighlight(textStr, bx+70, by -30);
 
-                    by += 110;
-                }
-            }
-
-        } else if( segment==2 || segment==3 ) {
-
-            // KEEP THE DISTANCE
-            int bx = x + 100; int by = y + 150;
-            ofFill();
-            for(std::map<int, Blob>::iterator it = blobs.begin(); it != blobs.end(); ++it){
-                Blob* b = &it->second;
-                if (b->onStage) {
-                    if (b->movingMean) ofSetColor(255);
-                    else ofSetColor(100);
-
-                    ofCircle(bx, by, 50);
-                    ofSetColor(0,0,255);
-                    ofDrawBitmapString( ofToString(b->id, 4, '0'), bx-15, by+5);
-
-                    string textStr = "neighbors\t: "+ ofToString(b->neighbors.size());
-                    textStr += "\nmovingMean\t: " + ofToString(b->movingMean ? "true" : "false");
-                    textStr += "\nvel \t\t: "+ ofToString(b->vel,2);
-                    ofDrawBitmapStringHighlight(textStr, bx+70, by -40);
-
-                    for(std::map<int, Neighbor>::iterator iter = b->neighbors.begin(); iter != b->neighbors.end(); ++iter){
-                        Neighbor* nb = &iter->second;
-                        if (nb->steadyDistance) ofSetColor(255); else ofSetColor(0);
-                        ofDrawBitmapString(ofToString(nb->id) + " stdDev "+ ofToString(nb->getStdDev(),0), bx+70, by+15);
-                        ofRect(bx+180, by+15, nb->distance[0]*0.2, -10);
-                        by += 15;
-                    }
-
-                    by += 60;
-                }
+                by += 110;
             }
         }
-    } else if (scene==3 || scene==4) {
+
+    } else if (scene==CONSTELLATIONS) {
+
+        // KEEP THE DISTANCE
+        int bx = x + 100; int by = y + 150;
+        ofFill();
+        for(std::map<int, Blob>::iterator it = blobs.begin(); it != blobs.end(); ++it){
+            Blob* b = &it->second;
+            if (b->onStage) {
+                if (b->movingMean) ofSetColor(255);
+                else ofSetColor(100);
+
+                ofCircle(bx, by, 50);
+                ofSetColor(0,0,255);
+                ofDrawBitmapString( ofToString(b->id, 4, '0'), bx-15, by+5);
+
+                string textStr = "neighbors\t: "+ ofToString(b->neighbors.size());
+                textStr += "\nmovingMean\t: " + ofToString(b->movingMean ? "true" : "false");
+                textStr += "\nvel \t\t: "+ ofToString(b->vel,2);
+                ofDrawBitmapStringHighlight(textStr, bx+70, by -40);
+
+                for(std::map<int, Neighbor>::iterator iter = b->neighbors.begin(); iter != b->neighbors.end(); ++iter){
+                    Neighbor* nb = &iter->second;
+                    if (nb->steadyDistance) ofSetColor(255); else ofSetColor(0);
+                    ofDrawBitmapString(ofToString(nb->id) + " stdDev "+ ofToString(nb->getStdDev(),0), bx+70, by+15);
+                    ofRect(bx+180, by+15, nb->distance[0]*0.2, -10);
+                    by += 15;
+                }
+
+                by += 60;
+            }
+        }
+    } else if (scene==SUN || scene==ECLIPSE) {
 
         // HOP
         int bx = x + 100; int by = y + 150;
@@ -2289,7 +2289,7 @@ void planeApp::drawAnalysis(int x, int y, float scale){
             }
         }
 
-    } else if (scene==5) {
+    } else if (scene==SHOOTING) {
         // SHOOTING STARS
         int bx = x + 100; int by = y + 150;
         ofFill();
@@ -2489,20 +2489,21 @@ void planeApp::configureBlobserver() {
         bool allowLessFP = false;        // allow more false positives
         bool slow = false;              // extra slow?
 
-        if (scene==0) {                 // IDLE
+        if (scene==IDLE) {                 // IDLE
 
-        } else if (scene==1) {          // STARS
+        } else if (scene==STARS) {          // STARS
             slow = true;
 
             if (segment==0) {               // STAND STILL
                 slow = true;
             } else if (segment==1) {        // STAND STILL SOME MORE
                 slow = true;
-            } else if (segment==2) {        // KEEP THE DISTANCE
-            } else if (segment==3) {        // KEEP THE DISTANCE P2
             }
 
-        } else if (scene==2) {          // REVOLUTION
+        } else if (scene==CONSTELLATIONS) {          // STARS
+            slow = true;
+
+        } else if (scene==REVOLUTIONS) {          // REVOLUTION
 
             if (segment==0) {               // SPIN
                 erratic = true;
@@ -2510,7 +2511,7 @@ void planeApp::configureBlobserver() {
                 erratic = true;
             }
 
-        } else if (scene==3) {          // SUN
+        } else if (scene==SUN) {          // SUN
 
             if (segment==0) {               // STAND ON ONE LEG
             } else if (segment==1) {        // HOP
@@ -2521,7 +2522,7 @@ void planeApp::configureBlobserver() {
             } else if (segment==4) {        // FREEZE
             }
 
-        } else if (scene==4) {          // ALIGNMENT
+        } else if (scene==ECLIPSE) {          // ALIGNMENT
 
             slow = true;
 
@@ -2534,7 +2535,7 @@ void planeApp::configureBlobserver() {
             } else if (segment==6) {        // DISPERSE SLOWLY
             }
 
-        } else if (scene==5) {          // SHOOTING STARS
+        } else if (scene==SHOOTING) {          // SHOOTING STARS
             erratic = true;
             allowLessFP = true;
             if (segment==0) {               // MOVE LIKE A SHOOTING STAR
@@ -2694,7 +2695,7 @@ void planeApp::keyReleased(int key){
         ofLogNotice() << "saved screenshot " << fileName.c_str();
     }
 
-    if (key>='0' && key<='5') {
+    if (key>='0' && key<='6') {
         int s = int(key) - int('0');
         ofLogNotice("KEY") << "\t\t\t" << ofGetFrameNum() << "\t" << "==============>" << key << " scene = " << s;
         jumpToScene(s);
