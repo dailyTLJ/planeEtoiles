@@ -802,7 +802,7 @@ void planeApp::update(){
             }
         // } else if (scene==3 && segment==5) {
         //     if (ofRandom(100)<2) (*fgMedia[0]).bounce();
-        } else if (scene==ECLIPSE && segment==1) {
+        } else if (scene==ECLIPSE && segment==SEG_FOLLOWME) {
             // FOLLOW ME
             followMe += followMeSpeed;
             if (followMe >= 2*3.14) {
@@ -1899,6 +1899,7 @@ void planeApp::receiveOsc(){
 
 		} else if(m.getAddress() == "/blobserver/bgsubtractor"){
 
+
             // parse incoming elements:  iiiiffii: id x y size vx vy age lost 
             int blobid = m.getArgAsInt32(0);
             int posx = m.getArgAsInt32(1);
@@ -1928,6 +1929,7 @@ void planeApp::receiveOsc(){
             ofLogNotice() << "BROADCAST" << var << ", " << source << ", " << cam << ", " << val;
 
 		} else if(m.getAddress() == "/blobserver/hog" && currentFlowId==hogFlowId){
+
 			// parse incoming elements:  iiiffiii: id x y vx vy age lost occluded
 			int blobid = m.getArgAsInt32(0);
 			int posx = m.getArgAsInt32(1);
@@ -2114,7 +2116,7 @@ void planeApp::drawScreen(int x, int y, float scale){
             for (vector<string>::iterator it = instructionLine.begin() ; it != instructionLine.end(); ++it) {
 
                 ofRectangle textR = fontBg.getStringBoundingBox(measureInstLine[i],0, 0);
-                if (scene==ECLIPSE && segment==1) {
+                if (scene==ECLIPSE && segment==SEG_FOLLOWME) {
                     // FOLLOW ME
                     fontBg.drawString((*it), x+ ((*fgMedia[0]).position.x - textR.width/2)*scale, y+ypos*scale);
                 } else {

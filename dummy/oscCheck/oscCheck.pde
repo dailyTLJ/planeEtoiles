@@ -15,7 +15,7 @@ NetAddress myRemoteLocation;
 void setup() {
   size(400,400);
   frameRate(25);
-  /* start oscP5, listening for incoming messages at port 12000 */
+  /* start oscP5, listening for incoming messages at port 9000 */
   oscP5 = new OscP5(this,9000);
   
   /* myRemoteLocation is a NetAddress. a NetAddress takes 2 parameters,
