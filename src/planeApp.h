@@ -279,7 +279,22 @@ class planeApp : public ofBaseApp{
 		// nebula movie, that is placed underneath
 		// the bgMedia movies
 		ofPtr<mediaElement> nebula;
-		
+
+
+		// videofiles that should be preloaded, as they are larger:
+		// STARS
+		// ATTRACTION
+		ofPtr<mediaElement> attraction_outro;
+		// REVOLUTIONS
+		// SUN
+		ofPtr<mediaElement> sun_jump;
+		ofPtr<mediaElement> sun_run;
+		std::vector< ofPtr<mediaElement> > sun_freeze_red;		// 4
+		std::vector< ofPtr<mediaElement> > sun_surface_blue;	// 12
+		// ECLIPSE
+		std::vector< ofPtr<mediaElement> > planet_animated;			// 9
+		// SHOOTING
+
 		ofImage instructionImg;
 		int bgMediaId;
 
