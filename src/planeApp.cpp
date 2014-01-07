@@ -181,7 +181,7 @@ void planeApp::setup(){
     paramSc3.setName("Sc4 Sun");
     // paramSc3.add(edgeMargin.set( "Edge Margin", 50, 0, 150));
     paramSc3.add(minLostHop.set("MinLost HOP", 1, 0, 10));
-    paramSc3.add(activityColorCh.set( "Activity Color Change", 10, 0, 30));
+    // paramSc3.add(activityColorCh.set( "Activity Color Change", 10, 0, 30));
     paramSc3.add(freezeAllMaxVel.set( "FreezeAllMaxVel",0.1, 0, 3.0 ));
     // paramSc3.add(freezeJudgeTime.set( "freezeJudgeTime", 180, 0, 240));
     // paramSc3.add(freezeVideoSpeedMap.set( "freezeVideoSpeedMap", 0.1, 0, 1));
@@ -325,7 +325,7 @@ void planeApp::initScenes(){
     n++;
 
     sceneInfo stars;
-    stars.name = "Star Links";
+    stars.name = "Stars";
     stars.no = n;
     stars.segments = 2;
     stars.instructions[0][0] = "Stand still";
@@ -343,7 +343,7 @@ void planeApp::initScenes(){
     n++;
 
     sceneInfo constellations;
-    stars.name = "Constellations";
+    stars.name = "Attraction";
     stars.no = n;
     stars.segments = 2;  
     stars.instructions[0][0] = "Walk with someone\nKeep the same distance\nbetween you\n(No hands!)";
@@ -361,7 +361,7 @@ void planeApp::initScenes(){
     n++;
 
     sceneInfo revolution;
-    revolution.name = "Revolution";
+    revolution.name = "Revolutions";
     revolution.no = n;
     revolution.segments = 2;
     revolution.instructions[0][0] = "Take someone's hand\nSpin and lean out\nas far as possible";
@@ -381,7 +381,7 @@ void planeApp::initScenes(){
     n++;
 
     sceneInfo sun;
-    sun.name = "Explosion";
+    sun.name = "Sun";
     sun.no = n;
     sun.segments = 5;
     sun.instructions[0][0] = "Stand on one leg";
@@ -422,7 +422,7 @@ void planeApp::initScenes(){
     n++;
 
     sceneInfo eclipse;
-    eclipse.name = "Alignment";
+    eclipse.name = "Eclipse";
     eclipse.no = n;
     eclipse.segments = 7;
     eclipse.instructions[0][0] = "Now line-up in\nfront of me";
@@ -465,7 +465,7 @@ void planeApp::initScenes(){
     n++;
 
     sceneInfo shooting;
-    shooting.name = "Combustion";
+    shooting.name = "Shooting Stars";
     shooting.no = n;
     shooting.segments = 3;
     shooting.instructions[0][0] = "Move like a\nshooting star";
@@ -2077,6 +2077,14 @@ void planeApp::draw(){
 //--------------------------------------------------------------
 void planeApp::drawScreen(int x, int y, float scale){
 
+    ofPushMatrix();
+    ofTranslate(x, y);
+    ofScale(scale, scale, scale);
+
+    // reset these values for now, before cleaning them out of all the following code
+    x = 0;
+    y = 0;
+    scale = 1.f;
 
     // black frame first
     ofFill(); ofSetColor(0);
@@ -2194,6 +2202,8 @@ void planeApp::drawScreen(int x, int y, float scale){
     //     ofRect(x,y,projectionW*scale,projectionH*scale);
     //     ofDisableAlphaBlending();
     // }
+
+    ofPopMatrix();
 }
 
 //--------------------------------------------------------------

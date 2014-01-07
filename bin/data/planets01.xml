@@ -1,119 +1,124 @@
 <HUMANS_AND_PLANETS>
-	<autoplay>1</autoplay>
-	<Transition_Flash_Color>255, 200, 100, 0</Transition_Flash_Color>
-	<Global>
-		<Site_Width>500</Site_Width>
-		<Site_Length>700</Site_Length>
-		<Map_Site_to_Viz_Width>2</Map_Site_to_Viz_Width>
-		<Map_Site_to_Viz_Height>2</Map_Site_to_Viz_Height>
-		<Offset_X>0</Offset_X>
-		<Offset_Y>0</Offset_Y>
-	</Global>
-	<Timing/>
-	<Sc1_Stars>
-		<Freeze_Minimum_Velocity>0.602041</Freeze_Minimum_Velocity>
-		<Freeze_Minimum_Time>0</Freeze_Minimum_Time>
-		<Freeze_Maximum_Time>13</Freeze_Maximum_Time>
-		<Distance_Std.Dev._Threshold>10</Distance_Std.Dev._Threshold>
-		<Movement_Threshold>0.1</Movement_Threshold>
-		<New_Star_Maximum>30</New_Star_Maximum>
-		<Bonus_every_X_Stars>5</Bonus_every_X_Stars>
-	<Distance_StdDev_Thresh>10</Distance_StdDev_Thresh>
-	<Freeze_MinVel>0.602041</Freeze_MinVel>
-		<Freeze_MinTime>1</Freeze_MinTime>
-		<Freeze_MaxTime>3</Freeze_MaxTime>
-		<Dist_StdDev>36.2245</Dist_StdDev>
-		<Movement_Thr>1.5</Movement_Thr>
-		<NewStar_Max>40</NewStar_Max>
-		<Bonus_every>5</Bonus_every>
-	<Freeze_MaxVel>0.321429</Freeze_MaxVel>
-	<Dist_Reward>10</Dist_Reward>
-	</Sc1_Stars>
-	<Sc2_Revolutions>
-		<spinSuccess>3</spinSuccess>
-		<spinJudgeTime>53</spinJudgeTime>
-		<spinFailure>2</spinFailure>
-	<MinLost_SPIN>1</MinLost_SPIN>
-	</Sc2_Revolutions>
-	<Sc3_Sun>
-		<Edge_Margin>21</Edge_Margin>
-	<Min_LostTime>1</Min_LostTime>
-	<Activity_Color_Change>13</Activity_Color_Change>
-	<freezeJudgeTime>75</freezeJudgeTime>
-		<freezeVideoSpeedMap>0.1</freezeVideoSpeedMap>
-		<runJudgeTime>30</runJudgeTime>
-		<runHogThr>2.70408</runHogThr>
-		<runBgsThr>8</runBgsThr>
-	<runActThr>3</runActThr>
-	<FreezeAllMaxVel>0.596939</FreezeAllMaxVel>
-	<MinLost_HOP>1</MinLost_HOP>
-	</Sc3_Sun>
-	<Sc4_Alignment>
-		<Alignm_MaxDist>77</Alignm_MaxDist>
-		<Alignm_Transition>3</Alignm_Transition>
-	<followMeSpeed>0.0117347</followMeSpeed>
-		<followMeRadius>303</followMeRadius>
-	</Sc4_Alignment>
-	<Sc5_Combustion>
-		<MinLost_SHOOT>1</MinLost_SHOOT>
-	</Sc5_Combustion>
-<HUMANS_AND_PLANETS/>
-	<Dimension>
-		<Site_Width>500</Site_Width>
-		<Site_Length>500</Site_Length>
-		<Map_Site_to_Viz_Width>2</Map_Site_to_Viz_Width>
-		<Map_Site_to_Viz_Height>2</Map_Site_to_Viz_Height>
-		<Offset_X>0</Offset_X>
-		<Offset_Y>326</Offset_Y>
-	<Map_Width>2.36735</Map_Width>
-		<Map_Height>2.79592</Map_Height>
-	<Stage_Radius>257</Stage_Radius>
-	<Y_Interpolation>5</Y_Interpolation>
-	</Dimension>
-<testMode>0</testMode>
-<configBlobserver>1</configBlobserver>
-	<Blobserver>
-		<NORMAL_noise>7</NORMAL_noise>
-		<SLOW_noise>9</SLOW_noise>
-		<ERRATIC_noise>3</ERRATIC_noise>
-		<NORMAL_measurement>4</NORMAL_measurement>
-		<SLOW_measurement>6</SLOW_measurement>
-		<ERRATIC_measurement>7</ERRATIC_measurement>
-	</Blobserver>
-<Min_LostTime>1</Min_LostTime>
-<Nebula_Opacity>39</Nebula_Opacity>
 
-<drawFbo>0</drawFbo>
+	<autoplay>1</autoplay>
+
+	<testMode>0</testMode>
+
 	<displayDebug>0</displayDebug>
-<inactivity_timer>30</inactivity_timer>
+
+	<Min_LostTime>1</Min_LostTime>
+
+	<inactivity_timer>30</inactivity_timer>
+
 	<Min_Segm_Length>3</Min_Segm_Length>
-<Sc2_Attraction>
-		<Dist_StdDev>10</Dist_StdDev>
-		<Movement_Thr>0.1</Movement_Thr>
+
+	<Nebula_Opacity>39</Nebula_Opacity>
+
+	<Dimension>
+
+		<Site_Width>500</Site_Width>
+
+		<Site_Length>500</Site_Length>
+
+		<Stage_Radius>257</Stage_Radius>
+
+		<Map_Width>2.36735</Map_Width>
+
+		<Map_Height>2.79592</Map_Height>
+
+		<Offset_X>0</Offset_X>
+
+		<Offset_Y>326</Offset_Y>
+
+		<Y_Interpolation>5</Y_Interpolation>
+
+	</Dimension>
+
+	<configBlobserver>1</configBlobserver>
+
+	<Blobserver>
+
+		<SLOW_noise>9</SLOW_noise>
+
+		<SLOW_measurement>6</SLOW_measurement>
+
+		<NORMAL_noise>7</NORMAL_noise>
+
+		<NORMAL_measurement>4</NORMAL_measurement>
+
+		<ERRATIC_noise>3</ERRATIC_noise>
+
+		<ERRATIC_measurement>7</ERRATIC_measurement>
+
+	</Blobserver>
+
+	<Sc1_Stars>
+
+		<Freeze_MaxVel>0.602041</Freeze_MaxVel>
+
+		<Freeze_MinTime>1</Freeze_MinTime>
+
+		<Freeze_MaxTime>3</Freeze_MaxTime>
+
+		<NewStar_Max>40</NewStar_Max>
+
+	</Sc1_Stars>
+
+	<Sc2_Attraction>
+
+		<Dist_StdDev>36.2245</Dist_StdDev>
+
+		<Movement_Thr>1.5</Movement_Thr>
+
 		<Dist_Reward>2</Dist_Reward>
+
 	</Sc2_Attraction>
+
 	<Sc3_Revolutions>
+
 		<MinLost_SPIN>1</MinLost_SPIN>
-		<spinJudgeTime>180</spinJudgeTime>
+
+		<spinJudgeTime>53</spinJudgeTime>
+
 		<spinSuccess>5</spinSuccess>
+
 		<spinFailure>2</spinFailure>
+
 	</Sc3_Revolutions>
+
 	<Sc4_Sun>
+
 		<MinLost_HOP>1</MinLost_HOP>
-		<Activity_Color_Change>10</Activity_Color_Change>
-		<FreezeAllMaxVel>0.1</FreezeAllMaxVel>
-		<runJudgeTime>80</runJudgeTime>
-		<runHogThr>1</runHogThr>
-		<runBgsThr>3</runBgsThr>
-		<runActThr>5</runActThr>
+
+		<FreezeAllMaxVel>0.596939</FreezeAllMaxVel>
+
+		<runJudgeTime>75</runJudgeTime>
+
+		<runHogThr>2.7</runHogThr>
+
+		<runBgsThr>8</runBgsThr>
+
+		<runActThr>3</runActThr>
+
 	</Sc4_Sun>
+
 	<Sc5_Eclipse>
-		<Alignm_MaxDist>50</Alignm_MaxDist>
-		<Alignm_Transition>10</Alignm_Transition>
-		<followMeSpeed>0.002</followMeSpeed>
-		<followMeRadius>300</followMeRadius>
+
+		<Alignm_MaxDist>77</Alignm_MaxDist>
+
+		<Alignm_Transition>3</Alignm_Transition>
+
+		<followMeSpeed>0.0117347</followMeSpeed>
+
+		<followMeRadius>303</followMeRadius>
+
 	</Sc5_Eclipse>
+
 	<Sc6_Combustion>
+
 		<MinLost_SHOOT>1</MinLost_SHOOT>
+
 	</Sc6_Combustion>
-</HUMANS_AND_PLANETS>
+
+</HUMANS_AND_PLANETS>
+
