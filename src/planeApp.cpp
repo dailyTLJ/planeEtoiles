@@ -2088,17 +2088,13 @@ void planeApp::drawScreen(int x, int y, float scale){
 
     // black frame first
     ofFill(); ofSetColor(0);
-    ofRect(x,y,projectionW*scale,projectionH*scale);
+    ofRect(0,0,projectionW,projectionH);
     ofNoFill(); ofSetColor(255);
-    if (scale<1.0) {
-        ofRect(x,y,projectionW*scale,projectionH*scale);
-    }
-
 
     // BACKGROUND VIDEOS
     ofEnableBlendMode(OF_BLENDMODE_ADD);
-    nebula->draw(x+projectionOffsetX*scale,y,scale);
-    (*bgMedia[bgMediaId]).draw(x+projectionOffsetX*scale,y,scale);
+    nebula->draw(projectionOffsetX,0,1);
+    (*bgMedia[bgMediaId]).draw(projectionOffsetX,0,1);
     ofDisableBlendMode();
 
 
@@ -2107,14 +2103,14 @@ void planeApp::drawScreen(int x, int y, float scale){
     // foreground videos, with BLENDING
     ofEnableBlendMode(OF_BLENDMODE_ADD);
     for (vector<ofPtr<mediaElement> >::iterator it = fgMedia.begin(); it != fgMedia.end(); ++it) {
-        if (!(**it).dead && (**it).blend) (**it).draw(x, y, scale);   //
+        if (!(**it).dead && (**it).blend) (**it).draw(0, 0, 1);   //
     }
     ofDisableBlendMode();
 
     // foreground videos, without BLENDING mode
     ofEnableAlphaBlending();
     for (vector<ofPtr<mediaElement> >::iterator it = fgMedia.begin(); it != fgMedia.end(); ++it) {
-        if (!(**it).dead && !(**it).blend) (**it).draw(x, y, scale);
+        if (!(**it).dead && !(**it).blend) (**it).draw(0, 0, 1);
     }
     ofDisableAlphaBlending();
 
@@ -2148,9 +2144,9 @@ void planeApp::drawScreen(int x, int y, float scale){
                 ofRectangle textR = fontBg.getStringBoundingBox(measureInstLine[i],0, 0);
                 if (scene==ECLIPSE && segment==SEG_FOLLOWME) {
                     // FOLLOW ME
-                    fontBg.drawString((*it), x+ ((*fgMedia[0]).position.x - textR.width/2)*scale, y+ypos*scale);
+                    fontBg.drawString((*it), ((*fgMedia[0]).position.x - textR.width/2), ypos);
                 } else {
-                    fontBg.drawString((*it), x+ (projectionW/2 - textR.width/2)*scale, y+ypos*scale);
+                    fontBg.drawString((*it), (projectionW/2 - textR.width/2), ypos);
                 }
                 ypos += textLineH;
                 i++;
@@ -2168,14 +2164,8 @@ void planeApp::drawScreen(int x, int y, float scale){
                 ofSetColor(255);
             }
             ofRectangle textR = fontBg.getStringBoundingBox(measureInst,0,0);
-            fontIdle.drawString(instruction, x+ (projectionW/2 - textR.width/2)*scale, y+ypos*scale);
+            fontIdle.drawString(instruction, (projectionW/2 - textR.width/2), ypos);
 
-
-            // ofPushMatrix();
-            // ofTranslate(x+ (projectionW/2 - textR.width/2)*scale, y+ypos*scale);
-            // ofScale(scale, scale, scale);
-            // fontIdle.drawString(instruction, 0, 0);
-            // ofPopMatrix();
         }
     }
 
@@ -2184,24 +2174,16 @@ void planeApp::drawScreen(int x, int y, float scale){
         ofEnableBlendMode(OF_BLENDMODE_ADD);
         ofFill();
         ofSetColor(255,255,255);
-        instructionImg.draw(x,y, projectionW*scale, projectionH*scale);
+        instructionImg.draw(0,0, projectionW, projectionH);
         ofDisableBlendMode();
     }
 
     // extra debug information
     if (displayDebug) {
-        fontSm.drawString(scenes[scene].analysis[segment], x+100*scale, y+(projectionH-150)*scale);
-        fontBg.drawString(ofToString(segmentClock), x+(projectionW-200)*scale, y+(projectionH-200)*scale);
-        fontSm.drawString(ofToString(success ? "true" : "false"), x+(projectionW-200)*scale, y+(projectionH-150)*scale);
+        fontSm.drawString(scenes[scene].analysis[segment], 100, (projectionH-150));
+        fontBg.drawString(ofToString(segmentClock), (projectionW-200), (projectionH-200));
+        fontSm.drawString(ofToString(success ? "true" : "false"), (projectionW-200), (projectionH-150));
     }
-
-    // if (flash) {
-    //     ofEnableAlphaBlending();
-    //     float alpha = (flashCnt < flashMax/2) ? (flashCnt/(flashMax/2.f)) : (flashMax - flashCnt)/(flashMax/2.f);
-    //     ofSetColor(flashColor.get().r,flashColor.get().g,flashColor.get().b,flashColor.get().a*alpha); ofFill();
-    //     ofRect(x,y,projectionW*scale,projectionH*scale);
-    //     ofDisableAlphaBlending();
-    // }
 
     ofPopMatrix();
 }
