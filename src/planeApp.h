@@ -87,6 +87,7 @@ class planeApp : public ofBaseApp{
 		bool allBlobsAlignedWith(ofPoint &p);
 		ofPoint blobMapToScreen(ofPoint &o);
 
+		void endSegmentOld();				// 1. trigger fgMediaFadedOut or moveOn
 		void endSegment();					// 1. trigger fgMediaFadedOut or moveOn
 		void fgMediaFadedOut(int & trans);  // 2. call outroTransformation calls on FG and BG media
 		void allFaded(int & trans); 

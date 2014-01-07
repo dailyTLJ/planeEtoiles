@@ -1643,19 +1643,188 @@ void planeApp::beginSegment() {
 
 }
 
+
+
+
+
+
 // trigger specific outro transformations for segment / scene 
 //--------------------------------------------------------------
 void planeApp::endSegment() {
     ofLogNotice("TRANSITION") << "\t" << ofGetFrameNum() << "\t" << "endSegment()   " << scene << ":" << segment;
     endedSegment = true;    // so that instructions are not displayed anymore
 
+    // default
+    sceneChange = false;
+
+    if (scene==IDLE) {                 // IDLE
+
+        int tmp = -1;
+        fgMediaFadedOut(tmp);
+
+    } else if (scene==STARS) {          // STARS
+
+        if (segment==0) {               // 0 - STAND STILL
+            moveOn = true;
+        } else if (segment==1) {        // 1 - STAND STILL SOME MORE
+            sceneChange = true;
+            int tmp = -1;
+            fgMediaFadedOut(tmp);
+        }
+
+    } else if (scene==ATTRACTION) {     // ATTRACTION
+
+        if (segment==0) {               // 0 - KEEP DISTANCE
+            moveOn = true;
+        } else if (segment==1) {        // 1 - KEEP DISTANCE
+            sceneChange = true;
+
+            // make sure, all fgMedia (stars, bridges) disappears
+            for (vector<ofPtr<mediaElement> >::iterator it = fgMedia.begin(); it != fgMedia.end(); ++it) {
+                if (!(**it).dead) ((((**it)).*((**it)).outroTransformation))();
+                else ofLogNotice("TRANSITION") << "\t" << ofGetFrameNum() << "\t\t\t" << "can't outro dead video: " << (**it).file;
+            }
+
+            // play starry outro video
+            fgMedia.push_back(attraction_outro);
+            (*fgMedia[fgMedia.size()-1]).setDisplay(projectionW/2,projectionH/2, true);
+            (*fgMedia[fgMedia.size()-1]).reset();
+            (*fgMedia[fgMedia.size()-1]).autoDestroy(true);
+            (*fgMedia[fgMedia.size()-1]).movieEndTrigger=true;
+            ofAddListener( (*fgMedia[fgMedia.size()-1]).fadeOutEnd, this, &planeApp::fgMediaFadedOut );
+
+        }
+
+    } else if (scene==REVOLUTIONS) {    // REVOLUTION
+
+        if (segment==0) {               // 0 - SPIN
+            // don't move to LET GO if there are no more planets on the screen
+            if (planetCnt ==0) {
+                ofLogNotice("TRANSITION") << "\t" << ofGetFrameNum() << "\t" << "endSegment()   planetCnt 0 ";
+                segment+=2;
+                sceneChange = true;
+                bgMediaSwap(scene);
+            } else {
+                moveOn = true;
+                ofLogNotice("TRANSITION") << "\t" << ofGetFrameNum() << "\t" << "endSegment()   planetCnt " << planetCnt;
+            }
+        } else if (segment==1) {        // 1 - LET GO
+            sceneChange = true;
+
+            // make sure, all fgMedia (planets) disappears
+            for (vector<ofPtr<mediaElement> >::iterator it = fgMedia.begin(); it != fgMedia.end(); ++it) {
+                if (!(**it).dead) ((((**it)).*((**it)).outroTransformation))();
+            }
+
+            // trigger sun-intro video
+            bgMediaSwap(scene);
+
+        }
+
+    } else if (scene==SUN) {            // SUN
+
+        if (segment==0) {               // 0 - STAND ON ONE LEG
+            moveOn = true;
+        } else if (segment==1) {        // 1 - HOP
+            moveOn = true;
+        } else if (segment==2) {        // 2 - FREEZE
+            if (success) {
+                // ALL FROZEN
+                ofLogNotice("TRANSITION") << "\t" << ofGetFrameNum() << "\t" << "sunfreeze red";
+                int randomRedFreeze = ofRandom(sun_freeze_red.size()) + 1;
+                fgMedia[0] = sun_freeze_red[randomRedFreeze];
+                (*fgMedia[0]).reset();
+                (*fgMedia[fgMedia.size()-1]).finishMovie(1.0);
+                (*fgMedia[fgMedia.size()-1]).movieEndTrigger=true;
+                ofAddListener( (*fgMedia[fgMedia.size()-1]).fadeOutEnd, this, &planeApp::bgMediaSwap );
+                transition = true;
+            } else {
+                moveOn = true;
+            }
+        } else if (segment==3) {        // 3 - RUN EVERYWHERE
+            moveOn = true;
+        } else if (segment==4) {        // 4 - FREEZE
+            sceneChange = true;
+            if (success) {
+                // ALL FROZEN
+                ofLogNotice("TRANSITION") << "\t" << ofGetFrameNum() << "\t" << "sunfreeze red";
+                int randomRedFreeze = ofRandom(sun_freeze_red.size()) + 1;
+                fgMedia[0] = sun_freeze_red[randomRedFreeze];
+                (*fgMedia[0]).reset();
+                (*fgMedia[fgMedia.size()-1]).autoDestroy(true);
+                (*fgMedia[fgMedia.size()-1]).movieEndTrigger=true;
+                ofAddListener( (*fgMedia[fgMedia.size()-1]).fadeOutEnd, this, &planeApp::bgMediaSwap );
+                transition = true;
+            } else {
+                moveOn = true;
+            }
+        }
+
+    } else if (scene==ECLIPSE) {        // ALIGNMENT
+
+        if (segment==0) {               // 0 - LINE UP IN FRONT OF ME
+            moveOn = true;
+        } else if (segment==1) {        // 1 - FOLLOW ME
+            moveOn = true;
+        } else if (segment==2) {        // 2 - STEP OUT OF THE LINE
+            moveOn = true;
+        } else if (segment==3) {        // 3 - STEP INTO THE LINE
+            moveOn = true;
+        } else if (segment==4) {        // 4 - STEP OUT OF THE LINE
+            moveOn = true;
+        } else if (segment==5) {        // 5 - STEP INTO THE LINE
+            moveOn = true;
+        } else if (segment==6) {        // 6 - DISPERSE SLOWLY
+            sceneChange = true;
+            // fade out all planets
+            int i=0;
+            if (fgMedia.size()>0) {
+                for (vector<ofPtr<mediaElement> >::iterator it = fgMedia.begin(); it != fgMedia.end(); ++it) {
+                    if (!(**it).dead) ((((**it)).*((**it)).outroTransformation))();
+                    if (i==0) {
+                        ofLogNotice("TRANSITION") << "\t" << ofGetFrameNum() << "\t" << "add allFaded listener";
+                        ofAddListener( (**it).fadeOutEnd, this, &planeApp::allFaded );
+                    }
+                    i++;
+                }
+            } else {
+                moveOn=true;
+            }
+        }
+
+    } else if (scene==SHOOTING) {       // SHOOTING STARS
+
+        if (segment==0) {               // 0 - MOVE LIKE A SHOOTING STAR
+            moveOn = true;
+        } else if (segment==1) {        // 1 - DROP
+            moveOn = true;
+        } else if (segment==2) {        // 2 - GET UP
+            sceneChange = true;
+            // no need to fade out all shooting stars
+            moveOn = true;
+        }
+
+    }
+
+    if (sceneChange) transition = true;
+
+}
+
+
+
+// trigger specific outro transformations for segment / scene 
+//--------------------------------------------------------------
+void planeApp::endSegmentOld() {
+    ofLogNotice("TRANSITION") << "\t" << ofGetFrameNum() << "\t" << "endSegment()   " << scene << ":" << segment;
+    endedSegment = true;    // so that instructions are not displayed anymore
+
     // ONLY DO BG-VIDEO TRANSITIONS IF A SCENE CHANGE IS COMING UP!
-    if ((segment+1 >= scenes[scene].segments) && scene!=3) {
+    if ((segment+1 >= scenes[scene].segments) && scene!=SUN) {
         sceneChange = true;
 
-        if (scene==ATTRACTION && segment==1) {
+        if (scene==ATTRACTION) {
             // STARS ENDING
-            // make sure, all other fgMedia (planets) is gone already
+            // make sure, all other fgMedia (stars, bridges) is gone already
             for (vector<ofPtr<mediaElement> >::iterator it = fgMedia.begin(); it != fgMedia.end(); ++it) {
                 if (!(**it).dead) ((((**it)).*((**it)).outroTransformation))();
                 else ofLogNotice("TRANSITION") << "\t" << ofGetFrameNum() << "\t\t\t" << "can't outro dead video: " << (**it).file;
@@ -1669,7 +1838,7 @@ void planeApp::endSegment() {
             (*fgMedia[fgMedia.size()-1]).movieEndTrigger=true;
             ofAddListener( (*fgMedia[fgMedia.size()-1]).fadeOutEnd, this, &planeApp::fgMediaFadedOut );
 
-        } else if (scene==REVOLUTIONS && segment==1) {
+        } else if (scene==REVOLUTIONS) {
             // REVOLUTIONS OUTRO TRANSITION VIDEO
             // make sure, all other fgMedia (planets) is gone already
             for (vector<ofPtr<mediaElement> >::iterator it = fgMedia.begin(); it != fgMedia.end(); ++it) {
@@ -1710,6 +1879,8 @@ void planeApp::endSegment() {
 
         transition = true;
     } else {
+        sceneChange = false;
+
         // if no BG fading is necessary, simply move on to the next segment
         if (scene==SUN && (segment==2 || segment==4)) {
             if (success) {  // ALL FROZEN?
@@ -1742,12 +1913,10 @@ void planeApp::endSegment() {
                 sceneChange = true;
                 bgMediaSwap(scene);
             } else {
-                sceneChange = false;
                 moveOn = true;
                 ofLogNotice("TRANSITION") << "\t" << ofGetFrameNum() << "\t" << "endSegment()   planetCnt " << planetCnt;
             }
         } else {
-            sceneChange = false;
             moveOn = true;
         }
     }
@@ -1782,18 +1951,11 @@ void planeApp::nextSegment() {
             if (blobsOnStage==0) scene = 0;
             else scene = 1;
         }
-
-    } else if (segment < 0){
-        scene--;
-        if(scene < 0){
-            language = (language+1>=languageRatio) ? 0 : language+1;
-            scene = scenes.size()-1;
-        }
-        segment = scenes[scene].segments -1;
     }
 
+    // SKIP SEGMENTS 
     if (scene==ATTRACTION && segment>1) {
-        // skip ATTRACTION if only 1 blob
+        // skip if only 1 blob
         if (blobsOnStage<2) {
             scene++;
             segment = 0;
@@ -1801,10 +1963,10 @@ void planeApp::nextSegment() {
         }
     }
 
+    // IF NO ACTIVITY, GO TO IDLE MODE
     if (lastActivity > inactivityTimer) {
-        // no activity, got to idle mode
         ofLogNotice("TRANSITION") << "\t" << ofGetFrameNum() << "\t" << "no activity since " << lastActivity << "sec, go to IDLE";
-        scene = 0;
+        scene = IDLE;
         segment = 0;
         sceneChange = true;
     }
