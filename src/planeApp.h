@@ -87,12 +87,12 @@ class planeApp : public ofBaseApp{
 		bool allBlobsAlignedWith(ofPoint &p);
 		ofPoint blobMapToScreen(ofPoint &o);
 
-		void endSegment(int direction = 1);	// 1. trigger fgMediaFadedOut or moveOn
+		void endSegment();					// 1. trigger fgMediaFadedOut or moveOn
 		void fgMediaFadedOut(int & trans);  // 2. call outroTransformation calls on FG and BG media
 		void allFaded(int & trans); 
 		// void bgMediaFadedOut(int & trans);	// 3. all elements faded out, moveOn = true
 		void bgMediaSwap(int & trans);		//
-		void nextSegment(int direction = 1);// 4. pick the next segment
+		void nextSegment();					// 4. pick the next segment
 		void initSegment();					// 5. initialize the new segment, create new fgvideos
 		void configureBlobserver();
 		void beginSegment();				// 6. after flash, fade in BG
@@ -150,7 +150,7 @@ class planeApp : public ofBaseApp{
         ofxToggle testMode;
 		int scene;
 		int segment;
-		int segmentChange;
+		// int segmentChange;
 		bool sceneChange;
 		int masterClock;
 		int segmentClock;

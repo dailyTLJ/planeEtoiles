@@ -80,7 +80,6 @@ void planeApp::setup(){
     endedSegment = false;
     moveOn = false;
     sceneChange = false;
-    segmentChange = 1;
     flash = false;
     flashCnt = 0;
     flashMax = 20;
@@ -530,7 +529,7 @@ void planeApp::initScenes(){
     ofLogNotice("START") << "\t" << ofGetFrameNum() << "\t" << "there are " << scenes.size() << " scenes";
 
     sceneChange = true;
-    nextSegment(1);
+    nextSegment();
 
 }
 
@@ -625,11 +624,11 @@ void planeApp::update(){
         }
         // TIME TRIGGERS
         if (autoplay && scenes[scene].length[segment] > 0 && segmentClock >= scenes[scene].length[segment] && !transition) {
-            endSegment(1);
+            endSegment();
         }
         // triggered by the end of fading out the bg
         if (moveOn) {
-            nextSegment(segmentChange);
+            nextSegment();
             moveOn = false;
         }
 
@@ -638,17 +637,17 @@ void planeApp::update(){
             // fade out idle-mode video, connect fade-End to transition to next Segment
             if(autoplay && success && !transition) {
                 ofLogNotice("interaction") << "\t" << ofGetFrameNum() << "\t" << "scene " << scene << " success";
-                endSegment(1);
+                endSegment();
             }
         } else if (scene==STARS) {
             if (autoplay && segment==1 && successCnt > newStarMax && !transition) {
                 ofLogNotice("interaction") << "\t" << ofGetFrameNum() << "\t" << "scene " << scene << " segment 1 success";
-                endSegment(1);
+                endSegment();
             }
         } else if (scene==REVOLUTIONS && segment==1) {
             if (autoplay && success && !transition) {
                 ofLogNotice("interaction") << "\t" << ofGetFrameNum() << "\t" << "scene " << scene << " segment 1 success";
-                endSegment(1);
+                endSegment();
             }
         } else if (scene==SUN) {
             if (segment==2 || segment==4 ) {
@@ -660,17 +659,17 @@ void planeApp::update(){
                 }
                 if(autoplay && success && !transition) {
                     ofLogNotice("interaction") << "\t" << ofGetFrameNum() << "\t" << "FREEZE success";
-                    endSegment(1);
+                    endSegment();
                 }
             }
         } else if (scene==ECLIPSE) {
             if (autoplay && success && !transition && segmentClock > minSegmentLength ) {
                 if (segment==2 || segment==4) {
                     // STEP OUT OF THE LINE
-                    if (blobsOnStage > 0 && !success) endSegment(1);
+                    if (blobsOnStage > 0 && !success) endSegment();
                 } else if (segment==3 || segment==5) {
                     // STEP INTO THE LINE
-                    if (success) endSegment(1);
+                    if (success) endSegment();
                 }
             }
         }
@@ -852,7 +851,7 @@ void planeApp::update(){
             if (followMe >= 2*3.14) {
                 (*fgMedia[0]).position.x = projectionW/2;
                 if (followMe > 2*3.6 && autoplay && !transition) {
-                    endSegment(1);
+                    endSegment();
                 }
             } else if (followMe > 0) {
                 (*fgMedia[0]).position.x = projectionW/2 + sin(followMe) * followMeRadius;
@@ -961,7 +960,7 @@ void planeApp::bgMediaSwap(int & trans) {
         // (*bgMedia[bgMediaId]).movieEndTrigger=true;
         ofAddListener( (*bgMedia[bgMediaId]).fadeOutEnd, this, &planeApp::bgMediaSwap );
     } else {
-        if (trans!=-2) nextSegment(1);
+        if (trans!=-2) nextSegment();
         ofLogNotice("TRANSITION") << "\t" << ofGetFrameNum() << "\t" << "bgMediaSwap\t\t\tstarry bg " << trans;
         bgMediaId = 5;
         (*bgMedia[bgMediaId]).id = bgMediaId;
@@ -1646,13 +1645,12 @@ void planeApp::beginSegment() {
 
 // trigger specific outro transformations for segment / scene 
 //--------------------------------------------------------------
-void planeApp::endSegment(int direction) {
+void planeApp::endSegment() {
     ofLogNotice("TRANSITION") << "\t" << ofGetFrameNum() << "\t" << "endSegment()   " << scene << ":" << segment;
     endedSegment = true;    // so that instructions are not displayed anymore
-    segmentChange = direction;
 
     // ONLY DO BG-VIDEO TRANSITIONS IF A SCENE CHANGE IS COMING UP!
-    if ((segment+segmentChange >= scenes[scene].segments || segment+segmentChange < 0) && scene!=3) {
+    if ((segment+1 >= scenes[scene].segments) && scene!=3) {
         sceneChange = true;
 
         if (scene==ATTRACTION && segment==1) {
@@ -1771,9 +1769,9 @@ void planeApp::jumpToScene(int s) {
 
 // decide what the next segment / scene will be
 //--------------------------------------------------------------
-void planeApp::nextSegment(int direction) {
-    ofLogNotice("TRANSITION") << "\t" << ofGetFrameNum() << "\t" << "nextSegment " << direction;
-    segment+=direction;
+void planeApp::nextSegment() {
+    ofLogNotice("TRANSITION") << "\t" << ofGetFrameNum() << "\t" << "nextSegment";
+    segment++;
 
     // MOVE ON TO NEW SCENE
     if(scene == -1 || segment >= scenes[scene].segments) {
@@ -2717,7 +2715,7 @@ void planeApp::keyReleased(int key){
 
     if (key == OF_KEY_RIGHT){
         if (!transition) {
-            endSegment(1);
+            endSegment();
             ofLogNotice("KEY") << "\t\t\t" << ofGetFrameNum() << "\t" << "==============>" << key << " end segment ";
         }
     }
