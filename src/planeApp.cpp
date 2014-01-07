@@ -1633,8 +1633,9 @@ void planeApp::beginSegment() {
 
     transition = false;
 
-    if (scene!=4) {
-        // make new blob connections, to ensure blobs are connected to video elements, if necessary
+    // make new blob connections, to ensure blobs are connected to video elements, if necessary
+    // exclude ECLIPSE planets, so that they don't change their look on every segment jump
+    if (scene!=ECLIPSE) {
         for(std::map<int, Blob>::iterator it = blobs.begin(); it != blobs.end(); ++it){
             Blob* b = &it->second;
             ofNotifyEvent(b->onCreate,b->id,b);
@@ -1736,7 +1737,7 @@ void planeApp::endSegment() {
                 (*fgMedia[0]).reset();
                 (*fgMedia[fgMedia.size()-1]).finishMovie(1.0);
                 (*fgMedia[fgMedia.size()-1]).movieEndTrigger=true;
-                ofAddListener( (*fgMedia[fgMedia.size()-1]).fadeOutEnd, this, &planeApp::bgMediaSwap );
+                ofAddListener( (*fgMedia[fgMedia.size()-1]).fadeOutEnd, this, &planeApp::bgMediaSwap );  // WHY?
                 transition = true;
             } else {
                 moveOn = true;
@@ -1753,7 +1754,7 @@ void planeApp::endSegment() {
                 (*fgMedia[0]).reset();
                 (*fgMedia[fgMedia.size()-1]).autoDestroy(true);
                 (*fgMedia[fgMedia.size()-1]).movieEndTrigger=true;
-                ofAddListener( (*fgMedia[fgMedia.size()-1]).fadeOutEnd, this, &planeApp::bgMediaSwap );
+                ofAddListener( (*fgMedia[fgMedia.size()-1]).fadeOutEnd, this, &planeApp::bgMediaSwap );  // WHY?
                 transition = true;
             } else {
                 moveOn = true;
@@ -2877,8 +2878,8 @@ void planeApp::keyReleased(int key){
 
     if (key == OF_KEY_RIGHT){
         if (!transition) {
-            endSegment();
             ofLogNotice("KEY") << "\t\t\t" << ofGetFrameNum() << "\t" << "==============>" << key << " end segment ";
+            endSegment();
         }
     }
     if (key == ' ') {
