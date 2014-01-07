@@ -14,7 +14,6 @@ void planeApp::setup(){
     ofLogNotice("START") << "\t" << ofGetFrameNum() << "\t" << "setup";
 
     ofSetLogLevel(OF_LOG_NOTICE);
-    ofLogNotice("START") << "\t" << ofGetFrameNum() << "\t" << "setup3";
     // OF_LOG_VERBOSE
     // OF_LOG_NOTICE
     // OF_LOG_WARNING
@@ -27,15 +26,14 @@ void planeApp::setup(){
     // ofLogWarning()
     // ofLogError()
     // ofLogFatalError()
-    ofLogNotice("START") << "\t" << ofGetFrameNum() << "\t" << "0";
 
-    ofSetLogLevel("BLOB", OF_LOG_VERBOSE);
+    ofSetLogLevel("BLOB", OF_LOG_WARNING);
     ofSetLogLevel("BRIDGE", OF_LOG_WARNING);
-    ofSetLogLevel("TRANSITION", OF_LOG_VERBOSE);
+    ofSetLogLevel("TRANSITION", OF_LOG_NOTICE);
     ofSetLogLevel("OSC", OF_LOG_WARNING);
-    ofSetLogLevel("interaction", OF_LOG_VERBOSE);
-    ofSetLogLevel("videoElement", OF_LOG_VERBOSE);
-    ofSetLogLevel("mediaElement", OF_LOG_VERBOSE);
+    ofSetLogLevel("interaction", OF_LOG_WARNING);
+    ofSetLogLevel("videoElement", OF_LOG_NOTICE);
+    ofSetLogLevel("mediaElement", OF_LOG_NOTICE);
 
 	ofTrueTypeFont::setGlobalDpi(72);
 
@@ -296,6 +294,8 @@ void planeApp::initScenes(){
     resetClock = false;
 
 
+    // ******************* preload videos ********************* //
+
     nebula = ofPtr<mediaElement>( new videoElement("video/NEBULA_131211-H264.mp4"));
     nebula->reset(true);
     nebula->opMax = nebulaOpacity/100.f;
@@ -309,6 +309,41 @@ void planeApp::initScenes(){
     bgMedia.push_back(ofPtr<mediaElement>( new videoElement("video/BACKGROUND-1_loop-H264_10mpbs.mp4",false)));         // 5
     bgMedia.push_back(ofPtr<mediaElement>( new videoElement("video/4_sun/SUN_15-intro-photoJPEG.mov",false)));          // 6
 
+    attraction_outro = ofPtr<mediaElement>( new videoElement("video/2_stars/ATTRACTION_outro-photoJPEG.mov"));
+    sun_jump = ofPtr<mediaElement>( new videoElement("video/4_sun/SUN_stand_jump-loop_2-qtPNG.mov",false));
+    sun_run = ofPtr<mediaElement>( new videoElement("video/4_sun/SUN_run_loop-1-qtPNG.mov"));
+    sun_freeze_red.push_back( ofPtr<mediaElement>( new videoElement("video/4_sun/SUN_freeze_1-qtPNG.mov")));
+    sun_freeze_red.push_back( ofPtr<mediaElement>( new videoElement("video/4_sun/SUN_freeze_2-qtPNG.mov")));
+    sun_freeze_red.push_back( ofPtr<mediaElement>( new videoElement("video/4_sun/SUN_freeze_3-qtPNG.mov")));
+    sun_freeze_red.push_back( ofPtr<mediaElement>( new videoElement("video/4_sun/SUN_freeze_4-qtPNG.mov")));
+
+    sun_surface_blue.push_back( ofPtr<mediaElement>( new videoElement("video/4_sun/SUN_run_surface-1-blue-qtPNG.mov")));
+    sun_surface_blue.push_back( ofPtr<mediaElement>( new videoElement("video/4_sun/SUN_run_surface-2-blue-qtPNG.mov")));
+    sun_surface_blue.push_back( ofPtr<mediaElement>( new videoElement("video/4_sun/SUN_run_surface-3-blue-qtPNG.mov")));
+    sun_surface_blue.push_back( ofPtr<mediaElement>( new videoElement("video/4_sun/SUN_run_surface-4-blue-qtPNG.mov")));
+    sun_surface_blue.push_back( ofPtr<mediaElement>( new videoElement("video/4_sun/SUN_run_surface-5-blue-qtPNG.mov")));
+    sun_surface_blue.push_back( ofPtr<mediaElement>( new videoElement("video/4_sun/SUN_run_surface-6-blue-qtPNG.mov")));
+    sun_surface_blue.push_back( ofPtr<mediaElement>( new videoElement("video/4_sun/SUN_run_surface-7-blue-qtPNG.mov")));
+    sun_surface_blue.push_back( ofPtr<mediaElement>( new videoElement("video/4_sun/SUN_run_surface-8-blue-qtPNG.mov")));
+    sun_surface_blue.push_back( ofPtr<mediaElement>( new videoElement("video/4_sun/SUN_run_surface-9-blue-qtPNG.mov")));
+    sun_surface_blue.push_back( ofPtr<mediaElement>( new videoElement("video/4_sun/SUN_run_surface-10-blue-qtPNG.mov")));
+    sun_surface_blue.push_back( ofPtr<mediaElement>( new videoElement("video/4_sun/SUN_run_surface-11-blue-qtPNG.mov")));
+    sun_surface_blue.push_back( ofPtr<mediaElement>( new videoElement("video/4_sun/SUN_run_surface-12-blue-qtPNG.mov")));
+
+    // int planedId[] = { 6, 9, 13, 15, 18, 19,20, 22, 23 };
+    planet_animated.push_back( ofPtr<mediaElement>( new videoElement("video/5_eclipse/P_6-qtPNG.mov")));
+    planet_animated.push_back( ofPtr<mediaElement>( new videoElement("video/5_eclipse/P_9-qtPNG.mov")));
+    planet_animated.push_back( ofPtr<mediaElement>( new videoElement("video/5_eclipse/P_13-qtPNG.mov")));
+    planet_animated.push_back( ofPtr<mediaElement>( new videoElement("video/5_eclipse/P_15-qtPNG.mov")));
+    planet_animated.push_back( ofPtr<mediaElement>( new videoElement("video/5_eclipse/P_18-qtPNG.mov")));
+    planet_animated.push_back( ofPtr<mediaElement>( new videoElement("video/5_eclipse/P_19-qtPNG.mov")));
+    planet_animated.push_back( ofPtr<mediaElement>( new videoElement("video/5_eclipse/P_20-qtPNG.mov")));
+    planet_animated.push_back( ofPtr<mediaElement>( new videoElement("video/5_eclipse/P_22-qtPNG.mov")));
+    planet_animated.push_back( ofPtr<mediaElement>( new videoElement("video/5_eclipse/P_23-qtPNG.mov")));
+
+
+
+    // ****************** define scene information ****************** //
 
     sceneInfo idle;
     idle.name = "Idle";
@@ -796,8 +831,9 @@ void planeApp::update(){
                     // (*fgMedia[fgMedia.size()-1]).setDisplay(projectionW/2,projectionH/2, true);
                     // (*fgMedia[fgMedia.size()-1]).reset();
                     // (*fgMedia[fgMedia.size()-1]).autoDestroy(true);
-                    int rndSun = ofRandom(12)+1;
-                    fgMedia.push_back(ofPtr<mediaElement>( new videoElement("video/4_sun/SUN_run_surface-"+ofToString(rndSun)+"-blue-qtPNG.mov",false)));
+                    int rndBlueSun = ofRandom(sun_surface_blue.size())+1;
+                    // fgMedia.push_back(ofPtr<mediaElement>( new videoElement("video/4_sun/SUN_run_surface-"+ofToString(rndBlueSun)+"-blue-qtPNG.mov",false)));
+                    fgMedia.push_back(sun_surface_blue[rndBlueSun]);
                     (*fgMedia[fgMedia.size()-1]).setDisplay(projectionW/2,projectionH/2, true);
                     (*fgMedia[fgMedia.size()-1]).reset();
                     (*fgMedia[fgMedia.size()-1]).autoDestroy(true);
@@ -1314,13 +1350,14 @@ void planeApp::blobEnterStage(int & blobID) {
     } else if (scene==ECLIPSE && (!transition)) {
         // PLANETS
         ofLogNotice("BLOB") << "\t\t" << ofGetFrameNum() << "\t" << "blobEnterStage()\t\t" << blobID << " (planet)";
-        int planedId[] = { 6, 9, 13, 15, 18, 19,20, 22, 23 };
-        int planets = sizeof(planedId) / sizeof(planedId[0]);
+        // int planedId[] = { 6, 9, 13, 15, 18, 19,20, 22, 23 };
+        // int planets = sizeof(planedId) / sizeof(planedId[0]);
         pickPlanet++;
-        if (pickPlanet >= planets) pickPlanet = 0;
-        int randomPlanet = pickPlanet;
+        if (pickPlanet >= planet_animated.size()) pickPlanet = 0;
+        // int randomPlanet = pickPlanet;
         // P_13-qtPNG.mov
-        fgMedia.push_back(ofPtr<mediaElement>( new videoElement("video/5_eclipse/P_" + ofToString(planedId[randomPlanet])+"-qtPNG.mov", true)));
+        // fgMedia.push_back(ofPtr<mediaElement>( new videoElement("video/5_eclipse/P_" + ofToString(planedId[randomPlanet])+"-qtPNG.mov", true)));
+        fgMedia.push_back(planet_animated[pickPlanet]);
         blobs[blobID].mediaLink = fgMedia[fgMedia.size()-1];
         blobs[blobID].videoTrace = true;
         (*fgMedia[fgMedia.size()-1]).setDisplay(blobMapToScreen(blobs[blobID].position), true);
@@ -1626,7 +1663,8 @@ void planeApp::endSegment(int direction) {
                 else ofLogNotice("TRANSITION") << "\t" << ofGetFrameNum() << "\t\t\t" << "can't outro dead video: " << (**it).file;
             }
 
-            fgMedia.push_back(ofPtr<mediaElement>( new videoElement("video/2_stars/ATTRACTION_outro-photoJPEG.mov")));
+            // fgMedia.push_back(ofPtr<mediaElement>( new videoElement("video/2_stars/ATTRACTION_outro-photoJPEG.mov")));
+            fgMedia.push_back(attraction_outro);
             (*fgMedia[fgMedia.size()-1]).setDisplay(projectionW/2,projectionH/2, true);
             (*fgMedia[fgMedia.size()-1]).reset();
             (*fgMedia[fgMedia.size()-1]).autoDestroy(true);
@@ -1676,13 +1714,14 @@ void planeApp::endSegment(int direction) {
     } else {
         // if no BG fading is necessary, simply move on to the next segment
         if (scene==SUN && (segment==2 || segment==4)) {
-            if (success) {
+            if (success) {  // ALL FROZEN?
                 ofLogNotice("TRANSITION") << "\t" << ofGetFrameNum() << "\t" << "sunfreeze red";
-                int randomFreezeSurface = ofRandom(4) + 1;
+                int randomRedFreeze = ofRandom(sun_freeze_red.size()) + 1;
                 //"SUN_freeze_3-qtPNG.mov";
-                string newVideoName = "video/4_sun/SUN_freeze_" + ofToString(randomFreezeSurface) + "-qtPNG.mov";
+                // string newVideoName = "video/4_sun/SUN_freeze_" + ofToString(randomRedFreeze) + "-qtPNG.mov";
 
-                (*fgMedia[0]).loadMovie(newVideoName);
+                // (*fgMedia[0]).loadMovie(newVideoName);
+                fgMedia[0] = sun_freeze_red[randomRedFreeze];
                 (*fgMedia[0]).reset();
 
                 // fgMedia.push_back(ofPtr<mediaElement>( new videoElement(newVideoName,false)));
@@ -1836,12 +1875,14 @@ void planeApp::initSegment(){
         // SUN, load sun as fgMedia
         if (sceneChange) {
 
-            fgMedia.push_back(ofPtr<mediaElement>( new videoElement("video/4_sun/SUN_stand_jump-loop_2-qtPNG.mov",false)));
+            // fgMedia.push_back(ofPtr<mediaElement>( new videoElement("video/4_sun/SUN_stand_jump-loop_2-qtPNG.mov",false)));
+            fgMedia.push_back(ofPtr<mediaElement>( sun_jump ));
             (*fgMedia[fgMedia.size()-1]).setDisplay(projectionW/2,projectionH/2, true);
             (*fgMedia[fgMedia.size()-1]).reset();
         } else if (segment==2) {
 
-            (*fgMedia[0]).loadMovie("video/4_sun/SUN_run_loop-1-qtPNG.mov");
+            // (*fgMedia[0]).loadMovie("video/4_sun/SUN_run_loop-1-qtPNG.mov");
+            fgMedia[0] = sun_run;
             (*fgMedia[0]).reset();
             // (*fgMedia[0]).dead = true;
             // fgMedia.push_back(ofPtr<mediaElement>( new videoElement("video/4_sun/SUN_run_loop-1-qtPNG.mov",false)));
@@ -1849,7 +1890,8 @@ void planeApp::initSegment(){
             // (*fgMedia[fgMedia.size()-1]).reset();
         } else if (segment==3) {
             // RUN EVERYWHERE
-            (*fgMedia[0]).loadMovie("video/4_sun/SUN_run_loop-1-qtPNG.mov");
+            // (*fgMedia[0]).loadMovie("video/4_sun/SUN_run_loop-1-qtPNG.mov");
+            fgMedia[0] = sun_run;
             (*fgMedia[0]).reset();
         }
 

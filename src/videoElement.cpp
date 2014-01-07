@@ -101,6 +101,21 @@ void videoElement::update() {
 void videoElement::reset(bool visible) {
     if (mediaLoaded) {
         // ofLogNotice("videoElement") << ofGetFrameNum() << "\t" << "reset video " << file << "  " << visible;
+        this->setFileDeadNow = false;
+        this->loadLoopFileNow = false;
+        this->dead = false;
+        this->hide = false;
+        this->selfdestroy = false;
+        this->movieEndTrigger = false;
+        this->loopFile = "";
+        this->fadeoutDestroy = false;
+        this->opacityChange = 0.01f;
+        this->opacity = 1.f;
+        this->opMax = 1.f;
+        this->fading = false;
+        this->moveElement = false;
+        this->velocity.set(0,0);
+        bridgeVideo = false;
         mediaElement::reset(visible);
         displaySpeed = 1.f;
         this->pause(false);
