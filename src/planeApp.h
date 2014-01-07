@@ -266,9 +266,20 @@ class planeApp : public ofBaseApp{
 		ofParameter<int> measurementNormal;
 		ofParameter<int> measurementErratic;
 
+
+		// vector holding foreground movies
+		// that are loaded dynamically
 		std::vector< ofPtr<mediaElement> > fgMedia;
+
+		// vector holds bg movies:
+		// 4 different idle mode animations
+		// starry-bg intro, starry-bg loop, sun-intro)
 		std::vector< ofPtr<mediaElement> > bgMedia;
+
+		// nebula movie, that is placed underneath
+		// the bgMedia movies
 		ofPtr<mediaElement> nebula;
+		
 		ofImage instructionImg;
 		int bgMediaId;
 
