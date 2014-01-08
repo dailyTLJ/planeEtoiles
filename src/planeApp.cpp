@@ -115,13 +115,14 @@ void planeApp::setup(){
 
     ofLogNotice("START") << "\t" << ofGetFrameNum() << "\t" << "3";
 
-    languageGui.setup("LANGUAGE", "languageSelection.xml", 10, 620);
+    if (!projectorOn) languageGui.setup("LANGUAGE", "languageSelection.xml", 10, 620);
+    else languageGui.setup("LANGUAGE", "languageSelection.xml", 510, 620);
     languageGui.add(languageRatio.set("French_English_Ratio", 1, 1, 5));
-    languageGui.setSize(200,50);
+    languageGui.setSize(220,50);
     languageGui.loadFromFile("languageSelection.xml");
 
-    if (!projectorOn) gui.setup("HUMANS AND PLANETS", "planets01.xml", 1104,190);
-    else gui.setup("HUMANS AND PLANETS", "planets01.xml", 1604,190);
+    if (!projectorOn) gui.setup("HUMANS AND PLANETS", "planets01.xml", 1204,10);
+    else gui.setup("HUMANS AND PLANETS", "planets01.xml", 1704,10);
     gui.setDefaultBackgroundColor( ofColor(0,0,50) );
     gui.add(autoplay.setup("autoplay", false));
     gui.add(testMode.setup("testMode", false));
@@ -2184,10 +2185,7 @@ void planeApp::draw(){
         if(!projectorOn) offsx = 10;
         int offsy = 10;
 
-        ofFill(); ofSetColor(255);
-        ofDrawBitmapString(ofToString(ofGetFrameRate()), offsx, offsy);
-
-        offsy += 20;
+        // ofFill(); ofSetColor(255);
 
         this->drawRawData(offsx, offsy, 0.5);
 
@@ -2195,14 +2193,14 @@ void planeApp::draw(){
         this->drawTopDown(offsx, offsy, 0.5, drawBlobDetail);
 
         offsy = 10;
-        offsx += 260;
+        offsx += 280;
         this->drawAnalysis(offsx, offsy, 0.35);
 
         offsy = 10;
-        offsx += 390;
+        offsx += 370;
         this->drawScreen(offsx, offsy, 0.35);
 
-        offsx += 440;
+        offsx += 430;
         this->drawControlInfo(offsx, offsy);
 
         languageGui.draw();
@@ -2218,10 +2216,6 @@ void planeApp::draw(){
             this->drawRawData(0, 50, 2);
             this->drawTopDown(0, 850, 2, drawBlobDetail);
         } else this->drawScreen(0, 0, 1);
-
-        ofFill(); ofSetColor(255);
-        ofDrawBitmapString(ofToString(ofGetFrameRate()), 10, 10);
-        ofPopMatrix();
 
     }
 }
@@ -2506,20 +2500,21 @@ void planeApp::drawControlInfo(int x, int y){
     ofFill(); ofSetColor(255);
 
     string instruction = scenes[scene].instructions[language][segment];
-    ofDrawBitmapString("SCENE ID\t" + ofToString(scene) +
-                       "\nSCENE NAME\t" + scenes[scene].name +
-                       "\nSEGMENT\t\t" + ofToString(segment) +
-                       "\nLENGTH\t\t" + ofToString(scenes[scene].length[segment]) +
-                       "\nSUCCESS\t\t" + ofToString(success ? "true" : "false") +
-                       "\nSUCCESS CNT\t" + ofToString(successCnt) +
-                       "\nACTIVITY CNT\t" + ofToString(activityCnt) +
-                       "\nFG MEDIA\t" + ofToString(fgMedia.size()) +
+    ofDrawBitmapString("FPS\n--------------\n" + ofToString(ofGetFrameRate()) +
+                       "\n\nSCENE ID\n" + "--------------\n" + ofToString(scene) +
+                       "\n\nSCENE NAME\n" + "--------------\n"  + scenes[scene].name +
+                       "\n\nSEGMENT\n" + "--------------\n"  + ofToString(segment) +
+                       "\n\nLENGTH\n" + "--------------\n"  + ofToString(scenes[scene].length[segment]) +
+                       "\n\nSUCCESS\n" + "--------------\n"  + ofToString(success ? "true" : "false") +
+                       "\n\nSUCCESS CNT\n" + "--------------\n"  + ofToString(successCnt) +
+                       "\n\nACTIVITY CNT\n" + "--------------\n"  + ofToString(activityCnt) +
+                       "\n\nFG MEDIA\n" + "--------------\n"  + ofToString(fgMedia.size()) +
                        // "\n\n" + instruction +
                        // "\n\nAUTOPLAY\t" + ofToString(autoplay ? "true" : "false") +
-                       "\n\nTRANSITION\t" + ofToString(transition ? "true" : "false") +
-                       "\nGLOBAL TIME\t" + ofToString(masterClock) +
-                       "\nLAST ACTIVITY\t" + ofToString(lastActivity) +
-                       "\nSEGMENT TIME\t" + ofToString(segmentClock), x+3, y+10 );
+                       "\n\nTRANSITION\n" + "--------------\n"  + ofToString(transition ? "true" : "false") +
+                       "\n\nGLOBAL TIME\n" + "--------------\n"  + ofToString(masterClock) +
+                       "\n\nLAST ACTIVITY\n" + "--------------\n"  + ofToString(lastActivity) +
+                       "\n\nSEGMENT TIME\n" + "--------------\n"  + ofToString(segmentClock), x+3, y+10 );
 }
 
 
