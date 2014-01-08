@@ -107,7 +107,7 @@ void videoElement::reset(bool visible) {
         this->hide = false;
         this->selfdestroy = false;
         this->movieEndTrigger = false;
-        this->loopFile = "";
+        // this->loopFile = "";
         this->fadeoutDestroy = false;
         this->opacityChange = 0.01f;
         this->opacity = 1.f;

@@ -135,8 +135,7 @@ void Blob::analyze(float freezeMaxVel, float freezeMinTime, float freezeMaxTime,
 }
 
 //--------------------------------------------------------------
-void Blob::analyzeNeighbors(std::map<int, tinyNeighbor> neighborLocation, float distStdDevThr, int steadyReward){
-// void Blob::analyzeNeighbors(std::map<int, ofPoint> neighborLocation, float distStdDevThr, int steadyReward){
+void Blob::analyzeNeighbors(std::map<int, tinyNeighbor> neighborLocation, float distStdDevThr){
 
     // set all neighbor-updates to false, to be able to delete inactive ones after
     for(std::map<int, Neighbor>::iterator it = neighbors.begin(); it != neighbors.end(); ++it){
@@ -179,13 +178,6 @@ void Blob::analyzeNeighbors(std::map<int, tinyNeighbor> neighborLocation, float 
                     ofNotifyEvent(onSteady,pair,this);
                 } else {
                     n->steadyTimer = ofGetUnixTime() - n->steadyStart;
-
-                    // STEADY DISTANCE REWARD
-                    // if (n->steadyTimer >= steadyReward && !n->steadyRewarded) {
-                    //     n->steadyRewarded = true;
-                    //     ofNotifyEvent(onSteadyReward,pair,this);
-                    //     steadyRewarded = true;
-                    // }
                 }
             } else {
                 if (n->steadyDistance) {
