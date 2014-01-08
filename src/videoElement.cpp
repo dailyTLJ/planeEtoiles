@@ -120,7 +120,7 @@ void videoElement::reset(bool visible) {
         this->pause(false);
         movie->setSpeed(this->displaySpeed);
         movie->firstFrame();
-        // movie->update();
+        movie->update();
         // movie->nextFrame();
     }
 }

@@ -116,6 +116,7 @@ class planeApp : public ofBaseApp{
 		std::stringstream coutput;
 
 		int language;
+		int languageCnt;
 		ofParameter<int> languageRatio;
 		
 		bool projectorOn;

@@ -55,7 +55,8 @@ void planeApp::setup(){
 
     ofLogNotice("START") << "\t" << ofGetFrameNum() << "\t" << "1";
     projectorOn = false;
-    language = 1;
+    language = 0;
+    languageCnt = 0;
     processing = true;
     oscMsgReceived = false;
     oscLastMsg = 0;
@@ -831,7 +832,7 @@ void planeApp::update(){
                     // (*fgMedia[fgMedia.size()-1]).setDisplay(projectionW/2,projectionH/2, true);
                     // (*fgMedia[fgMedia.size()-1]).reset();
                     // (*fgMedia[fgMedia.size()-1]).autoDestroy(true);
-                    int rndBlueSun = ofRandom(sun_surface_blue.size())+1;
+                    int rndBlueSun = ofRandom(sun_surface_blue.size());
                     // fgMedia.push_back(ofPtr<mediaElement>( new videoElement("video/4_sun/SUN_run_surface-"+ofToString(rndBlueSun)+"-blue-qtPNG.mov",false)));
                     fgMedia.push_back(sun_surface_blue[rndBlueSun]);
                     (*fgMedia[fgMedia.size()-1]).setDisplay(projectionW/2,projectionH/2, true);
@@ -936,14 +937,20 @@ void planeApp::update(){
 /* define the current bg videofile, depending on scene and segment */
 void planeApp::bgMediaSwap(int & trans) {
 
+    // (*bgMedia[bgMediaId]).reset(true);
+
     if (scene==IDLE && ((*bgMedia[bgMediaId]).id==-1 || (*bgMedia[bgMediaId]).id==5)) {
         ofLogNotice("TRANSITION") << "\t" << ofGetFrameNum() << "\t" << "bgMediaSwap\t\t\tidle " << trans;
+        ofLogNotice("TRANSITION") << "\t" << ofGetFrameNum() << "\t" << "getCurrentFrame() " << bgMediaId << "\t" << (*bgMedia[bgMediaId]).movie->getCurrentFrame();
         bgMediaId = ofRandom(4);
+        ofLogNotice("TRANSITION") << "\t" << ofGetFrameNum() << "\t" << "getCurrentFrame() " << bgMediaId << "\t"  << (*bgMedia[bgMediaId]).movie->getCurrentFrame();
         (*bgMedia[bgMediaId]).id = bgMediaId;
         (*bgMedia[bgMediaId]).reset(true);   // play right away
+        ofLogNotice("TRANSITION") << "\t" << ofGetFrameNum() << "\t" << "getCurrentFrame() " << bgMediaId << "\t"  << (*bgMedia[bgMediaId]).movie->getCurrentFrame();
         (*bgMedia[bgMediaId]).movieEndTrigger=false;
         (*bgMedia[bgMediaId]).outroTransformation = &mediaElement::finishMovie;
         ofAddListener( (*bgMedia[bgMediaId]).fadeOutEnd, this, &planeApp::bgMediaSwap );
+        ofLogNotice("TRANSITION") << "\t" << ofGetFrameNum() << "\t" << "getCurrentFrame() " << bgMediaId << "\t"  << (*bgMedia[bgMediaId]).movie->getCurrentFrame();
     } else if (scene==IDLE && (*bgMedia[bgMediaId]).id<4) {
         ofLogNotice("TRANSITION") << "\t" << ofGetFrameNum() << "\t" << "bgMediaSwap\t\t\tstarry intro " << trans;
         bgMediaId = 4;
@@ -1733,11 +1740,12 @@ void planeApp::endSegment() {
             if (success) {
                 // ALL FROZEN
                 ofLogNotice("TRANSITION") << "\t" << ofGetFrameNum() << "\t" << "sunfreeze red";
-                int randomRedFreeze = ofRandom(sun_freeze_red.size()) + 1;
+                int randomRedFreeze = ofRandom(sun_freeze_red.size());
                 fgMedia[0] = sun_freeze_red[randomRedFreeze];
+                (*fgMedia[0]).setDisplay(projectionW/2,projectionH/2, true);
                 (*fgMedia[0]).reset();
-                (*fgMedia[fgMedia.size()-1]).finishMovie(1.0);
-                (*fgMedia[fgMedia.size()-1]).movieEndTrigger=true;
+                (*fgMedia[0]).finishMovie(1.0);
+                (*fgMedia[0]).movieEndTrigger=true;
                 ofAddListener( (*fgMedia[fgMedia.size()-1]).fadeOutEnd, this, &planeApp::bgMediaSwap );  // WHY?
                 transition = true;
             } else {
@@ -1750,11 +1758,12 @@ void planeApp::endSegment() {
             if (success) {
                 // ALL FROZEN
                 ofLogNotice("TRANSITION") << "\t" << ofGetFrameNum() << "\t" << "sunfreeze red";
-                int randomRedFreeze = ofRandom(sun_freeze_red.size()) + 1;
+                int randomRedFreeze = ofRandom(sun_freeze_red.size());
                 fgMedia[0] = sun_freeze_red[randomRedFreeze];
+                (*fgMedia[0]).setDisplay(projectionW/2,projectionH/2, true);
                 (*fgMedia[0]).reset();
-                (*fgMedia[fgMedia.size()-1]).autoDestroy(true);
-                (*fgMedia[fgMedia.size()-1]).movieEndTrigger=true;
+                (*fgMedia[0]).autoDestroy(true);
+                (*fgMedia[0]).movieEndTrigger=true;
                 ofAddListener( (*fgMedia[fgMedia.size()-1]).fadeOutEnd, this, &planeApp::bgMediaSwap );  // WHY?
                 transition = true;
             } else {
@@ -1887,7 +1896,7 @@ void planeApp::endSegmentOld() {
         if (scene==SUN && (segment==2 || segment==4)) {
             if (success) {  // ALL FROZEN?
                 ofLogNotice("TRANSITION") << "\t" << ofGetFrameNum() << "\t" << "sunfreeze red";
-                int randomRedFreeze = ofRandom(sun_freeze_red.size()) + 1;
+                int randomRedFreeze = ofRandom(sun_freeze_red.size());
                 //"SUN_freeze_3-qtPNG.mov";
                 // string newVideoName = "video/4_sun/SUN_freeze_" + ofToString(randomRedFreeze) + "-qtPNG.mov";
 
@@ -1949,7 +1958,8 @@ void planeApp::nextSegment() {
         scene++;
         segment = 0;
         if(scene >= scenes.size()) {
-            language = (language+1>=languageRatio) ? 0 : language+1;
+            languageCnt = (languageCnt+1>=languageRatio) ? 0 : languageCnt+1;
+            language = (languageCnt==0) ? 0 : 1;
             if (blobsOnStage==0) scene = 0;
             else scene = 1;
         }
@@ -2046,6 +2056,7 @@ void planeApp::initSegment(){
 
             // (*fgMedia[0]).loadMovie("video/4_sun/SUN_run_loop-1-qtPNG.mov");
             fgMedia[0] = sun_run;
+            (*fgMedia[0]).setDisplay(projectionW/2,projectionH/2, true);
             (*fgMedia[0]).reset();
             // (*fgMedia[0]).dead = true;
             // fgMedia.push_back(ofPtr<mediaElement>( new videoElement("video/4_sun/SUN_run_loop-1-qtPNG.mov",false)));
@@ -2055,6 +2066,7 @@ void planeApp::initSegment(){
             // RUN EVERYWHERE
             // (*fgMedia[0]).loadMovie("video/4_sun/SUN_run_loop-1-qtPNG.mov");
             fgMedia[0] = sun_run;
+            (*fgMedia[0]).setDisplay(projectionW/2,projectionH/2, true);
             (*fgMedia[0]).reset();
         }
 
