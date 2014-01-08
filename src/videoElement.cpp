@@ -111,7 +111,6 @@ void videoElement::reset(bool visible) {
         this->fadeoutDestroy = false;
         this->opacityChange = 0.01f;
         this->opacity = 1.f;
-        this->opMax = 1.f;
         this->fading = false;
         this->moveElement = false;
         this->velocity.set(0,0);

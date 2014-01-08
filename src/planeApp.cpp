@@ -305,6 +305,7 @@ void planeApp::initScenes(){
     bgMedia.push_back(ofPtr<mediaElement>( new videoElement("video/IDLE_MODE_13_white-anim-H264-10mbps.mp4",false)));   // 2
     bgMedia.push_back(ofPtr<mediaElement>( new videoElement("video/IDLE_MODE_13_yellow-anim-H264-10mbps.mp4",false)));  // 3
     bgMedia.push_back(ofPtr<mediaElement>( new videoElement("video/BACKGROUND-1_intro-H264_10mpbs.mp4",false)));        // 4
+    (*bgMedia[4]).opMax = 0.35;  
     bgMedia.push_back(ofPtr<mediaElement>( new videoElement("video/BACKGROUND-1_loop-H264_10mpbs.mp4",false)));         // 5
     bgMedia.push_back(ofPtr<mediaElement>( new videoElement("video/4_sun/SUN_15-intro-photoJPEG.mov",false)));          // 6
 
@@ -960,13 +961,13 @@ void planeApp::bgMediaSwap(int & trans) {
         // (*bgMedia[bgMediaId]).movieEndTrigger=true;
         ofAddListener( (*bgMedia[bgMediaId]).fadeOutEnd, this, &planeApp::bgMediaSwap );
     } else {
-        if (trans!=-2) nextSegment();
         ofLogNotice("TRANSITION") << "\t" << ofGetFrameNum() << "\t" << "bgMediaSwap\t\t\tstarry bg " << trans;
         bgMediaId = 5;
         (*bgMedia[bgMediaId]).id = bgMediaId;
         (*bgMedia[bgMediaId]).reset(true);
         (*bgMedia[bgMediaId]).movieEndTrigger=false;
         ofRemoveListener( (*bgMedia[bgMediaId]).fadeOutEnd, this, &planeApp::bgMediaSwap );
+        if (trans!=-2) nextSegment();
     }
 
 }
@@ -2010,8 +2011,9 @@ void planeApp::initSegment(){
         ofLogNotice("TRANSITION") << "\t" << ofGetFrameNum() << "\t" << "load instruction image " << in_img;
     }
 
-    if (scene==STARS && segment<2) {
-        (*bgMedia[5]).opMax = 0.35;
+    // SET BG STARRY-SKY OPACITY LOWER FOR STARS
+    if (scene==STARS && segment<2) {    
+        (*bgMedia[5]).opMax = 0.35;     
     } else (*bgMedia[5]).opMax = 1;
 
     // add FG videos
