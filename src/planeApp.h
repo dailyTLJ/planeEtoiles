@@ -98,7 +98,7 @@ class planeApp : public ofBaseApp{
 		void beginSegment();				// 6. after flash, fade in BG
 		// void bgMediaFadedIn(int & trans);	// 7. reinit blobs, introtransformation of videos
 		// void fgMediaFadedIn(int & trans);
-
+		void unHideSun(int & trans);
 
 		void keyPressed(int key);
 		void keyReleased(int key);
@@ -295,6 +295,7 @@ class planeApp : public ofBaseApp{
 		// ECLIPSE
 		std::vector< ofPtr<mediaElement> > planet_animated;			// 9
 		// SHOOTING
+		std::vector< ofPtr<mediaElement> > shooting_stars;			// 50
 
 		ofImage instructionImg;
 		int bgMediaId;

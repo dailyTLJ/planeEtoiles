@@ -172,7 +172,7 @@ void mediaElement::moveInFromSide(int centerx, int centery) {
     opacity = 0.f;
     opacityChange = 0.01; // don't do this with fade, to avoid triggering the fadeInEvent
     moveSpeed = 7;
-    ofLogNotice("mediaElement") << ofGetFrameNum() << "\t" << " moveInFromSide   rot: " << rot << "  position: " << position.x << "/" << position.y << "  goal: " << goal.x << "/" << goal.y;
+    ofLogNotice("mediaElement") << "\t" << ofGetFrameNum() << "\t" << " moveInFromSide   rot: " << rot << "  position: " << position.x << "/" << position.y << "  goal: " << goal.x << "/" << goal.y;
 }
 
 void mediaElement::fade(float speed) {
