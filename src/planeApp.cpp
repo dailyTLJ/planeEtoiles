@@ -319,36 +319,23 @@ void planeApp::initScenes(){
     sun_freeze_red.push_back( ofPtr<mediaElement>( new videoElement("video/4_sun/SUN_freeze_3-qtPNG.mov",false)));
     sun_freeze_red.push_back( ofPtr<mediaElement>( new videoElement("video/4_sun/SUN_freeze_4-qtPNG.mov",false)));
 
-    // SUN_run_surface-1-blue-photoJPEG.mov
-    // sun_surface_blue.push_back( ofPtr<mediaElement>( new videoElement("video/4_sun/SUN_run_surface-1-blue-qtPNG.mov",false)));
-    // sun_surface_blue.push_back( ofPtr<mediaElement>( new videoElement("video/4_sun/SUN_run_surface-2-blue-qtPNG.mov",false)));
-    // sun_surface_blue.push_back( ofPtr<mediaElement>( new videoElement("video/4_sun/SUN_run_surface-3-blue-qtPNG.mov",false)));
-    // sun_surface_blue.push_back( ofPtr<mediaElement>( new videoElement("video/4_sun/SUN_run_surface-4-blue-qtPNG.mov",false)));
-    // sun_surface_blue.push_back( ofPtr<mediaElement>( new videoElement("video/4_sun/SUN_run_surface-5-blue-qtPNG.mov",false)));
-    // sun_surface_blue.push_back( ofPtr<mediaElement>( new videoElement("video/4_sun/SUN_run_surface-6-blue-qtPNG.mov",false)));
-    // sun_surface_blue.push_back( ofPtr<mediaElement>( new videoElement("video/4_sun/SUN_run_surface-7-blue-qtPNG.mov",false)));
-    // sun_surface_blue.push_back( ofPtr<mediaElement>( new videoElement("video/4_sun/SUN_run_surface-8-blue-qtPNG.mov",false)));
-    // sun_surface_blue.push_back( ofPtr<mediaElement>( new videoElement("video/4_sun/SUN_run_surface-9-blue-qtPNG.mov",false)));
-    // sun_surface_blue.push_back( ofPtr<mediaElement>( new videoElement("video/4_sun/SUN_run_surface-10-blue-qtPNG.mov",false)));
-    // sun_surface_blue.push_back( ofPtr<mediaElement>( new videoElement("video/4_sun/SUN_run_surface-11-blue-qtPNG.mov",false)));
-    // sun_surface_blue.push_back( ofPtr<mediaElement>( new videoElement("video/4_sun/SUN_run_surface-12-blue-qtPNG.mov",false)));
+    // PRELOAD BLUE SURFACE VIDS = seems to slow down FPS
+    // for (int i=1; i<13; i++) {
+    //     sun_surface_blue.push_back( ofPtr<mediaElement>( 
+    //         new videoElement("video/4_sun/SUN_run_surface-"+ofToString(i)+"-blue-photoJPEG.mov",false)));
+    // }
 
-    // photoJPEG
-    for (int i=1; i<13; i++) {
-        sun_surface_blue.push_back( ofPtr<mediaElement>( 
-            new videoElement("video/4_sun/SUN_run_surface-"+ofToString(i)+"-blue-photoJPEG.mov",false)));
-    }
-
+    // PRELOAD PLANET VIDS = seems to slow down FPS
     // int planedId[] = { 6, 9, 13, 15, 18, 19,20, 22, 23 };
-    planet_animated.push_back( ofPtr<mediaElement>( new videoElement("video/5_eclipse/P_6-qtPNG.mov")));
-    planet_animated.push_back( ofPtr<mediaElement>( new videoElement("video/5_eclipse/P_9-qtPNG.mov")));
-    planet_animated.push_back( ofPtr<mediaElement>( new videoElement("video/5_eclipse/P_13-qtPNG.mov")));
-    planet_animated.push_back( ofPtr<mediaElement>( new videoElement("video/5_eclipse/P_15-qtPNG.mov")));
-    planet_animated.push_back( ofPtr<mediaElement>( new videoElement("video/5_eclipse/P_18-qtPNG.mov")));
-    planet_animated.push_back( ofPtr<mediaElement>( new videoElement("video/5_eclipse/P_19-qtPNG.mov")));
-    planet_animated.push_back( ofPtr<mediaElement>( new videoElement("video/5_eclipse/P_20-qtPNG.mov")));
-    planet_animated.push_back( ofPtr<mediaElement>( new videoElement("video/5_eclipse/P_22-qtPNG.mov")));
-    planet_animated.push_back( ofPtr<mediaElement>( new videoElement("video/5_eclipse/P_23-qtPNG.mov")));
+    // planet_animated.push_back( ofPtr<mediaElement>( new videoElement("video/5_eclipse/P_6-qtPNG.mov")));
+    // planet_animated.push_back( ofPtr<mediaElement>( new videoElement("video/5_eclipse/P_9-qtPNG.mov")));
+    // planet_animated.push_back( ofPtr<mediaElement>( new videoElement("video/5_eclipse/P_13-qtPNG.mov")));
+    // planet_animated.push_back( ofPtr<mediaElement>( new videoElement("video/5_eclipse/P_15-qtPNG.mov")));
+    // planet_animated.push_back( ofPtr<mediaElement>( new videoElement("video/5_eclipse/P_18-qtPNG.mov")));
+    // planet_animated.push_back( ofPtr<mediaElement>( new videoElement("video/5_eclipse/P_19-qtPNG.mov")));
+    // planet_animated.push_back( ofPtr<mediaElement>( new videoElement("video/5_eclipse/P_20-qtPNG.mov")));
+    // planet_animated.push_back( ofPtr<mediaElement>( new videoElement("video/5_eclipse/P_22-qtPNG.mov")));
+    // planet_animated.push_back( ofPtr<mediaElement>( new videoElement("video/5_eclipse/P_23-qtPNG.mov")));
 
     for (int i=0; i<50; i++) {
         int randomShooter = ofRandom(26) + 1;
@@ -777,13 +764,10 @@ void planeApp::update(){
                 // if high activity, add blue surface to sun
                 if (hogAvVel > runHogThr || activityCnt > runActThr) {
                     // activity!
-                    // ADD BLUE BACKGROUND
-                    // fgMedia.push_back(ofPtr<mediaElement>( new videoElement("video/4_sun/SUN_run_loop-blue_background-1-qtPNG.mov",false)));
-                    // (*fgMedia[fgMedia.size()-1]).setDisplay(projectionW/2,projectionH/2, true);
-                    // (*fgMedia[fgMedia.size()-1]).reset();
-                    // (*fgMedia[fgMedia.size()-1]).autoDestroy(true);
-                    int rndBlueSun = ofRandom(sun_surface_blue.size());
-                    fgMedia.push_back(sun_surface_blue[rndBlueSun]);
+                    // int rndBlueSun = ofRandom(sun_surface_blue.size());
+                    int rndBlueSun = ofRandom(12) + 1;
+                    // fgMedia.push_back(sun_surface_blue[rndBlueSun]);
+                    fgMedia.push_back(ofPtr<mediaElement>( new videoElement("video/4_sun/SUN_run_surface-"+ofToString(rndBlueSun)+"-blue-photoJPEG.mov",false)));
                     (*fgMedia[fgMedia.size()-1]).setDisplay(projectionW/2,projectionH/2, true);
                     (*fgMedia[fgMedia.size()-1]).reset();
                     (*fgMedia[fgMedia.size()-1]).autoDestroy(true);
@@ -1308,14 +1292,14 @@ void planeApp::blobEnterStage(int & blobID) {
     } else if (scene==ECLIPSE && (!transition)) {
         // PLANETS
         ofLogNotice("BLOB") << "\t" << ofGetFrameNum() << "\t" << "blobEnterStage()\t\t" << blobID << " (planet)";
-        // int planedId[] = { 6, 9, 13, 15, 18, 19,20, 22, 23 };
-        // int planets = sizeof(planedId) / sizeof(planedId[0]);
+        int planedId[] = { 6, 9, 13, 15, 18, 19,20, 22, 23 };
+        int planets = sizeof(planedId) / sizeof(planedId[0]);
         pickPlanet++;
-        if (pickPlanet >= planet_animated.size()) pickPlanet = 0;
+        // if (pickPlanet >= planet_animated.size()) pickPlanet = 0;
+        if (pickPlanet >= planets) pickPlanet = 0;
         // int randomPlanet = pickPlanet;
-        // P_13-qtPNG.mov
-        // fgMedia.push_back(ofPtr<mediaElement>( new videoElement("video/5_eclipse/P_" + ofToString(planedId[randomPlanet])+"-qtPNG.mov", true)));
-        fgMedia.push_back(planet_animated[pickPlanet]);
+        fgMedia.push_back(ofPtr<mediaElement>( new videoElement("video/5_eclipse/P_" + ofToString(planedId[pickPlanet])+"-qtPNG.mov", true)));
+        // fgMedia.push_back(planet_animated[pickPlanet]);
         blobs[blobID].mediaLink = fgMedia[fgMedia.size()-1];
         blobs[blobID].videoTrace = true;
         (*fgMedia[fgMedia.size()-1]).setDisplay(blobMapToScreen(blobs[blobID].position), true);
