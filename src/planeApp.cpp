@@ -54,7 +54,7 @@ void planeApp::setup(){
 
 
     ofLogNotice("START") << "\t" << ofGetFrameNum() << "\t" << "1";
-    projectorOn = true;
+    projectorOn = false;
     language = 0;
     languageCnt = 0;
     processing = true;
@@ -313,24 +313,31 @@ void planeApp::initScenes(){
 
     attraction_outro = ofPtr<mediaElement>( new videoElement("video/2_stars/ATTRACTION_outro-photoJPEG.mov"));
     sun_jump = ofPtr<mediaElement>( new videoElement("video/4_sun/SUN_stand_jump-loop_2-qtPNG.mov",false));
-    sun_run = ofPtr<mediaElement>( new videoElement("video/4_sun/SUN_run_loop-1-qtPNG.mov"));
-    sun_freeze_red.push_back( ofPtr<mediaElement>( new videoElement("video/4_sun/SUN_freeze_1-qtPNG.mov")));
-    sun_freeze_red.push_back( ofPtr<mediaElement>( new videoElement("video/4_sun/SUN_freeze_2-qtPNG.mov")));
-    sun_freeze_red.push_back( ofPtr<mediaElement>( new videoElement("video/4_sun/SUN_freeze_3-qtPNG.mov")));
-    sun_freeze_red.push_back( ofPtr<mediaElement>( new videoElement("video/4_sun/SUN_freeze_4-qtPNG.mov")));
+    sun_run = ofPtr<mediaElement>( new videoElement("video/4_sun/SUN_run_loop-1-qtPNG.mov",false));
+    sun_freeze_red.push_back( ofPtr<mediaElement>( new videoElement("video/4_sun/SUN_freeze_1-qtPNG.mov",false)));
+    sun_freeze_red.push_back( ofPtr<mediaElement>( new videoElement("video/4_sun/SUN_freeze_2-qtPNG.mov",false)));
+    sun_freeze_red.push_back( ofPtr<mediaElement>( new videoElement("video/4_sun/SUN_freeze_3-qtPNG.mov",false)));
+    sun_freeze_red.push_back( ofPtr<mediaElement>( new videoElement("video/4_sun/SUN_freeze_4-qtPNG.mov",false)));
 
-    sun_surface_blue.push_back( ofPtr<mediaElement>( new videoElement("video/4_sun/SUN_run_surface-1-blue-qtPNG.mov",false)));
-    sun_surface_blue.push_back( ofPtr<mediaElement>( new videoElement("video/4_sun/SUN_run_surface-2-blue-qtPNG.mov",false)));
-    sun_surface_blue.push_back( ofPtr<mediaElement>( new videoElement("video/4_sun/SUN_run_surface-3-blue-qtPNG.mov",false)));
-    sun_surface_blue.push_back( ofPtr<mediaElement>( new videoElement("video/4_sun/SUN_run_surface-4-blue-qtPNG.mov",false)));
-    sun_surface_blue.push_back( ofPtr<mediaElement>( new videoElement("video/4_sun/SUN_run_surface-5-blue-qtPNG.mov",false)));
-    sun_surface_blue.push_back( ofPtr<mediaElement>( new videoElement("video/4_sun/SUN_run_surface-6-blue-qtPNG.mov",false)));
-    sun_surface_blue.push_back( ofPtr<mediaElement>( new videoElement("video/4_sun/SUN_run_surface-7-blue-qtPNG.mov",false)));
-    sun_surface_blue.push_back( ofPtr<mediaElement>( new videoElement("video/4_sun/SUN_run_surface-8-blue-qtPNG.mov",false)));
-    sun_surface_blue.push_back( ofPtr<mediaElement>( new videoElement("video/4_sun/SUN_run_surface-9-blue-qtPNG.mov",false)));
-    sun_surface_blue.push_back( ofPtr<mediaElement>( new videoElement("video/4_sun/SUN_run_surface-10-blue-qtPNG.mov",false)));
-    sun_surface_blue.push_back( ofPtr<mediaElement>( new videoElement("video/4_sun/SUN_run_surface-11-blue-qtPNG.mov",false)));
-    sun_surface_blue.push_back( ofPtr<mediaElement>( new videoElement("video/4_sun/SUN_run_surface-12-blue-qtPNG.mov",false)));
+    // SUN_run_surface-1-blue-photoJPEG.mov
+    // sun_surface_blue.push_back( ofPtr<mediaElement>( new videoElement("video/4_sun/SUN_run_surface-1-blue-qtPNG.mov",false)));
+    // sun_surface_blue.push_back( ofPtr<mediaElement>( new videoElement("video/4_sun/SUN_run_surface-2-blue-qtPNG.mov",false)));
+    // sun_surface_blue.push_back( ofPtr<mediaElement>( new videoElement("video/4_sun/SUN_run_surface-3-blue-qtPNG.mov",false)));
+    // sun_surface_blue.push_back( ofPtr<mediaElement>( new videoElement("video/4_sun/SUN_run_surface-4-blue-qtPNG.mov",false)));
+    // sun_surface_blue.push_back( ofPtr<mediaElement>( new videoElement("video/4_sun/SUN_run_surface-5-blue-qtPNG.mov",false)));
+    // sun_surface_blue.push_back( ofPtr<mediaElement>( new videoElement("video/4_sun/SUN_run_surface-6-blue-qtPNG.mov",false)));
+    // sun_surface_blue.push_back( ofPtr<mediaElement>( new videoElement("video/4_sun/SUN_run_surface-7-blue-qtPNG.mov",false)));
+    // sun_surface_blue.push_back( ofPtr<mediaElement>( new videoElement("video/4_sun/SUN_run_surface-8-blue-qtPNG.mov",false)));
+    // sun_surface_blue.push_back( ofPtr<mediaElement>( new videoElement("video/4_sun/SUN_run_surface-9-blue-qtPNG.mov",false)));
+    // sun_surface_blue.push_back( ofPtr<mediaElement>( new videoElement("video/4_sun/SUN_run_surface-10-blue-qtPNG.mov",false)));
+    // sun_surface_blue.push_back( ofPtr<mediaElement>( new videoElement("video/4_sun/SUN_run_surface-11-blue-qtPNG.mov",false)));
+    // sun_surface_blue.push_back( ofPtr<mediaElement>( new videoElement("video/4_sun/SUN_run_surface-12-blue-qtPNG.mov",false)));
+
+    // photoJPEG
+    for (int i=1; i<13; i++) {
+        sun_surface_blue.push_back( ofPtr<mediaElement>( 
+            new videoElement("video/4_sun/SUN_run_surface-"+ofToString(i)+"-blue-photoJPEG.mov",false)));
+    }
 
     // int planedId[] = { 6, 9, 13, 15, 18, 19,20, 22, 23 };
     planet_animated.push_back( ofPtr<mediaElement>( new videoElement("video/5_eclipse/P_6-qtPNG.mov")));
@@ -633,6 +640,11 @@ void planeApp::update(){
         }
         // TIME TRIGGERS
         if (autoplay && scenes[scene].length[segment] > 0 && segmentClock >= scenes[scene].length[segment] && !transition) {
+            endSegment();
+        }
+        // FAIL SAVE TIME TRIGGER
+        if (autoplay && scenes[scene].length[segment] > 0 && segmentClock >= scenes[scene].length[segment]*3) {
+            ofLogError("TRANSITION") << "\t" << ofGetFrameNum() << "\t" << "FORCE transition change, because segmentClock>3*max";
             endSegment();
         }
         // triggered by the end of fading out the bg
@@ -1189,6 +1201,7 @@ void planeApp::blobOverFreeze(int & blobID) {
     if (!transition) {
         if (scene==STARS) {
             if (segment==1 && blobs[blobID].onStage && blobs[blobID].mediaLink != NULL) {
+
                 string constellations[] = {
                 "CONSTELLATION_1-photoJPEG.mov",    // ok seahorse
                 // "CONSTELLATION_2-photoJPEG.mov",
@@ -1199,7 +1212,7 @@ void planeApp::blobOverFreeze(int & blobID) {
                 "CONSTELLATION_7-photoJPEG.mov",    // ok
                 "CONSTELLATION_8-photoJPEG.mov",    // bold ok
                 "CONSTELLATION_9-photoJPEG.mov",    // bold ok
-                "CONSTELLATION_11-photoJPEG.mov",    // bold ok
+                // "CONSTELLATION_11-photoJPEG.mov",    // bold ok
                 "CONSTELLATION_13-photoJPEG.mov",    // bold ok
                 "CONSTELLATION_14-photoJPEG.mov",    // bold ok
                 // "CONSTELLATION_15-photoJPEG.mov",    // bold ok
@@ -1209,12 +1222,14 @@ void planeApp::blobOverFreeze(int & blobID) {
                 "CONSTELLATION_CASSEROLLE-photoJPEG.mov",
                 // "CONSTELLATION_CUBE-photoJPEG.mov",
                 // "CONSTELLATION_FISH-photoJPEG.mov",
-                // "CONSTELLATION_HAND-photoJPEG.mov",
+                "CONSTELLATION_HAND-photoJPEG.mov",
                 // "CONSTELLATION_HEART2-photoJPEG.mov",
                 // "CONSTELLATION_HOUSE-photoJPEG.mov",
                 // "CONSTELLATION_MERMAID-photoJPEG.mov",
-                // "CONSTELLATION_STICKBOY-photoJPEG.mov"
-                 };
+                "CONSTELLATION_STICKBOY-photoJPEG.mov"
+                };
+
+                // string constellations[] = { "CONSTELLATION_9-photoJPEG.mov" };
 
                 int constOrigin[][2] = {
                     {70,518},   // 1
@@ -1226,7 +1241,7 @@ void planeApp::blobOverFreeze(int & blobID) {
                     {46,54},    // 7
                     {246,84},    // 8x:264, y:84
                     {54,228},    // 8x:54, y:228
-                    {448,244},    // 11x:448, y:244
+                    // {448,244},    // 11x:448, y:244
                     {88,40},    // 13 x:88, y:40
                     {136,60},    // 14 x:136, y:60
                     // {96,148},    // 15 x:96, y:148
@@ -1236,12 +1251,14 @@ void planeApp::blobOverFreeze(int & blobID) {
                     {44,86},
                     // {36,74},
                     // {264,188},
-                    // {564,450},
+                    {65,450},
                     // {60,50},
                     // {220,332},
                     // {176,58},
-                    // {120,428}
+                    {120,428}
                 };
+
+                // int constOrigin[][2] = { {54,228} };
 
                 // play constellation video, as reward, position based on first star
                 int randomConst = ofRandom(sizeof(constellations) / sizeof(constellations[0]));
@@ -1737,10 +1754,14 @@ void planeApp::endSegment() {
             int i=0;
             if (fgMedia.size()>0) {
                 for (vector<ofPtr<mediaElement> >::iterator it = fgMedia.begin(); it != fgMedia.end(); ++it) {
-                    if (!(**it).dead) ((((**it)).*((**it)).outroTransformation))();
-                    if (i==0) {
-                        ofLogNotice("TRANSITION") << "\t" << ofGetFrameNum() << "\t" << "add allFaded listener";
-                        ofAddListener( (**it).fadeOutEnd, this, &planeApp::allFaded );
+                    if (!(**it).dead) {
+                        ((((**it)).*((**it)).outroTransformation))();
+                        if (i==0) {
+                            ofLogNotice("TRANSITION") << "\t" << ofGetFrameNum() << "\t" << "add allFaded listener";
+                            ofAddListener( (**it).fadeOutEnd, this, &planeApp::allFaded );
+                        }
+                    } else {
+                        if (i==0) moveOn = true;
                     }
                     i++;
                 }
