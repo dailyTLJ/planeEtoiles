@@ -54,7 +54,7 @@ void planeApp::setup(){
 
 
     ofLogNotice("START") << "\t" << ofGetFrameNum() << "\t" << "1";
-    projectorOn = false;
+    projectorOn = true;
     language = 0;
     languageCnt = 0;
     processing = true;
@@ -125,7 +125,7 @@ void planeApp::setup(){
     else gui.setup("HUMANS AND PLANETS", "planets01.xml", 1704,10);
     gui.setDefaultBackgroundColor( ofColor(0,0,50) );
     gui.add(autoplay.setup("autoplay", false));
-    gui.add(testMode.setup("testMode", false));
+    // gui.add(testMode.setup("testMode", false));
     gui.add(displayDebug.setup("displayDebug", false));
     gui.add(minLostTime.set("Min LostTime", 1, 0, 10));
     gui.add(inactivityTimer.set("inactivity timer", 30, 10, 200));
@@ -648,12 +648,12 @@ void planeApp::update(){
                 endSegment();
             }
         } else if (scene==STARS) {
-            if (autoplay && segment==1 && successCnt > newStarMax && !transition) {
+            if (autoplay && segment==1 && successCnt > newStarMax && !transition && segmentClock > minSegmentLength) {
                 ofLogNotice("interaction") << "\t" << ofGetFrameNum() << "\t" << "scene " << scene << " segment 1 success";
                 endSegment();
             }
         } else if (scene==REVOLUTIONS && segment==1) {
-            if (autoplay && success && !transition) {
+            if (autoplay && success && !transition && segmentClock > minSegmentLength) {
                 ofLogNotice("interaction") << "\t" << ofGetFrameNum() << "\t" << "scene " << scene << " segment 1 success";
                 endSegment();
             }
@@ -665,7 +665,7 @@ void planeApp::update(){
                 } else {
                     success = false;
                 }
-                if(autoplay && success && !transition) {
+                if(autoplay && success && !transition && segmentClock > minSegmentLength) {
                     ofLogNotice("interaction") << "\t" << ofGetFrameNum() << "\t" << "FREEZE success";
                     endSegment();
                 }
@@ -1578,7 +1578,7 @@ void planeApp::beginSegment() {
 
     // make new blob connections, to ensure blobs are connected to video elements, if necessary
     // exclude ECLIPSE planets, so that they don't change their look on every segment jump
-    if (scene!=ECLIPSE) {
+    if (scene!=ECLIPSE || (scene==ECLIPSE && segment==0)) {
         for(std::map<int, Blob>::iterator it = blobs.begin(); it != blobs.end(); ++it){
             Blob* b = &it->second;
             ofNotifyEvent(b->onCreate,b->id,b);
@@ -2215,12 +2215,11 @@ void planeApp::draw(){
         ofPushMatrix();
         ofTranslate(0,2100);
         ofRotateZ(-90);
-        if (testMode) {
-            // this->drawRawData(1490, 50, 2);
-            // this->drawTopDown(1490, 850, 2, drawBlobDetail);
-            this->drawRawData(0, 50, 2);
-            this->drawTopDown(0, 850, 2, drawBlobDetail);
-        } else this->drawScreen(0, 0, 1);
+        // if (testMode) {
+        //     this->drawRawData(0, 50, 2);
+        //     this->drawTopDown(0, 850, 2, drawBlobDetail);
+        // } else this->drawScreen(0, 0, 1);
+        this->drawScreen(0, 0, 1);
 
     }
 }
@@ -2253,6 +2252,10 @@ void planeApp::drawScreen(int x, int y, float scale){
     // FOREGROUND VIDEOS
 
     // foreground videos, with BLENDING
+    //  ofBlendMode {
+    //   OF_BLENDMODE_DISABLED = 0, OF_BLENDMODE_ALPHA = 1, OF_BLENDMODE_ADD = 2, OF_BLENDMODE_SUBTRACT = 3,
+    //   OF_BLENDMODE_MULTIPLY = 4, OF_BLENDMODE_SCREEN = 5
+    // }
     ofEnableBlendMode(OF_BLENDMODE_ADD);
     for (vector<ofPtr<mediaElement> >::iterator it = fgMedia.begin(); it != fgMedia.end(); ++it) {
         if (!(**it).dead && (**it).blend) (**it).draw(0, 0, 1);   //
@@ -2261,9 +2264,11 @@ void planeApp::drawScreen(int x, int y, float scale){
 
     // foreground videos, without BLENDING mode
     ofEnableAlphaBlending();
+    // ofEnableBlendMode(OF_BLENDMODE_ALPHA);
     for (vector<ofPtr<mediaElement> >::iterator it = fgMedia.begin(); it != fgMedia.end(); ++it) {
         if (!(**it).dead && !(**it).blend) (**it).draw(0, 0, 1);
     }
+    // ofDisableBlendMode();
     ofDisableAlphaBlending();
 
 
@@ -2506,20 +2511,18 @@ void planeApp::drawControlInfo(int x, int y){
 
     string instruction = scenes[scene].instructions[language][segment];
     ofDrawBitmapString("FPS\n--------------\n" + ofToString(ofGetFrameRate()) +
-                       "\n\nSCENE ID\n" + "--------------\n" + ofToString(scene) +
-                       "\n\nSCENE NAME\n" + "--------------\n"  + scenes[scene].name +
-                       "\n\nSEGMENT\n" + "--------------\n"  + ofToString(segment) +
-                       "\n\nLENGTH\n" + "--------------\n"  + ofToString(scenes[scene].length[segment]) +
+                       "\n\nSCENE:SEGMENT\n" + "--------------\n" + ofToString(scene) + ":" + ofToString(segment) +
+                       "\n\nSEGM LENGTH\n" + "--------------\n"  + ofToString(scenes[scene].length[segment]) +
+                       "\n\n\nSEGMENT TIME\n" + "--------------\n"  + ofToString(segmentClock) +
+                       "\n\nGLOBAL TIME\n" + "--------------\n"  + ofToString(masterClock) +
+                       "\n\nLAST ACTIVITY\n" + "--------------\n"  + ofToString(lastActivity) +
+
+
+                       "\n\n\nTRANSITION\n" + "--------------\n"  + ofToString(transition ? "true" : "false") +
                        "\n\nSUCCESS\n" + "--------------\n"  + ofToString(success ? "true" : "false") +
                        "\n\nSUCCESS CNT\n" + "--------------\n"  + ofToString(successCnt) +
                        "\n\nACTIVITY CNT\n" + "--------------\n"  + ofToString(activityCnt) +
-                       "\n\nFG MEDIA\n" + "--------------\n"  + ofToString(fgMedia.size()) +
-                       // "\n\n" + instruction +
-                       // "\n\nAUTOPLAY\t" + ofToString(autoplay ? "true" : "false") +
-                       "\n\nTRANSITION\n" + "--------------\n"  + ofToString(transition ? "true" : "false") +
-                       "\n\nGLOBAL TIME\n" + "--------------\n"  + ofToString(masterClock) +
-                       "\n\nLAST ACTIVITY\n" + "--------------\n"  + ofToString(lastActivity) +
-                       "\n\nSEGMENT TIME\n" + "--------------\n"  + ofToString(segmentClock), x+3, y+10 );
+                       "\n\n\nFG MEDIA\n" + "--------------\n"  + ofToString(fgMedia.size()), x+3, y+10 );
 }
 
 
@@ -2835,9 +2838,9 @@ void planeApp::keyReleased(int key){
     if (key == ' ') {
         autoplay = !autoplay;
     }
-    if (key == 't') {
-        testMode = !testMode;
-    }
+    // if (key == 't') {
+    //     testMode = !testMode;
+    // }
     if(key == 's') {
 		gui.saveToFile("planets01.xml");
 	}
