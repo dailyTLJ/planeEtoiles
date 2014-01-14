@@ -11,9 +11,13 @@ std::ostream& tcout() {
 void planeApp::setup(){
 
     ofSetFrameRate(30);
+    
+    ofSetLogLevel(OF_LOG_NOTICE);
+
+    // create a new logfile everytime the application is started
+    ofLogToFile("/home/planeviz/Documents/log/of_log/planeEtoiles_"+ofGetTimestampString()+".log");
     ofLogNotice("START") << "\t" << ofGetFrameNum() << "\t" << "setup";
 
-    ofSetLogLevel(OF_LOG_NOTICE);
     // OF_LOG_VERBOSE
     // OF_LOG_NOTICE
     // OF_LOG_WARNING
@@ -34,6 +38,8 @@ void planeApp::setup(){
     ofSetLogLevel("interaction", OF_LOG_NOTICE);
     ofSetLogLevel("videoElement", OF_LOG_NOTICE);
     ofSetLogLevel("mediaElement", OF_LOG_NOTICE);
+
+
 
 	ofTrueTypeFont::setGlobalDpi(72);
 
@@ -2744,8 +2750,8 @@ void planeApp::configureBlobserver() {
 
 void planeApp::exit() {
     // do some destructing here
-    // sendOscMsg("signOut", MYIP); // don't send disconnect, else blobserver terminates
-    ofLogNotice() << "goodbye";
+    // sendOscMsg("signOut", MYIP); // don't send disconnect, else blobserver terminates!!
+    ofLogNotice() << "\t\t" << ofGetFrameNum() << "\t" << "goodbye";
 }
 
 
