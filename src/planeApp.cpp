@@ -37,24 +37,26 @@ void planeApp::setup(){
 
 	ofTrueTypeFont::setGlobalDpi(72);
 
-
+    // font to draw text instructions
     fontBg.loadFont("CircularStd-Book.otf", 34, true, true);
     fontBg.setLineHeight(40.0f);
     fontBg.setLetterSpacing(1.037);
     fontBg.setSpaceSize(0.5);
 
+    // slightly bigger font to draw 'come closer' instruction, in idle scene
     fontIdle.loadFont("CircularStd-Book.otf", 46, true, true);
     fontIdle.setLineHeight(52.0f);
     fontIdle.setLetterSpacing(1.037);
     fontIdle.setSpaceSize(0.5);
 
+    // font only used for GUI, debug display
     fontSm.loadFont("Mercury Bold.otf", 20, true, true);
 	fontSm.setLineHeight(16.0f);
 	fontSm.setLetterSpacing(1.037);
 
 
     ofLogNotice("START") << "\t" << ofGetFrameNum() << "\t" << "1";
-    projectorOn = true;
+    projectorOn = (ofGetWindowMode() == OF_FULLSCREEN) ? true : false;
     language = 0;
     languageCnt = 0;
     processing = true;
@@ -69,16 +71,12 @@ void planeApp::setup(){
     lastActivityClock = ofGetUnixTime();
     lastActivity = 0;
 
-    fullscreen = false;
-    // ofSetWindowPosition(0,0);
-    ofLogNotice("START") << "\t" << ofGetFrameNum() << "\t" << "2";
     success = false;
     successCnt = 0;
     blobsOnStage = 0;
     activityCnt = 0;
 	drawBlobDetail = false;
     transition = false;
-    endedSegment = false;
     moveOn = false;
     sceneChange = false;
     flash = false;
@@ -226,11 +224,13 @@ void planeApp::setup(){
 
     ofLogNotice("START") << "\t" << ofGetFrameNum() << "\t" << "5";
 
-    // init
-    this->initScenes();
 
+    instructionTxt.setText("test", "test");
     instructionImg.loadImage("img/placeholder_letgo.jpg");
 
+    // load instruction-video placeholder
+    instructionVid = ofPtr<mediaElement>( new videoElement());
+    instructionVid->setDisplay(projectionW/2,projectionH/2, true);
 
     // compute the perspectiveTransformation
     // to map from blob-coordinates to the top-down view
@@ -248,6 +248,8 @@ void planeApp::setup(){
     int tmp = 1;
     recalculatePerspective(tmp);
 
+    // init
+    this->initScenes();
 
 	ofBackground(255);
 
@@ -307,7 +309,7 @@ void planeApp::initScenes(){
     bgMedia.push_back(ofPtr<mediaElement>( new videoElement("video/IDLE_MODE_13_white-anim-H264-10mbps.mp4",false)));   // 2
     bgMedia.push_back(ofPtr<mediaElement>( new videoElement("video/IDLE_MODE_13_yellow-anim-H264-10mbps.mp4",false)));  // 3
     bgMedia.push_back(ofPtr<mediaElement>( new videoElement("video/BACKGROUND-1_intro-H264_10mpbs.mp4",false)));        // 4
-    (*bgMedia[4]).opMax = 0.35;  
+    (*bgMedia[4]).opMax = 0.35;
     bgMedia.push_back(ofPtr<mediaElement>( new videoElement("video/BACKGROUND-1_loop-H264_10mpbs.mp4",false)));         // 5
     bgMedia.push_back(ofPtr<mediaElement>( new videoElement("video/4_sun/SUN_15-intro-photoJPEG.mov",false)));          // 6
 
@@ -321,7 +323,7 @@ void planeApp::initScenes(){
 
     // PRELOAD BLUE SURFACE VIDS = seems to slow down FPS
     // for (int i=1; i<13; i++) {
-    //     sun_surface_blue.push_back( ofPtr<mediaElement>( 
+    //     sun_surface_blue.push_back( ofPtr<mediaElement>(
     //         new videoElement("video/4_sun/SUN_run_surface-"+ofToString(i)+"-blue-photoJPEG.mov",false)));
     // }
 
@@ -355,6 +357,9 @@ void planeApp::initScenes(){
     idle.instructions[0][0] = "Come closer";
     idle.instructions[1][0] = "Approchez";
     idle.instructions[2][0] = "Approchez";
+    idle.instructionVid[0][0][0] = "video/text/LET_GO_5_intro-photoJPEG.mov"; // intro
+    idle.instructionVid[0][0][1] = "video/text/LET_GO_5_loop-photoJPEG.mov"; // loop
+    idle.instructionVid[0][0][2] = "video/text/LET_GO_5_intro-photoJPEG.mov"; // outro
     idle.length[0] = -1;
     scenes[n] = idle;
 
@@ -382,7 +387,7 @@ void planeApp::initScenes(){
     sceneInfo constellations;
     stars.name = "Attraction";
     stars.no = n;
-    stars.segments = 2;  
+    stars.segments = 2;
     stars.instructions[0][0] = "Walk with someone\nKeep the same distance\nbetween you\n(No hands!)";
     stars.instructions[1][0] = "Marchez avec quelqu'un\nGardez toujours le même écart\n(Sans les mains!)";
     stars.instructions[2][0] = "Marchez avec quelqu'un\nGardez toujours le meme ecart\n(Sans les mains!)";
@@ -407,10 +412,16 @@ void planeApp::initScenes(){
     revolution.analysis[0] = "* activityCnt >= spinSuccess\n-> 20 sec";
     revolution.length[0] = 20;
     revolution.instructions[0][1] = "";
-    revolution.instructionImg[0][1] = "LET-GO-BLACK.jpg";
+    // revolution.instructionImg[0][1] = "LET-GO-BLACK.jpg";
+    revolution.instructionVid[0][1][0] = "video/text/LET_GO_5_intro-photoJPEG.mov"; // intro
+    revolution.instructionVid[0][1][1] = "video/text/LET_GO_5_loop-photoJPEG.mov"; // loop
+    revolution.instructionVid[0][1][2] = "video/text/LET_GO_5_intro-photoJPEG.mov"; // outro
     revolution.instructions[1][1] = "";
     revolution.instructions[2][1] = "";
-    revolution.instructionImg[1][1] = "LACHEZ-TOUT-BLACK.jpg";
+    // revolution.instructionImg[1][1] = "LACHEZ-TOUT-BLACK.jpg";
+    revolution.instructionVid[1][1][0] = "video/text/LET_GO_5_intro-photoJPEG.mov"; // intro
+    revolution.instructionVid[1][1][1] = "video/text/LET_GO_5_loop-photoJPEG.mov"; // loop
+    revolution.instructionVid[1][1][2] = "video/text/LET_GO_5_intro-photoJPEG.mov"; // outro
     revolution.analysis[1] = "* activityCnt < spinFailure\n-> 10 sec";
     revolution.length[1] = 10;
     scenes[n] = revolution;
@@ -436,10 +447,16 @@ void planeApp::initScenes(){
     // sun.analysis[2] = "* onLost event\n-> 20 sec";
     // sun.length[2] = 20;
     sun.instructions[0][2] = "everyone";
-    sun.instructionImg[0][2] = "FREEZE-BLACK.jpg";
+    // sun.instructionImg[0][2] = "FREEZE-BLACK.jpg";
+    sun.instructionVid[0][2][0] = "video/text/LET_GO_5_intro-photoJPEG.mov"; // intro
+    sun.instructionVid[0][2][1] = "video/text/LET_GO_5_loop-photoJPEG.mov"; // loop
+    sun.instructionVid[0][2][2] = "video/text/LET_GO_5_intro-photoJPEG.mov"; // outro
     sun.instructions[1][2] = "tout le monde";
     sun.instructions[2][2] = "tout le monde";
-    sun.instructionImg[1][2] = "STOP-BLACK.jpg";
+    // sun.instructionImg[1][2] = "STOP-BLACK.jpg";
+    sun.instructionVid[1][2][0] = "video/text/LET_GO_5_intro-photoJPEG.mov"; // intro
+    sun.instructionVid[1][2][1] = "video/text/LET_GO_5_loop-photoJPEG.mov"; // loop
+    sun.instructionVid[1][2][2] = "video/text/LET_GO_5_intro-photoJPEG.mov"; // outro
     sun.analysis[2] = "* hogAvVel < freezeAllMaxVel\n* segmentClock > 3\n-> 20 sec || all frozen";
     sun.length[2] = 20;
     sun.instructions[0][3] = "Run in every\ndirection at once.";
@@ -448,10 +465,16 @@ void planeApp::initScenes(){
     sun.analysis[3] = "* hogAvVel > runHogThr \n  || activityCnt > runActThr\n-> 40 sec";
     sun.length[3] = 40;
     sun.instructions[0][4] = "everyone";
-    sun.instructionImg[0][4] = "FREEZE-BLACK.jpg";
+    // sun.instructionImg[0][4] = "FREEZE-BLACK.jpg";
+    sun.instructionVid[0][4][0] = "video/text/LET_GO_5_intro-photoJPEG.mov"; // intro
+    sun.instructionVid[0][4][1] = "video/text/LET_GO_5_loop-photoJPEG.mov"; // loop
+    sun.instructionVid[0][4][2] = "video/text/LET_GO_5_intro-photoJPEG.mov"; // outro
     sun.instructions[1][4] = "tout le monde";
     sun.instructions[2][4] = "tout le monde";
-    sun.instructionImg[1][4] = "STOP-BLACK.jpg";
+    // sun.instructionImg[1][4] = "STOP-BLACK.jpg";
+    sun.instructionVid[1][4][0] = "video/text/LET_GO_5_intro-photoJPEG.mov"; // intro
+    sun.instructionVid[1][4][1] = "video/text/LET_GO_5_loop-photoJPEG.mov"; // loop
+    sun.instructionVid[1][4][2] = "video/text/LET_GO_5_intro-photoJPEG.mov"; // outro
     sun.analysis[4] = "* hogAvVel < freezeAllMaxVel\n* segmentClock > 3\n-> 20 sec || all frozen";
     sun.length[4] = 13;
     scenes[n] = sun;
@@ -504,7 +527,7 @@ void planeApp::initScenes(){
     sceneInfo shooting;
     shooting.name = "Shooting Stars";
     shooting.no = n;
-    shooting.segments = 3;
+    shooting.segments = 4;
     shooting.instructions[0][0] = "Move like a\nshooting star";
     shooting.instructions[1][0] = "Filez comme une étoile";
     shooting.instructions[2][0] = "Filez comme une etoile";
@@ -516,10 +539,16 @@ void planeApp::initScenes(){
     shooting.analysis[1] = "* onLost event\n-> 15 sec";
     shooting.length[1] = 15;
     shooting.instructions[0][2] = "";
-    shooting.instructionImg[0][2] = "look-at-the-sky-BLACK.jpg";
+    // shooting.instructionImg[0][2] = "look-at-the-sky-BLACK.jpg";
+    shooting.instructionVid[0][2][0] = "video/text/LET_GO_5_intro-photoJPEG.mov"; // intro
+    shooting.instructionVid[0][2][1] = "video/text/LET_GO_5_loop-photoJPEG.mov"; // loop
+    shooting.instructionVid[0][2][2] = "video/text/LET_GO_5_intro-photoJPEG.mov"; // outro
     shooting.instructions[1][2] = "";
     shooting.instructions[2][2] = "";
-    shooting.instructionImg[1][2] = "regardez-le-ciel-BLACK.jpg";
+    // shooting.instructionImg[1][2] = "regardez-le-ciel-BLACK.jpg";
+    shooting.instructionVid[1][2][0] = "video/text/LET_GO_5_intro-photoJPEG.mov"; // intro
+    shooting.instructionVid[1][2][1] = "video/text/LET_GO_5_loop-photoJPEG.mov"; // loop
+    shooting.instructionVid[1][2][2] = "video/text/LET_GO_5_intro-photoJPEG.mov"; // outro
     shooting.analysis[2] = "- \n-> 15 sec";
     shooting.length[2] = 15;
     shooting.instructions[0][3] = "Stand up";
@@ -822,9 +851,13 @@ void planeApp::update(){
             }
         }
 
+
+
         // VIDEO
         nebula->update();
         (*bgMedia[bgMediaId]).update();
+        instructionVid->update();
+        instructionTxt.update();
 
         vector<ofPtr<mediaElement> >::iterator iter = fgMedia.begin();
         while (iter != fgMedia.end()) {
@@ -956,8 +989,12 @@ void planeApp::fgMediaFadedOut(int & trans) {
         }
     } else {
         // fade BG now
-        if (scene==IDLE) ((*bgMedia[bgMediaId]).*((*bgMedia[bgMediaId]).outroTransformation))();
-        else moveOn = true;
+        if (scene==IDLE) {
+            //
+            if ( (*bgMedia[bgMediaId]).mediaLoaded ) {
+                ((*bgMedia[bgMediaId]).*((*bgMedia[bgMediaId]).outroTransformation))();
+            } else moveOn = true;
+        } else moveOn = true;
     }
 }
 
@@ -1571,7 +1608,8 @@ void planeApp::bridgeUnlink(Pair & pair) {
 }
 
 void planeApp::beginSegment() {
-    endedSegment = false;
+    instructionTxt.fadeIn(0.1);
+
     ofLogNotice("TRANSITION") << "\t" << ofGetFrameNum() << "\t" << "beginSegment() " << blobs.size();
 
     transition = false;
@@ -1592,11 +1630,34 @@ void planeApp::beginSegment() {
 
 
 
-// trigger specific outro transformations for segment / scene 
+// trigger specific outro transformations for segment / scene
 //--------------------------------------------------------------
 void planeApp::endSegment() {
     ofLogNotice("TRANSITION") << "\t" << ofGetFrameNum() << "\t" << "endSegment()   " << scene << ":" << segment;
-    endedSegment = true;    // so that instructions are not displayed anymore
+
+    transition = true;
+
+    // end instructions:
+    if (instructionVid->mediaLoaded) {
+        instructionVid->loadMovie(scenes[scene].instructionVid[language][segment][2]);
+        instructionVid->reset();
+        instructionVid->finishMovie(1.0);
+        ofAddListener( instructionVid->fadeOutEnd, this, &planeApp::endedInstructions );
+    } else {
+        // endedSegment = true;    // so that instructions are not displayed anymore
+        // endedInstructions(scene);
+        instructionTxt.fadeOut(0.05);
+        ofAddListener( instructionTxt.fadeOutEnd, this, &planeApp::endedInstructions );
+    }
+}
+
+void planeApp::endedInstructions(int & trans) {
+    ofLogNotice("TRANSITION") << "\t" << ofGetFrameNum() << "\t" << "endedInstructions()";
+
+    // better remove these
+    instructionVid->mediaLoaded = false;
+    ofRemoveListener( instructionVid->fadeOutEnd, this, &planeApp::endedInstructions );
+    ofRemoveListener( instructionTxt.fadeOutEnd, this, &planeApp::endedInstructions );
 
     // default
     sceneChange = false;
@@ -1681,13 +1742,17 @@ void planeApp::endSegment() {
                 ofLogNotice("TRANSITION") << "\t" << ofGetFrameNum() << "\t" << "sunfreeze red";
                 int randomRedFreeze = ofRandom(sun_freeze_red.size());
                 fgMedia[0] = sun_freeze_red[randomRedFreeze];
-                (*fgMedia[0]).setDisplay(projectionW/2,projectionH/2, true);
-                (*fgMedia[0]).reset();
-                (*fgMedia[0]).finishMovie(1.0);
-                (*fgMedia[0]).movieEndTrigger=true;
-                ofAddListener( (*fgMedia[fgMedia.size()-1]).fadeOutEnd, this, &planeApp::allFaded );  // WHY?
-                // ofAddListener( (*fgMedia[fgMedia.size()-1]).fadeOutEnd, this, &planeApp::bgMediaSwap );  // WHY?
-                transition = true;
+                if ((*fgMedia[0]).mediaLoaded) {
+                    (*fgMedia[0]).setDisplay(projectionW/2,projectionH/2, true);
+                    (*fgMedia[0]).reset();
+                    (*fgMedia[0]).finishMovie(1.0);
+                    (*fgMedia[0]).movieEndTrigger=true;
+                    ofAddListener( (*fgMedia[fgMedia.size()-1]).fadeOutEnd, this, &planeApp::allFaded );  // WHY?
+                    // ofAddListener( (*fgMedia[fgMedia.size()-1]).fadeOutEnd, this, &planeApp::bgMediaSwap );  // WHY?
+                    transition = true;
+                } else {
+                    moveOn = true;
+                }
             } else {
                 moveOn = true;
             }
@@ -1707,12 +1772,16 @@ void planeApp::endSegment() {
                 ofLogNotice("TRANSITION") << "\t" << ofGetFrameNum() << "\t" << "sunfreeze red";
                 int randomRedFreeze = ofRandom(sun_freeze_red.size());
                 fgMedia[0] = sun_freeze_red[randomRedFreeze];
-                (*fgMedia[0]).setDisplay(projectionW/2,projectionH/2, true);
-                (*fgMedia[0]).reset();
-                (*fgMedia[0]).autoDestroy(true);
-                (*fgMedia[0]).movieEndTrigger=true;
-                ofAddListener( (*fgMedia[fgMedia.size()-1]).fadeOutEnd, this, &planeApp::fgMediaFadedOut );
-                transition = true;
+                if ((*fgMedia[0]).mediaLoaded) {
+                    (*fgMedia[0]).setDisplay(projectionW/2,projectionH/2, true);
+                    (*fgMedia[0]).reset();
+                    (*fgMedia[0]).autoDestroy(true);
+                    (*fgMedia[0]).movieEndTrigger=true;
+                    ofAddListener( (*fgMedia[fgMedia.size()-1]).fadeOutEnd, this, &planeApp::fgMediaFadedOut );
+                    transition = true;
+                } else {
+                    moveOn = true;
+                }
             } else {
                 moveOn = true;
             }
@@ -1760,9 +1829,11 @@ void planeApp::endSegment() {
             moveOn = true;
         } else if (segment==1) {        // 1 - DROP
             moveOn = true;
-        } else if (segment==2) {        // 2 - GET UP
-            sceneChange = true;
+        } else if (segment==2) {        // 2 - EXHALE
             // no need to fade out all shooting stars
+            moveOn = true;
+        } else if (segment==3) {        // 3 - STAND UP
+            sceneChange = true;
             moveOn = true;
         }
 
@@ -1772,118 +1843,6 @@ void planeApp::endSegment() {
 
 }
 
-
-
-// trigger specific outro transformations for segment / scene 
-//--------------------------------------------------------------
-void planeApp::endSegmentOld() {
-    ofLogNotice("TRANSITION") << "\t" << ofGetFrameNum() << "\t" << "endSegment()   " << scene << ":" << segment;
-    endedSegment = true;    // so that instructions are not displayed anymore
-
-    // ONLY DO BG-VIDEO TRANSITIONS IF A SCENE CHANGE IS COMING UP!
-    if ((segment+1 >= scenes[scene].segments) && scene!=SUN) {
-        sceneChange = true;
-
-        if (scene==ATTRACTION) {
-            // STARS ENDING
-            // make sure, all other fgMedia (stars, bridges) is gone already
-            for (vector<ofPtr<mediaElement> >::iterator it = fgMedia.begin(); it != fgMedia.end(); ++it) {
-                if (!(**it).dead) ((((**it)).*((**it)).outroTransformation))();
-                else ofLogNotice("TRANSITION") << "\t" << ofGetFrameNum() << "\t\t\t" << "can't outro dead video: " << (**it).file;
-            }
-
-            // fgMedia.push_back(ofPtr<mediaElement>( new videoElement("video/2_stars/ATTRACTION_outro-photoJPEG.mov")));
-            fgMedia.push_back(attraction_outro);
-            (*fgMedia[fgMedia.size()-1]).setDisplay(projectionW/2,projectionH/2, true);
-            (*fgMedia[fgMedia.size()-1]).reset();
-            (*fgMedia[fgMedia.size()-1]).autoDestroy(true);
-            (*fgMedia[fgMedia.size()-1]).movieEndTrigger=true;
-            ofAddListener( (*fgMedia[fgMedia.size()-1]).fadeOutEnd, this, &planeApp::fgMediaFadedOut );
-
-        } else if (scene==REVOLUTIONS) {
-            // REVOLUTIONS OUTRO TRANSITION VIDEO
-            // make sure, all other fgMedia (planets) is gone already
-            for (vector<ofPtr<mediaElement> >::iterator it = fgMedia.begin(); it != fgMedia.end(); ++it) {
-                if (!(**it).dead) ((((**it)).*((**it)).outroTransformation))();
-            }
-            // BIG SQUIGGLE
-            // fgMedia.push_back(ofPtr<mediaElement>( new videoElement("video/3_revolution/REVOLUTION_outro-photoJPEG.mov")));
-            // (*fgMedia[fgMedia.size()-1]).setDisplay(projectionW/2,projectionH/2, true);
-            // (*fgMedia[fgMedia.size()-1]).reset();
-            // (*fgMedia[fgMedia.size()-1]).autoDestroy(true);
-            // (*fgMedia[fgMedia.size()-1]).movieEndTrigger=true;
-            // ofAddListener( (*fgMedia[fgMedia.size()-1]).fadeOutEnd, this, &planeApp::bgMediaSwap );
-            bgMediaSwap(scene);
-            // moveOn = true;
-        } else if (scene==ECLIPSE) {
-            // fade out all planets
-            int i=0;
-            if (fgMedia.size()>0) {
-                for (vector<ofPtr<mediaElement> >::iterator it = fgMedia.begin(); it != fgMedia.end(); ++it) {
-                    if (!(**it).dead) ((((**it)).*((**it)).outroTransformation))();
-                    if (i==0) {
-                        ofLogNotice("TRANSITION") << "\t" << ofGetFrameNum() << "\t" << "add allFaded listener";
-                        ofAddListener( (**it).fadeOutEnd, this, &planeApp::allFaded );
-                    }
-                    i++;
-                }
-            } else {
-                moveOn=true;
-            }
-        } else if (scene==SHOOTING) {
-            // dont' fade out all shooting stars
-            moveOn = true;
-        } else {
-            int tmp = -1;
-            fgMediaFadedOut(tmp);   // TODO clean up, just need to hand back ref. of integer
-            // moveOn = true;
-        }
-
-        transition = true;
-    } else {
-        sceneChange = false;
-
-        // if no BG fading is necessary, simply move on to the next segment
-        if (scene==SUN && (segment==2 || segment==4)) {
-            if (success) {  // ALL FROZEN?
-                ofLogNotice("TRANSITION") << "\t" << ofGetFrameNum() << "\t" << "sunfreeze red";
-                int randomRedFreeze = ofRandom(sun_freeze_red.size());
-                //"SUN_freeze_3-qtPNG.mov";
-                // string newVideoName = "video/4_sun/SUN_freeze_" + ofToString(randomRedFreeze) + "-qtPNG.mov";
-
-                // (*fgMedia[0]).loadMovie(newVideoName);
-                fgMedia[0] = sun_freeze_red[randomRedFreeze];
-                (*fgMedia[0]).reset();
-
-                // fgMedia.push_back(ofPtr<mediaElement>( new videoElement(newVideoName,false)));
-                // (*fgMedia[fgMedia.size()-1]).setDisplay(projectionW/2,projectionH/2, true);
-                // (*fgMedia[fgMedia.size()-1]).reset();
-                if (segment==4) (*fgMedia[fgMedia.size()-1]).autoDestroy(true);
-                else (*fgMedia[fgMedia.size()-1]).finishMovie(1.0);
-                (*fgMedia[fgMedia.size()-1]).movieEndTrigger=true;
-                ofAddListener( (*fgMedia[fgMedia.size()-1]).fadeOutEnd, this, &planeApp::bgMediaSwap );
-                transition = true;
-            } else {
-                moveOn = true;
-            }
-            if(segment==4) sceneChange = true;
-        } else if (scene==REVOLUTIONS && segment==0) {
-            // don't move to LET GO if there are no more planets on the screen
-            if (planetCnt ==0) {
-                ofLogNotice("TRANSITION") << "\t" << ofGetFrameNum() << "\t" << "endSegment()   planetCnt 0 ";
-                segment+=2;
-                sceneChange = true;
-                bgMediaSwap(scene);
-            } else {
-                moveOn = true;
-                ofLogNotice("TRANSITION") << "\t" << ofGetFrameNum() << "\t" << "endSegment()   planetCnt " << planetCnt;
-            }
-        } else {
-            moveOn = true;
-        }
-    }
-    ofLogNotice("TRANSITION") << "\t" << ofGetFrameNum() << "\t" << "endSegment()   sceneChange " << sceneChange;
-}
 
 void planeApp::jumpToScene(int s) {
     ofLogNotice("TRANSITION") << "\t" << ofGetFrameNum() << "\t" << "jump to scene " << s;
@@ -1916,7 +1875,7 @@ void planeApp::nextSegment() {
         }
     }
 
-    // SKIP SEGMENTS 
+    // SKIP SEGMENTS
     if (scene==ATTRACTION && segment>1) {
         // skip if only 1 blob
         if (blobsOnStage<2) {
@@ -1964,6 +1923,14 @@ void planeApp::initSegment(){
     flash = true;       //
     segmentStart = ofGetUnixTime();
 
+
+    string instruction = scenes[scene].instructions[language][segment];
+    string measureInst = instruction;
+    // hack to allow for french-accented letters to produce correct center-align text-block width
+    if(language==1) measureInst = scenes[scene].instructions[2][segment];
+    instructionTxt.setText(instruction, measureInst);
+
+
     // INSTRUCTION IMAGE, if present
     string in_img = scenes[scene].instructionImg[language][segment];
     if (in_img.length() > 2) {
@@ -1972,9 +1939,21 @@ void planeApp::initSegment(){
         ofLogNotice("TRANSITION") << "\t" << ofGetFrameNum() << "\t" << "load instruction image " << in_img;
     }
 
+    // INSTRUCTION VIDEO, if present
+    string in_vid = scenes[scene].instructionVid[language][segment][0]; // intro video
+    if (in_vid.length() > 2) {
+        // ofLogNotice("TRANSITION") << "\t" << ofGetFrameNum() << "\t" << "in_vid: " << in_vid;
+        instructionVid->loadMovie(in_vid);
+        instructionVid->reset();
+        instructionVid->loopFile = scenes[scene].instructionVid[language][segment][1];
+        instructionVid->finishMovie(1.0);
+    } else {
+        instructionVid->mediaLoaded = false;
+    }
+
     // SET BG STARRY-SKY OPACITY LOWER FOR STARS
-    if (scene==STARS && segment<2) {    
-        (*bgMedia[5]).opMax = 0.35;     
+    if (scene==STARS && segment<2) {
+        (*bgMedia[5]).opMax = 0.35;
     } else (*bgMedia[5]).opMax = 1;
 
     // add FG videos
@@ -2080,7 +2059,7 @@ void planeApp::receiveOsc(){
 		} else if(m.getAddress() == "/blobserver/bgsubtractor"){
 
 
-            // parse incoming elements:  iiiiffii: id x y size vx vy age lost 
+            // parse incoming elements:  iiiiffii: id x y size vx vy age lost
             int blobid = m.getArgAsInt32(0);
             int posx = m.getArgAsInt32(1);
             int posy = m.getArgAsInt32(2);
@@ -2164,64 +2143,42 @@ void planeApp::receiveOsc(){
 //--------------------------------------------------------------
 void planeApp::draw(){
 
-    if (fullscreen) {
+    ofBackground(0,50,150);
+    // ofBackground(0);
+    int offsx = 500;
+    if(!projectorOn) offsx = 10;
+    int offsy = 10;
 
-        ofBackground(0);
-        ofPushMatrix();
-        // ofTranslate(0, 1080);
-        // ofRotateZ(-90);
+    // ofFill(); ofSetColor(255);
 
-        this->drawScreen(0, 0, 1);
+    this->drawRawData(offsx, offsy, 0.5);
 
-        string instruction = scenes[scene].instructions[language][segment];
-        ofFill(); ofSetColor(255);
-        fontBg.drawString(instruction, 50, 50);
+    offsy += 260 + 10;
+    this->drawTopDown(offsx, offsy, 0.5, drawBlobDetail);
 
-        ofPopMatrix();
+    offsy = 10;
+    offsx += 280;
+    this->drawAnalysis(offsx, offsy, 0.35);
 
-        ofFill(); ofSetColor(255);
-        ofDrawBitmapString(ofToString(ofGetFrameRate()), 10, 10);
+    offsy = 10;
+    offsx += 370;
+    this->drawScreen(offsx, offsy, 0.35);
 
-    } else {
+    offsx += 430;
+    this->drawControlInfo(offsx, offsy);
 
-        ofBackground(0,50,150);
-        // ofBackground(0);
-        int offsx = 500;
-        if(!projectorOn) offsx = 10;
-        int offsy = 10;
+    languageGui.draw();
+    gui.draw();
 
-        // ofFill(); ofSetColor(255);
-
-        this->drawRawData(offsx, offsy, 0.5);
-
-        offsy += 260 + 10;
-        this->drawTopDown(offsx, offsy, 0.5, drawBlobDetail);
-
-        offsy = 10;
-        offsx += 280;
-        this->drawAnalysis(offsx, offsy, 0.35);
-
-        offsy = 10;
-        offsx += 370;
-        this->drawScreen(offsx, offsy, 0.35);
-
-        offsx += 430;
-        this->drawControlInfo(offsx, offsy);
-
-        languageGui.draw();
-        gui.draw();
-
-        // MAIN VISUALS SCREEN
-        ofPushMatrix();
-        ofTranslate(0,2100);
-        ofRotateZ(-90);
-        // if (testMode) {
-        //     this->drawRawData(0, 50, 2);
-        //     this->drawTopDown(0, 850, 2, drawBlobDetail);
-        // } else this->drawScreen(0, 0, 1);
-        this->drawScreen(0, 0, 1);
-
-    }
+    // MAIN VISUALS SCREEN
+    ofPushMatrix();
+    ofTranslate(0,2100);
+    ofRotateZ(-90);
+    // if (testMode) {
+    //     this->drawRawData(0, 50, 2);
+    //     this->drawTopDown(0, 850, 2, drawBlobDetail);
+    // } else this->drawScreen(0, 0, 1);
+    this->drawScreen(0, 0, 1);
 }
 
 
@@ -2272,68 +2229,31 @@ void planeApp::drawScreen(int x, int y, float scale){
     ofDisableAlphaBlending();
 
 
-
-    // INSTRUCTIONS
-    string in_img = scenes[scene].instructionImg[language][segment];
-
+    // INSTRUCTION VIDEOS
+    if (instructionVid->mediaLoaded) {
+        ofEnableBlendMode(OF_BLENDMODE_ADD);
+        instructionVid->draw(projectionOffsetX,0,1);
+        ofDisableBlendMode();
+    } else {
     // INSTRUCTION TEXT
-    if (!transition && !endedSegment && segmentClock>0) {
-        int ypos = 1742;
-        int textLineH = 40;
         ofFill();
-
-        string instruction = scenes[scene].instructions[language][segment];
-        string measureInst = instruction;
-        // hack to allow for french-accented letters to produce correct center-align text-block width
-        if(language==1) measureInst = scenes[scene].instructions[2][segment];
-
-        if (scene>0) {
-
-
-            ofSetColor(255);
-            // multiple lines, need to split up, to center-align
-            vector< string > instructionLine = ofSplitString(instruction, "\n");
-            vector< string > measureInstLine = ofSplitString(measureInst, "\n");
-
-            int i = 0;
-            for (vector<string>::iterator it = instructionLine.begin() ; it != instructionLine.end(); ++it) {
-
-                ofRectangle textR = fontBg.getStringBoundingBox(measureInstLine[i],0, 0);
-                if (scene==ECLIPSE && segment==SEG_FOLLOWME) {
-                    // FOLLOW ME
-                    fontBg.drawString((*it), ((*fgMedia[0]).position.x - textR.width/2), ypos);
-                } else {
-                    fontBg.drawString((*it), (projectionW/2 - textR.width/2), ypos);
-                }
-                ypos += textLineH;
-                i++;
-            }
+        if (scene==ECLIPSE && segment==SEG_FOLLOWME) {
+        // FOLLOW ME
+            instructionTxt.draw(&fontBg, (*fgMedia[0]).position.x, 1742);
         } else {
-            // IDLE MODE, one liner therefore no need to split
-
-            int animCnt = ofGetFrameNum()%120;
-            float dimAlpha = 0.3;
-            if (animCnt < 30) {
-                ofSetColor(255, int (255*dimAlpha + (animCnt/30.f)*(255*(1-dimAlpha))));
-            } else if (animCnt > 90) {
-                ofSetColor(255, int (255 - ((animCnt-90)/30.f)*(255*(1-dimAlpha))));
-            } else {
-                ofSetColor(255);
-            }
-            ofRectangle textR = fontBg.getStringBoundingBox(measureInst,0,0);
-            fontIdle.drawString(instruction, (projectionW/2 - textR.width/2), ypos);
-
+            instructionTxt.draw(&fontBg, projectionW/2, 1742);
         }
     }
 
     // INSTRUCTION IMAGES, display always, so that they are visible on transition videos (red sun)
-    if (in_img.length() > 2) {
-        ofEnableBlendMode(OF_BLENDMODE_ADD);
-        ofFill();
-        ofSetColor(255,255,255);
-        instructionImg.draw(0,0, projectionW, projectionH);
-        ofDisableBlendMode();
-    }
+    // if (in_img.length() > 2) {
+    //     ofEnableBlendMode(OF_BLENDMODE_ADD);
+    //     ofFill();
+    //     ofSetColor(255,255,255);
+    //     instructionImg.draw(0,0, projectionW, projectionH);
+
+    //     ofDisableBlendMode();
+    // }
 
     // extra debug information
     if (displayDebug) {
