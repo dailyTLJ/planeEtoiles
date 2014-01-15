@@ -9,7 +9,7 @@ class mediaElement
         mediaElement();
         ~mediaElement();
 
-        virtual void update();
+        virtual void update(float updateRate = 1.0);
         virtual void draw();
         virtual void draw(int x, int y, float _scale);
         virtual void drawElement(float _scale);

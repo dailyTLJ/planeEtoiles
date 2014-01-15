@@ -57,7 +57,7 @@ void videoElement::pause(bool v) {
     }
 }
 
-void videoElement::update() {
+void videoElement::update(float updateRate) {
     if (mediaLoaded) {
         mediaElement::update();
         if (loadLoopFileNow) {

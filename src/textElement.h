@@ -9,7 +9,7 @@ class textElement: public mediaElement
         textElement();
         textElement(string t, string c);
 
-        void update();
+        void update(float updateRate = 1.0);
 
         void setText(string t, string c);
 

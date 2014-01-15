@@ -21,8 +21,8 @@ void textElement::setText(string t, string c) {
     compLine = ofSplitString(compText, "\n");
 }
 
-void textElement::update() {
-    mediaElement::update();
+void textElement::update(float updateRate) {
+    mediaElement::update(updateRate);
 }
 
 void textElement::draw(ofTrueTypeFont * font) {

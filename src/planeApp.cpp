@@ -570,6 +570,8 @@ void planeApp::update(){
 
     if (processing) {
 
+        float updateRate  = 30.0/ofGetFrameRate();
+
         oscMsgReceived = false;
         this->receiveOsc();
 
@@ -812,7 +814,7 @@ void planeApp::update(){
             }
         } else if (scene==ECLIPSE && segment==SEG_FOLLOWME) {
             // FOLLOW ME
-            followMe += followMeSpeed;
+            followMe += followMeSpeed * updateRate;
             if (followMe >= 2*3.14) {
                 (*fgMedia[0]).position.x = projectionW/2;
                 if (followMe > 2*3.6 && autoplay && !transition) {
@@ -854,10 +856,10 @@ void planeApp::update(){
 
 
         // VIDEO
-        nebula->update();
-        (*bgMedia[bgMediaId]).update();
-        instructionVid->update();
-        instructionTxt.update();
+        nebula->update(updateRate);
+        (*bgMedia[bgMediaId]).update(updateRate);
+        instructionVid->update(updateRate);
+        instructionTxt.update(updateRate);
 
         vector<ofPtr<mediaElement> >::iterator iter = fgMedia.begin();
         while (iter != fgMedia.end()) {
@@ -887,7 +889,7 @@ void planeApp::update(){
                 }
             }
 
-            (**iter).update();
+            (**iter).update(updateRate);
             if ((**iter).dead) {
                 ofLogNotice("videoElement") << ofGetFrameNum() << "\t" << "delete video " << (**iter).file;
                 iter = fgMedia.erase(iter);

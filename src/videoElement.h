@@ -10,7 +10,7 @@ class videoElement: public mediaElement
         videoElement(string filename, bool _blend = true);
         ~videoElement();
 
-        void update();
+        void update(float updateRate = 1.0);
 
         void loadMovie(string filename);
         void play(bool loop = true);
