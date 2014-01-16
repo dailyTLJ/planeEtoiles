@@ -40,12 +40,12 @@ mediaElement::~mediaElement() {
 
 
 
-void mediaElement::update() {
+void mediaElement::update(float updateRate) {
     bridgeUpdated = false;
     if (moveElement) {
-        position.x += velocity.x;
-        position.y += velocity.y;
-        if (opacity<1) opacity += opacityChange;
+        position.x += velocity.x * updateRate;
+        position.y += velocity.y * updateRate;
+        if (opacity<1) opacity += opacityChange * updateRate;
         if (goalDefined) {
             float distance = ofDist(position.x, position.y, goal.x, goal.y);
             if (distance < moveSpeed) {
@@ -63,11 +63,11 @@ void mediaElement::update() {
         }
     }
     if (addSc>0) {
-        addSc-=0.01;
+        addSc-=0.01 * updateRate;
         if (addSc<0) addSc = 0;
     }
     if (fading) {
-        opacity += opacityChange;
+        opacity += opacityChange * updateRate;
         // ofLogNotice("mediaElement") << "update opacity > " << opacity;
         if (opacityChange>0 && opacity >= 1.0f) {
             opacity = 1.f;
@@ -85,7 +85,7 @@ void mediaElement::update() {
         }
     }
     if (scaling) {
-        scale *= 0.95;
+        scale *= 0.95 * updateRate;
         if (scale < 0.05) {
             visible = false;
             ofNotifyEvent(fadeOutEnd,this->w,this);

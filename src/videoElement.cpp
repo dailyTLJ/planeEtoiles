@@ -2,22 +2,28 @@
 
 videoElement::videoElement() {
     movie = ofPtr<ofVideoPlayer>( new ofVideoPlayer() );
+    movie->setPixelFormat(OF_PIXELS_BGRA);  // need to set this even for non-alpha videos, 
+                                            // because of alpha-fix in ofGstVideoPlayer.cpp
+    this->blend = false;
+    this->rotation = 0;
+    this->setFileDeadNow = false;
+    this->loadLoopFileNow = false;
+    this->mediaLoaded = false;
 }
 
 videoElement::videoElement(string filename, bool _blend) {
     movie = ofPtr<ofVideoPlayer>( new ofVideoPlayer() );
     movie->setPixelFormat(OF_PIXELS_BGRA);  // need to set this even for non-alpha videos, 
                                             // because of alpha-fix in ofGstVideoPlayer.cpp
-    this->blend = _blend;
     this->rotation = 0;
     this->setFileDeadNow = false;
     this->loadLoopFileNow = false;
     this->mediaLoaded = false;
+    this->blend = _blend;
     this->loadMovie(filename);
 }
 
 videoElement::~videoElement() {
-    // cout << "~videoElement() " << endl;
     movie = ofPtr<ofVideoPlayer>( new ofVideoPlayer() );
     ofLogNotice("videoElement") << ofGetFrameNum() << "\t" << "destructor " << file;
 }
@@ -31,6 +37,7 @@ void videoElement::loadMovie(string filename) {
         this->h = movie->getHeight();
         this->play(true);
         this->pause(true);
+        // ofLogNotice("videoElement") << ofGetFrameNum() << "\t" << "loadMovie\t" << w << ":" << h << "\t" << position.x << ":" << position.y;
     } else {
         ofLogError() << ofGetFrameNum() << "\t" << "file doesn't exist " << file;
     }
@@ -50,13 +57,14 @@ void videoElement::pause(bool v) {
     }
 }
 
-void videoElement::update() {
+void videoElement::update(float updateRate) {
     if (mediaLoaded) {
         mediaElement::update();
         if (loadLoopFileNow) {
             ofLogNotice("videoElement") << ofGetFrameNum() << "\t" << "loadLoopFileNow\t" << loopFile;
             loadLoopFileNow = false;
             loadMovie(loopFile);
+            hide = false;
             loopFile = "";
             play(true);
         }
@@ -83,6 +91,7 @@ void videoElement::update() {
             } else if (this->movieEndTrigger && loopFile!="") {
                 play(true);
                 movie->update();
+                hide = true;
                 ofLogNotice("videoElement") << ofGetFrameNum() << "\t" << "movieisdone, loopfile\t" << loopFile;
                 loadLoopFileNow = true;
                 // loadMovie(loopFile);

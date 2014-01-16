@@ -10,6 +10,7 @@
 #include "Blob.h"
 #include "videoElement.h"
 #include "imageElement.h"
+#include "textElement.h"
 
 // listen to blobserver on port 9000
 #define MYPORT 9000
@@ -39,6 +40,7 @@ class sceneInfo {
         int length[7];
         string instructions[3][7];
         string instructionImg[2][7];
+        string instructionVid[2][7][3];
         string analysis[7];
 };
 
@@ -86,9 +88,9 @@ class planeApp : public ofBaseApp{
 		void jumpToScene(int s);
 		bool allBlobsAlignedWith(ofPoint &p);
 		ofPoint blobMapToScreen(ofPoint &o);
-
-		void endSegmentOld();				// 
-		void endSegment();					// 1. trigger fgMediaFadedOut or moveOn
+			// 
+		void endSegment();					// 1. 
+		void endedInstructions(int & trans);// trigger fgMediaFadedOut or moveOn
 		void fgMediaFadedOut(int & trans);  // 2. call outroTransformation calls on FG and BG media
 		void allFaded(int & trans); 		// 3. all elements faded out, moveOn = true
 		void bgMediaSwap(int & trans);		//
@@ -138,8 +140,6 @@ class planeApp : public ofBaseApp{
 		ofPoint steles[8];
 		ofPoint steles_topdown[8];
 
-		bool fullscreen;
-
 		// SEQUENCING
 		bool processing;
 		bool oscMsgReceived;
@@ -162,7 +162,6 @@ class planeApp : public ofBaseApp{
 		int globalStart;
 		bool moveOn;
 		bool transition;
-		bool endedSegment;
 		bool success;			// if people followed the instructions
 		int successCnt;
 		int activityCnt;
@@ -290,14 +289,16 @@ class planeApp : public ofBaseApp{
 		// SUN
 		ofPtr<mediaElement> sun_jump;
 		ofPtr<mediaElement> sun_run;
-		std::vector< ofPtr<mediaElement> > sun_freeze_red;		// 4
-		std::vector< ofPtr<mediaElement> > sun_surface_blue;	// 12
+		std::vector< ofPtr<mediaElement> > sun_freeze_red;			// 4
+		std::vector< ofPtr<mediaElement> > sun_surface_blue;		// 12
 		// ECLIPSE
 		std::vector< ofPtr<mediaElement> > planet_animated;			// 9
 		// SHOOTING
 		std::vector< ofPtr<mediaElement> > shooting_stars;			// 50
 
 		ofImage instructionImg;
+		ofPtr<mediaElement> instructionVid;
+		textElement instructionTxt;
 		int bgMediaId;
 
 };
