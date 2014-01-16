@@ -135,6 +135,8 @@ void planeApp::setup(){
     gui.add(inactivityTimer.set("inactivity timer", 30, 10, 200));
     gui.add(minSegmentLength.set("Min Segm Length", 3, 0, 10));
     gui.add(nebulaOpacity.set("Nebula Opacity", 50, 0, 100));
+    gui.add(instructionFadeIn.set("Instruct Fade In",0.1, 0.001, 0.2));
+    gui.add(instructionFadeOut.set("Instruct Fade Out",0.1, 0.001, 0.2));
     // gui.add(flashColor.set("Transition Flash Color",ofColor(255,200,100),ofColor(0,0),ofColor(255,255)));
 
     paramBasic.setName("Dimension");
@@ -363,9 +365,9 @@ void planeApp::initScenes(){
     idle.instructions[0][0] = "Come closer";
     idle.instructions[1][0] = "Approchez";
     idle.instructions[2][0] = "Approchez";
-    idle.instructionVid[0][0][0] = "video/text/LET_GO_5_intro-photoJPEG.mov"; // intro
-    idle.instructionVid[0][0][1] = "video/text/LET_GO_5_loop-photoJPEG.mov"; // loop
-    idle.instructionVid[0][0][2] = "video/text/LET_GO_5_intro-photoJPEG.mov"; // outro
+    idle.instructionVid[0][0][0] = "video/text/COME_CLOSER_4_loop-photoJPEG.mov"; // intro
+    idle.instructionVid[0][0][1] = "video/text/COME_CLOSER_4_loop-photoJPEG.mov"; // loop
+    idle.instructionVid[0][0][2] = "video/text/COME_CLOSER_4_loop-photoJPEG.mov"; // outro
     idle.length[0] = -1;
     scenes[n] = idle;
 
@@ -454,15 +456,15 @@ void planeApp::initScenes(){
     // sun.length[2] = 20;
     sun.instructions[0][2] = "everyone";
     // sun.instructionImg[0][2] = "FREEZE-BLACK.jpg";
-    sun.instructionVid[0][2][0] = "video/text/LET_GO_5_intro-photoJPEG.mov"; // intro
-    sun.instructionVid[0][2][1] = "video/text/LET_GO_5_loop-photoJPEG.mov"; // loop
-    sun.instructionVid[0][2][2] = "video/text/LET_GO_5_intro-photoJPEG.mov"; // outro
+    sun.instructionVid[0][2][0] = "video/text/FREEZE_3_loop-photoJPEG.mov"; // intro
+    sun.instructionVid[0][2][1] = "video/text/FREEZE_3_loop-photoJPEG.mov"; // loop
+    sun.instructionVid[0][2][2] = "video/text/FREEZE_3_loop-photoJPEG.mov"; // outro
     sun.instructions[1][2] = "tout le monde";
     sun.instructions[2][2] = "tout le monde";
     // sun.instructionImg[1][2] = "STOP-BLACK.jpg";
-    sun.instructionVid[1][2][0] = "video/text/LET_GO_5_intro-photoJPEG.mov"; // intro
-    sun.instructionVid[1][2][1] = "video/text/LET_GO_5_loop-photoJPEG.mov"; // loop
-    sun.instructionVid[1][2][2] = "video/text/LET_GO_5_intro-photoJPEG.mov"; // outro
+    sun.instructionVid[1][2][0] = "video/text/FREEZE_3_loop-photoJPEG.mov"; // intro
+    sun.instructionVid[1][2][1] = "video/text/FREEZE_3_loop-photoJPEG.mov"; // loop
+    sun.instructionVid[1][2][2] = "video/text/FREEZE_3_loop-photoJPEG.mov"; // outro
     sun.analysis[2] = "* hogAvVel < freezeAllMaxVel\n* segmentClock > 3\n-> 20 sec || all frozen";
     sun.length[2] = 20;
     sun.instructions[0][3] = "Run in every\ndirection at once.";
@@ -472,15 +474,15 @@ void planeApp::initScenes(){
     sun.length[3] = 40;
     sun.instructions[0][4] = "everyone";
     // sun.instructionImg[0][4] = "FREEZE-BLACK.jpg";
-    sun.instructionVid[0][4][0] = "video/text/LET_GO_5_intro-photoJPEG.mov"; // intro
-    sun.instructionVid[0][4][1] = "video/text/LET_GO_5_loop-photoJPEG.mov"; // loop
-    sun.instructionVid[0][4][2] = "video/text/LET_GO_5_intro-photoJPEG.mov"; // outro
+    sun.instructionVid[0][4][0] = "video/text/FREEZE_3_loop-photoJPEG.mov"; // intro
+    sun.instructionVid[0][4][1] = "video/text/FREEZE_3_loop-photoJPEG.mov"; // loop
+    sun.instructionVid[0][4][2] = "video/text/FREEZE_3_loop-photoJPEG.mov"; // outro
     sun.instructions[1][4] = "tout le monde";
     sun.instructions[2][4] = "tout le monde";
     // sun.instructionImg[1][4] = "STOP-BLACK.jpg";
-    sun.instructionVid[1][4][0] = "video/text/LET_GO_5_intro-photoJPEG.mov"; // intro
-    sun.instructionVid[1][4][1] = "video/text/LET_GO_5_loop-photoJPEG.mov"; // loop
-    sun.instructionVid[1][4][2] = "video/text/LET_GO_5_intro-photoJPEG.mov"; // outro
+    sun.instructionVid[1][4][0] = "video/text/FREEZE_3_loop-photoJPEG.mov"; // intro
+    sun.instructionVid[1][4][1] = "video/text/FREEZE_3_loop-photoJPEG.mov"; // loop
+    sun.instructionVid[1][4][2] = "video/text/FREEZE_3_loop-photoJPEG.mov"; // outro
     sun.analysis[4] = "* hogAvVel < freezeAllMaxVel\n* segmentClock > 3\n-> 20 sec || all frozen";
     sun.length[4] = 13;
     scenes[n] = sun;
@@ -546,15 +548,15 @@ void planeApp::initScenes(){
     shooting.length[1] = 15;
     shooting.instructions[0][2] = "";
     // shooting.instructionImg[0][2] = "look-at-the-sky-BLACK.jpg";
-    shooting.instructionVid[0][2][0] = "video/text/LET_GO_5_intro-photoJPEG.mov"; // intro
-    shooting.instructionVid[0][2][1] = "video/text/LET_GO_5_loop-photoJPEG.mov"; // loop
-    shooting.instructionVid[0][2][2] = "video/text/LET_GO_5_intro-photoJPEG.mov"; // outro
+    shooting.instructionVid[0][2][0] = "video/text/EXHALE_3_intro-photoJPEG.mov"; // intro
+    shooting.instructionVid[0][2][1] = "video/text/EXHALE_3_loop-photoJPEG.mov"; // loop
+    shooting.instructionVid[0][2][2] = "video/text/EXHALE_3_intro-photoJPEG.mov"; // outro
     shooting.instructions[1][2] = "";
     shooting.instructions[2][2] = "";
     // shooting.instructionImg[1][2] = "regardez-le-ciel-BLACK.jpg";
-    shooting.instructionVid[1][2][0] = "video/text/LET_GO_5_intro-photoJPEG.mov"; // intro
-    shooting.instructionVid[1][2][1] = "video/text/LET_GO_5_loop-photoJPEG.mov"; // loop
-    shooting.instructionVid[1][2][2] = "video/text/LET_GO_5_intro-photoJPEG.mov"; // outro
+    shooting.instructionVid[1][2][0] = "video/text/EXHALE_3_intro-photoJPEG.mov"; // intro
+    shooting.instructionVid[1][2][1] = "video/text/EXHALE_3_loop-photoJPEG.mov"; // loop
+    shooting.instructionVid[1][2][2] = "video/text/EXHALE_3_intro-photoJPEG.mov"; // outro
     shooting.analysis[2] = "- \n-> 15 sec";
     shooting.length[2] = 15;
     shooting.instructions[0][3] = "Stand up";
@@ -1616,7 +1618,7 @@ void planeApp::bridgeUnlink(Pair & pair) {
 }
 
 void planeApp::beginSegment() {
-    instructionTxt.fadeIn(0.1);
+    instructionTxt.fadeIn(instructionFadeIn);
 
     ofLogNotice("TRANSITION") << "\t" << ofGetFrameNum() << "\t" << "beginSegment() " << blobs.size();
 
@@ -1654,7 +1656,7 @@ void planeApp::endSegment() {
     } else {
         // endedSegment = true;    // so that instructions are not displayed anymore
         // endedInstructions(scene);
-        instructionTxt.fadeOut(0.05);
+        instructionTxt.fadeOut(instructionFadeOut);
         ofAddListener( instructionTxt.fadeOutEnd, this, &planeApp::endedInstructions );
     }
 }
@@ -1855,6 +1857,7 @@ void planeApp::endedInstructions(int & trans) {
 void planeApp::jumpToScene(int s) {
     ofLogNotice("TRANSITION") << "\t" << ofGetFrameNum() << "\t" << "jump to scene " << s;
     int oldScene = scene;
+    instructionTxt.opacity = 0.0;
     scene = s;
     segment = 0;
     sceneChange = true;

@@ -210,6 +210,9 @@ class planeApp : public ofBaseApp{
 		ofxOscReceiver receiver;
 		ofxOscSender sender;
 
+		ofParameter<float> instructionFadeIn;
+		ofParameter<float> instructionFadeOut;
+
 		ofParameter<float> freezeMaxVel;
 		ofParameter<float> freezeAllMaxVel;
 		ofParameter<int> freezeMinTime;
