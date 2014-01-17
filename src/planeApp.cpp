@@ -289,7 +289,7 @@ void planeApp::setPerspective() {
     int cx = 78;
     int cy = 16;
     // float in[] = {260-78,140-16,600-78,210-16,380-78,300-16,-150-78,300-16};
-    float in[] = {260-cx,140-cy,700-cx,210-cy,480-cx,300-cy,-150-cx,300-cy};
+    float in[] = { 310-cx,178-cy,    750-cx,223-cy,     540-cx,353-cy,    -150-cx,293-cy};
     float out[] = {0,0,siteW,0,siteW,siteH,0,siteH};
 
     cv::Mat proj_in(4,2, CV_32FC1, in);
