@@ -61,7 +61,7 @@ class planeApp : public ofBaseApp{
 		void setPerspective();
 		void recalculatePerspective(int & v);
 
-		void drawRawData(int x, int y, float scale);
+		void drawRawData(int x, int y, float scale, bool displayText = false);
 		void drawTopDown(int x, int y, float scale, bool detailed = false);
 		void drawScreen(int x, int y, float scale);
 		void drawAnalysis(int x, int y, float scale);

@@ -15,7 +15,7 @@ void planeApp::setup(){
     ofSetLogLevel(OF_LOG_NOTICE);
 
     // create a new logfile everytime the application is started
-    ofLogToFile("/home/planeviz/Documents/log/of_log/planeEtoiles_"+ofGetTimestampString()+".log");
+    // ofLogToFile("/home/planeviz/Documents/log/of_log/planeEtoiles_"+ofGetTimestampString()+".log");
     ofLogNotice("START") << "\t" << ofGetFrameNum() << "\t" << "setup";
 
     // OF_LOG_VERBOSE
@@ -244,14 +244,23 @@ void planeApp::setup(){
     // to map from blob-coordinates to the top-down view
     this->setPerspective();
 
-    steles[0].set(383-78,184-16,0);
-    steles[1].set(457-78,198-16,0);
-    steles[2].set(506-78,224-16,0);
-    steles[3].set(446-78,260-16,0);
-    steles[4].set(312-78,276-16,0);
-    steles[5].set(160-78,269-16,0);
-    steles[6].set(159-78,231-16,0);
-    steles[7].set(241-78,203-16,0);
+    int cx = 78;
+    int cy = 16;
+    // steles[0].set(383-cx,184-cy,0);
+    // steles[1].set(457-cx,198-cy,0);
+    // steles[2].set(506-cx,224-cy,0);
+    // steles[3].set(446-cx,260-cy,0);
+    // steles[4].set(312-cx,276-cy,0);
+    // steles[5].set(160-cx,269-cy,0);
+    // steles[6].set(159-cx,231-cy,0);
+    // steles[7].set(241-cx,203-cy,0);
+    steles[0].set(313-cx,203-cy,0);
+    steles[1].set(492-cx,208-cy,0);
+    steles[2].set(615-cx,237-cy,0);
+    steles[3].set(567-cx,293-cy,0);
+    steles[4].set(341-cx,314-cy,0);
+    steles[5].set(150-cx,293-cy,0);
+    steles[6].set(179-cx,237-cy,0);
 
     int tmp = 1;
     recalculatePerspective(tmp);
@@ -267,7 +276,7 @@ void planeApp::recalculatePerspective(int & v) {
     ofLogNotice() << "recalculatePerspective\t" << "siteW " << siteW << "\tsiteH " << siteH;
     this->setPerspective();
 
-    for (int i=0; i<8; i++) {
+    for (int i=0; i<7; i++) {
         vector<cv::Point2f> pre, post;
         pre.push_back(cv::Point2f(steles[i].x, steles[i].y));
         cv::perspectiveTransform(pre, post, perspectiveMat);
@@ -277,7 +286,10 @@ void planeApp::recalculatePerspective(int & v) {
 
 void planeApp::setPerspective() {
     int skew = 0;
-    float in[] = {260-78,140-16,600-78,210-16,380-78,300-16,-150-78,300-16};
+    int cx = 78;
+    int cy = 16;
+    // float in[] = {260-78,140-16,600-78,210-16,380-78,300-16,-150-78,300-16};
+    float in[] = {260-cx,140-cy,700-cx,210-cy,480-cx,300-cy,-150-cx,300-cy};
     float out[] = {0,0,siteW,0,siteW,siteH,0,siteH};
 
     cv::Mat proj_in(4,2, CV_32FC1, in);
@@ -501,8 +513,8 @@ void planeApp::initScenes(){
     eclipse.instructions[0][1] = "Follow me";
     eclipse.instructions[1][1] = "Suivez moi";
     eclipse.instructions[2][1] = "Suivez moi";
-    eclipse.analysis[1] = "\n-> 22 sec";
-    eclipse.length[1] = 22;
+    eclipse.analysis[1] = "\n-> 25 sec || sinus 0";
+    eclipse.length[1] = 25;
     eclipse.instructions[0][2] = "Step out of the line";
     eclipse.instructions[1][2] = "Sortez de la file";
     eclipse.instructions[2][2] = "Sortez de la file";
@@ -702,7 +714,9 @@ void planeApp::update(){
                 if (hogAvVel < freezeAllMaxVel && segmentClock > 3) {
                     success = true;
                 } else {
-                    success = false;
+                    // once freeze-success, no way back to false,
+                    // so that this doesn't change, while the system is busy fading out the instructions
+                    if (segmentClock < minSegmentLength) success = false;
                 }
                 if(autoplay && success && !transition && segmentClock > minSegmentLength) {
                     ofLogNotice("interaction") << "\t" << ofGetFrameNum() << "\t" << "FREEZE success";
@@ -825,6 +839,7 @@ void planeApp::update(){
             followMe += followMeSpeed * updateRate;
             if (followMe >= 2*3.14) {
                 (*fgMedia[0]).position.x = projectionW/2;
+                // planet back at center position, move on to next scene
                 if (followMe > 2*3.6 && autoplay && !transition) {
                     endSegment();
                 }
@@ -970,60 +985,43 @@ void planeApp::unHideSun(int & trans) {
     }
 }
 
-// trans -1 : trigger first fade from main-loop and not from faded-event
+// default:  attach event trigger 
+// trans -1 : don't attach event trigger
 void planeApp::fgMediaFadedOut(int & trans) {
     ofLogNotice("TRANSITION") << "\t" << ofGetFrameNum() << "\t" << "fgMediaFadedOut  " << trans << "  fgmedia size = " << fgMedia.size();
 
-    if (fgMedia.size()>0) {
 
-        if (trans == -1) {
-            // first call of function, therefore we fade the last fgMedia object
-            ofAddListener( (*fgMedia.back()).fadeOutEnd, this, &planeApp::fgMediaFadedOut );
-            ofLogNotice("TRANSITION") << "\t" << ofGetFrameNum() << "\t" << "call outroTransformation() on fgMedia[" << (fgMedia.size()-1) << "]";
-            ((*fgMedia.back()).*((*fgMedia.back()).outroTransformation))();
+    if (fgMedia.size() > 0) {
 
-        } else {
-            // delete last fgMedia object
-            (*fgMedia.back()).dead = true;
-
-            if (fgMedia.size()>1) {
-                // fade new last fgMedia object
-                ofAddListener( (*fgMedia[fgMedia.size()-2]).fadeOutEnd, this, &planeApp::fgMediaFadedOut );
-                ofLogNotice("TRANSITION") << "\t" << ofGetFrameNum() << "\t" << "call outroTransformation() on fgMedia[" << (fgMedia.size()-2) << "]";
-                ((*fgMedia[fgMedia.size()-2]).*((*fgMedia[fgMedia.size()-2]).outroTransformation))();
-            } else {
-                // fade BG now
-                if (scene==IDLE) ((*bgMedia[bgMediaId]).*((*bgMedia[bgMediaId]).outroTransformation))();
-                else moveOn = true;
+        // FADE OUT ALL MEDIAelements AT ONCE
+        bool attachedTrigger = false;
+        for (vector<ofPtr<mediaElement> >::iterator it = fgMedia.begin(); it != fgMedia.end(); ++it) {
+            // they could already be dead, or fading
+            if (!(**it).dead && !(**it).fading) {
+                // outro = usually fadeOut, fade ends with triggering fadeOutEnd event
+                ((((**it)).*((**it)).outroTransformation))();
+                // attache trigger to first non-dead element
+                if (trans>0 && !attachedTrigger) {
+                    ofLogNotice("TRANSITION") << "\t" << ofGetFrameNum() << "\t" << "added allFaded() listener to " << (**it).file;
+                    ofAddListener( (**it).fadeOutEnd, this, &planeApp::allFaded );
+                    attachedTrigger = true;
+                }
             }
         }
+
+        if (trans>0 && !attachedTrigger) {
+            // assumes all mediaElements are as good as dead, therefore simply 
+            moveOn = true;
+        }
+
     } else {
-        // fade BG now
-        if (scene==IDLE) {
-            //
-            if ( (*bgMedia[bgMediaId]).mediaLoaded ) {
-                ((*bgMedia[bgMediaId]).*((*bgMedia[bgMediaId]).outroTransformation))();
-            } else moveOn = true;
+        if (scene==IDLE && (*bgMedia[bgMediaId]).mediaLoaded) {
+            // make sure bgMedia is loaded, so the transition also works without the videofile
+            ((*bgMedia[bgMediaId]).*((*bgMedia[bgMediaId]).outroTransformation))();
         } else moveOn = true;
     }
 }
 
-// void planeApp::fgMediaFadedIn(int & trans) {
-//     ofLogNotice("TRANSITION") << "\t" << ofGetFrameNum() << "\t" << "fgMediaFadedIn  " << trans;
-//     if (fgMedia.size() > 0) {
-//         for (vector<ofPtr<mediaElement> >::iterator it = fgMedia.begin(); it != fgMedia.end(); it++) {
-//             if (!(**it).visible) {
-//                 ofLogNotice("TRANSITION") << "\t" << ofGetFrameNum() << "\t" << "fgMediaFadedIn   " << (**it).file;
-//                 ofAddListener( (**it).fadeInEnd, this, &planeApp::fgMediaFadedIn );
-//                 ((**it).*((**it).introTransformation))();
-//             }
-//         }
-//     }
-// }
-
-// void planeApp::bgMediaFadedIn(int & trans) {
-//     ofLogNotice("TRANSITION") << "\t" << ofGetFrameNum() << "\t" << "bgMediaFadedIn";
-// }
 
 void planeApp::blobOnLost(int & blobID) {
     ofLogNotice("BLOB") << "\t" << ofGetFrameNum() << "\t" << blobID << " just got lost  (occl: " << blobs[blobID].occluded << ")";
@@ -1392,55 +1390,6 @@ void planeApp::blobOnCreate(int & blobID) {
 //
 void planeApp::positionRevolutions() {
 
-    // if (fgMedia.size()>=5 ) {
-    //     // REVOLUTION
-
-    //     // there should only be 5 fgMedia elements
-    //     for (unsigned int i=0; i<fgMedia.size(); i++) {
-    //         bool prevHide = (*fgMedia[i]).hide;
-    //         (*fgMedia[i]).hide = true;
-    //         if (i < planetCnt) {
-    //             (*fgMedia[i]).hide = false;
-    //             // (*fgMedia[i]).fadeIn();
-    //         } else {
-    //             if (prevHide != true) {
-    //                 // (*fgMedia[i]).fadeOut();
-    //             }
-    //         }
-    //         (*fgMedia[i]).rotation = 0;
-    //     }
-
-    //     // positioning
-    //     switch (planetCnt) {
-    //         case 1:     (*fgMedia[0]).setDisplay(projectionW/2, projectionH/2, true);
-    //                     break;
-    //         case 2:     (*fgMedia[0]).setDisplay(projectionW/2, projectionH/2 - 350, true);
-    //                     (*fgMedia[1]).setDisplay(projectionW/2, projectionH/2 + 350, true);
-    //                     break;
-    //         case 3:     (*fgMedia[0]).setDisplay(projectionW/2, projectionH/2 - 550, true);
-    //                     (*fgMedia[1]).setDisplay(projectionW/2, projectionH/2, true);
-    //                     (*fgMedia[2]).setDisplay(projectionW/2, projectionH/2 + 550, true);
-    //                     break;
-    //         case 4:     (*fgMedia[0]).setDisplay(projectionW/2-100, projectionH/2 - 550, true);
-    //                     (*fgMedia[1]).setDisplay(projectionW/2+100, projectionH/2 - 200, true);
-    //                     (*fgMedia[2]).setDisplay(projectionW/2-100, projectionH/2 + 200, true);
-    //                     (*fgMedia[3]).setDisplay(projectionW/2+100, projectionH/2 + 550, true);
-    //                     break;
-    //         case 5:     (*fgMedia[0]).setDisplay(projectionW/2, projectionH/2, true);
-    //                     (*fgMedia[1]).setDisplay(projectionW/2-200, projectionH/2 - 350, true);
-    //                     (*fgMedia[1]).rotation = -45;
-    //                     (*fgMedia[2]).setDisplay(projectionW/2+200, projectionH/2 - 350, true);
-    //                     (*fgMedia[2]).rotation = 45;
-    //                     (*fgMedia[3]).setDisplay(projectionW/2-200, projectionH/2 + 350, true);
-    //                     (*fgMedia[3]).rotation = 45;
-    //                     (*fgMedia[4]).setDisplay(projectionW/2+200, projectionH/2 + 350, true);
-    //                     (*fgMedia[4]).rotation = -45;
-    //                     break;
-    //     }
-    // }
-
-    // SPIN TAKE 2
-
     if (fgMedia.size()>=1 ) {
         ofLogNotice("interaction") << "\t" << ofGetFrameNum() << "\t" << "positionRevolutions() \t planetCnt: " << planetCnt << " fgM: " << fgMedia.size();
         // REVOLUTION
@@ -1682,8 +1631,7 @@ void planeApp::endedInstructions(int & trans) {
     if (scene==IDLE) {                 // IDLE
 
         sceneChange = true;
-        int tmp = -1;
-        fgMediaFadedOut(tmp);
+        fgMediaFadedOut(scene);
 
     } else if (scene==STARS) {          // STARS
 
@@ -1691,17 +1639,8 @@ void planeApp::endedInstructions(int & trans) {
             moveOn = true;
         } else if (segment==1) {        // 1 - STAND STILL SOME MORE
             sceneChange = true;
-            int tmp = -1;
-
-            // fgMediaFadedOut(tmp);
-            //TODO clean
-            // make sure, all fgMedia (stars, bridges) disappears
-            for (vector<ofPtr<mediaElement> >::iterator it = fgMedia.begin(); it != fgMedia.end(); ++it) {
-                // if (!(**it).dead) ((((**it)).*((**it)).outroTransformation))();
-                (**it).dead = true;
-                // else ofLogNotice("TRANSITION") << "\t" << ofGetFrameNum() << "\t\t\t" << "can't outro dead video: " << (**it).file;
-            }
-            moveOn = true;
+            // fade out all stars and constellations, attach trigger
+            fgMediaFadedOut(scene); 
         }
 
     } else if (scene==ATTRACTION) {     // ATTRACTION
@@ -1710,15 +1649,11 @@ void planeApp::endedInstructions(int & trans) {
             moveOn = true;
         } else if (segment==1) {        // 1 - KEEP DISTANCE
             sceneChange = true;
+            // fade out all stars and bridges, no trigger
+            int tmp = -1;
+            fgMediaFadedOut(tmp); 
 
-            // make sure, all fgMedia (stars, bridges) disappears
-            for (vector<ofPtr<mediaElement> >::iterator it = fgMedia.begin(); it != fgMedia.end(); ++it) {
-                // if (!(**it).dead) ((((**it)).*((**it)).outroTransformation))();
-                (**it).dead = true;
-                // else ofLogNotice("TRANSITION") << "\t" << ofGetFrameNum() << "\t\t\t" << "can't outro dead video: " << (**it).file;
-            }
-
-            // play starry outro video
+            // play starry outro video, with trigger
             fgMedia.push_back(attraction_outro);
             (*fgMedia[fgMedia.size()-1]).setDisplay(projectionW/2,projectionH/2, true);
             (*fgMedia[fgMedia.size()-1]).reset();
@@ -1732,27 +1667,30 @@ void planeApp::endedInstructions(int & trans) {
     } else if (scene==REVOLUTIONS) {    // REVOLUTION
 
         if (segment==0) {               // 0 - SPIN
-            // don't move to LET GO if there are no more planets on the screen
+            // skip LET GO if there are no more planets on the screen
             if (planetCnt ==0) {
                 ofLogNotice("TRANSITION") << "\t" << ofGetFrameNum() << "\t" << "endSegment()   planetCnt 0 ";
                 segment+=2;
                 sceneChange = true;
-                bgMediaSwap(scene);
+                bgMediaSwap(scene);     // trigger sun-intro video
             } else {
                 moveOn = true;
                 ofLogNotice("TRANSITION") << "\t" << ofGetFrameNum() << "\t" << "endSegment()   planetCnt " << planetCnt;
             }
+
         } else if (segment==1) {        // 1 - LET GO
+
             sceneChange = true;
+            // fade out all planets, no trigger
+            int tmp = -1;
+            fgMediaFadedOut(tmp);
 
-            // make sure, all fgMedia (planets) disappears
-            for (vector<ofPtr<mediaElement> >::iterator it = fgMedia.begin(); it != fgMedia.end(); ++it) {
-                // if (!(**it).dead) ((((**it)).*((**it)).outroTransformation))();
-                if (!(**it).dead) (**it).fadeOut(0.3);
-            }
+            // FASTER FADEOUT, necessary? 
+            // for (vector<ofPtr<mediaElement> >::iterator it = fgMedia.begin(); it != fgMedia.end(); ++it) {
+            //     if (!(**it).dead) (**it).fadeOut(0.3);
+            // }
 
-            // trigger sun-intro video
-            bgMediaSwap(scene);
+            bgMediaSwap(scene);   // trigger sun-intro video
 
         }
 
@@ -1763,8 +1701,9 @@ void planeApp::endedInstructions(int & trans) {
         } else if (segment==1) {        // 1 - HOP
             moveOn = true;
         } else if (segment==2) {        // 2 - FREEZE
+
             if (success) {
-                // ALL FROZEN
+                // GOT HERE BECAUSE: ALL FROZEN
                 ofLogNotice("TRANSITION") << "\t" << ofGetFrameNum() << "\t" << "sunfreeze red";
                 int randomRedFreeze = ofRandom(sun_freeze_red.size());
                 fgMedia[0] = sun_freeze_red[randomRedFreeze];
@@ -1773,13 +1712,13 @@ void planeApp::endedInstructions(int & trans) {
                     (*fgMedia[0]).reset();
                     (*fgMedia[0]).finishMovie(1.0);
                     (*fgMedia[0]).movieEndTrigger=true;
-                    ofAddListener( (*fgMedia[fgMedia.size()-1]).fadeOutEnd, this, &planeApp::allFaded );  // WHY?
-                    // ofAddListener( (*fgMedia[fgMedia.size()-1]).fadeOutEnd, this, &planeApp::bgMediaSwap );  // WHY?
+                    ofAddListener( (*fgMedia[fgMedia.size()-1]).fadeOutEnd, this, &planeApp::allFaded );
                     transition = true;
                 } else {
                     moveOn = true;
                 }
             } else {
+                // GOT HERE BECAUSE TIME RAN OUT
                 moveOn = true;
             }
         } else if (segment==3) {        // 3 - RUN EVERYWHERE
@@ -1788,13 +1727,14 @@ void planeApp::endedInstructions(int & trans) {
                 for (int i=1; i<fgMedia.size(); i++) {
                     fgMedia[i]->dead = true;
                 }
-                fgMedia[0]->hide = false;
             }
+            // make sure yellow sun is displayed
+            fgMedia[0]->hide = false;
             moveOn = true;
         } else if (segment==4) {        // 4 - FREEZE
             sceneChange = true;
             if (success) {
-                // ALL FROZEN
+                // GOT HERE BECAUSE: ALL FROZEN
                 ofLogNotice("TRANSITION") << "\t" << ofGetFrameNum() << "\t" << "sunfreeze red";
                 int randomRedFreeze = ofRandom(sun_freeze_red.size());
                 fgMedia[0] = sun_freeze_red[randomRedFreeze];
@@ -1803,12 +1743,13 @@ void planeApp::endedInstructions(int & trans) {
                     (*fgMedia[0]).reset();
                     (*fgMedia[0]).autoDestroy(true);
                     (*fgMedia[0]).movieEndTrigger=true;
-                    ofAddListener( (*fgMedia[fgMedia.size()-1]).fadeOutEnd, this, &planeApp::fgMediaFadedOut );
+                    ofAddListener( (*fgMedia[fgMedia.size()-1]).fadeOutEnd, this, &planeApp::allFaded );
                     transition = true;
                 } else {
                     moveOn = true;
                 }
             } else {
+                // GOT HERE BECAUSE TIME RAN OUT
                 moveOn = true;
             }
         }
@@ -1829,26 +1770,8 @@ void planeApp::endedInstructions(int & trans) {
             moveOn = true;
         } else if (segment==6) {        // 6 - DISPERSE SLOWLY
             sceneChange = true;
-            // fade out all planets
-            // TODO CLEAN, fade out instead
-            // int i=0;
-            // if (fgMedia.size()>0) {
-            //     for (vector<ofPtr<mediaElement> >::iterator it = fgMedia.begin(); it != fgMedia.end(); ++it) {
-            //         if (!(**it).dead) {
-            //             ((((**it)).*((**it)).outroTransformation))();
-            //             if (i==0) {
-            //                 ofLogNotice("TRANSITION") << "\t" << ofGetFrameNum() << "\t" << "add allFaded listener";
-            //                 ofAddListener( (**it).fadeOutEnd, this, &planeApp::allFaded );
-            //             }
-            //         } else {
-            //             if (i==0) moveOn = true;
-            //         }
-            //         i++;
-            //     }
-            // } else {
-            //     moveOn=true;
-            // }
-            moveOn=true;
+            // fade out all planets, add trigger
+            fgMediaFadedOut(scene);
         }
 
     } else if (scene==SHOOTING) {       // SHOOTING STARS
@@ -2180,7 +2103,7 @@ void planeApp::draw(){
 
     // ofFill(); ofSetColor(255);
 
-    this->drawRawData(offsx, offsy, 0.5);
+    this->drawRawData(offsx, offsy, 0.5, true);
 
     offsy += 260 + 10;
     this->drawTopDown(offsx, offsy, 0.5, drawBlobDetail);
@@ -2203,10 +2126,6 @@ void planeApp::draw(){
     ofPushMatrix();
     ofTranslate(0,2100);
     ofRotateZ(-90);
-    // if (testMode) {
-    //     this->drawRawData(0, 50, 2);
-    //     this->drawTopDown(0, 850, 2, drawBlobDetail);
-    // } else this->drawScreen(0, 0, 1);
     this->drawScreen(0, 0, 1);
 }
 
@@ -2236,12 +2155,6 @@ void planeApp::drawScreen(int x, int y, float scale){
 
 
     // FOREGROUND VIDEOS
-
-    // foreground videos, with BLENDING
-    //  ofBlendMode {
-    //   OF_BLENDMODE_DISABLED = 0, OF_BLENDMODE_ALPHA = 1, OF_BLENDMODE_ADD = 2, OF_BLENDMODE_SUBTRACT = 3,
-    //   OF_BLENDMODE_MULTIPLY = 4, OF_BLENDMODE_SCREEN = 5
-    // }
     ofEnableBlendMode(OF_BLENDMODE_ADD);
     for (vector<ofPtr<mediaElement> >::iterator it = fgMedia.begin(); it != fgMedia.end(); ++it) {
         if (!(**it).dead && (**it).blend) (**it).draw(0, 0, 1);   //
@@ -2250,11 +2163,9 @@ void planeApp::drawScreen(int x, int y, float scale){
 
     // foreground videos, without BLENDING mode
     ofEnableAlphaBlending();
-    // ofEnableBlendMode(OF_BLENDMODE_ALPHA);
     for (vector<ofPtr<mediaElement> >::iterator it = fgMedia.begin(); it != fgMedia.end(); ++it) {
         if (!(**it).dead && !(**it).blend) (**it).draw(0, 0, 1);
     }
-    // ofDisableBlendMode();
     ofDisableAlphaBlending();
 
 
@@ -2264,11 +2175,12 @@ void planeApp::drawScreen(int x, int y, float scale){
         instructionVid->draw(projectionOffsetX,0,1);
         ofDisableBlendMode();
     } 
-    if (scenes[scene].instructionVid[language][segment][0].length() < 2) {
+
     // INSTRUCTION TEXT
+    if (scenes[scene].instructionVid[language][segment][0].length() < 2) {
         ofFill();
         if (scene==ECLIPSE && segment==SEG_FOLLOWME) {
-        // FOLLOW ME
+            // FOLLOW ME
             instructionTxt.draw(&fontBg, (*fgMedia[0]).position.x, 1742);
         } else {
             instructionTxt.draw(&fontBg, projectionW/2, 1742);
@@ -2287,9 +2199,10 @@ void planeApp::drawScreen(int x, int y, float scale){
 
     // extra debug information
     if (displayDebug) {
-        fontSm.drawString(scenes[scene].analysis[segment], 100, (projectionH-150));
+        // fontSm.drawString(scenes[scene].analysis[segment], 100, (projectionH-150));
         fontBg.drawString(ofToString(segmentClock), (projectionW-200), (projectionH-200));
         fontSm.drawString(ofToString(success ? "true" : "false"), (projectionW-200), (projectionH-150));
+        this->drawRawData(300, projectionH-200, -0.5, false);
     }
 
     ofPopMatrix();
@@ -2478,36 +2391,38 @@ void planeApp::drawControlInfo(int x, int y){
 
 // draw raw data / small display
 //--------------------------------------------------------------
-void planeApp::drawRawData(int x, int y, float scale){
+void planeApp::drawRawData(int x, int y, float scale, bool displayText){
 
 //    int blobserverW = 192;
 //    int blobserverH = 144;
 
     // frame first
     ofNoFill(); ofSetColor(255);
-    ofRect(x,y,blobserverW*scale,blobserverH*scale);
+    ofRect(x,y,blobserverW*scale,blobserverH*abs(scale));
 
-    // write information
-    string rawInfo = "port: \t\t" + ofToString(MYPORT);
-    rawInfo += "\nBLOBSERVER: \t" + ofToString(BLOBSERVERIP); //  + " (" + ofToString(BLOBPORT) + ")";
-    rawInfo += "\nosc active: \t" + ofToString(oscActive ? "true" : "false");
-    rawInfo += "\nosc last msg: \t" + ofToString(oscLastMsgTimer,2) + " sec";
-    rawInfo += "\nexposure: \t" + ofToString(cameraExposure,5);
-    // rawInfo += "\nbgs blob cnt: \t" + ofToString(bgsubtractorCnt);
-    // rawInfo += "\nbgs avg vel: \t" + ofToString(bgsubtractorAvVel,2);
-    rawInfo += "\nhog velocity: \t" + ofToString(hogAvVel,2);
-    ofDrawBitmapStringHighlight(rawInfo, x + 3, y + blobserverH*scale + 15);
+    if (displayText) {
+        // write information
+        string rawInfo = "port: \t\t" + ofToString(MYPORT);
+        rawInfo += "\nBLOBSERVER: \t" + ofToString(BLOBSERVERIP); //  + " (" + ofToString(BLOBPORT) + ")";
+        rawInfo += "\nosc active: \t" + ofToString(oscActive ? "true" : "false");
+        rawInfo += "\nosc last msg: \t" + ofToString(oscLastMsgTimer,2) + " sec";
+        rawInfo += "\nexposure: \t" + ofToString(cameraExposure,5);
+        // rawInfo += "\nbgs blob cnt: \t" + ofToString(bgsubtractorCnt);
+        // rawInfo += "\nbgs avg vel: \t" + ofToString(bgsubtractorAvVel,2);
+        rawInfo += "\nhog velocity: \t" + ofToString(hogAvVel,2);
+        ofDrawBitmapStringHighlight(rawInfo, x + 3, y + blobserverH*scale + 15);
+    }
 
     // draw frame for each blob. blobserver frame size = 64 x 128 px
     for(std::map<int, Blob>::iterator it = blobs.begin(); it != blobs.end(); ++it){
         Blob* b = &it->second;
-        ofRect( x + b->_rawPos.x*scale - blobW*scale/2.0, y + b->_rawPos.y*scale - blobH*scale*0.8, blobW*scale, blobH*scale);
+        ofRect( x + b->_rawPos.x*scale - blobW*scale/2.0, y + b->_rawPos.y*abs(scale) - blobH*scale*0.8, blobW*scale, blobH*abs(scale));
     }
 
     // draw steles
-    for (int i=0; i<8; i++) {
-        if (i==0) ofCircle(x + steles[i].x*scale, y + steles[i].y*scale, 5*scale, 5*scale);
-        else ofCircle(x + steles[i].x*scale, y + steles[i].y*scale, 10*scale, 10*scale);
+    for (int i=0; i<7; i++) {
+        if (i==0) ofCircle(x + steles[i].x*scale, y + steles[i].y*abs(scale), 5*scale, 5*abs(scale));
+        else ofCircle(x + steles[i].x*scale, y + steles[i].y*abs(scale), 10*scale, 10*abs(scale));
     }
 
 }
