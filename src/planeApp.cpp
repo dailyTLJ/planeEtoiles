@@ -377,9 +377,13 @@ void planeApp::initScenes(){
     idle.instructions[0][0] = "Come closer";
     idle.instructions[1][0] = "Approchez";
     idle.instructions[2][0] = "Approchez";
-    idle.instructionVid[0][0][0] = "video/text/LET_GO_5_intro-photoJPEG.mov"; // intro
-    idle.instructionVid[0][0][1] = "video/text/COME_CLOSER_4_loop-photoJPEG.mov"; // loop
-    idle.instructionVid[0][0][2] = "video/text/LET_GO_5_intro-photoJPEG.mov"; // outro
+    idle.instructionVid[0][0][0] = "video/text/COME_CLOSER_7_loop-photoJPEG.mov"; // intro
+    idle.instructionVid[0][0][1] = "video/text/COME_CLOSER_7_loop-photoJPEG.mov"; // loop
+    idle.instructionVid[0][0][2] = "video/text/COME_CLOSER_7_loop-photoJPEG.mov"; // outro
+
+    idle.instructionVid[1][0][0] = "video/text/COME_CLOSER_7_loop-photoJPEG.mov"; // intro
+    idle.instructionVid[1][0][1] = "video/text/COME_CLOSER_7_loop-photoJPEG.mov"; // loop
+    idle.instructionVid[1][0][2] = "video/text/COME_CLOSER_7_loop-photoJPEG.mov"; // outro
     idle.length[0] = -1;
     scenes[n] = idle;
 
@@ -468,15 +472,15 @@ void planeApp::initScenes(){
     // sun.length[2] = 20;
     sun.instructions[0][2] = "";
     // sun.instructionImg[0][2] = "FREEZE-BLACK.jpg";
-    sun.instructionVid[0][2][0] = "video/text/FREEZE_3_loop-photoJPEG.mov"; // intro
-    sun.instructionVid[0][2][1] = "video/text/FREEZE_3_loop-photoJPEG.mov"; // loop
-    sun.instructionVid[0][2][2] = "video/text/FREEZE_3_loop-photoJPEG.mov"; // outro
+    sun.instructionVid[0][2][0] = "video/text/FREEZE_4_loop-photoJPEG.mov"; // intro
+    sun.instructionVid[0][2][1] = "video/text/FREEZE_4_loop-photoJPEG.mov"; // loop
+    sun.instructionVid[0][2][2] = "video/text/FREEZE_4_loop-photoJPEG.mov"; // outro
     sun.instructions[1][2] = "";
     sun.instructions[2][2] = "";
     // sun.instructionImg[1][2] = "STOP-BLACK.jpg";
-    sun.instructionVid[1][2][0] = "video/text/FREEZE_3_loop-photoJPEG.mov"; // intro
-    sun.instructionVid[1][2][1] = "video/text/FREEZE_3_loop-photoJPEG.mov"; // loop
-    sun.instructionVid[1][2][2] = "video/text/FREEZE_3_loop-photoJPEG.mov"; // outro
+    sun.instructionVid[1][2][0] = "video/text/FREEZE_4_loop-photoJPEG.mov"; // intro
+    sun.instructionVid[1][2][1] = "video/text/FREEZE_4_loop-photoJPEG.mov"; // loop
+    sun.instructionVid[1][2][2] = "video/text/FREEZE_4_loop-photoJPEG.mov"; // outro
     sun.analysis[2] = "* hogAvVel < freezeAllMaxVel\n* segmentClock > 3\n-> 20 sec || all frozen";
     sun.length[2] = 20;
     sun.instructions[0][3] = "Run in every\ndirection at once.";
@@ -486,15 +490,15 @@ void planeApp::initScenes(){
     sun.length[3] = 40;
     sun.instructions[0][4] = "everyone";
     // sun.instructionImg[0][4] = "FREEZE-BLACK.jpg";
-    sun.instructionVid[0][4][0] = "video/text/FREEZE_3_loop-photoJPEG.mov"; // intro
-    sun.instructionVid[0][4][1] = "video/text/FREEZE_3_loop-photoJPEG.mov"; // loop
-    sun.instructionVid[0][4][2] = "video/text/FREEZE_3_loop-photoJPEG.mov"; // outro
+    sun.instructionVid[0][4][0] = "video/text/FREEZE_4_loop-photoJPEG.mov"; // intro
+    sun.instructionVid[0][4][1] = "video/text/FREEZE_4_loop-photoJPEG.mov"; // loop
+    sun.instructionVid[0][4][2] = "video/text/FREEZE_4_loop-photoJPEG.mov"; // outro
     sun.instructions[1][4] = "tout le monde";
     sun.instructions[2][4] = "tout le monde";
     // sun.instructionImg[1][4] = "STOP-BLACK.jpg";
-    sun.instructionVid[1][4][0] = "video/text/FREEZE_3_loop-photoJPEG.mov"; // intro
-    sun.instructionVid[1][4][1] = "video/text/FREEZE_3_loop-photoJPEG.mov"; // loop
-    sun.instructionVid[1][4][2] = "video/text/FREEZE_3_loop-photoJPEG.mov"; // outro
+    sun.instructionVid[1][4][0] = "video/text/FREEZE_4_loop-photoJPEG.mov"; // intro
+    sun.instructionVid[1][4][1] = "video/text/FREEZE_4_loop-photoJPEG.mov"; // loop
+    sun.instructionVid[1][4][2] = "video/text/FREEZE_4_loop-photoJPEG.mov"; // outro
     sun.analysis[4] = "* hogAvVel < freezeAllMaxVel\n* segmentClock > 3\n-> 20 sec || all frozen";
     sun.length[4] = 13;
     scenes[n] = sun;
@@ -513,8 +517,8 @@ void planeApp::initScenes(){
     eclipse.instructions[0][1] = "Follow me";
     eclipse.instructions[1][1] = "Suivez moi";
     eclipse.instructions[2][1] = "Suivez moi";
-    eclipse.analysis[1] = "\n-> 25 sec || sinus 0";
-    eclipse.length[1] = 25;
+    eclipse.analysis[1] = "\n-> 30sec || sinus 0";
+    eclipse.length[1] = 30;
     eclipse.instructions[0][2] = "Step out of the line";
     eclipse.instructions[1][2] = "Sortez de la file";
     eclipse.instructions[2][2] = "Sortez de la file";
@@ -560,15 +564,15 @@ void planeApp::initScenes(){
     shooting.length[1] = 15;
     shooting.instructions[0][2] = "";
     // shooting.instructionImg[0][2] = "look-at-the-sky-BLACK.jpg";
-    shooting.instructionVid[0][2][0] = "video/text/EXHALE_3_intro-photoJPEG.mov"; // intro
-    shooting.instructionVid[0][2][1] = "video/text/EXHALE_3_loop-photoJPEG.mov"; // loop
-    shooting.instructionVid[0][2][2] = "video/text/EXHALE_3_intro-photoJPEG.mov"; // outro
+    shooting.instructionVid[0][2][0] = "video/text/EXHALE_6_intro-photoJPEG.mov"; // intro
+    shooting.instructionVid[0][2][1] = "video/text/EXHALE_6_loop-photoJPEG.mov"; // loop
+    shooting.instructionVid[0][2][2] = "video/text/EXHALE_6_outro-photoJPEG.mov"; // outro
     shooting.instructions[1][2] = "";
     shooting.instructions[2][2] = "";
     // shooting.instructionImg[1][2] = "regardez-le-ciel-BLACK.jpg";
-    shooting.instructionVid[1][2][0] = "video/text/EXHALE_3_intro-photoJPEG.mov"; // intro
-    shooting.instructionVid[1][2][1] = "video/text/EXHALE_3_loop-photoJPEG.mov"; // loop
-    shooting.instructionVid[1][2][2] = "video/text/EXHALE_3_intro-photoJPEG.mov"; // outro
+    shooting.instructionVid[1][2][0] = "video/text/EXHALE_6_intro-photoJPEG.mov"; // intro
+    shooting.instructionVid[1][2][1] = "video/text/EXHALE_6_loop-photoJPEG.mov"; // loop
+    shooting.instructionVid[1][2][2] = "video/text/EXHALE_6_outro-photoJPEG.mov"; // outro
     shooting.analysis[2] = "- \n-> 15 sec";
     shooting.length[2] = 15;
     shooting.instructions[0][3] = "Stand up";
@@ -1018,7 +1022,9 @@ void planeApp::fgMediaFadedOut(int & trans) {
         if (scene==IDLE && (*bgMedia[bgMediaId]).mediaLoaded) {
             // make sure bgMedia is loaded, so the transition also works without the videofile
             ((*bgMedia[bgMediaId]).*((*bgMedia[bgMediaId]).outroTransformation))();
-        } else moveOn = true;
+        } else {
+            if (trans>0) moveOn = true;
+        }
     }
 }
 
@@ -1682,13 +1688,32 @@ void planeApp::endedInstructions(int & trans) {
 
             sceneChange = true;
             // fade out all planets, no trigger
-            int tmp = -1;
-            fgMediaFadedOut(tmp);
+            // int tmp = -1;
+            // fgMediaFadedOut(tmp);
 
             // FASTER FADEOUT, necessary? 
             // for (vector<ofPtr<mediaElement> >::iterator it = fgMedia.begin(); it != fgMedia.end(); ++it) {
             //     if (!(**it).dead) (**it).fadeOut(0.3);
             // }
+            // if (fgMedia.size()>0) {
+            //     for (unsigned int i=fgMedia.size()-1; i>=0; i--) {
+            //         ofLogNotice("interaction") << "\t" << ofGetFrameNum() << "\t" << "\ttake away planet " << i;
+            //         if (!(*fgMedia[i]).selfdestroy) {
+            //             (*fgMedia[i]).loadMovie("video/3_revolution/REV_OUT-photoJPEG.mov");
+            //             (*fgMedia[i]).reset(true);
+            //             (*fgMedia[i]).autoDestroy(true);
+            //         }
+            //     }
+            // }
+            for (vector<ofPtr<mediaElement> >::iterator it = fgMedia.begin(); it != fgMedia.end(); ++it) {
+                if (!(**it).dead) {
+                    if (!(**it).selfdestroy) {
+                        (**it).loadMovie("video/3_revolution/REV_OUT-photoJPEG.mov");
+                        (**it).reset(true);
+                        (**it).autoDestroy(true);
+                    }
+                }
+            }
 
             bgMediaSwap(scene);   // trigger sun-intro video
 
@@ -2416,7 +2441,7 @@ void planeApp::drawRawData(int x, int y, float scale, bool displayText){
     // draw frame for each blob. blobserver frame size = 64 x 128 px
     for(std::map<int, Blob>::iterator it = blobs.begin(); it != blobs.end(); ++it){
         Blob* b = &it->second;
-        ofRect( x + b->_rawPos.x*scale - blobW*scale/2.0, y + b->_rawPos.y*abs(scale) - blobH*scale*0.8, blobW*scale, blobH*abs(scale));
+        ofRect( x + b->_rawPos.x*scale - blobW*scale/2.0, y + b->_rawPos.y*abs(scale) - blobH*abs(scale)*0.8, blobW*scale, blobH*abs(scale));
     }
 
     // draw steles

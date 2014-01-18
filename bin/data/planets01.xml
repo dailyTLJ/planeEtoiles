@@ -4,7 +4,7 @@
 
 	<testMode>0</testMode>
 
-	<displayDebug>0</displayDebug>
+	<displayDebug>1</displayDebug>
 
 	<Min_LostTime>1</Min_LostTime>
 
@@ -108,7 +108,7 @@
 
 		<Alignm_Transition>3</Alignm_Transition>
 
-		<followMeSpeed>0.0117347</followMeSpeed>
+		<followMeSpeed>0.00928571</followMeSpeed>
 
 		<followMeRadius>303</followMeRadius>
 
@@ -121,4 +121,6 @@
 	</Sc6_Combustion>
 
 <HUMANS_AND_PLANETS/>
+<Instruct_Fade_In>0.1</Instruct_Fade_In>
+	<Instruct_Fade_Out>0.1</Instruct_Fade_Out>
 </HUMANS_AND_PLANETS>
