@@ -83,6 +83,7 @@ void planeApp::setup(){
     activityCnt = 0;
 	drawBlobDetail = false;
     transition = false;
+    drawDebugScreen = false;
     moveOn = false;
     sceneChange = false;
     flash = false;
@@ -98,8 +99,8 @@ void planeApp::setup(){
     projectionW = 1200;
     projectionH = 1920;
     projectionOffsetX = 60;
-    blobserverW = 540;
-    blobserverH = 300;
+    blobserverW = 600;
+    blobserverH = 350;
     blobW = 80;
     blobH = 160;
 
@@ -234,6 +235,7 @@ void planeApp::setup(){
 
 
     instructionTxt.setText("test", "test");
+    instructionTxt.opacity = 0.0;
     instructionImg.loadImage("img/placeholder_letgo.jpg");
 
     // load instruction-video placeholder
@@ -1128,7 +1130,7 @@ void planeApp::blobSteady(Pair & pair) {
                 ofLogNotice("BLOB") << "\t" << ofGetFrameNum()  << "\t\t\t" << "add video bridge";
                 float distance = ofDist(b1->position.x, b1->position.y, b2->position.x, b2->position.y);
                 int distId = 1;
-                if (distance < 150 ) distId = 3;
+                if (distance < 150 ) distId = 2;    // TODO fix LINK_03 vid
                 else if (distance < 300) distId = 2;
                 string newVideoName = "video/2_stars/LINK_0" + ofToString(distId) + "-loop-photoJPEG.mov";
                 fgMedia.push_back(ofPtr<mediaElement>( new videoElement(newVideoName)));
@@ -1470,7 +1472,7 @@ void planeApp::videoFollowBlob(int & blobID) {
                 p = blobMapToScreen(blobs[blobID].position);
             }
 
-            if (!transition) {
+            if (!transition || (transition && scene==ECLIPSE)) {
                 // set position
                 if (!(*vid).moveElement) {
                     (*vid).setDisplay( p, true);
@@ -1541,7 +1543,10 @@ void planeApp::blobUnlink(int & blobID) {
             if (scene==STARS) {
                 // STARS: fade out frozen stars
                 (**it).fadeOut(0.001, 0.5, true);
-                ofLogNotice("BLOB") << "\t" << ofGetFrameNum() << "\t" << "\t\t\tunlinked blob and fadeOut ";
+                ofLogNotice("BLOB") << "\t" << ofGetFrameNum() << "\t" << "\t\t\tunlinked stars and fadeOut ";
+            } else if (scene==ECLIPSE) {
+                (**it).fadeOut(0.05, 1.0, true);
+                ofLogNotice("BLOB") << "\t" << ofGetFrameNum() << "\t" << "\t\t\tunlinked planet and fadeOut ";
             } else {
                 (**it).dead = true;
                 ofLogNotice("BLOB") << "\t" << ofGetFrameNum() << "\t" << "\t\t\tunlinked blob ";
@@ -1616,7 +1621,7 @@ void planeApp::endSegment() {
     transition = true;
 
     // end instructions:
-    if (scene==SUN && (segment==4 || segment==6)) {
+    if (scene==SUN && (segment==2 || segment==4)) {
         // FREEZE, keep instruction videos on, on red sun
         endedInstructions(scene);
     } else if (instructionVid->mediaLoaded) {
@@ -1631,7 +1636,7 @@ void planeApp::endSegment() {
         } else {
             if (scene==IDLE) {
                 // fade out COME CLOSER
-                instructionVid->fadeOut(0.1);
+                instructionVid->fadeOut(0.04);
                 ofAddListener( instructionVid->fadeOutEnd, this, &planeApp::endedInstructions );
             } else {
                 // hard cut
@@ -1650,7 +1655,10 @@ void planeApp::endedInstructions(int & trans) {
     ofLogNotice("TRANSITION") << "\t" << ofGetFrameNum() << "\t" << "endedInstructions()";
 
     // better remove these
-    if (!(scene==SUN && (segment==4 || segment==6))) instructionVid->mediaLoaded = false;
+    if (!(scene==SUN && (segment==2 || segment==4))) {
+        instructionVid->mediaLoaded = false;
+        ofLogNotice("TRANSITION") << "\t" << "mediaLoaded false";
+    }
     ofRemoveListener( instructionVid->fadeOutEnd, this, &planeApp::endedInstructions );
     ofRemoveListener( instructionTxt.fadeOutEnd, this, &planeApp::endedInstructions );
 
@@ -1929,6 +1937,7 @@ void planeApp::initSegment(){
     // hack to allow for french-accented letters to produce correct center-align text-block width
     if(language==1) measureInst = scenes[scene].instructions[2][segment];
     instructionTxt.setText(instruction, measureInst);
+    instructionTxt.opacity = 0.f;
 
 
     // INSTRUCTION IMAGE, if present
@@ -2158,18 +2167,20 @@ void planeApp::draw(){
 
     // ofFill(); ofSetColor(255);
 
-    this->drawRawData(offsx, offsy, 0.5, true);
+    if (drawDebugScreen) this->drawRawData(offsx, offsy, 0.45, true);
 
     offsy += 260 + 10;
-    this->drawTopDown(offsx, offsy, 0.5, drawBlobDetail);
+    if (drawDebugScreen) this->drawTopDown(offsx, offsy, 0.5, drawBlobDetail);
 
     offsy = 10;
     offsx += 280;
-    this->drawAnalysis(offsx, offsy, 0.35);
+    if (drawDebugScreen) this->drawAnalysis(offsx, offsy, 0.35);
 
     offsy = 10;
     offsx += 370;
-    this->drawScreen(offsx, offsy, 0.35);
+
+    if (drawDebugScreen) this->drawScreen(offsx, offsy, 0.35);
+
 
     offsx += 430;
     this->drawControlInfo(offsx, offsy);
@@ -2227,7 +2238,7 @@ void planeApp::drawScreen(int x, int y, float scale){
     // INSTRUCTION VIDEOS
     if (instructionVid->mediaLoaded) {
         ofEnableBlendMode(OF_BLENDMODE_ADD);
-        instructionVid->draw(projectionOffsetX,0,1);
+        instructionVid->draw(0,0,1);
         ofDisableBlendMode();
     } 
 
@@ -2257,7 +2268,7 @@ void planeApp::drawScreen(int x, int y, float scale){
         // fontSm.drawString(scenes[scene].analysis[segment], 100, (projectionH-150));
         fontBg.drawString(ofToString(segmentClock), (projectionW-200), (projectionH-200));
         fontSm.drawString(ofToString(success ? "true" : "false"), (projectionW-200), (projectionH-150));
-        this->drawRawData(300, projectionH-200, -0.5, false);
+        this->drawRawData(330, projectionH-200, -0.5, false);
     }
 
     ofPopMatrix();
@@ -2735,12 +2746,16 @@ void planeApp::sendOscMsgToHog(string addr, string v1, float v2) {
 //--------------------------------------------------------------
 void planeApp::keyReleased(int key){
 
-    if (key == 'd') {
+    if (key == 'm') {
         // drawBlobDetail = !drawBlobDetail;
-        cout << "print debug info" << endl;
-        printDebugInfo();
+        // cout << "print debug info" << endl;
+        // printDebugInfo();
+        
+        drawDebugScreen = !drawDebugScreen;
     }
-
+    if (key =='d') {
+        displayDebug = !displayDebug;
+    }
     if (key == 'b') {
         drawBridge = !drawBridge;
     }

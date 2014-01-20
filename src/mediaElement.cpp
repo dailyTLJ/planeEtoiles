@@ -68,7 +68,7 @@ void mediaElement::update(float updateRate) {
     }
     if (fading) {
         opacity += opacityChange * updateRate;
-        // ofLogNotice("mediaElement") << "update opacity > " << opacity;
+        // ofLogNotice("mediaElement") << ofGetFrameNum() << "\t"  << "update opacity > " << opacity;
         if (opacityChange>0 && opacity >= 1.0f) {
             opacity = 1.f;
             fading = false;
@@ -176,6 +176,7 @@ void mediaElement::moveInFromSide(int centerx, int centery) {
 }
 
 void mediaElement::fade(float speed) {
+    // ofLogNotice("mediaElement") << ofGetFrameNum() << "\t"  << "fade() opacity = " << opacity;
     fading = true;
     opacityChange = speed;
     // cout << "fade = true" << endl;
@@ -206,6 +207,7 @@ void mediaElement::fadeOut(float speed, float op, bool destroy) {
 }
 
 void mediaElement::fadeIn(float speed) {
+    ofLogNotice("mediaElement") << ofGetFrameNum() << "\t"  << "fadeIn at: " << speed;
     opacity = 0.0f;
     fade(speed);
 }

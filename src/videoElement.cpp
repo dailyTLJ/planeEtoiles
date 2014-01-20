@@ -91,8 +91,8 @@ void videoElement::update(float updateRate) {
                 }
             } else if (this->movieEndTrigger && loopFile!="") {
                 play(true);
-                movie->update();
-                hide = true;
+                // movie->update();
+                // hide = true;
                 ofLogNotice("videoElement") << ofGetFrameNum() << "\t" << "movieisdone, loopfile\t" << loopFile;
                 loadLoopFileNow = true;
                 // loadMovie(loopFile);

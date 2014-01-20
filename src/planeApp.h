@@ -175,6 +175,7 @@ class planeApp : public ofBaseApp{
 
 		int shootingPointer;
 
+		bool drawDebugScreen;
 		bool drawBridge;
 		float bridgeX;
 		float bridgeY;
