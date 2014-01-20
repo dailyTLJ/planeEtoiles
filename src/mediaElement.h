@@ -84,6 +84,7 @@ class mediaElement
 
         ofEvent<int> fadeOutEnd;
         ofEvent<int> fadeInEnd;
+        ofEvent<int> playLoop;
 
         ofPtr<ofVideoPlayer> movie;
 

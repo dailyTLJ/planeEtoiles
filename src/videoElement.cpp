@@ -67,6 +67,7 @@ void videoElement::update(float updateRate) {
             hide = false;
             loopFile = "";
             play(true);
+            ofNotifyEvent(playLoop,this->w,this);
         }
         if (setFileDeadNow) {
             setFileDeadNow = false;
@@ -201,7 +202,7 @@ void videoElement::moveAcross(float vx, float vy, int maxw, int maxh, bool destr
 
 
     ofLogNotice("videoElement") << ofGetFrameNum() << "\t" << "moveAcross()\t >>> " << rotation ;
-    float v = 45;
+    float v = 45 + ofRandom(20);
     int maxRadius = max(maxw/2, maxh/2);
     this->position.set( maxw/2 - maxRadius*1.5 * sin(ofDegToRad(rotation)), maxh/2 + maxRadius*1.5 * cos(ofDegToRad(rotation)) );
     // slightly random, to avoid that all are flying perfectly through the center point of the screen

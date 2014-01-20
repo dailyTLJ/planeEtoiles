@@ -101,6 +101,7 @@ class planeApp : public ofBaseApp{
 		// void bgMediaFadedIn(int & trans);	// 7. reinit blobs, introtransformation of videos
 		// void fgMediaFadedIn(int & trans);
 		void unHideSun(int & trans);
+		void placeInstruction(int & trans);
 
 		void keyPressed(int key);
 		void keyReleased(int key);
