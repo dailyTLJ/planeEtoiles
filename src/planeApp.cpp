@@ -36,8 +36,8 @@ void planeApp::setup(){
     ofSetLogLevel("TRANSITION", OF_LOG_NOTICE);
     ofSetLogLevel("OSC", OF_LOG_WARNING);
     ofSetLogLevel("interaction", OF_LOG_NOTICE);
-    ofSetLogLevel("videoElement", OF_LOG_WARNING);
-    ofSetLogLevel("mediaElement", OF_LOG_WARNING);
+    ofSetLogLevel("videoElement", OF_LOG_NOTICE);
+    ofSetLogLevel("mediaElement", OF_LOG_NOTICE);
 
 
 
@@ -64,7 +64,7 @@ void planeApp::setup(){
     ofLogNotice("START") << "\t" << ofGetFrameNum() << "\t" << "1";
     projectorOn = (ofGetWindowMode() == OF_FULLSCREEN) ? true : false;
     // projectorOn = false;
-    language = 0;
+    language = 1;
     languageCnt = 0;
     processing = true;
     oscMsgReceived = false;
@@ -89,7 +89,7 @@ void planeApp::setup(){
     sceneChange = false;
     flash = false;
     flashCnt = 0;
-    flashMax = 20;
+    flashMax = 2;
     bgMediaId = 0;
     pickPlanet = 0;
 
@@ -331,11 +331,11 @@ void planeApp::initScenes(){
 
     attraction_outro = ofPtr<mediaElement>( new videoElement("video/2_stars/ATTRACTION_outro-photoJPEG.mov"));
     sun_jump = ofPtr<mediaElement>( new videoElement("video/4_sun/SUN_stand_jump-loop_4-qtPNG.mov",false));
-    sun_run = ofPtr<mediaElement>( new videoElement("video/4_sun/SUN_run_loop-1-qtPNG.mov",false));
+    sun_run = ofPtr<mediaElement>( new videoElement("video/4_sun/SUN_run_loop-4-qtPNG.mov",false));
     sun_freeze_red.push_back( ofPtr<mediaElement>( new videoElement("video/4_sun/SUN_freeze_1-qtPNG.mov",false)));
-    sun_freeze_red.push_back( ofPtr<mediaElement>( new videoElement("video/4_sun/SUN_freeze_2-qtPNG.mov",false)));
-    sun_freeze_red.push_back( ofPtr<mediaElement>( new videoElement("video/4_sun/SUN_freeze_3-qtPNG.mov",false)));
-    sun_freeze_red.push_back( ofPtr<mediaElement>( new videoElement("video/4_sun/SUN_freeze_4-qtPNG.mov",false)));
+    // sun_freeze_red.push_back( ofPtr<mediaElement>( new videoElement("video/4_sun/SUN_freeze_2-qtPNG.mov",false)));
+    // sun_freeze_red.push_back( ofPtr<mediaElement>( new videoElement("video/4_sun/SUN_freeze_3-qtPNG.mov",false)));
+    // sun_freeze_red.push_back( ofPtr<mediaElement>( new videoElement("video/4_sun/SUN_freeze_4-qtPNG.mov",false)));
 
     // PRELOAD BLUE SURFACE VIDS = seems to slow down FPS
     // for (int i=1; i<13; i++) {
@@ -355,7 +355,7 @@ void planeApp::initScenes(){
     // planet_animated.push_back( ofPtr<mediaElement>( new videoElement("video/5_eclipse/P_22-qtPNG.mov")));
     // planet_animated.push_back( ofPtr<mediaElement>( new videoElement("video/5_eclipse/P_23-qtPNG.mov")));
 
-    for (int i=0; i<50; i++) {
+    for (int i=0; i<26; i++) {
         int randomShooter = ofRandom(26) + 1;
         if (randomShooter == 18 || randomShooter==26) randomShooter = 10;
         shooting_stars.push_back(ofPtr<mediaElement>( new videoElement("video/6_shooting/SSTAR_" + ofToString(randomShooter,2,'0') + "-photoJPEG.mov")));
@@ -668,22 +668,26 @@ void planeApp::update(){
         masterClock = ofGetUnixTime() - globalStart;
         segmentClock = ofGetUnixTime() - segmentStart;
         lastActivity = ofGetUnixTime() - lastActivityClock;
-        if (flash) {
-            flashCnt++;
-            if (flashCnt > flashMax) {
-                flashCnt = 0;
-                flash = false;
-                beginSegment();
-            }
-        }
+        // if (flash) {
+        //     flashCnt++;
+        //     if (flashCnt > flashMax) {
+        //         flashCnt = 0;
+        //         flash = false;
+        //         beginSegment();
+        //     }
+        // }
         // TIME TRIGGERS
         if (autoplay && scenes[scene].length[segment] > 0 && segmentClock >= scenes[scene].length[segment] && !transition) {
             endSegment();
         }
         // FAIL SAVE TIME TRIGGER
-        if (autoplay && scenes[scene].length[segment] > 0 && segmentClock >= scenes[scene].length[segment]*3) {
-            ofLogError("TRANSITION") << "\t" << ofGetFrameNum() << "\t" << "FORCE transition change, because segmentClock>3*max";
-            endSegment();
+        if (autoplay && scenes[scene].length[segment] > 0 && segmentClock >= scenes[scene].length[segment]+10) {
+            // ofLogError("TRANSITION") << "\t" << ofGetFrameNum() << "\t" << "FORCE transition change, because segmentClock>+15";
+            // endSegment();
+        }
+        if (autoplay && scenes[scene].length[segment] > 0 && segmentClock >= scenes[scene].length[segment]*20) {
+            ofLogError("TRANSITION") << "\t" << ofGetFrameNum() << "\t" << "FORCE transition change, because segmentClock>+20";
+            moveOn = true;
         }
         // triggered by the end of fading out the bg
         if (moveOn) {
@@ -823,9 +827,9 @@ void planeApp::update(){
                 if (hogAvVel > runHogThr || activityCnt > runActThr) {
                     // activity!
                     // int rndBlueSun = ofRandom(sun_surface_blue.size());
-                    int rndBlueSun = ofRandom(12) + 1;
-                    // fgMedia.push_back(sun_surface_blue[rndBlueSun]);   // photoJPEG   SUN_run_surface-1-blue-qtPNG.mov
-                    fgMedia.push_back(ofPtr<mediaElement>( new videoElement("video/4_sun/SUN_run_surface-"+ofToString(rndBlueSun)+"-blue-qtPNG.mov",false)));
+                    int rndBlueSun = ofRandom(3) + 1;
+                    // fgMedia.push_back(sun_surface_blue[rndBlueSun]);   // photoJPEG   SUN_run_surface-1-blue-qtPNG.mov  SUN_run_surface-1-blue-photoJPEG.mov
+                    fgMedia.push_back(ofPtr<mediaElement>( new videoElement("video/4_sun/SUN_run_surface-"+ofToString(rndBlueSun)+"-blue-photoJPEG.mov",true)));
                     (*fgMedia[fgMedia.size()-1]).setDisplay(projectionW/2,projectionH/2, true);
                     (*fgMedia[fgMedia.size()-1]).reset();
                     (*fgMedia[fgMedia.size()-1]).autoDestroy(true);
@@ -1041,7 +1045,7 @@ void planeApp::fgMediaFadedOut(int & trans) {
             // make sure bgMedia is loaded, so the transition also works without the videofile
             ((*bgMedia[bgMediaId]).*((*bgMedia[bgMediaId]).outroTransformation))();
         } else {
-            if (trans>0) moveOn = true;
+            if (trans>=0) moveOn = true;
         }
     }
 }
@@ -1464,11 +1468,11 @@ void planeApp::videoFollowBlob(int & blobID) {
         ofPoint p;
         if (vid != NULL) {
 
-            if (scene==ECLIPSE && segment>3 && segment<6) {
+            if (scene==ECLIPSE && segment>13 && segment<16) {
                 // PLANETS aligned on vertical, move up down
                 p.y = blobMapToScreen(blobs[blobID].position).x * (16.0/9.0);
                 p.x = offsetX + projectionW/2.0;
-            } else if (scene==ECLIPSE && segment<4) {
+            } else if (scene==ECLIPSE && segment<6) {
                 // PLANETS aligned on horizontal
                 p.y = projectionH/2;
                 p.x = blobMapToScreen(blobs[blobID].position).x * 0.8 + projectionW*0.1;
@@ -1629,7 +1633,7 @@ void planeApp::endSegment() {
         // FREEZE, keep instruction videos on, on red sun
         endedInstructions(scene);
     } else if (instructionVid->mediaLoaded) {
-        // COME CLOESR, LET GO, EXHALE
+        // COME CLOSER, LET GO, EXHALE
         if (scenes[scene].instructionVid[language][segment][2] != "") {
             // outro video
             instructionVid->loadMovie(scenes[scene].instructionVid[language][segment][2]);
@@ -1773,6 +1777,7 @@ void planeApp::endedInstructions(int & trans) {
                     (*fgMedia[0]).finishMovie(1.0);
                     (*fgMedia[0]).movieEndTrigger=true;
                     ofAddListener( (*fgMedia[fgMedia.size()-1]).fadeOutEnd, this, &planeApp::allFaded );
+                    ofLogNotice("TRANSITION") << "\t" << ofGetFrameNum() << "\t" << "play sun freeze red movie";
                     transition = true;
                 } else {
                     moveOn = true;
@@ -1881,7 +1886,7 @@ void planeApp::nextSegment() {
         segment = 0;
         if(scene >= scenes.size()) {
             languageCnt = (languageCnt+1>=languageRatio) ? 0 : languageCnt+1;
-            language = (languageCnt==0) ? 1 : 0;
+            language = (languageCnt==0) ? 0 : 1;
             if (blobsOnStage==0) scene = 0;
             else scene = 1;
         }
@@ -1932,7 +1937,7 @@ void planeApp::initSegment(){
     activityCnt = 0;
     followMe = -0.5;
     if (segment==0) planetCnt = 0;
-    flash = true;       //
+    // flash = true;       //
     segmentStart = ofGetUnixTime();
 
 
@@ -2037,6 +2042,8 @@ void planeApp::initSegment(){
     } else if (scene==SHOOTING && sceneChange) {
         shootingPointer = 0;
     }
+
+    beginSegment();
 
 }
 
@@ -2453,6 +2460,7 @@ void planeApp::drawControlInfo(int x, int y){
 
 
                        "\n\n\nTRANSITION\n" + "--------------\n"  + ofToString(transition ? "true" : "false") +
+                       "\n\n\nMOVEON\n" + "--------------\n"  + ofToString(moveOn ? "true" : "false") +
                        "\n\nSUCCESS\n" + "--------------\n"  + ofToString(success ? "true" : "false") +
                        "\n\nSUCCESS CNT\n" + "--------------\n"  + ofToString(successCnt) +
                        "\n\nACTIVITY CNT\n" + "--------------\n"  + ofToString(activityCnt) +
@@ -2796,6 +2804,10 @@ void planeApp::keyReleased(int key){
         //     ofSetWindowPosition(0,0);
         //     ofSetFullscreen(false);
         // }
+    }
+    if (key=='u') {
+        languageCnt = (languageCnt+1>=languageRatio) ? 0 : languageCnt+1;
+        language = (languageCnt==0) ? 0 : 1;
     }
 
     if (key=='p') {

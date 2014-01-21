@@ -66,9 +66,9 @@
 
 	<Sc2_Attraction>
 
-		<Dist_StdDev>12.7551</Dist_StdDev>
+		<Dist_StdDev>23.7245</Dist_StdDev>
 
-		<Movement_Thr>1.22449</Movement_Thr>
+		<Movement_Thr>0.811224</Movement_Thr>
 
 		<Dist_Reward>2</Dist_Reward>
 
