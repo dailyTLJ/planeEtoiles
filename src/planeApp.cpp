@@ -1356,13 +1356,13 @@ void planeApp::blobEnterStage(int & blobID) {
     } else if (scene==ECLIPSE && !transition) {
         // PLANETS
         ofLogNotice("BLOB") << "\t" << ofGetFrameNum() << "\t" << "blobEnterStage()\t\t" << blobID << " (planet)";
-        int planedId[] = { 6, 9, 13, 15, 18, 19,20, 22, 23 };
-        int planets = sizeof(planedId) / sizeof(planedId[0]);
+        // int planedId[] = { 6, 9, 13, 15, 18, 19,20, 22, 23 };
+        // int planets = sizeof(planedId) / sizeof(planedId[0]);
         pickPlanet++;
         // if (pickPlanet >= planets) pickPlanet = 0;
         if (pickPlanet > 24) pickPlanet = 0;
         // fgMedia.push_back(ofPtr<mediaElement>( new videoElement("video/5_eclipse/P_" + ofToString(planedId[pickPlanet])+"-qtPNG.mov", true)));
-        fgMedia.push_back(ofPtr<mediaElement>( new imageElement("video/5_eclipse/PLANET_" + ofToString(pickPlanet+1)+"png", true)));
+        fgMedia.push_back(ofPtr<mediaElement>( new imageElement("video/5_eclipse/PLANET_" + ofToString(pickPlanet+1)+".png", 0.5)));
         // fgMedia.push_back(planet_animated[pickPlanet]);
         blobs[blobID].mediaLink = fgMedia[fgMedia.size()-1];
         blobs[blobID].videoTrace = true;
