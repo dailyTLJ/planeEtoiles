@@ -393,7 +393,7 @@ void planeApp::initScenes(){
     stars.instructions[0][0] = "Stand still";
     stars.instructions[1][0] = "Ne bougez plus";
     stars.instructions[2][0] = "Ne bougez plus";
-    stars.analysis[0] = "* Velocity < FreezeMaxVel\n* frozenTimer > freezeMinTime\n-> 10 sec";
+    stars.analysis[0] = "* Velocity < FreezeMaxVel\n* frozenTimer > freezeMinTime\n-> 10 sec || all frozen";
     stars.length[0] = 5;
     stars.instructions[0][1] = "Try new spots\nto light up more stars";
     stars.instructions[1][1] = "Posez-vous à de nouveaux endroits\npour allumer de nouvelles étoiles";
@@ -699,9 +699,14 @@ void planeApp::update(){
                 endSegment();
             }
         } else if (scene==STARS) {
-            if (autoplay && segment==1 && successCnt > newStarMax && !transition && segmentClock > minSegmentLength) {
-                ofLogNotice("interaction") << "\t" << ofGetFrameNum() << "\t" << "scene " << scene << " segment 1 success";
-                endSegment();
+            if (autoplay && !transition && segmentClock > minSegmentLength) {
+                if (segment==0 && hogAvVel < freezeAllMaxVel) {
+                    ofLogNotice("interaction") << "\t" << ofGetFrameNum() << "\t" << "scene " << scene << " segment 0 success: all frozen";
+                    endSegment();
+                } else if (segment==1 && successCnt > newStarMax) {
+                    ofLogNotice("interaction") << "\t" << ofGetFrameNum() << "\t" << "scene " << scene << " segment 1 success: maxStarCnt";
+                    endSegment();
+                }
             }
         } else if (scene==REVOLUTIONS && segment==1) {
             if (autoplay && success && !transition && segmentClock > minSegmentLength) {
