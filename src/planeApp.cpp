@@ -2047,7 +2047,6 @@ void planeApp::initSegment(){
             fgMedia.push_back(ofPtr<mediaElement>( new imageElement("video/5_eclipse/WHITE_PLANET.png")));
             (*fgMedia[fgMedia.size()-1]).setDisplay( projectionW/2 + moonPosX, projectionH/2, true );
             (*fgMedia[fgMedia.size()-1]).reset();
-            // (*fgMedia[fgMedia.size()-1]).opacity = 0.8;
             (*fgMedia[fgMedia.size()-1]).fadeTo(0.8);
         } else if (segment==2) {
             (*fgMedia[0]).setDisplay( projectionW/2 + moonPosX, projectionH/2, true );
@@ -2169,7 +2168,8 @@ void planeApp::receiveOsc(){
             }
             // update blob with new values
             Blob* b = &blobs.find(blobid)->second;
-            b->follow(posx + blobW/2.0, posy + blobH*0.8, siteW, siteH, stageRadius, y_mean);
+            // multiply xy so that blobposition represents foot-position and not x/y of tracking window
+            b->follow(posx + blobW*0.95, posy + blobH*0.95, siteW, siteH, stageRadius, y_mean);
             b->setVelocity(velx, vely);
             // b->analyze(freezeMaxVel, freezeMinTime, freezeMaxTime, movingThr);    //
             b->age = age;
@@ -2275,7 +2275,7 @@ void planeApp::drawScreen(int x, int y, float scale){
         ofFill();
         if (scene==ECLIPSE && segment==SEG_FOLLOWME) {
             // FOLLOW ME
-            instructionTxt.draw(&fontBg, (*fgMedia[0]).position.x, 1742);
+            instructionTxt.draw(&fontBg, (*fgMedia[0]).position.x - moonPosX, 1742);
         } else {
             instructionTxt.draw(&fontBg, projectionW/2, 1742);
         }
@@ -2511,7 +2511,8 @@ void planeApp::drawRawData(int x, int y, float scale, bool displayText){
     // draw frame for each blob. blobserver frame size = 64 x 128 px
     for(std::map<int, Blob>::iterator it = blobs.begin(); it != blobs.end(); ++it){
         Blob* b = &it->second;
-        ofRect( x + b->_rawPos.x*scale - blobW*scale/2.0, y + b->_rawPos.y*abs(scale) - blobH*abs(scale)*0.8, blobW*scale, blobH*abs(scale));
+        ofRect( x + b->_rawPos.x*scale - blobW*scale/2.0, y + b->_rawPos.y*abs(scale) - blobH*abs(scale)*0.95, blobW*scale, blobH*abs(scale));
+        ofCircle(x + b->_rawPos.x*scale, y + b->_rawPos.y*abs(scale), 3*scale, 3*abs(scale));
     }
 
     // draw steles
