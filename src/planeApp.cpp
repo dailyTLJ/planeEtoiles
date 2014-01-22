@@ -355,7 +355,7 @@ void planeApp::initScenes(){
     // planet_animated.push_back( ofPtr<mediaElement>( new videoElement("video/5_eclipse/P_22-qtPNG.mov")));
     // planet_animated.push_back( ofPtr<mediaElement>( new videoElement("video/5_eclipse/P_23-qtPNG.mov")));
 
-    for (int i=0; i<26; i++) {
+    for (int i=0; i<75; i++) {
         int randomShooter = ofRandom(26) + 1;
         if (randomShooter == 18 || randomShooter==26) randomShooter = 10;
         shooting_stars.push_back(ofPtr<mediaElement>( new videoElement("video/6_shooting/SSTAR_" + ofToString(randomShooter,2,'0') + "-photoJPEG.mov")));
@@ -829,7 +829,7 @@ void planeApp::update(){
                     // int rndBlueSun = ofRandom(sun_surface_blue.size());
                     int rndBlueSun = ofRandom(3) + 1;
                     // fgMedia.push_back(sun_surface_blue[rndBlueSun]);   // photoJPEG   SUN_run_surface-1-blue-qtPNG.mov  SUN_run_surface-1-blue-photoJPEG.mov
-                    fgMedia.push_back(ofPtr<mediaElement>( new videoElement("video/4_sun/SUN_run_surface-"+ofToString(rndBlueSun)+"-blue-photoJPEG.mov",true)));
+                    fgMedia.push_back(ofPtr<mediaElement>( new videoElement("video/4_sun/SUN_run_surface-"+ofToString(rndBlueSun)+"-blue-qtPNG.mov",false)));
                     (*fgMedia[fgMedia.size()-1]).setDisplay(projectionW/2,projectionH/2, true);
                     (*fgMedia[fgMedia.size()-1]).reset();
                     (*fgMedia[fgMedia.size()-1]).autoDestroy(true);
@@ -847,13 +847,13 @@ void planeApp::update(){
             // FOLLOW ME
             followMe += followMeSpeed * updateRate;
             if (followMe >= 2*3.14) {
-                (*fgMedia[0]).position.x = projectionW/2;
+                (*fgMedia[0]).position.x = projectionW/2 + 40;
                 // planet back at center position, move on to next scene
                 if (followMe > 2*3.6 && autoplay && !transition) {
                     endSegment();
                 }
             } else if (followMe > 0) {
-                (*fgMedia[0]).position.x = projectionW/2 + sin(followMe) * followMeRadius;
+                (*fgMedia[0]).position.x = projectionW/2 + 40 + sin(followMe) * followMeRadius;
                 // position GLOW video, if exists
                 if (fgMedia.size() > 0) {
                     for (unsigned int i=1; i<fgMedia.size(); i++) {
@@ -1079,6 +1079,7 @@ void planeApp::blobOnLost(int & blobID) {
                 (*fgMedia[fgMedia.size()-1]).reset();
                 (*fgMedia[fgMedia.size()-1]).moveAcross( blobs[blobID].velocity.x, blobs[blobID].velocity.y, projectionW, projectionH, false);
                 (*fgMedia[fgMedia.size()-1]).autoDestroy(true);
+                (*fgMedia[fgMedia.size()-1]).movie->setSpeed(0.5);
             } else if (segment==1) {
                 float randdeg = ofRandom(-5.f, 5.f);
                 for (int i=0; i<10; i++) {
@@ -1088,6 +1089,7 @@ void planeApp::blobOnLost(int & blobID) {
                     (*fgMedia[fgMedia.size()-1]).reset();
                     (*fgMedia[fgMedia.size()-1]).moveAcross( randdeg, 45.f, projectionW, false);
                     (*fgMedia[fgMedia.size()-1]).autoDestroy(true);
+                    (*fgMedia[fgMedia.size()-1]).movie->setSpeed(0.5);
                 }
             }
         }
@@ -1381,7 +1383,7 @@ void planeApp::blobEnterStage(int & blobID) {
         if (segment==0 && segmentClock < alignmentTransition) {
             (*fgMedia[fgMedia.size()-1]).moveInFromSide(projectionW/2,projectionH/2);
         } else {
-            (*fgMedia[fgMedia.size()-1]).fadeIn(0.1);
+            // (*fgMedia[fgMedia.size()-1]).fadeIn(0.1);
         }
     }
 }
@@ -1553,7 +1555,8 @@ void planeApp::blobUnlink(int & blobID) {
                 (**it).fadeOut(0.001, 0.5, true);
                 ofLogNotice("BLOB") << "\t" << ofGetFrameNum() << "\t" << "\t\t\tunlinked stars and fadeOut ";
             } else if (scene==ECLIPSE) {
-                (**it).fadeOut(0.05, 1.0, true);
+                // (**it).fadeOut(0.05, 1.0, true);
+                (**it).dead = true;
                 ofLogNotice("BLOB") << "\t" << ofGetFrameNum() << "\t" << "\t\t\tunlinked planet and fadeOut ";
             } else {
                 (**it).dead = true;
@@ -2029,7 +2032,7 @@ void planeApp::initSegment(){
         if (sceneChange) {
             // ECLIPSE. create white/black MAIN PLANET
             fgMedia.push_back(ofPtr<mediaElement>( new imageElement("video/5_eclipse/WHITE_PLANET.png")));
-            (*fgMedia[fgMedia.size()-1]).setDisplay( projectionW/2, projectionH/2, true );
+            (*fgMedia[fgMedia.size()-1]).setDisplay( projectionW/2 + 40, projectionH/2, true );
             (*fgMedia[fgMedia.size()-1]).reset();
             // (*fgMedia[fgMedia.size()-1]).opacity = 0.8;
             (*fgMedia[fgMedia.size()-1]).fadeTo(0.8);

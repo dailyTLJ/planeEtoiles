@@ -4,11 +4,11 @@
 
 	<testMode>0</testMode>
 
-	<displayDebug>0</displayDebug>
+	<displayDebug>1</displayDebug>
 
 	<Min_LostTime>1</Min_LostTime>
 
-	<inactivity_timer>30</inactivity_timer>
+	<inactivity_timer>200</inactivity_timer>
 
 	<Min_Segm_Length>3</Min_Segm_Length>
 
@@ -20,7 +20,7 @@
 
 		<Site_Length>500</Site_Length>
 
-		<Stage_Radius>242</Stage_Radius>
+		<Stage_Radius>359</Stage_Radius>
 
 		<Map_Width>2.36735</Map_Width>
 
@@ -66,9 +66,9 @@
 
 	<Sc2_Attraction>
 
-		<Dist_StdDev>23.7245</Dist_StdDev>
+		<Dist_StdDev>50</Dist_StdDev>
 
-		<Movement_Thr>0.811224</Movement_Thr>
+		<Movement_Thr>0.596939</Movement_Thr>
 
 		<Dist_Reward>2</Dist_Reward>
 
@@ -80,9 +80,9 @@
 
 		<spinJudgeTime>53</spinJudgeTime>
 
-		<spinSuccess>3</spinSuccess>
+		<spinSuccess>4</spinSuccess>
 
-		<spinFailure>2</spinFailure>
+		<spinFailure>3</spinFailure>
 
 	</Sc3_Revolutions>
 
@@ -92,13 +92,13 @@
 
 		<FreezeAllMaxVel>0.596939</FreezeAllMaxVel>
 
-		<runJudgeTime>75</runJudgeTime>
+		<runJudgeTime>50</runJudgeTime>
 
 		<runHogThr>2.14286</runHogThr>
 
 		<runBgsThr>8</runBgsThr>
 
-		<runActThr>2</runActThr>
+		<runActThr>4</runActThr>
 
 	</Sc4_Sun>
 
@@ -116,7 +116,7 @@
 
 	<Sc6_Combustion>
 
-		<MinLost_SHOOT>1</MinLost_SHOOT>
+		<MinLost_SHOOT>2</MinLost_SHOOT>
 
 	</Sc6_Combustion>
 
