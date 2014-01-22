@@ -10,7 +10,7 @@ std::ostream& tcout() {
 //--------------------------------------------------------------
 void planeApp::setup(){
 
-    ofSetFrameRate(30);
+    ofSetFrameRate(5);
     
     ofSetLogLevel(OF_LOG_WARNING);
 
@@ -502,45 +502,59 @@ void planeApp::initScenes(){
 
     n++;
 
+    int s = 0;
     sceneInfo eclipse;
     eclipse.name = "Eclipse";
     eclipse.no = n;
-    eclipse.segments = 7;
-    eclipse.instructions[0][0] = "Now line-up in\nfront of me";
-    eclipse.instructions[1][0] = "Faites une file face à moi";
-    eclipse.instructions[2][0] = "Faites une file face a moi";
-    eclipse.analysis[0] = "- \n-> 10 sec";
-    eclipse.length[0] = 10;
-    eclipse.instructions[0][1] = "Follow me";
-    eclipse.instructions[1][1] = "Suivez moi";
-    eclipse.instructions[2][1] = "Suivez moi";
-    eclipse.analysis[1] = "\n-> 30sec || sinus 0";
-    eclipse.length[1] = 30;
-    eclipse.instructions[0][2] = "Step out of the line";
-    eclipse.instructions[1][2] = "Sortez de la file";
-    eclipse.instructions[2][2] = "Sortez de la file";
-    eclipse.analysis[2] = "\n-> 10 sec || out of line";
-    eclipse.length[2] = 7;
-    eclipse.instructions[0][3] = "Step into the line";
-    eclipse.instructions[1][3] = "Revenez dans la file";
-    eclipse.instructions[2][3] = "Revenez dans la file";
-    eclipse.analysis[3] = "* x == main.x\n-> 10 sec || in line";
-    eclipse.length[3] = 7;
-    eclipse.instructions[0][4] = "Step out of the line";
-    eclipse.instructions[1][4] = "Sortez de la file";
-    eclipse.instructions[2][4] = "Sortez de la file";
-    eclipse.analysis[4] = "\n-> 10 sec || out of line";
-    eclipse.length[4] = 7;
-    eclipse.instructions[0][5] = "Step into the line";
-    eclipse.instructions[1][5] = "Revenez dans la file";
-    eclipse.instructions[2][5] = "Revenez dans la file";
-    eclipse.analysis[5] = "* x == main.x\n-> 10 sec || in line";
-    eclipse.length[5] = 7;
-    eclipse.instructions[0][6] = "Disperse very slowly\ntowards the edges";
-    eclipse.instructions[1][6] = "Dispersez-vous\ntrès lentement";
-    eclipse.instructions[2][6] = "Dispersez-vous\ntres lentement";
-    eclipse.analysis[6] = "* edge-proximity = opacity\n-> 15 sec";
-    eclipse.length[6] = 15;
+    eclipse.segments = 8;
+    s = 0;
+    eclipse.instructions[0][s] = "Now line-up in\nfront of me";
+    eclipse.instructions[1][s] = "Faites une file face à moi";
+    eclipse.instructions[2][s] = "Faites une file face a moi";
+    eclipse.analysis[s] = "- \n-> 10 sec";
+    eclipse.length[s] = 10;
+    s = 1;
+    eclipse.instructions[0][s] = "Follow me";
+    eclipse.instructions[1][s] = "Suivez moi";
+    eclipse.instructions[2][s] = "Suivez moi";
+    eclipse.analysis[s] = "\n-> 30sec || sinus 0";
+    eclipse.length[s] = 30;
+    s = 2;
+    eclipse.instructions[0][s] = "Get back into the line";
+    eclipse.instructions[1][s] = "Refaites une file";
+    eclipse.instructions[2][s] = "Refaites une file";
+    eclipse.analysis[s] = "* x == main.x\n-> 7 sec";
+    eclipse.length[s] = 7;
+    s = 3;
+    eclipse.instructions[0][s] = "Step out of the line";
+    eclipse.instructions[1][s] = "Sortez de la file";
+    eclipse.instructions[2][s] = "Sortez de la file";
+    eclipse.analysis[s] = "\n-> 7 sec ";
+    eclipse.length[s] = 7;
+    s = 4;
+    eclipse.instructions[0][s] = "Step into the line";
+    eclipse.instructions[1][s] = "Revenez dans la file";
+    eclipse.instructions[2][s] = "Revenez dans la file";
+    eclipse.analysis[s] = "* x == main.x\n-> 7 sec";
+    eclipse.length[s] = 7;
+    s = 5;
+    eclipse.instructions[0][s] = "Step out of the line";
+    eclipse.instructions[1][s] = "Sortez de la file";
+    eclipse.instructions[2][s] = "Sortez de la file";
+    eclipse.analysis[s] = "\n-> 7 sec";
+    eclipse.length[s] = 7;
+    s = 6;
+    eclipse.instructions[0][s] = "Step into the line";
+    eclipse.instructions[1][s] = "Revenez dans la file";
+    eclipse.instructions[2][s] = "Revenez dans la file";
+    eclipse.analysis[s] = "* x == main.x\n-> 7 sec ";
+    eclipse.length[s] = 7;
+    s = 7;
+    eclipse.instructions[0][s] = "Disperse very slowly\ntowards the edges";
+    eclipse.instructions[1][s] = "Dispersez-vous\ntrès lentement";
+    eclipse.instructions[2][s] = "Dispersez-vous\ntres lentement";
+    eclipse.analysis[s] = "* edge-proximity = opacity\n-> 15 sec";
+    eclipse.length[s] = 15;
     scenes[n] = eclipse;
 
     n++;
@@ -735,12 +749,12 @@ void planeApp::update(){
             }
         } else if (scene==ECLIPSE) {
             if (autoplay && success && !transition && segmentClock > minSegmentLength ) {
-                if (segment==2 || segment==4) {
+                if (segment==3 || segment==5) {
                     // STEP OUT OF THE LINE
-                    if (blobsOnStage > 0 && !success) endSegment();
-                } else if (segment==3 || segment==5) {
+                    // if (blobsOnStage > 0 && !success) endSegment();
+                } else if (segment==2 || segment==4 || segment==6) {
                     // STEP INTO THE LINE
-                    if (success) endSegment();
+                    // if (success) endSegment();
                 }
             }
         }
@@ -855,34 +869,43 @@ void planeApp::update(){
                 }
             } else if (followMe > 0) {
                 (*fgMedia[0]).position.x = projectionW/2 + moonPosX + sin(followMe) * followMeRadius;
+                (*fgMedia[1]).position.x = (*fgMedia[0]).position.x;
                 // position GLOW video, if exists
-                if (fgMedia.size() > 0) {
-                    for (unsigned int i=1; i<fgMedia.size(); i++) {
-                        if ((*fgMedia[i]).file == "video/5_eclipse/LIGHT-photoJPEG.mov") {
-                            (*fgMedia[i]).position.x = (*fgMedia[0]).position.x;
-                        }
-                    }
-                }
+                // if (fgMedia.size() > 0) {
+                //     for (unsigned int i=1; i<fgMedia.size(); i++) {
+                //         if ((*fgMedia[i]).file == "video/5_eclipse/LIGHT-photoJPEG.mov") {
+                //             (*fgMedia[i]).position.x = (*fgMedia[0]).position.x;
+                //         }
+                //     }
+                // }
             }
         }
 
-        if ( scene==ECLIPSE && segment<6 && !transition && segmentClock > minSegmentLength && blobsOnStage>0) {
+        if ( scene==ECLIPSE && segment<scenes[scene].segments-1 && !transition && segmentClock > minSegmentLength && blobsOnStage>0) {
 
             // check if all are aligned
             bool allAligned = allBlobsAlignedWith((*fgMedia[0]).position);
 
             if (allAligned) {
+                // (*fgMedia[1]).hide = false;
                 if (!success) {
-                    // aligned
+                //     // aligned
                     success = true;
-                    string alignmentGlow = "video/5_eclipse/LIGHT-photoJPEG.mov";
-                    fgMedia.push_back(ofPtr<mediaElement>( new videoElement(alignmentGlow, true) ));
-                    (*fgMedia[fgMedia.size()-1]).setDisplay((*fgMedia[0]).position.x, (*fgMedia[0]).position.y, true);
-                    (*fgMedia[fgMedia.size()-1]).reset(true);
-                    (*fgMedia[fgMedia.size()-1]).autoDestroy(true);
+                    // (*fgMedia[1]).fadeIn();
+                    (*fgMedia[1]).fadeOut(-0.1, (*fgMedia[1]).opacity, false);
+                //     string alignmentGlow = "video/5_eclipse/LIGHT-photoJPEG.mov";
+                //     fgMedia.push_back(ofPtr<mediaElement>( new videoElement(alignmentGlow, true) ));
+                //     (*fgMedia[fgMedia.size()-1]).setDisplay((*fgMedia[0]).position.x, (*fgMedia[0]).position.y, true);
+                //     (*fgMedia[fgMedia.size()-1]).reset(true);
+                //     (*fgMedia[fgMedia.size()-1]).autoDestroy(true);
                 }
             } else {
-                success = false;
+                // (*fgMedia[1]).hide = true;
+                if (success) {
+                    success = false;
+                    // (*fgMedia[1]).fadeOut();
+                    (*fgMedia[1]).fadeOut(0.1, (*fgMedia[1]).opacity, false);
+                }
             }
         }
 
@@ -1023,8 +1046,8 @@ void planeApp::fgMediaFadedOut(int & trans) {
         // FADE OUT ALL MEDIAelements AT ONCE
         bool attachedTrigger = false;
         for (vector<ofPtr<mediaElement> >::iterator it = fgMedia.begin(); it != fgMedia.end(); ++it) {
-            // they could already be dead, or fading
-            if (!(**it).dead && !(**it).fading) {
+            // they could already be dead, or fading, or hidden (eclipse glow)
+            if (!(**it).dead && !(**it).fading && !(**it).hide) {
                 // outro = usually fadeOut, fade ends with triggering fadeOutEnd event
                 ((((**it)).*((**it)).outroTransformation))();
                 // attache trigger to first non-dead element
@@ -1370,15 +1393,15 @@ void planeApp::blobEnterStage(int & blobID) {
         (*fgMedia[fgMedia.size()-1]).fadeIn();
         // (*fgMedia[fgMedia.size()-1]).outroTransformation = &mediaElement::scaleAway;
     } else if (scene==ECLIPSE && !transition && segment<scenes[scene].segments-1) {
-        // PLANETS
+        // PLANETS, not allowed to enter in 'disperse' segment
         ofLogNotice("BLOB") << "\t" << ofGetFrameNum() << "\t" << "blobEnterStage()\t\t" << blobID << " (planet)";
         // int planedId[] = { 6, 9, 13, 15, 18, 19,20, 22, 23 };
         // int planets = sizeof(planedId) / sizeof(planedId[0]);
         pickPlanet++;
         // if (pickPlanet >= planets) pickPlanet = 0;
-        if (pickPlanet > 24) pickPlanet = 0;
+        if (pickPlanet > 29) pickPlanet = 0;
         // fgMedia.push_back(ofPtr<mediaElement>( new videoElement("video/5_eclipse/P_" + ofToString(planedId[pickPlanet])+"-qtPNG.mov", true)));
-        fgMedia.push_back(ofPtr<mediaElement>( new imageElement("video/5_eclipse/PLANET_" + ofToString(pickPlanet+1)+".png", 0.5)));
+        fgMedia.push_back(ofPtr<mediaElement>( new imageElement("video/5_eclipse/ECLIPSE_planet_" + ofToString(pickPlanet+1)+".png",1)));
         // fgMedia.push_back(planet_animated[pickPlanet]);
         blobs[blobID].mediaLink = fgMedia[fgMedia.size()-1];
         blobs[blobID].videoTrace = true;
@@ -1478,11 +1501,11 @@ void planeApp::videoFollowBlob(int & blobID) {
         if (vid != NULL) {
 
             if (scene==ECLIPSE && segment>13 && segment<16) {
-                // PLANETS aligned on vertical, move up down
+                // PLANETS aligned on VERTICAL, move up down
                 p.y = blobMapToScreen(blobs[blobID].position).x * (16.0/9.0);
                 p.x = offsetX + projectionW/2.0;
-            } else if (scene==ECLIPSE && segment<6) {
-                // PLANETS aligned on horizontal
+            } else if (scene==ECLIPSE && segment<scenes[scene].segments-1) {
+                // PLANETS aligned on HORIZONTAL
                 p.y = projectionH/2;
                 p.x = blobMapToScreen(blobs[blobID].position).x * 0.8 + projectionW*0.1;
             } else if (!transition) {
@@ -1497,7 +1520,7 @@ void planeApp::videoFollowBlob(int & blobID) {
                     (*vid).goal.set( p );
                 }
                 // set opacity
-                if (scene==ECLIPSE && segment==6) {
+                if (scene==ECLIPSE && segment==scenes[scene].segments-1) {
                     float d = ofDist(p.x, p.y, projectionW/2, projectionH/2);
                     (*vid).opMax = ((projectionW/2) - d) / (projectionW/2);
                 }
@@ -1841,15 +1864,17 @@ void planeApp::endedInstructions(int & trans) {
             moveOn = true;
         } else if (segment==1) {        // 1 - FOLLOW ME
             moveOn = true;
-        } else if (segment==2) {        // 2 - STEP OUT OF THE LINE
+        } else if (segment==2) {        // 2 - 
             moveOn = true;
-        } else if (segment==3) {        // 3 - STEP INTO THE LINE
+        } else if (segment==3) {        // 3 - 
             moveOn = true;
-        } else if (segment==4) {        // 4 - STEP OUT OF THE LINE
+        } else if (segment==4) {        // 4 - 
             moveOn = true;
-        } else if (segment==5) {        // 5 - STEP INTO THE LINE
+        } else if (segment==5) {        // 5 - 
             moveOn = true;
-        } else if (segment==6) {        // 6 - DISPERSE SLOWLY
+        } else if (segment==6) {        // 6 
+            moveOn = true;
+        } else if (segment==7) {        // 7 - DISPERSE SLOWLY
             sceneChange = true;
             // fade out all planets, add trigger
             fgMediaFadedOut(scene);
@@ -2042,17 +2067,26 @@ void planeApp::initSegment(){
         }
 
     } else if (scene==ECLIPSE) {
-        if (sceneChange) {
-            // ECLIPSE. create white/black MAIN PLANET
+        if (segment==0) {
+            // ECLIPSE. create white/black MAIN PLANET = fgMedia[0]
             fgMedia.push_back(ofPtr<mediaElement>( new imageElement("video/5_eclipse/WHITE_PLANET.png")));
             (*fgMedia[fgMedia.size()-1]).setDisplay( projectionW/2 + moonPosX, projectionH/2, true );
             (*fgMedia[fgMedia.size()-1]).reset();
             (*fgMedia[fgMedia.size()-1]).fadeTo(0.8);
+            // create ALIGNMENT GLOW, loop and hide   = fgMedia[1]
+            string alignmentGlow = "video/5_eclipse/LIGHT-photoJPEG.mov";
+            fgMedia.push_back(ofPtr<mediaElement>( new videoElement(alignmentGlow, true) ));
+            (*fgMedia[fgMedia.size()-1]).setDisplay((*fgMedia[0]).position.x, (*fgMedia[0]).position.y, true);
+            (*fgMedia[fgMedia.size()-1]).reset(true);
+            (*fgMedia[fgMedia.size()-1]).opacity = 0;
         } else if (segment==2) {
+            // just to make sure moon and glow are back to center position
             (*fgMedia[0]).setDisplay( projectionW/2 + moonPosX, projectionH/2, true );
-        } else if (segment==6) {
-            // disperse
+            (*fgMedia[1]).position.x = (*fgMedia[0]).position.x;
+        } else if (segment==scenes[scene].segments-1) {
+            // fade out white planet, and hide glow
             (*fgMedia[0]).fadeOut(0.01, 1.0, true);
+            (*fgMedia[1]).hide = true;
         }
     } else if (scene==SHOOTING && sceneChange) {
         shootingPointer = 0;
@@ -2844,11 +2878,26 @@ void planeApp::keyReleased(int key){
 
     if (key=='g') {
         // FAKE ALIGNMENT GLOW
-        string alignmentGlow = "video/5_eclipse/LIGHT-photoJPEG.mov";
-        fgMedia.push_back(ofPtr<mediaElement>( new videoElement(alignmentGlow, true) ));
-        (*fgMedia[fgMedia.size()-1]).setDisplay((*fgMedia[0]).position.x, (*fgMedia[0]).position.y, true);
-        (*fgMedia[fgMedia.size()-1]).reset(true);
-        (*fgMedia[fgMedia.size()-1]).autoDestroy(true);
+        // fgMedia[1]->hide = !fgMedia[1]->hide;
+        if (fgMedia[1]->opacity < 0.5) {
+            fgMedia[1]->fadeOut(-0.1, fgMedia[1]->opacity, false);
+        } else {
+            fgMedia[1]->fadeOut(0.1, fgMedia[1]->opacity, false);
+        }
+    }
+
+    if (key=='r') {
+        // rain shooting stars
+        float randdeg = ofRandom(-5.f, 5.f);
+        for (int i=0; i<10; i++) {
+            if (++shootingPointer>=shooting_stars.size()) shootingPointer=0;
+            fgMedia.push_back(shooting_stars[shootingPointer]);
+            (*fgMedia[fgMedia.size()-1]).setDisplay(ofRandom(projectionW-100), ofRandom(projectionH-100), true);
+            (*fgMedia[fgMedia.size()-1]).reset();
+            (*fgMedia[fgMedia.size()-1]).moveAcross( randdeg, 45.f, projectionW, false);
+            (*fgMedia[fgMedia.size()-1]).autoDestroy(true);
+            (*fgMedia[fgMedia.size()-1]).movie->setSpeed(0.5);
+        }
     }
 
 }

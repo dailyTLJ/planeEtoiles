@@ -59,7 +59,7 @@ void videoElement::pause(bool v) {
 
 void videoElement::update(float updateRate) {
     if (mediaLoaded) {
-        mediaElement::update();
+        mediaElement::update(updateRate);
         if (loadLoopFileNow) {
             ofLogNotice("videoElement") << ofGetFrameNum() << "\t" << "loadLoopFileNow\t" << loopFile;
             loadLoopFileNow = false;

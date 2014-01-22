@@ -31,17 +31,18 @@
 #define SHOOTING 		6
 // define special segment
 #define SEG_FOLLOWME 	1
+#define MAX_SEGMENTS	8
 
 class sceneInfo {
     public:
         string name;
         int no;
         int segments;
-        int length[7];
-        string instructions[3][7];
-        string instructionImg[2][7];
-        string instructionVid[2][7][3];
-        string analysis[7];
+        int length[MAX_SEGMENTS];
+        string instructions[3][MAX_SEGMENTS];
+        string instructionImg[2][MAX_SEGMENTS];
+        string instructionVid[2][MAX_SEGMENTS][3];
+        string analysis[MAX_SEGMENTS];
 };
 
 class planeApp : public ofBaseApp{
