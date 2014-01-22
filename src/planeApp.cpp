@@ -10,7 +10,7 @@ std::ostream& tcout() {
 //--------------------------------------------------------------
 void planeApp::setup(){
 
-    ofSetFrameRate(5);
+    ofSetFrameRate(30);
     
     ofSetLogLevel(OF_LOG_WARNING);
 
@@ -32,6 +32,7 @@ void planeApp::setup(){
     // ofLogFatalError()
 
     ofSetLogLevel("BLOB", OF_LOG_NOTICE);
+    ofSetLogLevel("KEY", OF_LOG_NOTICE);
     ofSetLogLevel("BRIDGE", OF_LOG_NOTICE);
     ofSetLogLevel("TRANSITION", OF_LOG_NOTICE);
     ofSetLogLevel("OSC", OF_LOG_WARNING);
@@ -2876,7 +2877,7 @@ void planeApp::keyReleased(int key){
         jumpToScene(s);
     }
 
-    if (key=='g') {
+    if (key=='g' && scene==ECLIPSE) {
         // FAKE ALIGNMENT GLOW
         // fgMedia[1]->hide = !fgMedia[1]->hide;
         if (fgMedia[1]->opacity < 0.5) {
@@ -2886,7 +2887,7 @@ void planeApp::keyReleased(int key){
         }
     }
 
-    if (key=='r') {
+    if (key=='r' && scene==SHOOTING) {
         // rain shooting stars
         float randdeg = ofRandom(-5.f, 5.f);
         for (int i=0; i<10; i++) {
@@ -2897,6 +2898,53 @@ void planeApp::keyReleased(int key){
             (*fgMedia[fgMedia.size()-1]).moveAcross( randdeg, 45.f, projectionW, false);
             (*fgMedia[fgMedia.size()-1]).autoDestroy(true);
             (*fgMedia[fgMedia.size()-1]).movie->setSpeed(0.5);
+        }
+    }
+
+    if (key=='e' && scene==SUN) {
+        // blue explosion]
+        ofLogNotice("KEY") << "\t\t\t" << ofGetFrameNum() << "\t" << "==============>" << key << " blue explosion";
+
+        int randomExpl = ofRandom(7) + 1;
+        string videoEnd = "_fullscale-blue-posterized-centered-qtPNG.mov";
+        string newVideoName = "video/4_sun/SUN_explosion-" + ofToString(randomExpl,2,'0') + videoEnd;
+        fgMedia.push_back(ofPtr<mediaElement>( new videoElement(newVideoName,false)));
+        (*fgMedia[fgMedia.size()-1]).setDisplay(projectionW/2 + ofRandom(-300,300), projectionH/2 + ofRandom(-300,300), true);
+        (*fgMedia[fgMedia.size()-1]).reset();
+        (*fgMedia[fgMedia.size()-1]).autoDestroy(true);
+    }
+
+    if (key=='k' && scene==REVOLUTIONS) {
+
+        ofLogNotice("KEY") << "\t\t\t" << ofGetFrameNum() << "\t" << "==============>" << key << " add revolution";
+        // add planet
+        if (planetCnt<5) {
+            planetCnt++;
+            string videoFile;
+            int videoPick = ofRandom(5) + 1;
+            videoFile = "video/3_revolution/REV_0"+ofToString(videoPick)+"-photoJPEG.mov";
+            fgMedia.push_back(ofPtr<mediaElement>( new videoElement(videoFile,true)));
+            (*fgMedia[fgMedia.size()-1]).reset(true);
+            positionRevolutions();
+        }
+    }
+
+    if (key=='j' && scene==REVOLUTIONS) {
+        ofLogNotice("KEY") << "\t\t\t" << ofGetFrameNum() << "\t" << "==============>" << key << " take out revolution";
+        if (planetCnt>0) {
+            planetCnt--;
+
+            if (fgMedia.size()>0) {
+                for (unsigned int i=fgMedia.size()-1; i>=0; i--) {
+                    ofLogNotice("interaction") << "\t" << ofGetFrameNum() << "\t" << "\ttake away planet " << i;
+                    if (!(*fgMedia[i]).selfdestroy) {
+                        (*fgMedia[i]).loadMovie("video/3_revolution/REV_OUT-photoJPEG.mov");
+                        (*fgMedia[i]).reset(true);
+                        (*fgMedia[i]).autoDestroy(true);
+                        if (i>=planetCnt) break;
+                    }
+                }
+            }
         }
     }
 
