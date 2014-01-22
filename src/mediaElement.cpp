@@ -73,13 +73,13 @@ void mediaElement::update(float updateRate) {
             opacity = 1.f;
             fading = false;
             visible = true;
-            ofLogNotice("mediaElement") << ofGetFrameNum() << "\t" << "mediaElement::update opacity 1, fadeInEnd";
+            ofLogNotice("mediaElement") << ofGetFrameNum() << "\t" << "opacity 1, fadeInEnd " << file;
             ofNotifyEvent(fadeInEnd,this->w,this);
         } else if (opacityChange<0 && opacity <= 0.f) {
             opacity = 0.f;
             fading = false;
             visible = false;
-            ofLogNotice("mediaElement") << ofGetFrameNum() << "\t" << "mediaElement::update opacity 0, fadeoutend";
+            ofLogNotice("mediaElement") << ofGetFrameNum() << "\t" << "opacity 0, fadeoutend " << file;
             ofNotifyEvent(fadeOutEnd,this->w,this);
             if (fadeoutDestroy) dead = true;
         }
@@ -183,7 +183,7 @@ void mediaElement::fade(float speed) {
 }
 
 void mediaElement::fadeOut() {
-    ofLogNotice("mediaElement") << "\t" << ofGetFrameNum() << "\t" << "fadeOut()";
+    // ofLogNotice("mediaElement") << "\t" << ofGetFrameNum() << "\tfadeOut() " << file;
     if (hide) opacity = 0.01;       // set to low value, so there is at least one procession step
                                     // else endless feedback loop to event fgMediaFadedOut would be created
     fadeOut(0.01);
@@ -200,7 +200,7 @@ void mediaElement::fadeTo(float _opMax) {
 }
 
 void mediaElement::fadeOut(float speed, float op, bool destroy) {
-    ofLogNotice("mediaElement") << ofGetFrameNum() << "\t" << file << "\tfadeOut()";
+    ofLogNotice("mediaElement") << ofGetFrameNum() << "\tfadeOut(" << speed << ") " << file;
     opacity = op;
     fadeoutDestroy = destroy;
     fade(-speed);

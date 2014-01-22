@@ -131,6 +131,7 @@ class planeApp : public ofBaseApp{
         int blobW;
         int blobH;
         float cameraExposure;
+        int moonPosX;
 
 		int mouseX, mouseY;
 		string mouseButtonState;

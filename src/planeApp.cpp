@@ -32,7 +32,7 @@ void planeApp::setup(){
     // ofLogFatalError()
 
     ofSetLogLevel("BLOB", OF_LOG_NOTICE);
-    ofSetLogLevel("BRIDGE", OF_LOG_WARNING);
+    ofSetLogLevel("BRIDGE", OF_LOG_NOTICE);
     ofSetLogLevel("TRANSITION", OF_LOG_NOTICE);
     ofSetLogLevel("OSC", OF_LOG_WARNING);
     ofSetLogLevel("interaction", OF_LOG_NOTICE);
@@ -77,6 +77,7 @@ void planeApp::setup(){
 	mouseButtonState = "";
     lastActivityClock = ofGetUnixTime();
     lastActivity = 0;
+    moonPosX = 40;
 
     success = false;
     successCnt = 0;
@@ -173,7 +174,7 @@ void planeApp::setup(){
     gui.add(paramSc1);
 
     paramSc6.setName("Sc2 Attraction");
-    paramSc6.add(distStdDevThr.set( "Dist StdDev", 10, 0, 50));
+    paramSc6.add(distStdDevThr.set( "Dist StdDev", 10, 0, 70));
     paramSc6.add(movingThr.set( "Movement Thr", 0.1, 0, 3));
     // paramSc6.add(steadyRewardTime.set( "Dist Reward", 2, 0, 10));
     gui.add(paramSc6);
@@ -399,7 +400,7 @@ void planeApp::initScenes(){
     stars.instructions[1][1] = "Posez-vous à de nouveaux endroits\npour allumer de nouvelles étoiles";
     stars.instructions[2][1] = "Posez-vous a de nouveaux endroits\npour allumer de nouvelles etoiles";
     stars.analysis[1] = "* Velocity < FreezeMaxVel\n* frozenTimer > freezeMinTime\n* frozenTimer < freezeMaxTime\n+ Star Animation at end of freezeMaxTime\n-> newStarMax stars || 40 sec";
-    stars.length[1] = 40;
+    stars.length[1] = 40;   // FOR DEBUGGING
     scenes[n] = stars;
 
     n++;
@@ -683,11 +684,11 @@ void planeApp::update(){
         // FAIL SAVE TIME TRIGGER
         if (autoplay && scenes[scene].length[segment] > 0 && segmentClock >= scenes[scene].length[segment]+10) {
             // ofLogError("TRANSITION") << "\t" << ofGetFrameNum() << "\t" << "FORCE transition change, because segmentClock>+15";
-            // endSegment();
+            // endSegment();        // FOR DEBUGGING
         }
         if (autoplay && scenes[scene].length[segment] > 0 && segmentClock >= scenes[scene].length[segment]*20) {
             ofLogError("TRANSITION") << "\t" << ofGetFrameNum() << "\t" << "FORCE transition change, because segmentClock>+20";
-            moveOn = true;
+            // moveOn = true;       // FOR DEBUGGING
         }
         // triggered by the end of fading out the bg
         if (moveOn) {
@@ -847,13 +848,13 @@ void planeApp::update(){
             // FOLLOW ME
             followMe += followMeSpeed * updateRate;
             if (followMe >= 2*3.14) {
-                (*fgMedia[0]).position.x = projectionW/2 + 40;
+                (*fgMedia[0]).position.x = projectionW/2 + moonPosX;
                 // planet back at center position, move on to next scene
                 if (followMe > 2*3.6 && autoplay && !transition) {
                     endSegment();
                 }
             } else if (followMe > 0) {
-                (*fgMedia[0]).position.x = projectionW/2 + 40 + sin(followMe) * followMeRadius;
+                (*fgMedia[0]).position.x = projectionW/2 + moonPosX + sin(followMe) * followMeRadius;
                 // position GLOW video, if exists
                 if (fgMedia.size() > 0) {
                     for (unsigned int i=1; i<fgMedia.size(); i++) {
@@ -1029,14 +1030,18 @@ void planeApp::fgMediaFadedOut(int & trans) {
                 // attache trigger to first non-dead element
                 if (trans>0 && !attachedTrigger) {
                     ofLogNotice("TRANSITION") << "\t" << ofGetFrameNum() << "\t" << "added allFaded() listener to " << (**it).file;
+                    (**it).movieEndTrigger = true;
                     ofAddListener( (**it).fadeOutEnd, this, &planeApp::allFaded );
                     attachedTrigger = true;
                 }
+            } else {
+                ofLogNotice("TRANSITION") << "\t" << ofGetFrameNum() << "\t" << (**it).file << " dead: " << (**it).dead << "  fading: " << (**it).fading;
             }
         }
 
         if (trans>0 && !attachedTrigger) {
             // assumes all mediaElements are as good as dead, therefore simply 
+            ofLogNotice("TRANSITION") << "\t" << ofGetFrameNum() << "\t" << "all dead or fading already, let's moveOn";
             moveOn = true;
         }
 
@@ -1401,10 +1406,10 @@ void planeApp::blobLeaveStage(int & blobID) {
 }
 
 void planeApp::blobOnCreate(int & blobID) {
+    ofLogNotice("BLOB") << "\t" << ofGetFrameNum() << "\t" << "blobOnCreate() \t" << blobID;
 
     if (!transition) {
         // first clean up, all related blob settings
-        ofLogNotice("BLOB") << "\t" << ofGetFrameNum() << "\t" << "blobOnCreate() \t" << blobID;
         this->blobUnlink(blobID);
         blobs[blobID].videoTrace = false;
         blobs[blobID].mediaLink = ofPtr<mediaElement>();  // TODO how to release ofPtr ?
@@ -1412,6 +1417,8 @@ void planeApp::blobOnCreate(int & blobID) {
         if (blobs[blobID].onStage) {
             this->blobEnterStage(blobID);
         }
+    } else {
+        ofLogNotice("BLOB") << "\t" << ofGetFrameNum() << "\t\t\t" << "-";
     }
 }
 
@@ -1552,11 +1559,18 @@ void planeApp::blobUnlink(int & blobID) {
             ofPtr<mediaElement> vid = blobs[blobID].mediaLink;
             if (scene==STARS) {
                 // STARS: fade out frozen stars
-                (**it).fadeOut(0.001, 0.5, true);
-                ofLogNotice("BLOB") << "\t" << ofGetFrameNum() << "\t" << "\t\t\tunlinked stars and fadeOut ";
+                if (segment<1 || !transition) {
+                    (**it).fadeOut(0.001, 0.5, true);
+                    ofLogNotice("BLOB") << "\t" << ofGetFrameNum() << "\t" << "\t\t\tunlinked stars and fadeOut ";
+                } else {
+                    if (segment==1 && transition) {
+                        ofLogNotice("BLOB") << "\t" << ofGetFrameNum() << "\t" << "\t\t\tdon't unlink bc already transitioning ";
+                    }
+                }
+                // if in transition, they are already fading out (and triggering allFaded Event)
             } else if (scene==ECLIPSE) {
                 // (**it).fadeOut(0.05, 1.0, true);
-                (**it).dead = true;
+                if (!(**it).fading) (**it).dead = true;
                 ofLogNotice("BLOB") << "\t" << ofGetFrameNum() << "\t" << "\t\t\tunlinked planet and fadeOut ";
             } else {
                 (**it).dead = true;
@@ -1668,7 +1682,6 @@ void planeApp::endedInstructions(int & trans) {
     // better remove these
     if (!(scene==SUN && (segment==2 || segment==4))) {
         instructionVid->mediaLoaded = false;
-        ofLogNotice("TRANSITION") << "\t" << "mediaLoaded false";
     }
     ofRemoveListener( instructionVid->fadeOutEnd, this, &planeApp::endedInstructions );
     ofRemoveListener( instructionTxt.fadeOutEnd, this, &planeApp::endedInstructions );
@@ -2032,12 +2045,12 @@ void planeApp::initSegment(){
         if (sceneChange) {
             // ECLIPSE. create white/black MAIN PLANET
             fgMedia.push_back(ofPtr<mediaElement>( new imageElement("video/5_eclipse/WHITE_PLANET.png")));
-            (*fgMedia[fgMedia.size()-1]).setDisplay( projectionW/2 + 40, projectionH/2, true );
+            (*fgMedia[fgMedia.size()-1]).setDisplay( projectionW/2 + moonPosX, projectionH/2, true );
             (*fgMedia[fgMedia.size()-1]).reset();
             // (*fgMedia[fgMedia.size()-1]).opacity = 0.8;
             (*fgMedia[fgMedia.size()-1]).fadeTo(0.8);
         } else if (segment==2) {
-            (*fgMedia[0]).setDisplay( projectionW/2, projectionH/2, true );
+            (*fgMedia[0]).setDisplay( projectionW/2 + moonPosX, projectionH/2, true );
         } else if (segment==6) {
             // disperse
             (*fgMedia[0]).fadeOut(0.01, 1.0, true);
@@ -2463,7 +2476,7 @@ void planeApp::drawControlInfo(int x, int y){
 
 
                        "\n\n\nTRANSITION\n" + "--------------\n"  + ofToString(transition ? "true" : "false") +
-                       "\n\n\nMOVEON\n" + "--------------\n"  + ofToString(moveOn ? "true" : "false") +
+                       "\n\nMOVEON\n" + "--------------\n"  + ofToString(moveOn ? "true" : "false") +
                        "\n\nSUCCESS\n" + "--------------\n"  + ofToString(success ? "true" : "false") +
                        "\n\nSUCCESS CNT\n" + "--------------\n"  + ofToString(successCnt) +
                        "\n\nACTIVITY CNT\n" + "--------------\n"  + ofToString(activityCnt) +
