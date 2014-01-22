@@ -1369,7 +1369,7 @@ void planeApp::blobEnterStage(int & blobID) {
         (*fgMedia[fgMedia.size()-1]).reset();
         (*fgMedia[fgMedia.size()-1]).fadeIn();
         // (*fgMedia[fgMedia.size()-1]).outroTransformation = &mediaElement::scaleAway;
-    } else if (scene==ECLIPSE && !transition) {
+    } else if (scene==ECLIPSE && !transition && segment<scenes[scene].segments-1) {
         // PLANETS
         ofLogNotice("BLOB") << "\t" << ofGetFrameNum() << "\t" << "blobEnterStage()\t\t" << blobID << " (planet)";
         // int planedId[] = { 6, 9, 13, 15, 18, 19,20, 22, 23 };
