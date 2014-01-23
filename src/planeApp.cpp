@@ -791,11 +791,14 @@ void planeApp::update(){
         }
 
 
-        // animation related
+        // animation relatedspinJT
         if (scene==REVOLUTIONS) {
 
-            if (!transition && ofGetFrameNum()%spinJudgeTime==0) {
-                ofLogNotice("interaction") << "\t" << ofGetFrameNum() << "\t" << "\tspinJudgeTime";
+            int spinJT = int ( float(spinJudgeTime) / updateRate);   // half framerate --> 2.0
+            // 30.0/ofGetFrameRate();
+
+            if (!transition && ofGetFrameNum()%spinJT==0) {
+                ofLogNotice("interaction") << "\t" << ofGetFrameNum() << "\t" << "\tspinJudgeTime: " << spinJT << " (" << spinJudgeTime << ")";
                 if (segment==0) {
                     int oldCnt = planetCnt;
                     // set planetCnt based on activityCnt
@@ -869,7 +872,8 @@ void planeApp::update(){
             }
 
         } else if (scene==SUN && segment==3) {
-            if (!transition && ofGetFrameNum()%runJudgeTime==0) {
+            int runJT = int ( float(runJudgeTime) / updateRate);
+            if (!transition && ofGetFrameNum()%runJT==0) {
                 // if high activity, add blue surface to sun
                 if (hogAvVel > runHogThr || activityCnt > runActThr) {
                     // activity!
@@ -2326,7 +2330,7 @@ void planeApp::draw(){
 
     offsy = 10;
     offsx += 280;
-    // if (drawDebugScreen) this->drawAnalysis(offsx, offsy, 0.35);
+    if (drawDebugScreen) this->drawAnalysis(offsx, offsy, 0.35);
 
     offsy = 10;
     offsx += 370;
@@ -2977,6 +2981,7 @@ void planeApp::keyReleased(int key){
     if (key=='g' && scene==ECLIPSE) {
         // FAKE ALIGNMENT GLOW
         // fgMedia[1]->hide = !fgMedia[1]->hide;
+        ofLogNotice("KEY") << "\t\t\t" << ofGetFrameNum() << "\t" << "==============>" << key << " fgMedia[1].opacity = " << fgMedia[1]->opacity;
         if (fgMedia[1]->opacity < 0.5) {
             fgMedia[1]->fadeOut(-0.1, fgMedia[1]->opacity, false);
         } else {
