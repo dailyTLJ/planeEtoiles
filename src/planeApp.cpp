@@ -823,17 +823,18 @@ void planeApp::update(){
                             videoFile = "video/3_revolution/REV_0"+ofToString(videoPick)+"-photoJPEG.mov";
                             fgMedia.push_back(ofPtr<mediaElement>( new videoElement(videoFile,true)));
                             (*fgMedia[fgMedia.size()-1]).reset(true);
+                            planetCnt = oldCnt + 1;
                         } else {
-                            ofLogNotice("interaction") << "\t" << ofGetFrameNum() << "\t" << "\ttake away planet";
+                            ofLogNotice("interaction") << "\t" << ofGetFrameNum() << "\t" << "\ttake away planet, planetCnt " << planetCnt;
                             // TAKE AWAY PLANETS
                             if (fgMedia.size()>0) {
                                 for (unsigned int i=fgMedia.size()-1; i>=0; i--) {
                                     ofLogNotice("interaction") << "\t" << ofGetFrameNum() << "\t" << "\ttake away planet " << i;
-                                    if (!(*fgMedia[i]).selfdestroy) {
+                                    if (i>=0 && !(*fgMedia[i]).selfdestroy) {
                                         (*fgMedia[i]).loadMovie("video/3_revolution/REV_OUT-photoJPEG.mov");
                                         (*fgMedia[i]).reset(true);
                                         (*fgMedia[i]).autoDestroy(true);
-                                        if (i>=planetCnt) break;
+                                        if (i<=planetCnt) break;
                                     }
                                 }
                             }
@@ -2325,7 +2326,7 @@ void planeApp::draw(){
 
     offsy = 10;
     offsx += 280;
-    if (drawDebugScreen) this->drawAnalysis(offsx, offsy, 0.35);
+    // if (drawDebugScreen) this->drawAnalysis(offsx, offsy, 0.35);
 
     offsy = 10;
     offsx += 370;
@@ -2569,8 +2570,6 @@ void planeApp::drawAnalysis(int x, int y, float scale){
 
     }
 
-
-
 }
 
 //  FOR TESTING WARPING MATH
@@ -2594,17 +2593,18 @@ void planeApp::drawControlInfo(int x, int y){
     ofDrawBitmapString("FPS\n--------------\n" + ofToString(ofGetFrameRate()) +
                        "\n\nSCENE:SEGMENT\n" + "--------------\n" + ofToString(scene) + ":" + ofToString(segment) +
                        "\n\nSEGM LENGTH\n" + "--------------\n"  + ofToString(scenes[scene].length[segment]) +
-                       "\n\n\nSEGMENT TIME\n" + "--------------\n"  + ofToString(segmentClock) +
+                       "\n\nSEGMENT TIME\n" + "--------------\n"  + ofToString(segmentClock) +
                        "\n\nGLOBAL TIME\n" + "--------------\n"  + ofToString(masterClock) +
                        "\n\nLAST ACTIVITY\n" + "--------------\n"  + ofToString(lastActivity) +
 
 
-                       "\n\n\nTRANSITION\n" + "--------------\n"  + ofToString(transition ? "true" : "false") +
+                       "\n\nTRANSITION\n" + "--------------\n"  + ofToString(transition ? "true" : "false") +
                        "\n\nMOVEON\n" + "--------------\n"  + ofToString(moveOn ? "true" : "false") +
                        "\n\nSUCCESS\n" + "--------------\n"  + ofToString(success ? "true" : "false") +
                        "\n\nSUCCESS CNT\n" + "--------------\n"  + ofToString(successCnt) +
                        "\n\nACTIVITY CNT\n" + "--------------\n"  + ofToString(activityCnt) +
-                       "\n\n\nFG MEDIA\n" + "--------------\n"  + ofToString(fgMedia.size()), x+3, y+10 );
+                       "\n\nPLANET CNT\n" + "--------------\n"  + ofToString(planetCnt) +
+                       "\n\nFG MEDIA\n" + "--------------\n"  + ofToString(fgMedia.size()), x+3, y+10 );
 }
 
 
