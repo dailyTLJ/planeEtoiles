@@ -147,6 +147,7 @@ class planeApp : public ofBaseApp{
 		bool processing;
 		bool oscMsgReceived;
 		bool oscActive;
+		bool oscNetworkReady;
 		float oscLastMsg;
 		float oscLastMsgTimer;
 		float oscLastMsgTimerMax;

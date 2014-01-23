@@ -72,6 +72,7 @@ void planeApp::setup(){
     oscLastMsg = 0;
     oscLastMsgTimer = 0;
     oscLastMsgTimerMax = 10;
+    oscNetworkReady = false;
     oscActive = false;
 	mouseX = 0;
 	mouseY = 0;
@@ -229,6 +230,7 @@ void planeApp::setup(){
         }
 
         sendOscMsg("signIn", MYIP, MYPORT);
+        oscNetworkReady = true;
     } catch(exception& e){
         ofLogError() << e.what();
     }
@@ -1978,7 +1980,7 @@ void planeApp::nextSegment() {
     }
 
     // IF NO ACTIVITY, GO TO IDLE MODE
-    if (lastActivity > inactivityTimer) {
+    if (!autoplay && lastActivity > inactivityTimer) {
         ofLogNotice("TRANSITION") << "\t" << ofGetFrameNum() << "\t" << "no activity since " << lastActivity << "sec, go to IDLE";
         scene = IDLE;
         segment = 0;
@@ -2586,6 +2588,7 @@ void planeApp::drawRawData(int x, int y, float scale, bool displayText){
     if (displayText) {
         // write information
         string rawInfo = "port: \t\t" + ofToString(MYPORT);
+        rawInfo += "\nnetwork ready:\t" + ofToString(oscNetworkReady ? "true" : "false");
         rawInfo += "\nBLOBSERVER: \t" + ofToString(BLOBSERVERIP); //  + " (" + ofToString(BLOBPORT) + ")";
         rawInfo += "\nosc active: \t" + ofToString(oscActive ? "true" : "false");
         rawInfo += "\nosc last msg: \t" + ofToString(oscLastMsgTimer,2) + " sec";
@@ -2701,7 +2704,7 @@ ofPoint planeApp::blobMapToScreen(ofPoint &o) {
 
 void planeApp::configureBlobserver() {
 
-    if (configBlobserver) {
+    if (oscNetworkReady && configBlobserver) {
 
         ofLogNotice("TRANSITION") << "\t" << ofGetFrameNum() << "\t" << "configureBlobserver()";
 
