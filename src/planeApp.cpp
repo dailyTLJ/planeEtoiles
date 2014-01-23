@@ -420,7 +420,7 @@ void planeApp::initScenes(){
     stars.instructions[1][0] = "Marchez avec quelqu'un\nGardez toujours le même écart\n(Sans les mains!)";
     stars.instructions[2][0] = "Marchez avec quelqu'un\nGardez toujours le meme ecart\n(Sans les mains!)";
     stars.analysis[0] = "* velocity history > movingThr\n* distance history < distStdDevThr\n-> 35 sec";
-    stars.length[0] = 35;
+    stars.length[0] = 30;
     stars.instructions[0][1] = "Walk with someone\nMake eye contact\nKeep the distance";
     stars.instructions[1][1] = "Marchez avec quelqu'un\nRegardez-vous dans les yeux\nGardez toujours le même écart";
     stars.instructions[2][1] = "Marchez avec quelqu'un\nRegardez-vous dans les yeux\nGardez toujours le meme ecart";
@@ -466,8 +466,8 @@ void planeApp::initScenes(){
     sun.analysis[0] = "- \n-> 5 sec";
     sun.length[0] = 5;
     sun.instructions[0][1] = "Hop from one\nspot to the other";
-    sun.instructions[1][1] = "Déplacez-vous dans l'espace\nen sautant";
-    sun.instructions[2][1] = "Deplacez-vous dans l'espace\nen sautant";
+    sun.instructions[1][1] = "Déplacez-vous en sautant\nd'un pied à l'autre";
+    sun.instructions[2][1] = "Deplacez-vous en sautant\nd'un pied a l'autre";
     sun.analysis[1] = "* onLost event\n-> 20 sec";
     sun.length[1] = 20;
     // sun.instructions[0][2] = "Everyone in unison";
@@ -518,8 +518,8 @@ void planeApp::initScenes(){
     eclipse.instructions[0][s] = "Now line-up in\nfront of me";
     eclipse.instructions[1][s] = "Faites une file face à moi";
     eclipse.instructions[2][s] = "Faites une file face a moi";
-    eclipse.analysis[s] = "- \n-> 10 sec";
-    eclipse.length[s] = 10;
+    eclipse.analysis[s] = "- \n-> 15 sec";
+    eclipse.length[s] = 15;
     s = 1;
     eclipse.instructions[0][s] = "Follow me";
     eclipse.instructions[1][s] = "Suivez moi";
@@ -591,8 +591,8 @@ void planeApp::initScenes(){
     shooting.instructionVid[1][2][0] = "video/text/EXHALE_7-FR_intro-photoJPEG.mov"; // intro
     shooting.instructionVid[1][2][1] = "video/text/EXHALE_7-FR_loop-photoJPEG.mov"; // loop
     shooting.instructionVid[1][2][2] = "video/text/EXHALE_7-FR_outro-photoJPEG.mov"; // outro
-    shooting.analysis[2] = "- \n-> 15 sec";
-    shooting.length[2] = 15;
+    shooting.analysis[2] = "- \n-> 10 sec";
+    shooting.length[2] = 10;
     
     shooting.instructions[0][3] = "Stand up";
     shooting.instructions[1][3] = "Relevez-vous";
@@ -793,7 +793,7 @@ void planeApp::update(){
                     else if (activityCnt < spinFailure) planetCnt--;
 
                     if (activityCnt==0) planetCnt=0;
-                    if (planetCnt>(blobsOnStage/2)+1) planetCnt = (blobsOnStage/2)+1;
+                    if (planetCnt>((blobsOnStage+1)/2.0)) planetCnt = ((blobsOnStage+1)/2);
                     if (planetCnt>5) planetCnt = 5;
                     else if (planetCnt<0) planetCnt = 0;
 
@@ -1413,8 +1413,8 @@ void planeApp::blobEnterStage(int & blobID) {
         (*fgMedia[fgMedia.size()-1]).reset();
         (*fgMedia[fgMedia.size()-1]).fadeIn();
         // (*fgMedia[fgMedia.size()-1]).outroTransformation = &mediaElement::scaleAway;
-    } else if (scene==ECLIPSE && !transition && segment<scenes[scene].segments-1) {
-        // PLANETS, not allowed to enter in 'disperse' segment
+    } else if (scene==ECLIPSE && !transition) {
+        // PLANETS, not allowed to enter in 'disperse' segment   //  && segment<scenes[scene].segments-1
         ofLogNotice("BLOB") << "\t" << ofGetFrameNum() << "\t" << "blobEnterStage()\t\t" << blobID << " (planet)";
         // int planedId[] = { 6, 9, 13, 15, 18, 19,20, 22, 23 };
         // int planets = sizeof(planedId) / sizeof(planedId[0]);
@@ -1423,13 +1423,16 @@ void planeApp::blobEnterStage(int & blobID) {
         if (pickPlanet > 29) pickPlanet = 0;
         // fgMedia.push_back(ofPtr<mediaElement>( new videoElement("video/5_eclipse/P_" + ofToString(planedId[pickPlanet])+"-qtPNG.mov", true)));
         fgMedia.push_back(ofPtr<mediaElement>( new imageElement("video/5_eclipse/ECLIPSE_planet_" + ofToString(pickPlanet+1)+".png",1)));
+        fgMedia[fgMedia.size()-1]->blend = false;
         // fgMedia.push_back(planet_animated[pickPlanet]);
         blobs[blobID].mediaLink = fgMedia[fgMedia.size()-1];
         blobs[blobID].videoTrace = true;
         (*fgMedia[fgMedia.size()-1]).setDisplay(blobMapToScreen(blobs[blobID].position), true);
         (*fgMedia[fgMedia.size()-1]).reset();
+        // fgMedia[fgMedia.size()-1]->moveElement = true;
 
-        if (segment==0 && segmentClock < alignmentTransition) {
+        if (segment==0 && segmentClock < alignmentTransition) {   // 
+            ofLogNotice("BLOB") << "\t" << ofGetFrameNum() << "\t" << "moveinfromside";
             (*fgMedia[fgMedia.size()-1]).moveInFromSide(projectionW/2,projectionH/2);
         } else {
             // (*fgMedia[fgMedia.size()-1]).fadeIn(0.1);
@@ -1904,7 +1907,9 @@ void planeApp::endedInstructions(int & trans) {
         } else if (segment==7) {        // 7 - DISPERSE SLOWLY
             sceneChange = true;
             // fade out all planets, add trigger
-            fgMediaFadedOut(scene);
+            (*fgMedia[0]).fadeOut(0.01, 1.0, true);
+            ofAddListener( (*fgMedia[0]).fadeOutEnd, this, &planeApp::allFaded );
+            // fgMediaFadedOut(scene);
         }
 
     } else if (scene==SHOOTING) {       // SHOOTING STARS
@@ -1998,7 +2003,7 @@ void planeApp::initSegment(){
 
     configureBlobserver();
 
-    if (sceneChange && scene==0) {
+    if (sceneChange || scene==0) {
         ofLogNotice("TRANSITION") << "\t" << ofGetFrameNum() << "\t" << "cleared " << fgMedia.size() << " fgMedia videos";
         fgMedia.clear();   // delete all foreground videos
     }
@@ -2009,6 +2014,7 @@ void planeApp::initSegment(){
     if (segment==0) planetCnt = 0;
     // flash = true;       //
     segmentStart = ofGetUnixTime();
+    segmentClock = 0;
 
 
     string instruction = scenes[scene].instructions[language][segment];
@@ -2101,7 +2107,9 @@ void planeApp::initSegment(){
             fgMedia.push_back(ofPtr<mediaElement>( new imageElement("video/5_eclipse/WHITE_PLANET.png")));
             (*fgMedia[fgMedia.size()-1]).setDisplay( projectionW/2 + moonPosX, projectionH/2, true );
             (*fgMedia[fgMedia.size()-1]).reset();
-            (*fgMedia[fgMedia.size()-1]).fadeTo(0.8);
+            (*fgMedia[fgMedia.size()-1]).opMax = 0.8;
+            (*fgMedia[fgMedia.size()-1]).fadeIn(0.005);
+            // (*fgMedia[fgMedia.size()-1]).fadeTo(0.8);
             // create ALIGNMENT GLOW, loop and hide   = fgMedia[1]
             string alignmentGlow = "video/5_eclipse/LIGHT-photoJPEG.mov";
             fgMedia.push_back(ofPtr<mediaElement>( new videoElement(alignmentGlow, true) ));
@@ -2114,7 +2122,7 @@ void planeApp::initSegment(){
             (*fgMedia[1]).position.x = (*fgMedia[0]).position.x;
         } else if (segment==scenes[scene].segments-1) {
             // fade out white planet, and hide glow
-            (*fgMedia[0]).fadeOut(0.01, 1.0, true);
+            //(*fgMedia[0]).fadeOut(0.01, 1.0, true);
             (*fgMedia[1]).hide = true;
         }
     } else if (scene==SHOOTING) {
@@ -2328,19 +2336,19 @@ void planeApp::drawScreen(int x, int y, float scale){
     ofDisableBlendMode();
 
 
-    // FOREGROUND VIDEOS
-    ofEnableBlendMode(OF_BLENDMODE_ADD);
-    for (vector<ofPtr<mediaElement> >::iterator it = fgMedia.begin(); it != fgMedia.end(); ++it) {
-        if (!(**it).dead && (**it).blend) (**it).draw(0, 0, 1);   //
-    }
-    ofDisableBlendMode();
-
     // foreground videos, without BLENDING mode
     ofEnableAlphaBlending();
     for (vector<ofPtr<mediaElement> >::iterator it = fgMedia.begin(); it != fgMedia.end(); ++it) {
         if (!(**it).dead && !(**it).blend) (**it).draw(0, 0, 1);
     }
     ofDisableAlphaBlending();
+
+    // FOREGROUND VIDEOS
+    ofEnableBlendMode(OF_BLENDMODE_ADD);
+    for (vector<ofPtr<mediaElement> >::iterator it = fgMedia.begin(); it != fgMedia.end(); ++it) {
+        if (!(**it).dead && (**it).blend) (**it).draw(0, 0, 1);   //
+    }
+    ofDisableBlendMode();
 
 
     // INSTRUCTION VIDEOS
@@ -2693,7 +2701,7 @@ ofPoint planeApp::blobMapToScreen(ofPoint &o) {
 
 void planeApp::configureBlobserver() {
 
-    if (configBlobserver && 1==2) {
+    if (configBlobserver) {
 
         ofLogNotice("TRANSITION") << "\t" << ofGetFrameNum() << "\t" << "configureBlobserver()";
 
@@ -2701,6 +2709,8 @@ void planeApp::configureBlobserver() {
         bool erratic = false;  // else slow movements
         bool allowLessFP = false;        // allow more false positives
         bool slow = false;              // extra slow?
+
+        bool mergeFar = true;
 
         if (scene==IDLE) {                 // IDLE
 
@@ -2717,6 +2727,7 @@ void planeApp::configureBlobserver() {
             slow = true;
 
         } else if (scene==REVOLUTIONS) {          // REVOLUTION
+            mergeFar = false;
 
             if (segment==0) {               // SPIN
                 erratic = true;
@@ -2749,8 +2760,8 @@ void planeApp::configureBlobserver() {
             }
 
         } else if (scene==SHOOTING) {          // SHOOTING STARS
-            erratic = true;
-            allowLessFP = true;
+            // erratic = true;
+            // allowLessFP = true;
             if (segment==0) {               // MOVE LIKE A SHOOTING STAR
             } else if (segment==1) {        // DROP
             }
@@ -2770,6 +2781,10 @@ void planeApp::configureBlobserver() {
             sendOscMsgToHog("setParameter", "processNoiseCov", pow(10, -noiseNormal));
             sendOscMsgToHog("setParameter", "measurementNoiseCov", pow(10, -measurementNormal));
         }
+
+
+        sendOscMsgToHog("setParameter", "mergeDistance", (mergeFar) ? 60.0 : 52.0);
+
 
         if (allowLessFP) {
             // ALLOW FOR LESS FALSE POSITIVES (jumping)

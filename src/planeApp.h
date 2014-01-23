@@ -16,8 +16,8 @@
 #define MYPORT 9000
 #define BLOBPORT 9002
 // #define BLOBSERVERIP "192.168.2.12"
-#define BLOBSERVERIP "192.168.2.14"
-// #define BLOBSERVERIP "10.4.40.28"
+// #define BLOBSERVERIP "192.168.2.14"
+#define BLOBSERVERIP "10.4.40.28"
 // #define MYIP "192.168.2.39"
 #define MYIP "10.10.44.21"
 

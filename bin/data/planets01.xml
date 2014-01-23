@@ -8,7 +8,7 @@
 
 	<Min_LostTime>1</Min_LostTime>
 
-	<inactivity_timer>200</inactivity_timer>
+	<inactivity_timer>141</inactivity_timer>
 
 	<Min_Segm_Length>3</Min_Segm_Length>
 
@@ -30,7 +30,7 @@
 
 		<Offset_Y>326</Offset_Y>
 
-		<Y_Interpolation>5</Y_Interpolation>
+		<Y_Interpolation>12</Y_Interpolation>
 
 	</Dimension>
 
@@ -46,19 +46,19 @@
 
 		<NORMAL_measurement>4</NORMAL_measurement>
 
-		<ERRATIC_noise>3</ERRATIC_noise>
+		<ERRATIC_noise>6</ERRATIC_noise>
 
-		<ERRATIC_measurement>7</ERRATIC_measurement>
+		<ERRATIC_measurement>5</ERRATIC_measurement>
 
 	</Blobserver>
 
 	<Sc1_Stars>
 
-		<Freeze_MaxVel>0.795918</Freeze_MaxVel>
+		<Freeze_MaxVel>1.40816</Freeze_MaxVel>
 
 		<Freeze_MinTime>1</Freeze_MinTime>
 
-		<Freeze_MaxTime>3</Freeze_MaxTime>
+		<Freeze_MaxTime>5</Freeze_MaxTime>
 
 		<NewStar_Max>40</NewStar_Max>
 
@@ -66,9 +66,9 @@
 
 	<Sc2_Attraction>
 
-		<Dist_StdDev>28.5714</Dist_StdDev>
+		<Dist_StdDev>57.5</Dist_StdDev>
 
-		<Movement_Thr>0.596939</Movement_Thr>
+		<Movement_Thr>0.244898</Movement_Thr>
 
 		<Dist_Reward>2</Dist_Reward>
 
@@ -78,11 +78,11 @@
 
 		<MinLost_SPIN>1</MinLost_SPIN>
 
-		<spinJudgeTime>53</spinJudgeTime>
+		<spinJudgeTime>31</spinJudgeTime>
 
-		<spinSuccess>5</spinSuccess>
+		<spinSuccess>3</spinSuccess>
 
-		<spinFailure>5</spinFailure>
+		<spinFailure>1</spinFailure>
 
 	</Sc3_Revolutions>
 
@@ -106,9 +106,9 @@
 
 		<Alignm_MaxDist>77</Alignm_MaxDist>
 
-		<Alignm_Transition>3</Alignm_Transition>
+		<Alignm_Transition>4</Alignm_Transition>
 
-		<followMeSpeed>0.0142857</followMeSpeed>
+		<followMeSpeed>0.0112245</followMeSpeed>
 
 		<followMeRadius>232</followMeRadius>
 
