@@ -102,8 +102,8 @@ void planeApp::setup(){
     projectionW = 1200;
     projectionH = 1920;
     projectionOffsetX = 60;
-    blobserverW = 600;
-    blobserverH = 300;
+    blobserverW = 564;
+    blobserverH = 320;
     blobW = 80;
     blobH = 160;
 
@@ -472,13 +472,13 @@ void planeApp::initScenes(){
     // sun.instructionImg[0][2] = "FREEZE-BLACK.jpg";
     sun.instructionVid[0][2][0] = ""; // intro
     sun.instructionVid[0][2][1] = "video/text/FREEZE_4_loop-photoJPEG.mov"; // loop
-    sun.instructionVid[0][2][2] = ""; // outro
+    sun.instructionVid[0][2][2] = "video/text/FREEZE_4_static-photoJPEG.mov"; // outro
     sun.instructions[1][2] = "";
     sun.instructions[2][2] = "";
     // sun.instructionImg[1][2] = "STOP-BLACK.jpg";
     sun.instructionVid[1][2][0] = ""; // intro
     sun.instructionVid[1][2][1] = "video/text/FREEZE_4-FR_loop-photoJPEG.mov"; // loop
-    sun.instructionVid[1][2][2] = ""; // outro
+    sun.instructionVid[1][2][2] = "video/text/FREEZE_4-FR_static-photoJPEG.mov"; // outro
     sun.analysis[2] = "* hogAvVel < freezeAllMaxVel\n* segmentClock > 3\n-> 8 sec || all frozen";
     sun.length[2] = 8;
     sun.instructions[0][3] = "Run in every\ndirection at once.";
@@ -492,11 +492,11 @@ void planeApp::initScenes(){
     // sun.instructionImg[0][4] = "FREEZE-BLACK.jpg";
     sun.instructionVid[0][4][0] = ""; // intro
     sun.instructionVid[0][4][1] = "video/text/FREEZE_4_loop-photoJPEG.mov"; // loop
-    sun.instructionVid[0][4][2] = ""; // outro
+    sun.instructionVid[0][4][2] = "video/text/FREEZE_4_static-photoJPEG.mov"; // outro
     // sun.instructionImg[1][4] = "STOP-BLACK.jpg";
     sun.instructionVid[1][4][0] = ""; // intro
     sun.instructionVid[1][4][1] = "video/text/FREEZE_4-FR_loop-photoJPEG.mov"; // loop
-    sun.instructionVid[1][4][2] = ""; // outro
+    sun.instructionVid[1][4][2] = "video/text/FREEZE_4-FR_static-photoJPEG.mov"; // outro
     sun.analysis[4] = "* hogAvVel < freezeAllMaxVel\n* segmentClock > 3\n-> 8 sec || all frozen";
     sun.length[4] = 8;
     scenes[n] = sun;
@@ -1671,7 +1671,13 @@ void planeApp::endSegment() {
 
     // end instructions:
     if (scene==SUN && (segment==2 || segment==4)) {
-        // FREEZE, keep instruction videos on, on red sun
+        // FREEZE, put instruction outro video, but loop
+        if (scenes[scene].instructionVid[language][segment][2] != "") {
+            // outro video
+            instructionVid->loadMovie(scenes[scene].instructionVid[language][segment][2]);
+            instructionVid->loopFile = "";
+            instructionVid->reset();
+        }
         endedInstructions(scene);
     } else if (instructionVid->mediaLoaded) {
         // COME CLOSER, LET GO, EXHALE
