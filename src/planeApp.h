@@ -31,6 +31,8 @@
 #define SHOOTING 		6
 // define special segment
 #define SEG_FOLLOWME 	1
+#define SEG_STARS 		2
+#define SEG_CONSTELLATIONS 	3
 #define MAX_SEGMENTS	8
 
 class sceneInfo {

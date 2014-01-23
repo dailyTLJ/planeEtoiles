@@ -365,13 +365,13 @@ void planeApp::initScenes(){
         shooting_stars.push_back(ofPtr<mediaElement>( new videoElement("video/6_shooting/SSTAR_" + ofToString(randomShooter,2,'0') + "-photoJPEG.mov")));
     }
 
-    title_sequence.push_back(ofPtr<mediaElement>( new videoElement("video/TITLE_01-EN-to-FR-photoJPEG.mov")));
-    title_sequence.push_back(ofPtr<mediaElement>( new videoElement("video/TITLE_01-FR-to-EN-photoJPEG.mov")));
-    diagram_sequence.push_back(ofPtr<mediaElement>( new videoElement("video/DIAGRAM_01-FR-photoJPEG.mov")));
+    title_sequence.push_back(ofPtr<mediaElement>( new videoElement("video/TITLE_02-EN-photoJPEG.mov")));
+    title_sequence.push_back(ofPtr<mediaElement>( new videoElement("video/TITLE_02-FR-photoJPEG.mov")));
     diagram_sequence.push_back(ofPtr<mediaElement>( new videoElement("video/DIAGRAM_01-EN-photoJPEG.mov")));
+    diagram_sequence.push_back(ofPtr<mediaElement>( new videoElement("video/DIAGRAM_01-FR-photoJPEG.mov")));
 
 
-
+    int s = 0;
 
     // ****************** define scene information ****************** //
 
@@ -399,17 +399,31 @@ void planeApp::initScenes(){
     sceneInfo stars;
     stars.name = "Stars";
     stars.no = n;
-    stars.segments = 2;
-    stars.instructions[0][0] = "Stand still";
-    stars.instructions[1][0] = "Ne bougez plus";
-    stars.instructions[2][0] = "Ne bougez plus";
-    stars.analysis[0] = "* Velocity < FreezeMaxVel\n* frozenTimer > freezeMinTime\n-> 10 sec || all frozen";
-    stars.length[0] = 5;
-    stars.instructions[0][1] = "Try new spots\nto light up more stars";
-    stars.instructions[1][1] = "Posez-vous à de nouveaux endroits\npour allumer de nouvelles étoiles";
-    stars.instructions[2][1] = "Posez-vous a de nouveaux endroits\npour allumer de nouvelles etoiles";
-    stars.analysis[1] = "* Velocity < FreezeMaxVel\n* frozenTimer > freezeMinTime\n* frozenTimer < freezeMaxTime\n+ Star Animation at end of freezeMaxTime\n-> newStarMax stars || 40 sec";
-    stars.length[1] = 40;   // FOR DEBUGGING
+    stars.segments = 4;
+    s = 0;
+    stars.instructions[0][s] = " ";
+    stars.instructions[1][s] = " ";
+    stars.instructions[2][s] = " ";
+    stars.analysis[s] = " ";
+    stars.length[s] = 30;
+    s = 1; 
+    stars.instructions[0][s] = " ";
+    stars.instructions[1][s] = " ";
+    stars.instructions[2][s] = " ";
+    stars.analysis[s] = " ";
+    stars.length[s] = 30;
+    s = 2;
+    stars.instructions[0][s] = "Stand still";
+    stars.instructions[1][s] = "Ne bougez plus";
+    stars.instructions[2][s] = "Ne bougez plus";
+    stars.analysis[s] = "* Velocity < FreezeMaxVel\n* frozenTimer > freezeMinTime\n-> 10 sec || all frozen";
+    stars.length[s] = 5;
+    s = 3;
+    stars.instructions[0][s] = "Try new spots\nto light up more stars";
+    stars.instructions[1][s] = "Posez-vous à de nouveaux endroits\npour allumer de nouvelles étoiles";
+    stars.instructions[2][s] = "Posez-vous a de nouveaux endroits\npour allumer de nouvelles etoiles";
+    stars.analysis[s] = "* Velocity < FreezeMaxVel\n* frozenTimer > freezeMinTime\n* frozenTimer < freezeMaxTime\n+ Star Animation at end of freezeMaxTime\n-> newStarMax stars || 40 sec";
+    stars.length[s] = 40;   // FOR DEBUGGING
     scenes[n] = stars;
 
     n++;
@@ -511,7 +525,7 @@ void planeApp::initScenes(){
 
     n++;
 
-    int s = 0;
+    s = 0;
     sceneInfo eclipse;
     eclipse.name = "Eclipse";
     eclipse.no = n;
@@ -571,7 +585,7 @@ void planeApp::initScenes(){
     sceneInfo shooting;
     shooting.name = "Shooting Stars";
     shooting.no = n;
-    shooting.segments = 6;
+    shooting.segments = 5;
     shooting.instructions[0][0] = "Move like a\nshooting star";
     shooting.instructions[1][0] = "Filez comme une étoile";
     shooting.instructions[2][0] = "Filez comme une etoile";
@@ -602,12 +616,6 @@ void planeApp::initScenes(){
     shooting.analysis[3] = "- \n-> 10 sec";
     shooting.length[3] = 10;    
     s = 4;
-    shooting.instructions[0][s] = " ";
-    shooting.instructions[1][s] = " ";
-    shooting.instructions[2][s] = " ";
-    shooting.analysis[s] = " ";
-    shooting.length[s] = 30;
-    s = 5;
     shooting.instructions[0][s] = " ";
     shooting.instructions[1][s] = " ";
     shooting.instructions[2][s] = " ";
@@ -742,10 +750,10 @@ void planeApp::update(){
             }
         } else if (scene==STARS) {
             if (autoplay && !transition && segmentClock > minSegmentLength) {
-                if (segment==0 && hogAvVel < freezeAllMaxVel) {
+                if (segment==SEG_STARS && hogAvVel < freezeAllMaxVel) {
                     ofLogNotice("interaction") << "\t" << ofGetFrameNum() << "\t" << "scene " << scene << " segment 0 success: all frozen";
                     endSegment();
-                } else if (segment==1 && successCnt > newStarMax) {
+                } else if (segment==SEG_CONSTELLATIONS && successCnt > newStarMax) {
                     ofLogNotice("interaction") << "\t" << ofGetFrameNum() << "\t" << "scene " << scene << " segment 1 success: maxStarCnt";
                     endSegment();
                 }
@@ -1263,7 +1271,7 @@ void planeApp::blobOnFreeze(int & blobID) {
     if (!transition) {
         ofPoint p = blobMapToScreen(blobs[blobID].position);
         ofLogNotice("BLOB") << "\t" << ofGetFrameNum() << "\t" << "blobOnFreeze()\t" << blobID << " at " << int(p.x) << "|" << int(p.y);
-        if (scene==STARS) {
+        if (scene==STARS && segment>=SEG_STARS) {
             if (blobs[blobID].onStage) {
                 // STAND STILL
                 // create star on location of blob
@@ -1278,7 +1286,7 @@ void planeApp::blobOnFreeze(int & blobID) {
                 // (*fgMedia[fgMedia.size()-1]).autoDestroy(true);
                 (*fgMedia[fgMedia.size()-1]).finishMovie(1.0);
                 // (*fgMedia[fgMedia.size()-1]).outroTransformation = &mediaElement::scaleAway;
-                if (segment==1) successCnt++;
+                if (segment==SEG_CONSTELLATIONS) successCnt++;
             }
         }
     }
@@ -1288,7 +1296,7 @@ void planeApp::blobOnFreeze(int & blobID) {
 
 void planeApp::blobUnFreeze(int & blobID) {
     if (!transition) {
-        if (scene==STARS) {
+        if (scene==STARS && segment>=SEG_STARS) {
             // STAND STILL
             ofLogNotice("BLOB") << "\t" << ofGetFrameNum() << "\t" << "blobUnFreeze()\t\t" << blobID;
             // video fade away
@@ -1310,7 +1318,7 @@ void planeApp::blobUnFreeze(int & blobID) {
 void planeApp::blobOverFreeze(int & blobID) {
     if (!transition) {
         if (scene==STARS) {
-            if (segment==1 && blobs[blobID].onStage && blobs[blobID].mediaLink != NULL) {
+            if (segment==SEG_CONSTELLATIONS && blobs[blobID].onStage && blobs[blobID].mediaLink != NULL) {
 
                 string constellations[] = {
                 "CONSTELLATION_1-photoJPEG.mov",    // ok seahorse
@@ -1608,11 +1616,11 @@ void planeApp::blobUnlink(int & blobID) {
             ofPtr<mediaElement> vid = blobs[blobID].mediaLink;
             if (scene==STARS) {
                 // STARS: fade out frozen stars
-                if (segment<1 || !transition) {
+                if (segment==SEG_STARS || !transition) {
                     (**it).fadeOut(0.001, 0.5, true);
                     ofLogNotice("BLOB") << "\t" << ofGetFrameNum() << "\t" << "\t\t\tunlinked stars and fadeOut ";
                 } else {
-                    if (segment==1 && transition) {
+                    if (segment==SEG_CONSTELLATIONS && transition) {
                         ofLogNotice("BLOB") << "\t" << ofGetFrameNum() << "\t" << "\t\t\tdon't unlink bc already transitioning ";
                     }
                 }
@@ -1726,8 +1734,13 @@ void planeApp::endSegment() {
     } else {
         // endedSegment = true;    // so that instructions are not displayed anymore
         // endedInstructions(scene);
-        instructionTxt.fadeOut(instructionFadeOut);
-        ofAddListener( instructionTxt.fadeOutEnd, this, &planeApp::endedInstructions );
+        if (instructionTxt.rawText != "") {
+            instructionTxt.fadeOut(instructionFadeOut);
+            ofAddListener( instructionTxt.fadeOutEnd, this, &planeApp::endedInstructions );
+        } else {
+            // hard cut
+            endedInstructions(scene);
+        }
     }
 }
 
@@ -1751,9 +1764,11 @@ void planeApp::endedInstructions(int & trans) {
 
     } else if (scene==STARS) {          // STARS
 
-        if (segment==0) {               // 0 - STAND STILL
+        if (segment<SEG_STARS) {
             moveOn = true;
-        } else if (segment==1) {        // 1 - STAND STILL SOME MORE
+        } else if (segment==SEG_STARS) {               // 0 - STAND STILL
+            moveOn = true;
+        } else if (segment==SEG_CONSTELLATIONS) {        // 1 - STAND STILL SOME MORE
             sceneChange = true;
             // fade out all stars and constellations, attach trigger
             fgMediaFadedOut(scene); 
@@ -2055,9 +2070,27 @@ void planeApp::initSegment(){
     instructionVid->setDisplay(projectionW/2,projectionH/2, true);
 
     // SET BG STARRY-SKY OPACITY LOWER FOR STARS
-    if (scene==STARS && segment<2) {
-        (*bgMedia[5]).opMax = 0.35;
-    } else (*bgMedia[5]).opMax = 1;
+    if (scene==STARS) {
+
+        if (segment==0) {
+            fgMedia.push_back(ofPtr<mediaElement>( title_sequence[language] ));
+            (*fgMedia[fgMedia.size()-1]).setDisplay(projectionW/2,projectionH/2, true);
+            (*fgMedia[fgMedia.size()-1]).reset();
+            (*fgMedia[fgMedia.size()-1]).autoDestroy(true);
+            (*fgMedia[fgMedia.size()-1]).finishMovie(1.0);
+            ofAddListener( (*fgMedia[fgMedia.size()-1]).fadeOutEnd, this, &planeApp::allFaded );
+        } else if (segment==1) {
+            fgMedia.push_back(ofPtr<mediaElement>( diagram_sequence[language] ));
+            (*fgMedia[fgMedia.size()-1]).setDisplay(projectionW/2,projectionH/2, true);
+            (*fgMedia[fgMedia.size()-1]).reset();
+            (*fgMedia[fgMedia.size()-1]).autoDestroy(true);
+            (*fgMedia[fgMedia.size()-1]).finishMovie(1.0);
+            ofAddListener( (*fgMedia[fgMedia.size()-1]).fadeOutEnd, this, &planeApp::allFaded );
+        } 
+    }
+
+    if (scene==STARS && segment>=SEG_STARS) (*bgMedia[5]).opMax = 0.35;
+    else (*bgMedia[5]).opMax = 1;
 
     // add FG videos
     if (scene==REVOLUTIONS) {
@@ -2129,7 +2162,7 @@ void planeApp::initSegment(){
         }
     } else if (scene==SHOOTING) {
         if (sceneChange) shootingPointer = 0;
-        if (segment==scenes[scene].segments-2) {
+        if (segment==scenes[scene].segments-1) {
             // last scene, TITLE SEQUENCE
             fgMedia.push_back(ofPtr<mediaElement>( title_sequence[language] ));
             (*fgMedia[fgMedia.size()-1]).setDisplay(projectionW/2,projectionH/2, true);
@@ -2137,15 +2170,16 @@ void planeApp::initSegment(){
             (*fgMedia[fgMedia.size()-1]).autoDestroy(true);
             (*fgMedia[fgMedia.size()-1]).finishMovie(1.0);
             ofAddListener( (*fgMedia[fgMedia.size()-1]).fadeOutEnd, this, &planeApp::allFaded );
-        } else if (segment==scenes[scene].segments-1) {
-            // last scene, TITLE SEQUENCE
-            fgMedia.push_back(ofPtr<mediaElement>( diagram_sequence[language] ));
-            (*fgMedia[fgMedia.size()-1]).setDisplay(projectionW/2,projectionH/2, true);
-            (*fgMedia[fgMedia.size()-1]).reset();
-            (*fgMedia[fgMedia.size()-1]).autoDestroy(true);
-            (*fgMedia[fgMedia.size()-1]).finishMovie(1.0);
-            ofAddListener( (*fgMedia[fgMedia.size()-1]).fadeOutEnd, this, &planeApp::allFaded );
         }
+        // else if (segment==scenes[scene].segments-1) {
+        //     // last scene, DIAGRAM SEQUENCE
+        //     fgMedia.push_back(ofPtr<mediaElement>( diagram_sequence[language] ));
+        //     (*fgMedia[fgMedia.size()-1]).setDisplay(projectionW/2,projectionH/2, true);
+        //     (*fgMedia[fgMedia.size()-1]).reset();
+        //     (*fgMedia[fgMedia.size()-1]).autoDestroy(true);
+        //     (*fgMedia[fgMedia.size()-1]).finishMovie(1.0);
+        //     ofAddListener( (*fgMedia[fgMedia.size()-1]).fadeOutEnd, this, &planeApp::allFaded );
+        // }
     }
 
     beginSegment();
@@ -2432,7 +2466,7 @@ void planeApp::drawAnalysis(int x, int y, float scale){
             Blob* b = &it->second;
             if (b->onStage) {
                 if(b->properFreeze) {
-                    if(segment==1 && b->frozenTimer > freezeMaxTime) {
+                    if(segment==SEG_CONSTELLATIONS && b->frozenTimer > freezeMaxTime) {
                         ofSetColor(0);
                     } else ofSetColor(255);
                 } else if(b->frozen) ofSetColor(100);
@@ -2721,9 +2755,7 @@ void planeApp::configureBlobserver() {
             slow = true;
 
             if (segment==0) {               // STAND STILL
-                slow = true;
             } else if (segment==1) {        // STAND STILL SOME MORE
-                slow = true;
             }
 
         } else if (scene==ATTRACTION) {          // STARS
@@ -2906,9 +2938,11 @@ void planeApp::keyReleased(int key){
     // }
     if(key == 's') {
 		gui.saveToFile("planets01.xml");
+        languageGui.saveToFile("languageSelection.xml");
 	}
 	if(key == 'l') {
 		gui.loadFromFile("planets01.xml");
+        languageGui.loadFromFile("languageSelection.xml");
 	}
     if (key=='f') {
         // fullscreen = !fullscreen;
