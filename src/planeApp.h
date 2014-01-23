@@ -302,6 +302,8 @@ class planeApp : public ofBaseApp{
 		std::vector< ofPtr<mediaElement> > planet_animated;			// 9
 		// SHOOTING
 		std::vector< ofPtr<mediaElement> > shooting_stars;			// 50
+		std::vector< ofPtr<mediaElement> > title_sequence;			// 2
+		std::vector< ofPtr<mediaElement> > diagram_sequence;		// 2
 
 		ofImage instructionImg;
 		ofPtr<mediaElement> instructionVid;

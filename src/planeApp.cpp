@@ -363,6 +363,12 @@ void planeApp::initScenes(){
         shooting_stars.push_back(ofPtr<mediaElement>( new videoElement("video/6_shooting/SSTAR_" + ofToString(randomShooter,2,'0') + "-photoJPEG.mov")));
     }
 
+    title_sequence.push_back(ofPtr<mediaElement>( new videoElement("video/TITLE_01-EN-to-FR-photoJPEG.mov")));
+    title_sequence.push_back(ofPtr<mediaElement>( new videoElement("video/TITLE_01-FR-to-EN-photoJPEG.mov")));
+    diagram_sequence.push_back(ofPtr<mediaElement>( new videoElement("video/DIAGRAM_01-FR-photoJPEG.mov")));
+    diagram_sequence.push_back(ofPtr<mediaElement>( new videoElement("video/DIAGRAM_01-EN-photoJPEG.mov")));
+
+
 
 
     // ****************** define scene information ****************** //
@@ -563,7 +569,7 @@ void planeApp::initScenes(){
     sceneInfo shooting;
     shooting.name = "Shooting Stars";
     shooting.no = n;
-    shooting.segments = 4;
+    shooting.segments = 6;
     shooting.instructions[0][0] = "Move like a\nshooting star";
     shooting.instructions[1][0] = "Filez comme une étoile";
     shooting.instructions[2][0] = "Filez comme une etoile";
@@ -587,11 +593,25 @@ void planeApp::initScenes(){
     shooting.instructionVid[1][2][2] = "video/text/EXHALE_7-FR_outro-photoJPEG.mov"; // outro
     shooting.analysis[2] = "- \n-> 15 sec";
     shooting.length[2] = 15;
+    
     shooting.instructions[0][3] = "Stand up";
     shooting.instructions[1][3] = "Relevez-vous";
     shooting.instructions[2][3] = "Relevez-vous";
     shooting.analysis[3] = "- \n-> 10 sec";
-    shooting.length[3] = 10;
+    shooting.length[3] = 10;    
+    s = 4;
+    shooting.instructions[0][s] = " ";
+    shooting.instructions[1][s] = " ";
+    shooting.instructions[2][s] = " ";
+    shooting.analysis[s] = " ";
+    shooting.length[s] = 30;
+    s = 5;
+    shooting.instructions[0][s] = " ";
+    shooting.instructions[1][s] = " ";
+    shooting.instructions[2][s] = " ";
+    shooting.analysis[s] = " ";
+    shooting.length[s] = 30;
+
     scenes[n] = shooting;
 
     ofLogNotice("START") << "\t" << ofGetFrameNum() << "\t" << "there are " << scenes.size() << " scenes";
@@ -1897,6 +1917,8 @@ void planeApp::endedInstructions(int & trans) {
             // no need to fade out all shooting stars
             moveOn = true;
         } else if (segment==3) {        // 3 - STAND UP
+            moveOn = true;
+        } else if (segment==4) {        // TITLE SEQUENCE
             sceneChange = true;
             moveOn = true;
         }
@@ -1976,7 +1998,7 @@ void planeApp::initSegment(){
 
     configureBlobserver();
 
-    if (sceneChange) {
+    if (sceneChange && scene==0) {
         ofLogNotice("TRANSITION") << "\t" << ofGetFrameNum() << "\t" << "cleared " << fgMedia.size() << " fgMedia videos";
         fgMedia.clear();   // delete all foreground videos
     }
@@ -2095,8 +2117,25 @@ void planeApp::initSegment(){
             (*fgMedia[0]).fadeOut(0.01, 1.0, true);
             (*fgMedia[1]).hide = true;
         }
-    } else if (scene==SHOOTING && sceneChange) {
-        shootingPointer = 0;
+    } else if (scene==SHOOTING) {
+        if (sceneChange) shootingPointer = 0;
+        if (segment==scenes[scene].segments-2) {
+            // last scene, TITLE SEQUENCE
+            fgMedia.push_back(ofPtr<mediaElement>( title_sequence[language] ));
+            (*fgMedia[fgMedia.size()-1]).setDisplay(projectionW/2,projectionH/2, true);
+            (*fgMedia[fgMedia.size()-1]).reset();
+            (*fgMedia[fgMedia.size()-1]).autoDestroy(true);
+            (*fgMedia[fgMedia.size()-1]).finishMovie(1.0);
+            ofAddListener( (*fgMedia[fgMedia.size()-1]).fadeOutEnd, this, &planeApp::allFaded );
+        } else if (segment==scenes[scene].segments-1) {
+            // last scene, TITLE SEQUENCE
+            fgMedia.push_back(ofPtr<mediaElement>( diagram_sequence[language] ));
+            (*fgMedia[fgMedia.size()-1]).setDisplay(projectionW/2,projectionH/2, true);
+            (*fgMedia[fgMedia.size()-1]).reset();
+            (*fgMedia[fgMedia.size()-1]).autoDestroy(true);
+            (*fgMedia[fgMedia.size()-1]).finishMovie(1.0);
+            ofAddListener( (*fgMedia[fgMedia.size()-1]).fadeOutEnd, this, &planeApp::allFaded );
+        }
     }
 
     beginSegment();
