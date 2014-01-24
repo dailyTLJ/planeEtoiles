@@ -25,8 +25,8 @@ void imageElement::loadImage(string filename, float _scale) {
     }
 }
 
-void imageElement::update() {
-    mediaElement::update();
+void imageElement::update(float updateRate) {
+    mediaElement::update(updateRate);
 }
 
 void imageElement::draw() {

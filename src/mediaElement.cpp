@@ -40,12 +40,12 @@ mediaElement::~mediaElement() {
 
 
 
-void mediaElement::update() {
+void mediaElement::update(float updateRate) {
     bridgeUpdated = false;
     if (moveElement) {
-        position.x += velocity.x;
-        position.y += velocity.y;
-        if (opacity<1) opacity += opacityChange;
+        position.x += velocity.x * updateRate;
+        position.y += velocity.y * updateRate;
+        if (opacity<1) opacity += opacityChange * updateRate;
         if (goalDefined) {
             float distance = ofDist(position.x, position.y, goal.x, goal.y);
             if (distance < moveSpeed) {
@@ -63,29 +63,29 @@ void mediaElement::update() {
         }
     }
     if (addSc>0) {
-        addSc-=0.01;
+        addSc-=0.01 * updateRate;
         if (addSc<0) addSc = 0;
     }
     if (fading) {
-        opacity += opacityChange;
-        // ofLogNotice("mediaElement") << "update opacity > " << opacity;
+        opacity += opacityChange * updateRate;
+        // ofLogNotice("mediaElement") << ofGetFrameNum() << "\t"  << "update opacity > " << opacity;
         if (opacityChange>0 && opacity >= 1.0f) {
             opacity = 1.f;
             fading = false;
             visible = true;
-            ofLogNotice("mediaElement") << ofGetFrameNum() << "\t" << "mediaElement::update opacity 1, fadeInEnd";
+            ofLogNotice("mediaElement") << ofGetFrameNum() << "\t" << "opacity 1, fadeInEnd " << file;
             ofNotifyEvent(fadeInEnd,this->w,this);
         } else if (opacityChange<0 && opacity <= 0.f) {
             opacity = 0.f;
             fading = false;
             visible = false;
-            ofLogNotice("mediaElement") << ofGetFrameNum() << "\t" << "mediaElement::update opacity 0, fadeoutend";
+            ofLogNotice("mediaElement") << ofGetFrameNum() << "\t" << "opacity 0, fadeoutend " << file;
             ofNotifyEvent(fadeOutEnd,this->w,this);
             if (fadeoutDestroy) dead = true;
         }
     }
     if (scaling) {
-        scale *= 0.95;
+        scale *= 0.95 * updateRate;
         if (scale < 0.05) {
             visible = false;
             ofNotifyEvent(fadeOutEnd,this->w,this);
@@ -176,13 +176,14 @@ void mediaElement::moveInFromSide(int centerx, int centery) {
 }
 
 void mediaElement::fade(float speed) {
+    // ofLogNotice("mediaElement") << ofGetFrameNum() << "\t"  << "fade() opacity = " << opacity;
     fading = true;
     opacityChange = speed;
     // cout << "fade = true" << endl;
 }
 
 void mediaElement::fadeOut() {
-    ofLogNotice("mediaElement") << "\t" << ofGetFrameNum() << "\t" << "fadeOut()";
+    // ofLogNotice("mediaElement") << "\t" << ofGetFrameNum() << "\tfadeOut() " << file;
     if (hide) opacity = 0.01;       // set to low value, so there is at least one procession step
                                     // else endless feedback loop to event fgMediaFadedOut would be created
     fadeOut(0.01);
@@ -199,13 +200,14 @@ void mediaElement::fadeTo(float _opMax) {
 }
 
 void mediaElement::fadeOut(float speed, float op, bool destroy) {
-    ofLogNotice("mediaElement") << ofGetFrameNum() << "\t" << file << "\tfadeOut()";
+    ofLogNotice("mediaElement") << ofGetFrameNum() << "\tfadeOut(" << speed << ") " << file;
     opacity = op;
     fadeoutDestroy = destroy;
     fade(-speed);
 }
 
 void mediaElement::fadeIn(float speed) {
+    ofLogNotice("mediaElement") << ofGetFrameNum() << "\t"  << "fadeIn at: " << speed;
     opacity = 0.0f;
     fade(speed);
 }

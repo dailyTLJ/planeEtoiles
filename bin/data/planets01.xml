@@ -8,7 +8,7 @@
 
 	<Min_LostTime>1</Min_LostTime>
 
-	<inactivity_timer>30</inactivity_timer>
+	<inactivity_timer>29</inactivity_timer>
 
 	<Min_Segm_Length>3</Min_Segm_Length>
 
@@ -20,7 +20,7 @@
 
 		<Site_Length>500</Site_Length>
 
-		<Stage_Radius>257</Stage_Radius>
+		<Stage_Radius>221</Stage_Radius>
 
 		<Map_Width>2.36735</Map_Width>
 
@@ -30,7 +30,7 @@
 
 		<Offset_Y>326</Offset_Y>
 
-		<Y_Interpolation>5</Y_Interpolation>
+		<Y_Interpolation>12</Y_Interpolation>
 
 	</Dimension>
 
@@ -46,19 +46,19 @@
 
 		<NORMAL_measurement>4</NORMAL_measurement>
 
-		<ERRATIC_noise>3</ERRATIC_noise>
+		<ERRATIC_noise>6</ERRATIC_noise>
 
-		<ERRATIC_measurement>7</ERRATIC_measurement>
+		<ERRATIC_measurement>5</ERRATIC_measurement>
 
 	</Blobserver>
 
 	<Sc1_Stars>
 
-		<Freeze_MaxVel>0.602041</Freeze_MaxVel>
+		<Freeze_MaxVel>1.40816</Freeze_MaxVel>
 
 		<Freeze_MinTime>1</Freeze_MinTime>
 
-		<Freeze_MaxTime>3</Freeze_MaxTime>
+		<Freeze_MaxTime>5</Freeze_MaxTime>
 
 		<NewStar_Max>40</NewStar_Max>
 
@@ -66,9 +66,9 @@
 
 	<Sc2_Attraction>
 
-		<Dist_StdDev>36.2245</Dist_StdDev>
+		<Dist_StdDev>13.9286</Dist_StdDev>
 
-		<Movement_Thr>1.5</Movement_Thr>
+		<Movement_Thr>1.68367</Movement_Thr>
 
 		<Dist_Reward>2</Dist_Reward>
 
@@ -78,11 +78,11 @@
 
 		<MinLost_SPIN>1</MinLost_SPIN>
 
-		<spinJudgeTime>53</spinJudgeTime>
+		<spinJudgeTime>31</spinJudgeTime>
 
-		<spinSuccess>5</spinSuccess>
+		<spinSuccess>3</spinSuccess>
 
-		<spinFailure>2</spinFailure>
+		<spinFailure>1</spinFailure>
 
 	</Sc3_Revolutions>
 
@@ -92,13 +92,13 @@
 
 		<FreezeAllMaxVel>0.596939</FreezeAllMaxVel>
 
-		<runJudgeTime>75</runJudgeTime>
+		<runJudgeTime>30</runJudgeTime>
 
-		<runHogThr>2.7</runHogThr>
+		<runHogThr>2.14286</runHogThr>
 
 		<runBgsThr>8</runBgsThr>
 
-		<runActThr>3</runActThr>
+		<runActThr>4</runActThr>
 
 	</Sc4_Sun>
 
@@ -106,19 +106,21 @@
 
 		<Alignm_MaxDist>77</Alignm_MaxDist>
 
-		<Alignm_Transition>3</Alignm_Transition>
+		<Alignm_Transition>4</Alignm_Transition>
 
-		<followMeSpeed>0.0117347</followMeSpeed>
+		<followMeSpeed>0.0112245</followMeSpeed>
 
-		<followMeRadius>303</followMeRadius>
+		<followMeRadius>232</followMeRadius>
 
 	</Sc5_Eclipse>
 
 	<Sc6_Combustion>
 
-		<MinLost_SHOOT>1</MinLost_SHOOT>
+		<MinLost_SHOOT>2</MinLost_SHOOT>
 
 	</Sc6_Combustion>
 
 <HUMANS_AND_PLANETS/>
+<Instruct_Fade_In>0.258355</Instruct_Fade_In>
+	<Instruct_Fade_Out>0.25636</Instruct_Fade_Out>
 </HUMANS_AND_PLANETS>

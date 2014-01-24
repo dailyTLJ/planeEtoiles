@@ -10,13 +10,14 @@
 #include "Blob.h"
 #include "videoElement.h"
 #include "imageElement.h"
+#include "textElement.h"
 
 // listen to blobserver on port 9000
 #define MYPORT 9000
 #define BLOBPORT 9002
 // #define BLOBSERVERIP "192.168.2.12"
-#define BLOBSERVERIP "192.168.2.14"
-// #define BLOBSERVERIP "10.4.40.28"
+// #define BLOBSERVERIP "192.168.2.14"
+#define BLOBSERVERIP "10.4.40.28"
 // #define MYIP "192.168.2.39"
 #define MYIP "10.10.44.21"
 
@@ -30,16 +31,20 @@
 #define SHOOTING 		6
 // define special segment
 #define SEG_FOLLOWME 	1
+#define SEG_STARS 		2
+#define SEG_CONSTELLATIONS 	3
+#define MAX_SEGMENTS	8
 
 class sceneInfo {
     public:
         string name;
         int no;
         int segments;
-        int length[7];
-        string instructions[3][7];
-        string instructionImg[2][7];
-        string analysis[7];
+        int length[MAX_SEGMENTS];
+        string instructions[3][MAX_SEGMENTS];
+        string instructionImg[2][MAX_SEGMENTS];
+        string instructionVid[2][MAX_SEGMENTS][3];
+        string analysis[MAX_SEGMENTS];
 };
 
 class planeApp : public ofBaseApp{
@@ -59,7 +64,7 @@ class planeApp : public ofBaseApp{
 		void setPerspective();
 		void recalculatePerspective(int & v);
 
-		void drawRawData(int x, int y, float scale);
+		void drawRawData(int x, int y, float scale, bool displayText = false);
 		void drawTopDown(int x, int y, float scale, bool detailed = false);
 		void drawScreen(int x, int y, float scale);
 		void drawAnalysis(int x, int y, float scale);
@@ -86,9 +91,9 @@ class planeApp : public ofBaseApp{
 		void jumpToScene(int s);
 		bool allBlobsAlignedWith(ofPoint &p);
 		ofPoint blobMapToScreen(ofPoint &o);
-
-		void endSegmentOld();				// 
-		void endSegment();					// 1. trigger fgMediaFadedOut or moveOn
+			// 
+		void endSegment();					// 1. 
+		void endedInstructions(int & trans);// trigger fgMediaFadedOut or moveOn
 		void fgMediaFadedOut(int & trans);  // 2. call outroTransformation calls on FG and BG media
 		void allFaded(int & trans); 		// 3. all elements faded out, moveOn = true
 		void bgMediaSwap(int & trans);		//
@@ -99,6 +104,7 @@ class planeApp : public ofBaseApp{
 		// void bgMediaFadedIn(int & trans);	// 7. reinit blobs, introtransformation of videos
 		// void fgMediaFadedIn(int & trans);
 		void unHideSun(int & trans);
+		void placeInstruction(int & trans);
 
 		void keyPressed(int key);
 		void keyReleased(int key);
@@ -128,6 +134,7 @@ class planeApp : public ofBaseApp{
         int blobW;
         int blobH;
         float cameraExposure;
+        int moonPosX;
 
 		int mouseX, mouseY;
 		string mouseButtonState;
@@ -138,12 +145,11 @@ class planeApp : public ofBaseApp{
 		ofPoint steles[8];
 		ofPoint steles_topdown[8];
 
-		bool fullscreen;
-
 		// SEQUENCING
 		bool processing;
 		bool oscMsgReceived;
 		bool oscActive;
+		bool oscNetworkReady;
 		float oscLastMsg;
 		float oscLastMsgTimer;
 		float oscLastMsgTimerMax;
@@ -162,7 +168,6 @@ class planeApp : public ofBaseApp{
 		int globalStart;
 		bool moveOn;
 		bool transition;
-		bool endedSegment;
 		bool success;			// if people followed the instructions
 		int successCnt;
 		int activityCnt;
@@ -175,6 +180,7 @@ class planeApp : public ofBaseApp{
 
 		int shootingPointer;
 
+		bool drawDebugScreen;
 		bool drawBridge;
 		float bridgeX;
 		float bridgeY;
@@ -210,6 +216,9 @@ class planeApp : public ofBaseApp{
         ofParameter<int> nebulaOpacity;
 		ofxOscReceiver receiver;
 		ofxOscSender sender;
+
+		ofParameter<float> instructionFadeIn;
+		ofParameter<float> instructionFadeOut;
 
 		ofParameter<float> freezeMaxVel;
 		ofParameter<float> freezeAllMaxVel;
@@ -290,14 +299,18 @@ class planeApp : public ofBaseApp{
 		// SUN
 		ofPtr<mediaElement> sun_jump;
 		ofPtr<mediaElement> sun_run;
-		std::vector< ofPtr<mediaElement> > sun_freeze_red;		// 4
-		std::vector< ofPtr<mediaElement> > sun_surface_blue;	// 12
+		std::vector< ofPtr<mediaElement> > sun_freeze_red;			// 4
+		std::vector< ofPtr<mediaElement> > sun_surface_blue;		// 12
 		// ECLIPSE
 		std::vector< ofPtr<mediaElement> > planet_animated;			// 9
 		// SHOOTING
 		std::vector< ofPtr<mediaElement> > shooting_stars;			// 50
+		std::vector< ofPtr<mediaElement> > title_sequence;			// 2
+		std::vector< ofPtr<mediaElement> > diagram_sequence;		// 2
 
 		ofImage instructionImg;
+		ofPtr<mediaElement> instructionVid;
+		textElement instructionTxt;
 		int bgMediaId;
 
 };

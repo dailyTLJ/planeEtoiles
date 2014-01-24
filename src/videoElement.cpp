@@ -2,22 +2,28 @@
 
 videoElement::videoElement() {
     movie = ofPtr<ofVideoPlayer>( new ofVideoPlayer() );
+    movie->setPixelFormat(OF_PIXELS_BGRA);  // need to set this even for non-alpha videos, 
+                                            // because of alpha-fix in ofGstVideoPlayer.cpp
+    this->blend = false;
+    this->rotation = 0;
+    this->setFileDeadNow = false;
+    this->loadLoopFileNow = false;
+    this->mediaLoaded = false;
 }
 
 videoElement::videoElement(string filename, bool _blend) {
     movie = ofPtr<ofVideoPlayer>( new ofVideoPlayer() );
     movie->setPixelFormat(OF_PIXELS_BGRA);  // need to set this even for non-alpha videos, 
                                             // because of alpha-fix in ofGstVideoPlayer.cpp
-    this->blend = _blend;
     this->rotation = 0;
     this->setFileDeadNow = false;
     this->loadLoopFileNow = false;
     this->mediaLoaded = false;
+    this->blend = _blend;
     this->loadMovie(filename);
 }
 
 videoElement::~videoElement() {
-    // cout << "~videoElement() " << endl;
     movie = ofPtr<ofVideoPlayer>( new ofVideoPlayer() );
     ofLogNotice("videoElement") << ofGetFrameNum() << "\t" << "destructor " << file;
 }
@@ -27,10 +33,12 @@ void videoElement::loadMovie(string filename) {
     ofLogNotice("videoElement") << ofGetFrameNum() << "\t" << "loadMovie\t'" << file << "'";
     mediaLoaded = movie->loadMovie(filename);
     if (mediaLoaded) {
+        movie->update();    // FOR DEBUGGIN, update to avoid glitches
         this->w = movie->getWidth();
         this->h = movie->getHeight();
         this->play(true);
         this->pause(true);
+        // ofLogNotice("videoElement") << ofGetFrameNum() << "\t" << "loadMovie\t" << w << ":" << h << "\t" << position.x << ":" << position.y;
     } else {
         ofLogError() << ofGetFrameNum() << "\t" << "file doesn't exist " << file;
     }
@@ -50,15 +58,17 @@ void videoElement::pause(bool v) {
     }
 }
 
-void videoElement::update() {
+void videoElement::update(float updateRate) {
     if (mediaLoaded) {
-        mediaElement::update();
+        mediaElement::update(updateRate);
         if (loadLoopFileNow) {
             ofLogNotice("videoElement") << ofGetFrameNum() << "\t" << "loadLoopFileNow\t" << loopFile;
             loadLoopFileNow = false;
             loadMovie(loopFile);
+            hide = false;
             loopFile = "";
             play(true);
+            ofNotifyEvent(playLoop,this->w,this);
         }
         if (setFileDeadNow) {
             setFileDeadNow = false;
@@ -78,11 +88,12 @@ void videoElement::update() {
                     ofNotifyEvent(fadeOutEnd,this->w,this);
                 } else {
                     ofLogNotice("videoElement") << ofGetFrameNum() << "\t" << "movieisdone, selfdestroy\t" << file;
-                    movie->update();
+                    // movie->update(); // DEBUG
                 }
             } else if (this->movieEndTrigger && loopFile!="") {
                 play(true);
-                movie->update();
+                // movie->update();
+                // hide = true;
                 ofLogNotice("videoElement") << ofGetFrameNum() << "\t" << "movieisdone, loopfile\t" << loopFile;
                 loadLoopFileNow = true;
                 // loadMovie(loopFile);
@@ -167,6 +178,10 @@ void videoElement::drawElement(float _scale) {
     if (mediaLoaded) {
         ofSetColor(255, 255, 255, int(255*opacity*opMax));
         float msc = (scale+addSc) * _scale;
+        if (movie->getCurrentFrame()<1) {
+            // ofLogNotice("videoElement") << ofGetFrameNum() << "\t" << "getCurrentFrame<1  movie->update()" ;
+            movie->update();    // FOR DEBUGGING, update before drawing to prevent glitches??
+        }
         if (centered) {
             movie->draw(-w * msc * 0.5, -h * msc * 0.5, w * msc, h * msc);
         } else {
@@ -192,7 +207,7 @@ void videoElement::moveAcross(float vx, float vy, int maxw, int maxh, bool destr
 
 
     ofLogNotice("videoElement") << ofGetFrameNum() << "\t" << "moveAcross()\t >>> " << rotation ;
-    float v = 45;
+    float v = 45 + ofRandom(20);
     int maxRadius = max(maxw/2, maxh/2);
     this->position.set( maxw/2 - maxRadius*1.5 * sin(ofDegToRad(rotation)), maxh/2 + maxRadius*1.5 * cos(ofDegToRad(rotation)) );
     // slightly random, to avoid that all are flying perfectly through the center point of the screen

@@ -10,7 +10,7 @@ class imageElement: public mediaElement
         imageElement(string filename, float _scale = 1.0f);
         // ~imageElement() { cout << "kill image " << this->file << endl; };
 
-        void update();
+        void update(float updateRate = 1.0);
 
         void loadImage(string filename, float _scale = 1.0f);
 
