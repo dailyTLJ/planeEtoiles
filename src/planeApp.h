@@ -120,10 +120,6 @@ class planeApp : public ofBaseApp{
 		void printDebugInfo();
 
 		std::stringstream coutput;
-
-		int language;
-		int languageCnt;
-		ofParameter<int> languageRatio;
 		
 		bool projectorOn;
 		int projectionW;
@@ -202,7 +198,15 @@ class planeApp : public ofBaseApp{
 		ofTrueTypeFont fontIdle;
 		ofTrueTypeFont fontSm;
 		ofxPanel gui;
-		ofxPanel languageGui;
+		// ofxPanel languageGui;
+		ofxPanel stateGui;
+
+		ofParameter<int> guiScene;
+		ofParameter<int> guiSegment;
+		ofParameter<int> language;
+		ofParameter<int> languageCnt;
+		ofParameter<int> languageRatio;
+
 		ofParameterGroup paramBasic;
 		ofParameterGroup paramTiming;
 		ofParameterGroup paramSc1;

@@ -12,7 +12,7 @@ void planeApp::setup(){
 
     ofSetFrameRate(30);
     
-    ofSetLogLevel(OF_LOG_WARNING);
+    ofSetLogLevel(OF_LOG_NOTICE);
 
     // create a new logfile everytime the application is started
     // ofLogToFile("/home/planeviz/Documents/log/of_log/planeEtoiles_"+ofGetTimestampString()+".log");
@@ -31,14 +31,14 @@ void planeApp::setup(){
     // ofLogError()
     // ofLogFatalError()
 
-    ofSetLogLevel("BLOB", OF_LOG_WARNING);
+    ofSetLogLevel("BLOB", OF_LOG_NOTICE);
     ofSetLogLevel("KEY", OF_LOG_NOTICE);
-    ofSetLogLevel("BRIDGE", OF_LOG_WARNING);
+    ofSetLogLevel("BRIDGE", OF_LOG_NOTICE);
     ofSetLogLevel("TRANSITION", OF_LOG_NOTICE);
     ofSetLogLevel("OSC", OF_LOG_WARNING);
     ofSetLogLevel("interaction", OF_LOG_NOTICE);
-    ofSetLogLevel("videoElement", OF_LOG_WARNING);
-    ofSetLogLevel("mediaElement", OF_LOG_WARNING);
+    ofSetLogLevel("videoElement", OF_LOG_NOTICE);
+    ofSetLogLevel("mediaElement", OF_LOG_NOTICE);
 
 
 
@@ -61,12 +61,8 @@ void planeApp::setup(){
 	fontSm.setLineHeight(16.0f);
 	fontSm.setLetterSpacing(1.037);
 
-
-    ofLogNotice("START") << "\t" << ofGetFrameNum() << "\t" << "1";
     projectorOn = (ofGetWindowMode() == OF_FULLSCREEN) ? true : false;
     // projectorOn = false;
-    language = 1;
-    languageCnt = 0;
     processing = true;
     oscMsgReceived = false;
     oscLastMsg = 0;
@@ -87,13 +83,13 @@ void planeApp::setup(){
     activityCnt = 0;
 	drawBlobDetail = false;
     transition = false;
-    drawDebugScreen = false;
+    drawDebugScreen = true;
     moveOn = false;
     sceneChange = false;
     flash = false;
     flashCnt = 0;
     flashMax = 2;
-    bgMediaId = 0;
+    bgMediaId = 5;
     pickPlanet = 0;
 
     drawBridge = false;
@@ -122,16 +118,19 @@ void planeApp::setup(){
     siteW.addListener(this,&planeApp::recalculatePerspective);
 	siteH.addListener(this,&planeApp::recalculatePerspective);
 
-    ofLogNotice("START") << "\t" << ofGetFrameNum() << "\t" << "3";
+    // reposition GUI based on number of screens
+    int transX = (!projectorOn) ? 0 : 500;
 
-    if (!projectorOn) languageGui.setup("LANGUAGE", "languageSelection.xml", 10, 620);
-    else languageGui.setup("LANGUAGE", "languageSelection.xml", 510, 620);
-    languageGui.add(languageRatio.set("French_English_Ratio", 1, 1, 5));
-    languageGui.setSize(220,50);
-    languageGui.loadFromFile("languageSelection.xml");
+    stateGui.setup("CURRENT STATE", "currentState.xml", 10 + transX, 580);
+    stateGui.add(guiScene.set("Current Scene", 1, 0, 6));
+    stateGui.add(guiSegment.set("Current Segment", 0, 0, 8));
+    stateGui.add(language.set("Current Language (EN/FR)", 1, 0, 1));
+    stateGui.add(languageCnt.set("Language Counter", 0, 0, 5));
+    stateGui.add(languageRatio.set("French_English_Ratio", 1, 1, 5));
+    stateGui.setSize(220,130);
+    stateGui.loadFromFile("currentState.xml");
 
-    if (!projectorOn) gui.setup("HUMANS AND PLANETS", "planets01.xml", 1204,10);
-    else gui.setup("HUMANS AND PLANETS", "planets01.xml", 1704,10);
+    gui.setup("HUMANS AND PLANETS", "planets01.xml", 1204 + transX,10);
     gui.setDefaultBackgroundColor( ofColor(0,0,50) );
     gui.add(autoplay.setup("autoplay", false));
     // gui.add(testMode.setup("testMode", false));
@@ -212,7 +211,6 @@ void planeApp::setup(){
     paramSc5.add(minLostShoot.set("MinLost SHOOT", 1, 0, 10));
     gui.add(paramSc5);
 
-    ofLogNotice("START") << "\t" << ofGetFrameNum() << "\t" << "4";
     gui.setSize(200,500);
     gui.loadFromFile("planets01.xml");
 
@@ -234,9 +232,6 @@ void planeApp::setup(){
     } catch(exception& e){
         ofLogError() << e.what();
     }
-
-
-    ofLogNotice("START") << "\t" << ofGetFrameNum() << "\t" << "5";
 
 
     instructionTxt.setText("test", "test");
@@ -310,8 +305,6 @@ void planeApp::initScenes(){
 
     globalStart = ofGetUnixTime();
     segmentStart = ofGetUnixTime();
-    scene = -1;
-	segment = 0;
 	segmentClock = 0;
 	masterClock = 0;
     resetClock = false;
@@ -638,17 +631,29 @@ void planeApp::initScenes(){
 
     ofLogNotice("START") << "\t" << ofGetFrameNum() << "\t" << "there are " << scenes.size() << " scenes";
 
+
+    // initialize current scene/segment based on data saved in currentState.xml! << last scene/segment after termination
+    scene = guiScene;
+    segment = guiSegment;
+    if (scene>=scenes.size()-1 && segment>=scenes[scene].segments-1) {
+        ofLogNotice("START") << "\t" << ofGetFrameNum() << "\t" << "restarted at normal position: scene " << scene << " : " << segment;
+        scene = 0;
+        segment = 0;
+    } else {
+        ofLogNotice("START") << "\t" << ofGetFrameNum() << "\t" << "untypical termination, restart at: scene " << scene << " : " << segment;
+    }
+
     sceneChange = true;
     nextSegment();
+    (*bgMedia[bgMediaId]).reset(true);
 
 }
 
 //--------------------------------------------------------------
 void planeApp::update(){
 
+    // ofGetFrameRate freaks out if at start of application? 
     if (processing) {
-
-        float updateRate  = 30.0/ofGetFrameRate();
 
         oscMsgReceived = false;
         this->receiveOsc();
@@ -803,209 +808,216 @@ void planeApp::update(){
         }
 
 
-        // animation relatedspinJT
-        if (scene==REVOLUTIONS) {
 
-            int spinJT = int ( float(spinJudgeTime) / updateRate);   // half framerate --> 2.0
-            // 30.0/ofGetFrameRate();
+        float updateRate  = 30.0/ofGetFrameRate();  
+        // ofLogNotice("interaction") << "\t" << ofGetFrameNum() << "\t" << "updateRate " << updateRate;
+        if (updateRate>0.5 && updateRate<6) {
 
-            if (!transition && ofGetFrameNum()%spinJT==0) {
-                ofLogNotice("interaction") << "\t" << ofGetFrameNum() << "\t" << "\tspinJudgeTime: " << spinJT << " (" << spinJudgeTime << ")";
-                if (segment==0) {
-                    int oldCnt = planetCnt;
-                    // set planetCnt based on activityCnt
-                    if (activityCnt >= spinSuccess) planetCnt++;
-                    else if (activityCnt < spinFailure) planetCnt--;
+            // animation relatedspinJT
+            if (scene==REVOLUTIONS) {
 
-                    if (activityCnt==0) planetCnt=0;
-                    if (planetCnt>((blobsOnStage+1)/2.0)) planetCnt = ((blobsOnStage+1)/2);
-                    if (planetCnt>5) planetCnt = 5;
-                    else if (planetCnt<0) planetCnt = 0;
+                int spinJT = int ( float(spinJudgeTime) / updateRate);   // half framerate --> 2.0
+                // 30.0/ofGetFrameRate();
 
-                    if (oldCnt==0 && planetCnt==1 && !resetClock) {
-                        // first pair spinning, reset timer!
-                        resetClock = true;
-                        segmentStart = ofGetUnixTime();
-                        ofLogNotice("interaction") << "\t" << ofGetFrameNum() << "\t" << "\treset segmentClock to " << segmentClock;
-                    }
+                if (!transition && ofGetFrameNum()%spinJT==0) {
+                    ofLogNotice("interaction") << "\t" << ofGetFrameNum() << "\t" << "\tspinJudgeTime: " << spinJT << " (" << spinJudgeTime << ")";
+                    if (segment==0) {
+                        int oldCnt = planetCnt;
+                        // set planetCnt based on activityCnt
+                        if (activityCnt >= spinSuccess) planetCnt++;
+                        else if (activityCnt < spinFailure) planetCnt--;
 
-                    if (oldCnt!=planetCnt) {
+                        if (activityCnt==0) planetCnt=0;
+                        if (planetCnt>((blobsOnStage+1)/2.0)) planetCnt = ((blobsOnStage+1)/2);
+                        if (planetCnt>5) planetCnt = 5;
+                        else if (planetCnt<0) planetCnt = 0;
 
-                        if (planetCnt>oldCnt) {
-                            // ADD PLANETS
-                            string videoFile;
-                            int videoPick = ofRandom(5) + 1;
-                            videoFile = "video/3_revolution/REV_0"+ofToString(videoPick)+"-photoJPEG.mov";
-                            fgMedia.push_back(ofPtr<mediaElement>( new videoElement(videoFile,true)));
-                            (*fgMedia[fgMedia.size()-1]).reset(true);
-                            planetCnt = oldCnt + 1;
-                        } else {
-                            ofLogNotice("interaction") << "\t" << ofGetFrameNum() << "\t" << "\ttake away planet, planetCnt " << planetCnt;
-                            // TAKE AWAY PLANETS
-                            if (fgMedia.size()>0) {
-                                for (unsigned int i=fgMedia.size()-1; i>=0; i--) {
-                                    ofLogNotice("interaction") << "\t" << ofGetFrameNum() << "\t" << "\ttake away planet " << i;
-                                    if (i>=0 && !(*fgMedia[i]).selfdestroy) {
-                                        (*fgMedia[i]).loadMovie("video/3_revolution/REV_OUT-photoJPEG.mov");
-                                        (*fgMedia[i]).reset(true);
-                                        (*fgMedia[i]).autoDestroy(true);
-                                        if (i<=planetCnt) break;
+                        if (oldCnt==0 && planetCnt==1 && !resetClock) {
+                            // first pair spinning, reset timer!
+                            resetClock = true;
+                            segmentStart = ofGetUnixTime();
+                            ofLogNotice("interaction") << "\t" << ofGetFrameNum() << "\t" << "\treset segmentClock to " << segmentClock;
+                        }
+
+                        if (oldCnt!=planetCnt) {
+
+                            if (planetCnt>oldCnt) {
+                                // ADD PLANETS
+                                string videoFile;
+                                int videoPick = ofRandom(5) + 1;
+                                videoFile = "video/3_revolution/REV_0"+ofToString(videoPick)+"-photoJPEG.mov";
+                                fgMedia.push_back(ofPtr<mediaElement>( new videoElement(videoFile,true)));
+                                (*fgMedia[fgMedia.size()-1]).reset(true);
+                                planetCnt = oldCnt + 1;
+                            } else {
+                                ofLogNotice("interaction") << "\t" << ofGetFrameNum() << "\t" << "\ttake away planet, planetCnt " << planetCnt;
+                                // TAKE AWAY PLANETS
+                                if (fgMedia.size()>0) {
+                                    for (unsigned int i=fgMedia.size()-1; i>=0; i--) {
+                                        ofLogNotice("interaction") << "\t" << ofGetFrameNum() << "\t" << "\ttake away planet " << i;
+                                        if (i>=0 && !(*fgMedia[i]).selfdestroy) {
+                                            (*fgMedia[i]).loadMovie("video/3_revolution/REV_OUT-photoJPEG.mov");
+                                            (*fgMedia[i]).reset(true);
+                                            (*fgMedia[i]).autoDestroy(true);
+                                            if (i<=planetCnt) break;
+                                        }
                                     }
                                 }
                             }
+
+                            positionRevolutions();
                         }
 
-                        positionRevolutions();
-                    }
-
-                } else if (segment==1) {
-                    int oldCnt = planetCnt;
-                    if (activityCnt < spinFailure) planetCnt--;
-                    if (planetCnt<oldCnt && planetCnt>=0) {
-                        ofLogNotice("interaction") << "\t" << ofGetFrameNum() << "\t" << "\ttake away planet";
-                        if (fgMedia.size()>0) {
-                            for (unsigned int i=fgMedia.size()-1; i>=0; i--) {
-                                ofLogNotice("interaction") << "\t" << ofGetFrameNum() << "\t" << "\ttake away planet " << i;
-                                if (!(*fgMedia[i]).selfdestroy) {
-                                    (*fgMedia[i]).loadMovie("video/3_revolution/REV_OUT-photoJPEG.mov");
-                                    (*fgMedia[i]).reset(true);
-                                    (*fgMedia[i]).autoDestroy(true);
-                                    if (i>=planetCnt) break;
+                    } else if (segment==1) {
+                        int oldCnt = planetCnt;
+                        if (activityCnt < spinFailure) planetCnt--;
+                        if (planetCnt<oldCnt && planetCnt>=0) {
+                            ofLogNotice("interaction") << "\t" << ofGetFrameNum() << "\t" << "\ttake away planet";
+                            if (fgMedia.size()>0) {
+                                for (unsigned int i=fgMedia.size()-1; i>=0; i--) {
+                                    ofLogNotice("interaction") << "\t" << ofGetFrameNum() << "\t" << "\ttake away planet " << i;
+                                    if (!(*fgMedia[i]).selfdestroy) {
+                                        (*fgMedia[i]).loadMovie("video/3_revolution/REV_OUT-photoJPEG.mov");
+                                        (*fgMedia[i]).reset(true);
+                                        (*fgMedia[i]).autoDestroy(true);
+                                        if (i>=planetCnt) break;
+                                    }
                                 }
                             }
+                            if (planetCnt==0) success = true;
+                        } else if (planetCnt==-1) {
+                            success = true;
                         }
-                        if (planetCnt==0) success = true;
-                    } else if (planetCnt==-1) {
+                    }
+                    ofLogNotice("interaction") << "\t" << ofGetFrameNum() << "\t" << "\tactivityCnt\t" << activityCnt << "\tplanetCnt\t" << planetCnt;
+                    activityCnt = 0;
+                }
+
+            } else if (scene==SUN && segment==3) {
+                int runJT = int ( float(runJudgeTime) / updateRate);
+                if (!transition && ofGetFrameNum()%runJT==0) {
+                    // if high activity, add blue surface to sun
+                    // DEBUGGING KILL
+                    // if (hogAvVel > runHogThr || activityCnt > runActThr) {
+                    //     // activity!
+                    //     // int rndBlueSun = ofRandom(sun_surface_blue.size());
+                    //     int rndBlueSun = ofRandom(3) + 1;
+                    //     // fgMedia.push_back(sun_surface_blue[rndBlueSun]);   // photoJPEG   SUN_run_surface-1-blue-qtPNG.mov  SUN_run_surface-1-blue-photoJPEG.mov
+                    //     // fgMedia.push_back(ofPtr<mediaElement>( new videoElement("video/4_sun/SUN_run_surface-"+ofToString(rndBlueSun)+"-blue-qtPNG.mov",false)));
+                    //     fgMedia.push_back(ofPtr<mediaElement>( new videoElement("video/4_sun/SUN_run_surface-4-blue-qtPNG.mov",false)));
+                    //     (*fgMedia[fgMedia.size()-1]).setDisplay(projectionW/2,projectionH/2, true);
+                    //     (*fgMedia[fgMedia.size()-1]).reset();
+                    //     (*fgMedia[fgMedia.size()-1]).autoDestroy(true);
+                    //     (*fgMedia[fgMedia.size()-1]).movieEndTrigger=true;
+                    //     ofAddListener( (*fgMedia[fgMedia.size()-1]).fadeOutEnd, this, &planeApp::unHideSun );
+                    //     ofLogNotice("interaction") << "\t" << ofGetFrameNum() << "\t" << "\trunJudge:  activity!  hog: "<< hogAvVel << "\tact: " << activityCnt;
+                    //     fgMedia[0]->hide = true;
+                    // } else {
+                    //     ofLogNotice("interaction") << "\t" << ofGetFrameNum() << "\t" << "\trunJudge:  not enough activity";
+                    // }
+
+                    activityCnt = 0;
+                }
+            } else if (scene==ECLIPSE && segment==SEG_FOLLOWME) {
+                // FOLLOW ME
+                followMe += followMeSpeed * updateRate;
+                if (followMe >= 2*3.14) {
+                    (*fgMedia[0]).position.x = projectionW/2 + moonPosX;
+                    // planet back at center position, move on to next scene
+                    if (followMe > 2*3.6 && autoplay && !transition) {
+                        ofLogNotice("interaction") << "\t" << ofGetFrameNum() << "\t" << "end because folloMe " << followMe;
+                        endSegment();
+                    }
+                } else if (followMe > 0) {
+                    (*fgMedia[0]).position.x = projectionW/2 + moonPosX + sin(followMe) * followMeRadius;
+                    (*fgMedia[1]).position.x = (*fgMedia[0]).position.x;
+                    // position GLOW video, if exists
+                    // if (fgMedia.size() > 0) {
+                    //     for (unsigned int i=1; i<fgMedia.size(); i++) {
+                    //         if ((*fgMedia[i]).file == "video/5_eclipse/LIGHT-photoJPEG.mov") {
+                    //             (*fgMedia[i]).position.x = (*fgMedia[0]).position.x;
+                    //         }
+                    //     }
+                    // }
+                }
+            }
+
+            if ( scene==ECLIPSE && segment<scenes[scene].segments-1 && !transition && segmentClock > minSegmentLength && blobsOnStage>0) {
+
+                // check if all are aligned
+                bool allAligned = allBlobsAlignedWith((*fgMedia[0]).position);
+
+                if (allAligned) {
+                    // (*fgMedia[1]).hide = false;
+                    if (!success) {
+                    //     // aligned
                         success = true;
+                        // (*fgMedia[1]).fadeIn();
+                        (*fgMedia[1]).fadeOut(-0.1, (*fgMedia[1]).opacity, false);
+                    //     string alignmentGlow = "video/5_eclipse/LIGHT-photoJPEG.mov";
+                    //     fgMedia.push_back(ofPtr<mediaElement>( new videoElement(alignmentGlow, true) ));
+                    //     (*fgMedia[fgMedia.size()-1]).setDisplay((*fgMedia[0]).position.x, (*fgMedia[0]).position.y, true);
+                    //     (*fgMedia[fgMedia.size()-1]).reset(true);
+                    //     (*fgMedia[fgMedia.size()-1]).autoDestroy(true);
                     }
-                }
-                ofLogNotice("interaction") << "\t" << ofGetFrameNum() << "\t" << "\tactivityCnt\t" << activityCnt << "\tplanetCnt\t" << planetCnt;
-                activityCnt = 0;
-            }
-
-        } else if (scene==SUN && segment==3) {
-            int runJT = int ( float(runJudgeTime) / updateRate);
-            if (!transition && ofGetFrameNum()%runJT==0) {
-                // if high activity, add blue surface to sun
-                // DEBUGGING KILL
-                // if (hogAvVel > runHogThr || activityCnt > runActThr) {
-                //     // activity!
-                //     // int rndBlueSun = ofRandom(sun_surface_blue.size());
-                //     int rndBlueSun = ofRandom(3) + 1;
-                //     // fgMedia.push_back(sun_surface_blue[rndBlueSun]);   // photoJPEG   SUN_run_surface-1-blue-qtPNG.mov  SUN_run_surface-1-blue-photoJPEG.mov
-                //     // fgMedia.push_back(ofPtr<mediaElement>( new videoElement("video/4_sun/SUN_run_surface-"+ofToString(rndBlueSun)+"-blue-qtPNG.mov",false)));
-                //     fgMedia.push_back(ofPtr<mediaElement>( new videoElement("video/4_sun/SUN_run_surface-4-blue-qtPNG.mov",false)));
-                //     (*fgMedia[fgMedia.size()-1]).setDisplay(projectionW/2,projectionH/2, true);
-                //     (*fgMedia[fgMedia.size()-1]).reset();
-                //     (*fgMedia[fgMedia.size()-1]).autoDestroy(true);
-                //     (*fgMedia[fgMedia.size()-1]).movieEndTrigger=true;
-                //     ofAddListener( (*fgMedia[fgMedia.size()-1]).fadeOutEnd, this, &planeApp::unHideSun );
-                //     ofLogNotice("interaction") << "\t" << ofGetFrameNum() << "\t" << "\trunJudge:  activity!  hog: "<< hogAvVel << "\tact: " << activityCnt;
-                //     fgMedia[0]->hide = true;
-                // } else {
-                //     ofLogNotice("interaction") << "\t" << ofGetFrameNum() << "\t" << "\trunJudge:  not enough activity";
-                // }
-
-                activityCnt = 0;
-            }
-        } else if (scene==ECLIPSE && segment==SEG_FOLLOWME) {
-            // FOLLOW ME
-            followMe += followMeSpeed * updateRate;
-            if (followMe >= 2*3.14) {
-                (*fgMedia[0]).position.x = projectionW/2 + moonPosX;
-                // planet back at center position, move on to next scene
-                if (followMe > 2*3.6 && autoplay && !transition) {
-                    endSegment();
-                }
-            } else if (followMe > 0) {
-                (*fgMedia[0]).position.x = projectionW/2 + moonPosX + sin(followMe) * followMeRadius;
-                (*fgMedia[1]).position.x = (*fgMedia[0]).position.x;
-                // position GLOW video, if exists
-                // if (fgMedia.size() > 0) {
-                //     for (unsigned int i=1; i<fgMedia.size(); i++) {
-                //         if ((*fgMedia[i]).file == "video/5_eclipse/LIGHT-photoJPEG.mov") {
-                //             (*fgMedia[i]).position.x = (*fgMedia[0]).position.x;
-                //         }
-                //     }
-                // }
-            }
-        }
-
-        if ( scene==ECLIPSE && segment<scenes[scene].segments-1 && !transition && segmentClock > minSegmentLength && blobsOnStage>0) {
-
-            // check if all are aligned
-            bool allAligned = allBlobsAlignedWith((*fgMedia[0]).position);
-
-            if (allAligned) {
-                // (*fgMedia[1]).hide = false;
-                if (!success) {
-                //     // aligned
-                    success = true;
-                    // (*fgMedia[1]).fadeIn();
-                    (*fgMedia[1]).fadeOut(-0.1, (*fgMedia[1]).opacity, false);
-                //     string alignmentGlow = "video/5_eclipse/LIGHT-photoJPEG.mov";
-                //     fgMedia.push_back(ofPtr<mediaElement>( new videoElement(alignmentGlow, true) ));
-                //     (*fgMedia[fgMedia.size()-1]).setDisplay((*fgMedia[0]).position.x, (*fgMedia[0]).position.y, true);
-                //     (*fgMedia[fgMedia.size()-1]).reset(true);
-                //     (*fgMedia[fgMedia.size()-1]).autoDestroy(true);
-                }
-            } else {
-                // (*fgMedia[1]).hide = true;
-                if (success) {
-                    success = false;
-                    // (*fgMedia[1]).fadeOut();
-                    (*fgMedia[1]).fadeOut(0.1, (*fgMedia[1]).opacity, false);
-                }
-            }
-        }
-
-
-
-        // VIDEO
-        nebula->update(updateRate);
-        (*bgMedia[bgMediaId]).update(updateRate);
-        instructionVid->update(updateRate);
-        instructionTxt.update(updateRate);
-
-        vector<ofPtr<mediaElement> >::iterator iter = fgMedia.begin();
-        while (iter != fgMedia.end()) {
-            // check if video is BRIDGE and if both blobs are still alive, else release
-            if ((**iter).bridgeVideo) {
-                int blob1 = (**iter).bridgeBlobID[0];
-                int blob2 = (**iter).bridgeBlobID[1];
-                // ofLogNotice("BLOB") << "\t" << ofGetFrameNum() << "\t" << "bridgeVideo " << blob1 << " / " << blob2;
-
-                std::map<int,Blob>::iterator iter1 = blobs.find(blob1);
-                if( iter1 == blobs.end() ) {
-                    // blob instance doesnt exist
-                    ofLogVerbose("BRIDGE") << "\t" << ofGetFrameNum() << "\t" << "DEAD BRIDGE blob 1: " << blob1 << "-" << blob2;
                 } else {
-                    if (blobs[blob1].position.x == 0) {
-                        ofLogVerbose("BRIDGE") << "\t" << ofGetFrameNum() << "\t" << "BRIDGE BLOB AT 0 X -  blob 1: " << blob1 << "-" << blob2;
+                    // (*fgMedia[1]).hide = true;
+                    if (success) {
+                        success = false;
+                        // (*fgMedia[1]).fadeOut();
+                        (*fgMedia[1]).fadeOut(0.1, (*fgMedia[1]).opacity, false);
                     }
                 }
-                std::map<int,Blob>::iterator iter2 = blobs.find(blob2);
-                if( iter2 == blobs.end() ) {
-                    // blob instance doesnt exist
-                    ofLogVerbose("BRIDGE") << "\t" << ofGetFrameNum() << "\t" << "DEAD BRIDGE blob 2: " << blob1 << "-" << blob2;
+            }
+
+
+
+            // VIDEO
+            nebula->update(updateRate);
+            (*bgMedia[bgMediaId]).update(updateRate);
+            instructionVid->update(updateRate);
+            instructionTxt.update(updateRate);
+
+            vector<ofPtr<mediaElement> >::iterator iter = fgMedia.begin();
+            while (iter != fgMedia.end()) {
+                // check if video is BRIDGE and if both blobs are still alive, else release
+                if ((**iter).bridgeVideo) {
+                    int blob1 = (**iter).bridgeBlobID[0];
+                    int blob2 = (**iter).bridgeBlobID[1];
+                    // ofLogNotice("BLOB") << "\t" << ofGetFrameNum() << "\t" << "bridgeVideo " << blob1 << " / " << blob2;
+
+                    std::map<int,Blob>::iterator iter1 = blobs.find(blob1);
+                    if( iter1 == blobs.end() ) {
+                        // blob instance doesnt exist
+                        ofLogVerbose("BRIDGE") << "\t" << ofGetFrameNum() << "\t" << "DEAD BRIDGE blob 1: " << blob1 << "-" << blob2;
+                    } else {
+                        if (blobs[blob1].position.x == 0) {
+                            ofLogVerbose("BRIDGE") << "\t" << ofGetFrameNum() << "\t" << "BRIDGE BLOB AT 0 X -  blob 1: " << blob1 << "-" << blob2;
+                        }
+                    }
+                    std::map<int,Blob>::iterator iter2 = blobs.find(blob2);
+                    if( iter2 == blobs.end() ) {
+                        // blob instance doesnt exist
+                        ofLogVerbose("BRIDGE") << "\t" << ofGetFrameNum() << "\t" << "DEAD BRIDGE blob 2: " << blob1 << "-" << blob2;
+                    } else {
+                        if (blobs[blob2].position.x == 0) {
+                            ofLogVerbose("BRIDGE") << "\t" << ofGetFrameNum() << "\t" << "BRIDGE BLOB AT 0 X -  blob 2: " << blob1 << "-" << blob2;
+                        }
+                    }
+                }
+                (**iter).update(updateRate);
+                if ((**iter).dead) {
+                    ofLogNotice("videoElement") << ofGetFrameNum() << "\t" << "delete video " << (**iter).file;
+                    iter = fgMedia.erase(iter);
                 } else {
-                    if (blobs[blob2].position.x == 0) {
-                        ofLogVerbose("BRIDGE") << "\t" << ofGetFrameNum() << "\t" << "BRIDGE BLOB AT 0 X -  blob 2: " << blob1 << "-" << blob2;
-                    }
+                    ++iter;
                 }
-            }
 
-            (**iter).update(updateRate);
-            if ((**iter).dead) {
-                ofLogNotice("videoElement") << ofGetFrameNum() << "\t" << "delete video " << (**iter).file;
-                iter = fgMedia.erase(iter);
-            } else {
-                ++iter;
             }
-
-        }
+        } else ofLogNotice("interaction") << "\t" << ofGetFrameNum() << "\t" << "updateRate crazy: " << updateRate;
 
     }
+    // ofLogNotice("interaction") << "\t" << ofGetFrameNum() << "\t" << "finish update()";
 
 }
 
@@ -2019,7 +2031,7 @@ void planeApp::nextSegment() {
     }
 
     // IF NO ACTIVITY, GO TO IDLE MODE
-    if (!autoplay && lastActivity > inactivityTimer) {
+    if (lastActivity > inactivityTimer && autoplay) {
         ofLogNotice("TRANSITION") << "\t" << ofGetFrameNum() << "\t" << "no activity since " << lastActivity << "sec, go to IDLE";
         scene = IDLE;
         segment = 0;
@@ -2036,16 +2048,22 @@ void planeApp::nextSegment() {
     ofLogNotice("TRANSITION") << "\t" << ofGetFrameNum() << "\t" << "---------------------------\t" << scene << " : " << segment;
 
     initSegment();
+
 }
 
 void planeApp::initSegment(){
 
     ofLogNotice("TRANSITION") << "\t" << ofGetFrameNum() << "\t" << "initSegment()";
 
+    guiScene = scene;
+    guiSegment = segment;
+    stateGui.saveToFile("currentState.xml");
+
+
     configureBlobserver();
 
     if (sceneChange || scene==0) {
-        ofLogNotice("TRANSITION") << "\t" << ofGetFrameNum() << "\t" << "cleared " << fgMedia.size() << " fgMedia videos";
+        ofLogNotice("TRANSITION") << "\t" << ofGetFrameNum() << "\t\t" << "cleared " << fgMedia.size() << " fgMedia videos";
         fgMedia.clear();   // delete all foreground videos
     }
     success = false;
@@ -2056,7 +2074,7 @@ void planeApp::initSegment(){
     // flash = true;       //
     segmentStart = ofGetUnixTime();
     segmentClock = 0;
-
+    ofLogNotice("TRANSITION") << "\t" << ofGetFrameNum() << "\t\t" << "1";
 
     string instruction = scenes[scene].instructions[language][segment];
     string measureInst = instruction;
@@ -2073,6 +2091,7 @@ void planeApp::initSegment(){
         // instructionImg.loadImage("img/placeholder_stop.jpg");
         ofLogNotice("TRANSITION") << "\t" << ofGetFrameNum() << "\t" << "load instruction image " << in_img;
     }
+    ofLogNotice("TRANSITION") << "\t" << ofGetFrameNum() << "\t\t" << "2";
 
     // INSTRUCTION VIDEO, if present
     string in_vid1 = scenes[scene].instructionVid[language][segment][0]; // intro video
@@ -2092,6 +2111,7 @@ void planeApp::initSegment(){
         instructionVid->mediaLoaded = false;
     }
     instructionVid->setDisplay(projectionW/2,projectionH/2, true);
+    ofLogNotice("TRANSITION") << "\t" << ofGetFrameNum() << "\t\t" << "3";
 
     // SET BG STARRY-SKY OPACITY LOWER FOR STARS
     if (scene==STARS) {
@@ -2112,6 +2132,7 @@ void planeApp::initSegment(){
             ofAddListener( (*fgMedia[fgMedia.size()-1]).fadeOutEnd, this, &planeApp::allFaded );
         } 
     }
+    ofLogNotice("TRANSITION") << "\t" << ofGetFrameNum() << "\t\t" << "4";
 
     if (scene==STARS && segment>=SEG_STARS) (*bgMedia[5]).opMax = 0.35;
     else (*bgMedia[5]).opMax = 1;
@@ -2142,8 +2163,8 @@ void planeApp::initSegment(){
             fgMedia.push_back(ofPtr<mediaElement>( sun_jump ));
             (*fgMedia[fgMedia.size()-1]).setDisplay(projectionW/2,projectionH/2, true);
             (*fgMedia[fgMedia.size()-1]).reset();
-        } else if (segment==2) {
-
+        }
+        if (segment==2) {
             // (*fgMedia[0]).loadMovie("video/4_sun/SUN_run_loop-1-qtPNG.mov");
             fgMedia[0] = sun_run;
             (*fgMedia[0]).setDisplay(projectionW/2,projectionH/2, true);
@@ -2161,7 +2182,8 @@ void planeApp::initSegment(){
         }
 
     } else if (scene==ECLIPSE) {
-        if (segment==0) {
+
+        if (sceneChange) {
             // ECLIPSE. create white/black MAIN PLANET = fgMedia[0]
             fgMedia.push_back(ofPtr<mediaElement>( new imageElement("video/5_eclipse/WHITE_PLANET.png")));
             (*fgMedia[fgMedia.size()-1]).setDisplay( projectionW/2 + moonPosX, projectionH/2, true );
@@ -2175,7 +2197,8 @@ void planeApp::initSegment(){
             (*fgMedia[fgMedia.size()-1]).setDisplay((*fgMedia[0]).position.x, (*fgMedia[0]).position.y, true);
             (*fgMedia[fgMedia.size()-1]).reset(true);
             (*fgMedia[fgMedia.size()-1]).opacity = 0;
-        } else if (segment==2) {
+        }
+        if (segment==2) {
             // just to make sure moon and glow are back to center position
             (*fgMedia[0]).setDisplay( projectionW/2 + moonPosX, projectionH/2, true );
             (*fgMedia[1]).position.x = (*fgMedia[0]).position.x;
@@ -2205,6 +2228,7 @@ void planeApp::initSegment(){
         //     ofAddListener( (*fgMedia[fgMedia.size()-1]).fadeOutEnd, this, &planeApp::allFaded );
         // }
     }
+    ofLogNotice("TRANSITION") << "\t" << ofGetFrameNum() << "\t\t" << "6";
 
     beginSegment();
 
@@ -2215,7 +2239,7 @@ void planeApp::initSegment(){
 //--------------------------------------------------------------
 void planeApp::receiveOsc(){
 
-	// check for waiting messages
+    // check for waiting messages
 	while(receiver.hasWaitingMessages()){
         if (!oscActive) oscActive =true;
         oscLastMsg = ofGetElapsedTimef();
@@ -2275,7 +2299,7 @@ void planeApp::receiveOsc(){
             string cam = m.getArgAsString(2);
             float val = ofToFloat( m.getArgAsString(3) );
             if (var.compare("exposureTime") == 0) cameraExposure = val;
-            ofLogNotice() << "BROADCAST" << var << ", " << source << ", " << cam << ", " << val;
+            ofLogNotice("OSC") << "BROADCAST " << var << ", " << source << ", " << cam << ", " << val;
 
 		} else if(m.getAddress() == "/blobserver/hog" && currentFlowId==hogFlowId){
 
@@ -2334,41 +2358,45 @@ void planeApp::receiveOsc(){
 //--------------------------------------------------------------
 void planeApp::draw(){
 
-    ofBackground(0,50,150);
-    // ofBackground(0);
-    int offsx = 500;
-    if(!projectorOn) offsx = 10;
-    int offsy = 10;
+    ofBackground(0);
 
-    // ofFill(); ofSetColor(255);
+    if (ofGetFrameNum() > 10 ) {
 
-    if (drawDebugScreen) this->drawRawData(offsx, offsy, 0.45, true);
+        // ofBackground(0);
+        int offsx = 500;
+        if(!projectorOn) offsx = 10;
+        int offsy = 10;
 
-    offsy += 260 + 10;
-    if (drawDebugScreen) this->drawTopDown(offsx, offsy, 0.5, drawBlobDetail);
+        // ofFill(); ofSetColor(255);
 
-    offsy = 10;
-    offsx += 280;
-    if (drawDebugScreen) this->drawAnalysis(offsx, offsy, 0.35);
+        if (drawDebugScreen) this->drawRawData(offsx, offsy, 0.45, true);
 
-    offsy = 10;
-    offsx += 370;
+        offsy += 260 + 10;
+        if (drawDebugScreen) this->drawTopDown(offsx, offsy, 0.5, drawBlobDetail);
 
-    if (drawDebugScreen) this->drawScreen(offsx, offsy, 0.35);
+        offsy = 10;
+        offsx += 280;
+        if (drawDebugScreen) this->drawAnalysis(offsx, offsy, 0.35);
+
+        offsy = 10;
+        offsx += 370;
+
+        if (drawDebugScreen) this->drawScreen(offsx, offsy, 0.35);
 
 
-    offsx += 430;
-    this->drawControlInfo(offsx, offsy);
+        offsx += 430;
+        this->drawControlInfo(offsx, offsy);
 
-    languageGui.draw();
-    gui.draw();
+        stateGui.draw();
+        gui.draw();
 
-    // MAIN VISUALS SCREEN
-    ofPushMatrix();
-    ofTranslate(0,2100);
-    ofRotateZ(-90);
-    this->drawScreen(0, 0, 1);
-    ofPopMatrix();
+        // MAIN VISUALS SCREEN
+        ofPushMatrix();
+        ofTranslate(0,2100);
+        ofRotateZ(-90);
+        this->drawScreen(0, 0, 1);
+        ofPopMatrix();
+    }
 }
 
 
@@ -2454,6 +2482,8 @@ void planeApp::drawScreen(int x, int y, float scale){
 void planeApp::drawAnalysis(int x, int y, float scale){
 
     // frame first
+    ofFill(); ofSetColor(30,30,50);
+    ofRect(x,y,1000*scale,projectionH*scale);
     ofNoFill(); ofSetColor(255);
     ofRect(x,y,1000*scale,projectionH*scale);
 
@@ -2639,6 +2669,8 @@ void planeApp::drawRawData(int x, int y, float scale, bool displayText){
 //    int blobserverH = 144;
 
     // frame first
+    ofFill(); ofSetColor(30,30,50);
+    ofRect(x,y,blobserverW*scale,blobserverH*abs(scale));
     ofNoFill(); ofSetColor(255);
     ofRect(x,y,blobserverW*scale,blobserverH*abs(scale));
 
@@ -2675,6 +2707,8 @@ void planeApp::drawRawData(int x, int y, float scale, bool displayText){
 void planeApp::drawTopDown(int x, int y, float scale, bool detailed) {
 
     // frame
+    ofFill(); ofSetColor(30,30,50);
+    ofRect(x,y,siteW*scale,siteH*scale);
     ofNoFill(); ofSetColor(255);
     ofRect(x,y,siteW*scale,siteH*scale);
 
@@ -2720,7 +2754,7 @@ void planeApp::drawTopDown(int x, int y, float scale, bool detailed) {
 
     // draw steles
     ofNoFill(); ofSetColor(255);
-    for (int i=0; i<8; i++) {
+    for (int i=0; i<7; i++) {
         if (i==0) ofCircle(x + steles_topdown[i].x*scale, y + steles_topdown[i].y*scale, 5*scale, 5*scale);
         else ofCircle(x + steles_topdown[i].x*scale, y + steles_topdown[i].y*scale, 10*scale, 10*scale);
     }
@@ -2961,11 +2995,11 @@ void planeApp::keyReleased(int key){
     // }
     if(key == 's') {
 		gui.saveToFile("planets01.xml");
-        languageGui.saveToFile("languageSelection.xml");
+        stateGui.saveToFile("currentState.xml");
 	}
 	if(key == 'l') {
 		gui.loadFromFile("planets01.xml");
-        languageGui.loadFromFile("languageSelection.xml");
+        stateGui.loadFromFile("currentState.xml");
 	}
     if (key=='f') {
         // fullscreen = !fullscreen;
