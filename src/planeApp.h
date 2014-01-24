@@ -173,6 +173,7 @@ class planeApp : public ofBaseApp{
 		bool flash;				// in between transitions, catch attention
 		int flashCnt;
 		int flashMax;
+		int numBridges;
 
 		int shootingPointer;
 

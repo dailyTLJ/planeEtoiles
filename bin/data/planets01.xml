@@ -1,6 +1,6 @@
 <HUMANS_AND_PLANETS>
 
-	<autoplay>1</autoplay>
+	<autoplay>0</autoplay>
 
 	<testMode>0</testMode>
 
@@ -34,7 +34,7 @@
 
 	</Dimension>
 
-	<configBlobserver>1</configBlobserver>
+	<configBlobserver>0</configBlobserver>
 
 	<Blobserver>
 

@@ -824,12 +824,12 @@ void planeApp::update(){
                     if (segment==0) {
                         int oldCnt = planetCnt;
                         // set planetCnt based on activityCnt
-                        if (activityCnt >= spinSuccess) planetCnt++;
+                        if (activityCnt >= spinSuccess && fgMedia.size()<5) planetCnt++;
                         else if (activityCnt < spinFailure) planetCnt--;
 
                         if (activityCnt==0) planetCnt=0;
                         if (planetCnt>((blobsOnStage+1)/2.0)) planetCnt = ((blobsOnStage+1)/2);
-                        if (planetCnt>5) planetCnt = 5;
+                        if (planetCnt>5) planetCnt = 5;   // there might still be squiggels, that take planet space!
                         else if (planetCnt<0) planetCnt = 0;
 
                         if (oldCnt==0 && planetCnt==1 && !resetClock) {
@@ -849,13 +849,14 @@ void planeApp::update(){
                                 fgMedia.push_back(ofPtr<mediaElement>( new videoElement(videoFile,true)));
                                 (*fgMedia[fgMedia.size()-1]).reset(true);
                                 planetCnt = oldCnt + 1;
+                                ofLogNotice("interaction") << "\t" << ofGetFrameNum() << "\t" << "\tadd a planet, planetCnt " << planetCnt;
                             } else {
-                                ofLogNotice("interaction") << "\t" << ofGetFrameNum() << "\t" << "\ttake away planet, planetCnt " << planetCnt;
                                 // TAKE AWAY PLANETS
+                                ofLogNotice("interaction") << "\t" << ofGetFrameNum() << "\t" << "\ttake away planet, planetCnt " << planetCnt;
                                 if (fgMedia.size()>0) {
                                     for (unsigned int i=fgMedia.size()-1; i>=0; i--) {
-                                        ofLogNotice("interaction") << "\t" << ofGetFrameNum() << "\t" << "\ttake away planet " << i;
                                         if (i>=0 && !(*fgMedia[i]).selfdestroy) {
+                                            ofLogNotice("interaction") << "\t" << ofGetFrameNum() << "\t" << "\ttake away planet " << i;
                                             (*fgMedia[i]).loadMovie("video/3_revolution/REV_OUT-photoJPEG.mov");
                                             (*fgMedia[i]).reset(true);
                                             (*fgMedia[i]).autoDestroy(true);
@@ -871,12 +872,12 @@ void planeApp::update(){
                     } else if (segment==1) {
                         int oldCnt = planetCnt;
                         if (activityCnt < spinFailure) planetCnt--;
-                        if (planetCnt<oldCnt && planetCnt>=0) {
+                        if (planetCnt<oldCnt) {
                             ofLogNotice("interaction") << "\t" << ofGetFrameNum() << "\t" << "\ttake away planet";
                             if (fgMedia.size()>0) {
                                 for (unsigned int i=fgMedia.size()-1; i>=0; i--) {
-                                    ofLogNotice("interaction") << "\t" << ofGetFrameNum() << "\t" << "\ttake away planet " << i;
-                                    if (!(*fgMedia[i]).selfdestroy) {
+                                    if (i>=0 && !(*fgMedia[i]).selfdestroy) {
+                                        ofLogNotice("interaction") << "\t" << ofGetFrameNum() << "\t" << "\ttake away planet " << i;
                                         (*fgMedia[i]).loadMovie("video/3_revolution/REV_OUT-photoJPEG.mov");
                                         (*fgMedia[i]).reset(true);
                                         (*fgMedia[i]).autoDestroy(true);
@@ -1093,6 +1094,7 @@ void planeApp::placeInstruction(int & trans) {
                     break;
             case 1: addY = 0;       // 1 > projectionH/2
         }
+        addY = 100;
         instructionVid->setDisplay(projectionW/2,projectionH/2 + addY, true);
     }
 }
@@ -1188,7 +1190,7 @@ void planeApp::blobOnLost(int & blobID) {
 
 void planeApp::blobSteady(Pair & pair) {
     // add particle trail video between stars
-    if (!transition && scene==ATTRACTION) {
+    if (!transition && scene==ATTRACTION && numBridges<10) {
         Blob* b1 = &blobs[pair.blob1];
         Blob* b2 = &blobs[pair.blob2];
 
@@ -1229,6 +1231,7 @@ void planeApp::blobSteady(Pair & pair) {
             }
 
             if (!exists) {
+                numBridges++;
                 ofLogNotice("BLOB") << "\t" << ofGetFrameNum()  << "\t\t\t" << "add video bridge";
                 float distance = ofDist(b1->position.x, b1->position.y, b2->position.x, b2->position.y);
                 int distId = 1;
@@ -1697,6 +1700,7 @@ void planeApp::bridgeUnlink(Pair & pair) {
                 (**it).h = oldH;
                 (**it).reset(true);
                 (**it).autoDestroy(true);
+                numBridges--;
             }
         }
     }
@@ -2139,21 +2143,6 @@ void planeApp::initSegment(){
 
     // add FG videos
     if (scene==REVOLUTIONS) {
-        // SPIN
-        // if (sceneChange) {
-        //     for (int i=0; i<5; i++) {
-        //         string videoFile;
-        //         int videoPick = i+1;
-        //         videoFile = "video/3_revolution/REV_0"+ofToString(videoPick)+"-photoJPEG.mov";
-        //         fgMedia.push_back(ofPtr<mediaElement>( new videoElement(videoFile,true)));
-        //         (*fgMedia[i]).reset(true);
-        //     }
-        // } else {
-        //     for (int i=0; i<5; i++) {
-        //         if (segment==1 && i>=planetCnt) (*fgMedia[i]).dead = true;
-        //     }
-        // }
-        // positionRevolutions();  // to position and turn on/off videos
 
     } else if (scene==SUN) {
         // SUN, load sun as fgMedia
@@ -2424,6 +2413,7 @@ void planeApp::drawScreen(int x, int y, float scale){
     ofDisableBlendMode();
 
 
+    // if (ofGetFrameRate()>10) {
     // foreground videos, without BLENDING mode
     ofEnableAlphaBlending();
     for (vector<ofPtr<mediaElement> >::iterator it = fgMedia.begin(); it != fgMedia.end(); ++it) {
@@ -2437,7 +2427,7 @@ void planeApp::drawScreen(int x, int y, float scale){
         if (!(**it).dead && (**it).blend) (**it).draw(0, 0, 1);   //
     }
     ofDisableBlendMode();
-
+    // }
 
     // INSTRUCTION VIDEOS
     if (instructionVid->mediaLoaded) {
@@ -2499,7 +2489,7 @@ void planeApp::drawAnalysis(int x, int y, float scale){
         ofFill();
         for(std::map<int, Blob>::iterator it = blobs.begin(); it != blobs.end(); ++it){
             Blob* b = &it->second;
-            if (b->onStage) {
+            if (b->onStage && by < projectionH*scale-100) {
                 ofSetColor(50);
                 ofCircle(bx, by, 50);
                 ofSetColor(0,0,255);
@@ -2514,11 +2504,11 @@ void planeApp::drawAnalysis(int x, int y, float scale){
     } else if (scene==STARS) {
         // STAND STILL
         // draw circle for each blob, and display frozen, frozentimer
-        int bx = x + 100; int by = y + 150;
+        int bx = x + 80; int by = y + 150;
         ofFill();
         for(std::map<int, Blob>::iterator it = blobs.begin(); it != blobs.end(); ++it){
             Blob* b = &it->second;
-            if (b->onStage) {
+            if (b->onStage && by < projectionH*scale-100) {
                 if(b->properFreeze) {
                     if(segment==SEG_CONSTELLATIONS && b->frozenTimer > freezeMaxTime) {
                         ofSetColor(0);
@@ -2544,11 +2534,11 @@ void planeApp::drawAnalysis(int x, int y, float scale){
     } else if (scene==ATTRACTION) {
 
         // KEEP THE DISTANCE
-        int bx = x + 100; int by = y + 150;
+        int bx = x + 80; int by = y + 150;
         ofFill();
         for(std::map<int, Blob>::iterator it = blobs.begin(); it != blobs.end(); ++it){
             Blob* b = &it->second;
-            if (b->onStage) {
+            if (b->onStage && by < projectionH*scale-100) {
                 if (b->movingMean) ofSetColor(255);
                 else ofSetColor(100);
 
@@ -2575,11 +2565,11 @@ void planeApp::drawAnalysis(int x, int y, float scale){
     } else if (scene==SUN || scene==ECLIPSE) {
 
         // HOP
-        int bx = x + 100; int by = y + 150;
+        int bx = x + 80; int by = y + 150;
         ofFill();
         for(std::map<int, Blob>::iterator it = blobs.begin(); it != blobs.end(); ++it){
             Blob* b = &it->second;
-            if (b->onStage) {
+            if (b->onStage && by < projectionH*scale-100) {
 
                 if(b->lostDuration > 0 && !b->onEdge) ofSetColor(255);  // b->lostDuration < hopLength
                 else ofSetColor(100);
@@ -2599,11 +2589,11 @@ void planeApp::drawAnalysis(int x, int y, float scale){
 
     } else if (scene==SHOOTING) {
         // SHOOTING STARS
-        int bx = x + 100; int by = y + 150;
+        int bx = x + 80; int by = y + 150;
         ofFill();
         for(std::map<int, Blob>::iterator it = blobs.begin(); it != blobs.end(); ++it){
             Blob* b = &it->second;
-            if (b->onStage) {
+            if (b->onStage && by < projectionH*scale-100) {
 
                 if(b->lostDuration > 0 && !b->onEdge) ofSetColor(255);  // b->lostDuration < hopLength
                 else ofSetColor(100);
@@ -2655,9 +2645,10 @@ void planeApp::drawControlInfo(int x, int y){
                        "\n\nMOVEON\n" + "--------------\n"  + ofToString(moveOn ? "true" : "false") +
                        "\n\nSUCCESS\n" + "--------------\n"  + ofToString(success ? "true" : "false") +
                        "\n\nSUCCESS CNT\n" + "--------------\n"  + ofToString(successCnt) +
-                       "\n\nACTIVITY CNT\n" + "--------------\n"  + ofToString(activityCnt) +
-                       "\n\nPLANET CNT\n" + "--------------\n"  + ofToString(planetCnt) +
-                       "\n\nFG MEDIA\n" + "--------------\n"  + ofToString(fgMedia.size()), x+3, y+10 );
+                       "\nACTIVITY CNT\n" + "--------------\n"  + ofToString(activityCnt) +
+                       "\nPLANET CNT\n" + "--------------\n"  + ofToString(planetCnt) +
+                       "\nBRIDGES\n" + "--------------\n"  + ofToString(numBridges) +
+                       "\nFG MEDIA\n" + "--------------\n"  + ofToString(fgMedia.size()), x+3, y+10 );
 }
 
 
@@ -3077,30 +3068,10 @@ void planeApp::keyReleased(int key){
             planetCnt++;
             string videoFile;
             int videoPick = ofRandom(5) + 1;
-            // video/3_revolution/REV_01-photoJPEG.mov
             videoFile = "video/3_revolution/REV_0"+ofToString(videoPick)+"-photoJPEG.mov";
             fgMedia.push_back(ofPtr<mediaElement>( new videoElement(videoFile,true)));
             (*fgMedia[fgMedia.size()-1]).reset(true);
             positionRevolutions();
-        }
-    }
-
-    if (key=='j' && scene==REVOLUTIONS) {
-        ofLogNotice("KEY") << "\t\t\t" << ofGetFrameNum() << "\t" << "==============>" << key << " take out revolution";
-        if (planetCnt>0) {
-            planetCnt--;
-
-            if (fgMedia.size()>0) {
-                for (unsigned int i=fgMedia.size()-1; i>=0; i--) {
-                    ofLogNotice("interaction") << "\t" << ofGetFrameNum() << "\t" << "\ttake away planet " << i;
-                    if (!(*fgMedia[i]).selfdestroy) {
-                        (*fgMedia[i]).loadMovie("video/3_revolution/REV_OUT-photoJPEG.mov");
-                        (*fgMedia[i]).reset(true);
-                        (*fgMedia[i]).autoDestroy(true);
-                        if (i>=planetCnt) break;
-                    }
-                }
-            }
         }
     }
 
