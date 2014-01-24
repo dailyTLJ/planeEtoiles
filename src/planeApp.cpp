@@ -1996,6 +1996,11 @@ void planeApp::nextSegment() {
         scene++;
         segment = 0;
         if(scene >= scenes.size()) {
+            // terminate program
+            ofLogNotice("TRANSITION") << "\t" << ofGetFrameNum() << "\t" << "force terminate program, so it restarts itself again";
+            // std::exit(1);
+            ofExit();
+            // 
             languageCnt = (languageCnt+1>=languageRatio) ? 0 : languageCnt+1;
             language = (languageCnt==0) ? 0 : 1;
             if (blobsOnStage==0) scene = 0;
