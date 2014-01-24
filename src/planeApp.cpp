@@ -31,14 +31,14 @@ void planeApp::setup(){
     // ofLogError()
     // ofLogFatalError()
 
-    ofSetLogLevel("BLOB", OF_LOG_NOTICE);
+    ofSetLogLevel("BLOB", OF_LOG_WARNING);
     ofSetLogLevel("KEY", OF_LOG_NOTICE);
-    ofSetLogLevel("BRIDGE", OF_LOG_NOTICE);
+    ofSetLogLevel("BRIDGE", OF_LOG_WARNING);
     ofSetLogLevel("TRANSITION", OF_LOG_NOTICE);
     ofSetLogLevel("OSC", OF_LOG_WARNING);
     ofSetLogLevel("interaction", OF_LOG_NOTICE);
-    ofSetLogLevel("videoElement", OF_LOG_NOTICE);
-    ofSetLogLevel("mediaElement", OF_LOG_NOTICE);
+    ofSetLogLevel("videoElement", OF_LOG_WARNING);
+    ofSetLogLevel("mediaElement", OF_LOG_WARNING);
 
 
 
@@ -316,6 +316,10 @@ void planeApp::initScenes(){
 	masterClock = 0;
     resetClock = false;
 
+    string sampleVideoFile = "video/3_revolution/REV_01-photoJPEG.mov";
+    sampleVideoFile = "video/REV_01-animation.mov";
+    sampleVideoFile = "video/SUN_explosion-11-animation.mov";
+
 
     // ******************* preload videos ********************* //
 
@@ -337,9 +341,7 @@ void planeApp::initScenes(){
     sun_jump = ofPtr<mediaElement>( new videoElement("video/4_sun/SUN_stand_jump-loop_4-qtPNG.mov",false));
     sun_run = ofPtr<mediaElement>( new videoElement("video/4_sun/SUN_run_loop-4-qtPNG.mov",false));
     sun_freeze_red.push_back( ofPtr<mediaElement>( new videoElement("video/4_sun/SUN_freeze_1-qtPNG.mov",false)));
-    // sun_freeze_red.push_back( ofPtr<mediaElement>( new videoElement("video/4_sun/SUN_freeze_2-qtPNG.mov",false)));
-    // sun_freeze_red.push_back( ofPtr<mediaElement>( new videoElement("video/4_sun/SUN_freeze_3-qtPNG.mov",false)));
-    // sun_freeze_red.push_back( ofPtr<mediaElement>( new videoElement("video/4_sun/SUN_freeze_4-qtPNG.mov",false)));
+
 
     // PRELOAD BLUE SURFACE VIDS = seems to slow down FPS
     // for (int i=1; i<13; i++) {
@@ -369,6 +371,10 @@ void planeApp::initScenes(){
     title_sequence.push_back(ofPtr<mediaElement>( new videoElement("video/TITLE_02-FR-photoJPEG.mov")));
     diagram_sequence.push_back(ofPtr<mediaElement>( new videoElement("video/DIAGRAM_01-EN-photoJPEG.mov")));
     diagram_sequence.push_back(ofPtr<mediaElement>( new videoElement("video/DIAGRAM_01-FR-photoJPEG.mov")));
+    // title_sequence.push_back(ofPtr<mediaElement>( new videoElement(sampleVideoFile)));
+    // title_sequence.push_back(ofPtr<mediaElement>( new videoElement(sampleVideoFile)));
+    // diagram_sequence.push_back(ofPtr<mediaElement>( new videoElement(sampleVideoFile)));
+    // diagram_sequence.push_back(ofPtr<mediaElement>( new videoElement(sampleVideoFile)));
 
 
     int s = 0;
@@ -507,7 +513,7 @@ void planeApp::initScenes(){
     sun.instructions[1][3] = "Courez partout en même temps";
     sun.instructions[2][3] = "Courez partout en meme temps";
     sun.analysis[3] = "* hogAvVel > runHogThr \n  || activityCnt > runActThr\n-> 30 sec";
-    sun.length[3] = 30;
+    sun.length[3] = 10;
     sun.instructions[0][4] = "everyone";
     sun.instructions[1][4] = "tout le monde";
     sun.instructions[2][4] = "tout le monde";
@@ -601,12 +607,18 @@ void planeApp::initScenes(){
     shooting.instructionVid[0][2][0] = "video/text/EXHALE_7_intro-photoJPEG.mov"; // intro
     shooting.instructionVid[0][2][1] = "video/text/EXHALE_7_loop-photoJPEG.mov"; // loop
     shooting.instructionVid[0][2][2] = "video/text/EXHALE_7_outro-photoJPEG.mov"; // outro
+    // shooting.instructionVid[0][2][0] = sampleVideoFile; // intro
+    // shooting.instructionVid[0][2][1] = sampleVideoFile; // loop
+    // shooting.instructionVid[0][2][2] = sampleVideoFile; // outro
     shooting.instructions[1][2] = "";
     shooting.instructions[2][2] = "";
     // shooting.instructionImg[1][2] = "regardez-le-ciel-BLACK.jpg";
     shooting.instructionVid[1][2][0] = "video/text/EXHALE_7-FR_intro-photoJPEG.mov"; // intro
     shooting.instructionVid[1][2][1] = "video/text/EXHALE_7-FR_loop-photoJPEG.mov"; // loop
     shooting.instructionVid[1][2][2] = "video/text/EXHALE_7-FR_outro-photoJPEG.mov"; // outro
+    // shooting.instructionVid[1][2][0] = sampleVideoFile; // intro
+    // shooting.instructionVid[1][2][1] = sampleVideoFile; // loop
+    // shooting.instructionVid[1][2][2] = sampleVideoFile; // outro
     shooting.analysis[2] = "- \n-> 10 sec";
     shooting.length[2] = 10;
     
@@ -875,22 +887,24 @@ void planeApp::update(){
             int runJT = int ( float(runJudgeTime) / updateRate);
             if (!transition && ofGetFrameNum()%runJT==0) {
                 // if high activity, add blue surface to sun
-                if (hogAvVel > runHogThr || activityCnt > runActThr) {
-                    // activity!
-                    // int rndBlueSun = ofRandom(sun_surface_blue.size());
-                    int rndBlueSun = ofRandom(3) + 1;
-                    // fgMedia.push_back(sun_surface_blue[rndBlueSun]);   // photoJPEG   SUN_run_surface-1-blue-qtPNG.mov  SUN_run_surface-1-blue-photoJPEG.mov
-                    fgMedia.push_back(ofPtr<mediaElement>( new videoElement("video/4_sun/SUN_run_surface-"+ofToString(rndBlueSun)+"-blue-qtPNG.mov",false)));
-                    (*fgMedia[fgMedia.size()-1]).setDisplay(projectionW/2,projectionH/2, true);
-                    (*fgMedia[fgMedia.size()-1]).reset();
-                    (*fgMedia[fgMedia.size()-1]).autoDestroy(true);
-                    (*fgMedia[fgMedia.size()-1]).movieEndTrigger=true;
-                    ofAddListener( (*fgMedia[fgMedia.size()-1]).fadeOutEnd, this, &planeApp::unHideSun );
-                    ofLogNotice("interaction") << "\t" << ofGetFrameNum() << "\t" << "\trunJudge:  activity!  hog: "<< hogAvVel << "\tact: " << activityCnt;
-                    fgMedia[0]->hide = true;
-                } else {
-                    ofLogNotice("interaction") << "\t" << ofGetFrameNum() << "\t" << "\trunJudge:  not enough activity";
-                }
+                // DEBUGGING KILL
+                // if (hogAvVel > runHogThr || activityCnt > runActThr) {
+                //     // activity!
+                //     // int rndBlueSun = ofRandom(sun_surface_blue.size());
+                //     int rndBlueSun = ofRandom(3) + 1;
+                //     // fgMedia.push_back(sun_surface_blue[rndBlueSun]);   // photoJPEG   SUN_run_surface-1-blue-qtPNG.mov  SUN_run_surface-1-blue-photoJPEG.mov
+                //     // fgMedia.push_back(ofPtr<mediaElement>( new videoElement("video/4_sun/SUN_run_surface-"+ofToString(rndBlueSun)+"-blue-qtPNG.mov",false)));
+                //     fgMedia.push_back(ofPtr<mediaElement>( new videoElement("video/4_sun/SUN_run_surface-4-blue-qtPNG.mov",false)));
+                //     (*fgMedia[fgMedia.size()-1]).setDisplay(projectionW/2,projectionH/2, true);
+                //     (*fgMedia[fgMedia.size()-1]).reset();
+                //     (*fgMedia[fgMedia.size()-1]).autoDestroy(true);
+                //     (*fgMedia[fgMedia.size()-1]).movieEndTrigger=true;
+                //     ofAddListener( (*fgMedia[fgMedia.size()-1]).fadeOutEnd, this, &planeApp::unHideSun );
+                //     ofLogNotice("interaction") << "\t" << ofGetFrameNum() << "\t" << "\trunJudge:  activity!  hog: "<< hogAvVel << "\tact: " << activityCnt;
+                //     fgMedia[0]->hide = true;
+                // } else {
+                //     ofLogNotice("interaction") << "\t" << ofGetFrameNum() << "\t" << "\trunJudge:  not enough activity";
+                // }
 
                 activityCnt = 0;
             }
@@ -3024,6 +3038,7 @@ void planeApp::keyReleased(int key){
             planetCnt++;
             string videoFile;
             int videoPick = ofRandom(5) + 1;
+            // video/3_revolution/REV_01-photoJPEG.mov
             videoFile = "video/3_revolution/REV_0"+ofToString(videoPick)+"-photoJPEG.mov";
             fgMedia.push_back(ofPtr<mediaElement>( new videoElement(videoFile,true)));
             (*fgMedia[fgMedia.size()-1]).reset(true);

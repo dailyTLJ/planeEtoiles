@@ -4,11 +4,11 @@
 
 	<testMode>0</testMode>
 
-	<displayDebug>1</displayDebug>
+	<displayDebug>0</displayDebug>
 
 	<Min_LostTime>1</Min_LostTime>
 
-	<inactivity_timer>141</inactivity_timer>
+	<inactivity_timer>29</inactivity_timer>
 
 	<Min_Segm_Length>3</Min_Segm_Length>
 
@@ -66,9 +66,9 @@
 
 	<Sc2_Attraction>
 
-		<Dist_StdDev>57.5</Dist_StdDev>
+		<Dist_StdDev>13.9286</Dist_StdDev>
 
-		<Movement_Thr>0.244898</Movement_Thr>
+		<Movement_Thr>1.68367</Movement_Thr>
 
 		<Dist_Reward>2</Dist_Reward>
 
@@ -92,7 +92,7 @@
 
 		<FreezeAllMaxVel>0.596939</FreezeAllMaxVel>
 
-		<runJudgeTime>71</runJudgeTime>
+		<runJudgeTime>30</runJudgeTime>
 
 		<runHogThr>2.14286</runHogThr>
 
