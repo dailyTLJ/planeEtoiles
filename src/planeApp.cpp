@@ -3008,7 +3008,7 @@ void planeApp::keyReleased(int key){
         // }
     }
     if (key=='u') {
-        languageCnt = (languageCnt+1>=languageRatio) ? 0 : languageCnt+1;
+        languageCnt = (languageCnt+1>languageRatio) ? 0 : languageCnt+1;
         language = (languageCnt==0) ? 0 : 1;
     }
 
