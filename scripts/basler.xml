@@ -24,20 +24,30 @@
                 <Value>1</Value>
             </Param>
             <Param>
+                <Name>scaleValues</Name>
+                <Value>1.6</Value>
+            </Param>
+            <Param>
                 <Name>rotation</Name>
                 <Value>-6</Value>
             </Param>
-            <Param>
+             <Param>
                 <Name>autoExposure</Name>
-                <Value>300 200 200 100 128 32 0.05</Value>
+                <Value>192 144 256 128 96 16 0.05</Value>
             </Param>
             <Param>
                 <Name>gain</Name>
-                <Value>0</Value>
+                <Value>600</Value>
+            </Param>
+            <Param>
+                <Name>gammaCorrection</Name>
+                <Value>1.4</Value>
             </Param>
             <Param>
                 <Name>crop</Name>
-                <Value>78 16 500 300</Value>
+                <Value>100 40 564 320</Value>
+                <!-- <Value>100 22 600 350</Value> -->
+                <!-- <Value>78 16 500 300</Value> -->
             </Param>
             <Param>
                 <Name>framerate</Name>
@@ -45,7 +55,7 @@
             </Param>
             <Param>
                 <Name>save</Name>
-                <Value>1 1 /home/planeblob/Documents/grabs/tmp/</Value>
+                <Value>0 1 /home/planeblob/Documents/grabs/tmp/</Value>
             </Param>
         </Source>
         <Actuator>
@@ -56,8 +66,8 @@
             </Param>
             <Param>
                 <Name>modelFilename</Name>
-                <!-- <Value>models/model_nov20g_cell16_bin9_block3.xml</Value> -->
-                <Value>models/model_nov29d_cell8_bin9_block1.xml</Value>
+                <!-- <Value>/home/planeblob/src/planeEtoiles/scripts/models/model_nov29d_cell8_bin9_block1.xml</Value> -->
+                <Value>/home/planeblob/src/planeEtoiles/scripts/models/model_jan21b_cell8_bin9_block1.xml</Value>
                 <!-- <Value>models/model_8x8_bw.xml</Value> -->
             </Param>
             <Param>
@@ -92,7 +102,7 @@
             </Param>
             <Param>
                 <Name>mergeDistance</Name>
-                <Value>45</Value>
+                <Value>52</Value>
             </Param>
             <Param>
                 <Name>maxTrackDistance</Name>
@@ -120,11 +130,11 @@
             </Param>
             <Param>
                 <Name>maxTimePerFrame</Name>
-                <Value>2e5</Value>
+                <Value>6e4</Value>
             </Param>
             <Param>
                 <Name>maxThreads</Name>
-                <Value>8</Value>
+                <Value>4</Value>
             </Param>
             <Param>
                 <Name>roiSize</Name>
@@ -135,45 +145,16 @@
                 <Name>keepOldBlobs</Name>
                 <Value>0 0</Value>
             </Param>
-            <Param>
+<!--             <Param>
                 <Name>saveSamples</Name>
-                <Value>0</Value>
-            </Param>
-            <Param>
+                <Value>1 10 /home/planeblob/Documents/grabs/tmp/</Value>
+            </Param> -->
+<!--             <Param>
                 <Name>saveSamplesAge</Name>
                 <Value>120</Value>
-            </Param>
+            </Param> -->
         </Actuator>
     </Flow>
-<!--     <Flow>
-        <Source>
-            <Type>Source_2D_Shmdata</Type>
-            <Subsource>0</Subsource>
-        </Source>
-        <Actuator>
-            <Type>Actuator_BgSubtractor</Type>
-            <Param>
-                <Name>filterSize</Name>
-                <Value>3</Value>
-            </Param>
-            <Param>
-                <Name>verbose</Name>
-                <Value>1</Value>
-            </Param>
-            <Param>
-                <Name>learningTime</Name>
-                <Value>20</Value>
-            </Param>
-            <Param>
-                <Name>keepOldBlobs</Name>
-                <Value>0 0</Value>
-            </Param>
-            <Param>
-                <Name>lifetime</Name>
-                <Value>15</Value>
-            </Param>
-        </Actuator>
-    </Flow> -->
     <Flow>
         <Source>
             <Type>Source_2D_Shmdata</Type>

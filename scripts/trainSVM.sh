@@ -1,5 +1,24 @@
 #!/bin/bash
 
+
+# last successful one:
+# blobtrainer -T -p ./models/positive -n ./models/negative -s 64 --cell-step 1.3x1.3 --roi-size 80x160 --position 0x0 -C 0.7 -E 0.1 -c 0.01 -b 9 --cell-size 8x8 --block-size 1x1 -o models/model_jan22a_cell8_bin9_block1.xml >> models/plane_training_JAN.csv
+
+
+# training
+for ((i = 9; i <= 9; i += 2));
+do
+    for ((j = 8; j <= 8; j += 4));
+    do
+        blobtrainer -T -p ./models/positive -n ./models/negative -s 64 --cell-step 1.3x1.3 --roi-size 80x160 --position 0x0 -C 0.7 -E 0.1 -c 0.01 -b ${i} --cell-size ${j}x${j} --block-size 1x1 -o models/model_jan21b_cell${j}_bin${i}_block1.xml >> models/plane_training_JAN.csv
+        # blobtrainer -T -p ./models/positive -n ./models/negative -s 64 --cell-step 1.3x1.3 --roi-size 80x160 --position 0x0 -C 0.7 -E 0.1 -c 0.01 -b ${i} --cell-size ${j}x${j} --block-size 2x2 -o models/model_jan21_cell${j}_bin${i}_block2.xml >> models/plane_training_JAN.csv &
+        # blobtrainer -T -p ./models/positive -n ./models/negative -s 64 --cell-step 1.3x1.3 --roi-size 80x160 --position 0x0 -C 0.7 -E 0.1 -c 0.01 -b ${i} --cell-size ${j}x${j} --block-size 3x3 -o models/model_jan21b_cell${j}_bin${i}_block1.xml >> models/plane_training_JAN.csv
+    done
+done
+
+
+
+
 #for ((j = 8; j <= 16; j += 4));
 #do
 #    blobtrainer -T -E 0.1 -c 0.01 --cell-size ${j}x${j} --block-size 1x1 -o model${j}.xml >> results.csv &
@@ -73,13 +92,3 @@
 #     done
 # done
 
-
-for ((i = 9; i <= 9; i += 2));
-do
-    for ((j = 8; j <= 8; j += 4));
-    do
-        # blobtrainer -T -p ./models/positive -n ./models/negative -s 64 --cell-step 1.3x1.3 --roi-size 80x160 --position 0x0 -C 0.7 -E 0.1 -c 0.01 -b ${i} --cell-size ${j}x${j} --block-size 1x1 -o models/model_nov29e_cell${j}_bin${i}_block1.xml >> models/plane_training_NOV29.csv &
-        # blobtrainer -T -p ./models/positive -n ./models/negative -s 64 --cell-step 1.3x1.3 --roi-size 80x160 --position 0x0 -C 0.7 -E 0.1 -c 0.01 -b ${i} --cell-size ${j}x${j} --block-size 2x2 -o models/model_nov29e_cell${j}_bin${i}_block2.xml >> models/plane_training_NOV29.csv &
-        blobtrainer -T -p ./models/positive -n ./models/negative -s 64 --cell-step 1.3x1.3 --roi-size 80x160 --position 0x0 -C 0.7 -E 0.1 -c 0.01 -b ${i} --cell-size ${j}x${j} --block-size 3x3 -o models/model_nov29e_cell${j}_bin${i}_block3.xml >> models/plane_training_NOV29.csv
-    done
-done

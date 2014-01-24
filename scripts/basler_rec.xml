@@ -8,21 +8,39 @@
                 <Value>/tmp/switcher_default_video_video-0</Value>
             </Param>
             <Param>
+                <Name>noiseFiltering</Name>
+                <Value>0</Value>
+            </Param>
+            <Param>
                 <Name>scale</Name>
                 <Value>1</Value>
             </Param>
             <Param>
+                <Name>scaleValues</Name>
+                <Value>1.6</Value>
+            </Param>
+            <Param>
                 <Name>rotation</Name>
-                <Value>0.0</Value>
+                <Value>-6</Value>
+            </Param>
+             <Param>
+                <Name>autoExposure</Name>
+                <Value>192 144 256 128 96 16 0.05</Value>
+            </Param>
+            <Param>
+                <Name>gain</Name>
+                <Value>600</Value>
+            </Param>
+            <Param>
+                <Name>gammaCorrection</Name>
+                <Value>1.4</Value>
             </Param>
             <Param>
                 <Name>crop</Name>
-                <Value>78 16 500 300</Value>
+                <Value>100 40 564 320</Value>
+                <!-- <Value>100 22 600 350</Value> -->
+                <!-- <Value>78 16 500 300</Value> -->
             </Param>
-<!--             <Param>
-                <Name>gammaCorrection</Name>
-                <Value>0.5</Value>
-            </Param> -->
         </Source>
         <Actuator>
             <Type>Actuator_Hog</Type>
@@ -32,8 +50,8 @@
             </Param>
             <Param>
                 <Name>modelFilename</Name>
-                <!-- <Value>models/model_nov20g_cell16_bin9_block3.xml</Value> -->
-                <Value>models/model_nov29d_cell8_bin9_block1.xml</Value>
+                <!-- <Value>models/model_nov29d_cell8_bin9_block1.xml</Value> -->
+                <Value>/home/planeblob/src/planeEtoiles/scripts/models/model_jan21b_cell8_bin9_block1.xml</Value>
                 <!-- <Value>models/model_8x8_bw.xml</Value> -->
             </Param>
             <Param>
@@ -68,7 +86,7 @@
             </Param>
             <Param>
                 <Name>mergeDistance</Name>
-                <Value>45</Value>
+                <Value>52</Value>
             </Param>
             <Param>
                 <Name>maxTrackDistance</Name>
@@ -96,11 +114,11 @@
             </Param>
             <Param>
                 <Name>maxTimePerFrame</Name>
-                <Value>2e5</Value>
+                <Value>6e4</Value>
             </Param>
             <Param>
                 <Name>maxThreads</Name>
-                <Value>8</Value>
+                <Value>4</Value>
             </Param>
             <Param>
                 <Name>roiSize</Name>
