@@ -639,9 +639,15 @@ void planeApp::initScenes(){
         ofLogNotice("START") << "\t" << ofGetFrameNum() << "\t" << "restarted at normal position: scene " << scene << " : " << segment;
         scene = 0;
         segment = 0;
+        languageCnt = (languageCnt+1>=languageRatio) ? 0 : languageCnt+1;
+        language = (languageCnt==0) ? 0 : 1;
+        language = 1;
+        ofLogNotice("START") << "\t" << ofGetFrameNum() << "\t" << "change language " << language;
+        stateGui.saveToFile("currentState.xml");
     } else {
         ofLogNotice("START") << "\t" << ofGetFrameNum() << "\t" << "untypical termination, restart at: scene " << scene << " : " << segment;
     }
+
 
     sceneChange = true;
     nextSegment();
@@ -2017,8 +2023,7 @@ void planeApp::nextSegment() {
             // std::exit(1);
             ofExit();
             // 
-            languageCnt = (languageCnt+1>=languageRatio) ? 0 : languageCnt+1;
-            language = (languageCnt==0) ? 0 : 1;
+
             if (blobsOnStage==0) scene = 0;
             else scene = 1;
         }
