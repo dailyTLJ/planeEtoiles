@@ -15,7 +15,7 @@ void planeApp::setup(){
     ofSetLogLevel(OF_LOG_NOTICE);
 
     // create a new logfile everytime the application is started
-    // ofLogToFile("/home/planeviz/Documents/log/of_log/planeEtoiles_"+ofGetTimestampString()+".log");
+    ofLogToFile("/home/planeviz/Documents/log/of_log/planeEtoiles_"+ofGetTimestampString()+".log");
     ofLogNotice("START") << "\t" << ofGetFrameNum() << "\t" << "setup";
 
     // OF_LOG_VERBOSE
@@ -651,6 +651,7 @@ void planeApp::initScenes(){
 
     sceneChange = true;
     nextSegment();
+    (*bgMedia[bgMediaId]).id = bgMediaId;
     (*bgMedia[bgMediaId]).reset(true);
 
 }
@@ -754,9 +755,9 @@ void planeApp::update(){
             // ofLogError("TRANSITION") << "\t" << ofGetFrameNum() << "\t" << "FORCE transition change, because segmentClock>+15";
             // endSegment();        // FOR DEBUGGING
         }
-        if (autoplay && scenes[scene].length[segment] > 0 && segmentClock >= scenes[scene].length[segment]*20) {
+        if (autoplay && scenes[scene].length[segment] > 0 && segmentClock >= scenes[scene].length[segment]+20) {
             ofLogError("TRANSITION") << "\t" << ofGetFrameNum() << "\t" << "FORCE transition change, because segmentClock>+20";
-            // moveOn = true;       // FOR DEBUGGING
+            moveOn = true;       // FOR DEBUGGING
         }
         // triggered by the end of fading out the bg
         if (moveOn) {
