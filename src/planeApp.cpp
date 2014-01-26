@@ -1516,9 +1516,10 @@ void planeApp::blobOnCreate(int & blobID) {
         blobs[blobID].videoTrace = false;
         blobs[blobID].mediaLink = ofPtr<mediaElement>();  // TODO how to release ofPtr ?
 
-        if (blobs[blobID].onStage) {
-            this->blobEnterStage(blobID);
-        }
+        blobs[blobID].onStage = false;
+        // if (blobs[blobID].onStage) {         // too early here, for new blobs at least
+        //     this->blobEnterStage(blobID);    // this will happen inside processRawPosition()
+        // }
     } else {
         ofLogNotice("BLOB") << "\t" << ofGetFrameNum() << "\t\t\t" << "-";
     }
