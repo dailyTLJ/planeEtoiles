@@ -207,7 +207,7 @@ void mediaElement::fadeOut(float speed, float op, bool destroy) {
 }
 
 void mediaElement::fadeIn(float speed) {
-    ofLogNotice("mediaElement") << ofGetFrameNum() << "\t"  << "fadeIn at: " << speed;
+    ofLogNotice("mediaElement") << ofGetFrameNum() << "\t"  << "fadeIn at: " << speed << " " << file;
     opacity = 0.0f;
     fade(speed);
 }

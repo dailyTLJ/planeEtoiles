@@ -96,8 +96,8 @@ class planeApp : public ofBaseApp{
 		void endedInstructions(int & trans);// trigger fgMediaFadedOut or moveOn
 		void fgMediaFadedOut(int & trans);  // 2. call outroTransformation calls on FG and BG media
 		void allFaded(int & trans); 		// 3. all elements faded out, moveOn = true
-		void bgMediaSwap(int & trans);		//
 		void nextSegment();					// 4. pick the next segment
+		void bgMediaSwap(int & trans);		//
 		void initSegment();					// 5. initialize the new segment, create new fgvideos
 		void configureBlobserver();
 		void beginSegment();				// 6. after flash, fade in BG
