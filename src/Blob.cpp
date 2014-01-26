@@ -11,7 +11,7 @@ Blob::~Blob() {
 
 //--------------------------------------------------------------
 void Blob::init(){
-    this->maxLifetime = 1;
+    this->maxLifetime = 2;
 	this->lifetime = this->maxLifetime;
 	this->updated = true;
 
@@ -30,52 +30,62 @@ void Blob::init(){
     this->steadyRewarded = false;
 }
 
+
 //--------------------------------------------------------------
-void Blob::follow(float x, float y, float frameW, float frameH, float stageRadius, int y_mean){
+// raw blob position is updated from within oscReceive()
+// can happen more than once, before follow(), depending on blobserver FPS
+void Blob::setRawPosition(float x, float y) {
     this->_rawPos.set(x, y);
+    this->updated = true;
+}
 
-    // on Edge?
-    // if (x<margin || x>frameW-margin || y<margin || y>frameH-margin) {
-    //     this->onEdge = true;
-    // } else this->onEdge = false;
+//--------------------------------------------------------------
+// actual processing of new raw-position (if updated)
+// averages Y position, does perspectiveTransformation, and stores data in position history
+void Blob::processRawPosition(float frameW, float frameH, float stageRadius, int y_mean){
 
-    // average Y position
-    int y_mean_min = min(y_mean, int(rawHistory.size()));
-    float sum = y;
-    for (int i=0; i<y_mean_min-1; i++) {
-        sum += rawHistory[rawHistory.size()-1-i].point.y;
+    // this->_rawPos.set(x, y);
+
+    if (updated) {
+
+        // average Y position
+        int y_mean_min = min(y_mean, int(rawHistory.size()));
+        float sum = _rawPos.y;
+        for (int i=0; i<y_mean_min-1; i++) {
+            sum += rawHistory[rawHistory.size()-1-i].point.y;
+        }
+        float avgY = sum / (float) y_mean_min;
+        ofPoint avgP;
+        avgP.set(_rawPos.x, avgY);
+
+        this->position = transformPerspective(avgP);
+        // this->position = transformPerspective(this->_rawPos);
+
+        // on Stage?
+        bool tmp = false;
+        if ( abs(ofDist(this->position.x, this->position.y,frameW/2,frameH/2)) < stageRadius) tmp = true;
+        if (onStage==true && tmp==false) ofNotifyEvent(onLeaveStage, this->id, this);
+        else if (onStage==false && tmp==true) ofNotifyEvent(onEnterStage, this->id, this);
+        onStage = tmp;
+
+        TimedPoint rawPoint;
+        rawPoint.set(_rawPos.x,_rawPos.y);
+        rawHistory.push_back(rawPoint);
+
+        TimedPoint tPoint;
+        tPoint.set(this->position.x, this->position.y);
+
+        history.push_back(tPoint);
+
+        while( rawHistory.size() > MAX_HISTORY ) {
+            rawHistory.erase( rawHistory.begin() );
+        }
+        while( history.size() > MAX_HISTORY ) {
+            history.erase( history.begin() );
+        }
     }
-    float avgY = sum / (float) y_mean_min;
-    ofPoint avgP;
-    avgP.set(_rawPos.x, avgY);
 
-    this->position = transformPerspective(avgP);
-    // this->position = transformPerspective(this->_rawPos);
-
-    // on Stage?
-    bool tmp = false;
-    if ( abs(ofDist(this->position.x, this->position.y,frameW/2,frameH/2)) < stageRadius) tmp = true;
-    if (onStage==true && tmp==false) ofNotifyEvent(onLeaveStage, this->id, this);
-    else if (onStage==false && tmp==true) ofNotifyEvent(onEnterStage, this->id, this);
-    onStage = tmp;
-
-    TimedPoint rawPoint;
-    rawPoint.set(x,y);
-    rawHistory.push_back(rawPoint);
-
-    TimedPoint tPoint;
-    tPoint.set(this->position.x, this->position.y);
-
-    history.push_back(tPoint);
-
-    while( rawHistory.size() > MAX_HISTORY ) {
-        rawHistory.erase( rawHistory.begin() );
-    }
-    while( history.size() > MAX_HISTORY ) {
-        history.erase( history.begin() );
-    }
-
-	this->updated = true;
+	// this->updated = true;
 }
 
 //--------------------------------------------------------------
@@ -91,6 +101,7 @@ void Blob::setVelocity(float dx, float dy){
 
 
 //--------------------------------------------------------------
+// see if blob is frozen, compute mean velocity, based on position history
 void Blob::analyze(float freezeMaxVel, float freezeMinTime, float freezeMaxTime, float movingThr) {
     // only analyse freeze state, once the blob is old enough
     if(this->velHistory.size() >= VELOCITY_HISTORY ) {
@@ -135,6 +146,7 @@ void Blob::analyze(float freezeMaxVel, float freezeMinTime, float freezeMaxTime,
 }
 
 //--------------------------------------------------------------
+// see if a blob is at a steady distance with one of its neighbor blobs
 void Blob::analyzeNeighbors(std::map<int, tinyNeighbor> neighborLocation, float distStdDevThr){
 
     // set all neighbor-updates to false, to be able to delete inactive ones after
@@ -146,7 +158,6 @@ void Blob::analyzeNeighbors(std::map<int, tinyNeighbor> neighborLocation, float 
     vector<Pair> breakMe;   // store the neighbor-connections that are broken, to trigger them later
 
     // update neighbors with new location data
-    // for(std::map<int, ofPoint>::iterator it = neighborLocation.begin(); it != neighborLocation.end(); ++it){
     for(std::map<int, tinyNeighbor>::iterator it = neighborLocation.begin(); it != neighborLocation.end(); ++it){
         int nid = it->first;
         if(nid != this-> id) {
@@ -224,6 +235,8 @@ void Blob::analyzeNeighbors(std::map<int, tinyNeighbor> neighborLocation, float 
 }
 
 //--------------------------------------------------------------
+// transform the rawPosition with a perspective Matrix,
+// to stretch and rotate the camera-view into a top-down view
 ofPoint Blob::transformPerspective(ofPoint& v){
 
     vector<cv::Point2f> pre, post;
@@ -237,6 +250,7 @@ ofPoint Blob::transformPerspective(ofPoint& v){
 }
 
 //--------------------------------------------------------------
+// check blob lifetime, and trigger inLost event
 void Blob::update(int minLostTime){
 	if(this->updated == false) {
 		this->lifetime--;
@@ -255,6 +269,9 @@ void Blob::update(int minLostTime){
     }
 }
 
+//--------------------------------------------------------------
+// if the blob is connected to a video > 
+// trigger updatePosition event to update the video position
 void Blob::updateVideo() {
     if (isAlive() && videoTrace) ofNotifyEvent(updatePosition, this->id, this);
 }

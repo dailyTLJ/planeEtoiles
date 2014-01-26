@@ -658,15 +658,13 @@ void planeApp::update(){
     // ofGetFrameRate freaks out if at start of application? 
     if (processing) {
 
-        oscMsgReceived = false;
-        this->receiveOsc();
-
-        //if () {
+        // check for incoming OSC messages
+        oscMsgReceived = false;    
+        this->receiveOsc();     // sets oscMsgReceived to true, if blobserver/endFrame 
         oscLastMsgTimer = ofGetElapsedTimef() - oscLastMsg;
         if (!oscMsgReceived && oscActive && oscLastMsgTimer > oscLastMsgTimerMax) {
             oscActive = false;
         }
-        //}
 
         if (oscMsgReceived) {
 
@@ -680,7 +678,12 @@ void planeApp::update(){
                 else if (scene==SUN) minLost = minLostHop;
                 else if (scene==SHOOTING) minLost = minLostShoot;
 
+                // position averaging, perspective transform, and position history
+                b->processRawPosition(siteW, siteH, stageRadius, y_mean);
+                // check lifetime and if lost, trigger onLost event
             	b->update(minLost);
+
+                // delete blob if it hasn't been updated and its lifetime has passed
             	if( !b->isAlive() ) {
                     ofLogNotice("BLOB") << "\t\t" << ofGetFrameNum() << "\t" << "dead\t" << b->id;
                     ofNotifyEvent(b->prepareToDie,b->id,b);
@@ -691,25 +694,27 @@ void planeApp::update(){
             }
 
             // ANALYSIS
-            // std::map<int, ofPoint> blobPositions;
-            // for(std::map<int, Blob>::iterator it = blobs.begin(); it != blobs.end(); ++it){
-            //     Blob* b = &it->second;
-            //     blobPositions[b->id] = b->position;
-            // }
+            // store all the blob position in a data structure that can be passed back into all blobs
             std::map<int, tinyNeighbor> blobPositions;
             for(std::map<int, Blob>::iterator it = blobs.begin(); it != blobs.end(); ++it){
                 Blob* b = &it->second;
                 blobPositions[b->id].set(b->position, b->movingMean, b->onStage);
             }
+            // analysis based on velocity (frozen, freeze events, mean velocity, ..)
+            // TODO WHY IS THIS HERE, AND NOT IN THE LOOP ABOVE??
             for(std::map<int, Blob>::iterator it = blobs.begin(); it != blobs.end(); ++it){
                 Blob* b = &it->second;
                 b->analyze(freezeMaxVel, freezeMinTime, freezeMaxTime, movingThr);
             }
-            for(std::map<int, Blob>::iterator it = blobs.begin(); it != blobs.end(); ++it){
-                Blob* b = &it->second;
-                b->analyzeNeighbors(blobPositions, distStdDevThr);
+            // analyse blob distance to its neighbors (steady, break steady events)
+            if (scene==ATTRACTION) {
+                for(std::map<int, Blob>::iterator it = blobs.begin(); it != blobs.end(); ++it){
+                    Blob* b = &it->second;
+                    b->analyzeNeighbors(blobPositions, distStdDevThr);
+                }
             }
 
+            // determine how many blobs are on stage, and their average velocity
             blobsOnStage = 0;
             float totalVel = 0;
             for(std::map<int, Blob>::iterator it = blobs.begin(); it != blobs.end(); ++it){
@@ -722,6 +727,7 @@ void planeApp::update(){
             if (blobsOnStage>0) lastActivityClock = ofGetUnixTime();
             hogAvVel = (blobsOnStage>0) ? totalVel/blobsOnStage : 0;
 
+            // now all blobs with attached video, shall update the video location
             it = blobs.begin();
             while (it != blobs.end()) {
                 Blob* b = &it->second;
@@ -2205,8 +2211,9 @@ void planeApp::initSegment(){
 void planeApp::receiveOsc(){
 
     // check for waiting messages
-	while(receiver.hasWaitingMessages()){
-        if (!oscActive) oscActive =true;
+	while (receiver.hasWaitingMessages()) {
+
+        if (!oscActive) oscActive = true;
         oscLastMsg = ofGetElapsedTimef();
 
 		// get the next message
@@ -2221,10 +2228,11 @@ void planeApp::receiveOsc(){
 
         } else if(m.getAddress() == "/blobserver/endFrame"){
 
-            oscMsgReceived = true;  // ready to process blob data
             currentFlowId = m.getArgAsInt32(1);
-            if (currentFlowId==hogFlowId) 
+            if (currentFlowId==hogFlowId) {
+                oscMsgReceived = true;  // ready to process blob data
                 ofLogNotice("OSC") << "\t\t" << ofGetFrameNum() << "\t" << "/blobserver/endFrame";
+            }
 
 		} else if(m.getAddress() == "/blobserver/bgsubtractor"){
             // ignore
@@ -2241,7 +2249,7 @@ void planeApp::receiveOsc(){
             if (var.compare("exposureTime") == 0) cameraExposure = val;
             ofLogNotice("OSC") << "BROADCAST " << var << ", " << source << ", " << cam << ", " << val;
 
-		} else if(m.getAddress() == "/blobserver/hog" && currentFlowId==hogFlowId){
+		} else if(m.getAddress() == "/blobserver/hog" && currentFlowId==hogFlowId) {
 
 			// parse incoming elements:  iiiffiii: id x y vx vy age lost occluded
 			int blobid = m.getArgAsInt32(0);
@@ -2278,12 +2286,13 @@ void planeApp::receiveOsc(){
                 ofAddListener( blobs[blobid].onEnterStage, this, &planeApp::blobEnterStage );
                 ofAddListener( blobs[blobid].onLeaveStage, this, &planeApp::blobLeaveStage );
             }
+
             // update blob with new values
             Blob* b = &blobs.find(blobid)->second;
             // multiply xy so that blobposition represents foot-position and not x/y of tracking window
-            b->follow(posx + blobW*0.95, posy + blobH*0.95, siteW, siteH, stageRadius, y_mean);
+            b->setRawPosition(posx + blobW*0.95, posy + blobH*0.95);
+            // b->follow(posx + blobW*0.95, posy + blobH*0.95, siteW, siteH, stageRadius, y_mean);
             b->setVelocity(velx, vely);
-            // b->analyze(freezeMaxVel, freezeMinTime, freezeMaxTime, movingThr);    //
             b->age = age;
             b->lostDuration = lost;
             b->occluded = (occluded==1) ? true : false;
