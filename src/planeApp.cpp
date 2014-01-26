@@ -236,7 +236,7 @@ void planeApp::setup(){
 
     instructionTxt.setText("test", "test");
     instructionTxt.opacity = 0.0;
-    instructionImg.loadImage("img/placeholder_letgo.jpg");
+    // instructionImg.loadImage("img/placeholder_letgo.jpg");
 
     // load instruction-video placeholder
     instructionVid = ofPtr<mediaElement>( new videoElement());
@@ -1721,7 +1721,6 @@ void planeApp::beginSegment() {
 
     instructionTxt.fadeIn(instructionFadeIn);
 
-
     transition = false;
 
     // make new blob connections, to ensure blobs are connected to video elements.
@@ -2083,12 +2082,12 @@ void planeApp::initSegment(){
 
 
     // INSTRUCTION IMAGE, if present
-    string in_img = scenes[scene].instructionImg[language][segment];
-    if (in_img.length() > 2) {
-        instructionImg.loadImage("img/" + in_img);
-        // instructionImg.loadImage("img/placeholder_stop.jpg");
-        ofLogNotice("TRANSITION") << "\t" << ofGetFrameNum() << "\t" << "load instruction image " << in_img;
-    }
+    // string in_img = scenes[scene].instructionImg[language][segment];
+    // if (in_img.length() > 2) {
+    //     instructionImg.loadImage("img/" + in_img);
+    //     // instructionImg.loadImage("img/placeholder_stop.jpg");
+    //     ofLogNotice("TRANSITION") << "\t" << ofGetFrameNum() << "\t" << "load instruction image " << in_img;
+    // }
 
     // INSTRUCTION VIDEO, if present
     string in_vid1 = scenes[scene].instructionVid[language][segment][0]; // intro video
@@ -2109,9 +2108,15 @@ void planeApp::initSegment(){
     }
     instructionVid->setDisplay(projectionW/2,projectionH/2, true);
 
-    // SET BG STARRY-SKY OPACITY LOWER FOR STARS
-    if (scene==STARS) {
+    
 
+
+    // SET BG STARRY-SKY OPACITY LOWER FOR STARS
+    if (scene==STARS && segment>=SEG_STARS) (*bgMedia[5]).opMax = 0.35;
+    else (*bgMedia[5]).opMax = 1;
+
+    // add FG videos
+    if (scene==STARS) {
         if (segment==0) {
             fgMedia.push_back(ofPtr<mediaElement>( title_sequence[language] ));
             (*fgMedia[fgMedia.size()-1]).setDisplay(projectionW/2,projectionH/2, true);
@@ -2127,13 +2132,7 @@ void planeApp::initSegment(){
             (*fgMedia[fgMedia.size()-1]).finishMovie(1.0);
             ofAddListener( (*fgMedia[fgMedia.size()-1]).fadeOutEnd, this, &planeApp::allFaded );
         } 
-    }
-
-    if (scene==STARS && segment>=SEG_STARS) (*bgMedia[5]).opMax = 0.35;
-    else (*bgMedia[5]).opMax = 1;
-
-    // add FG videos
-    if (scene==REVOLUTIONS) {
+    } else if (scene==REVOLUTIONS) {
 
     } else if (scene==SUN) {
         // SUN, load sun as fgMedia
@@ -2198,15 +2197,6 @@ void planeApp::initSegment(){
             (*fgMedia[fgMedia.size()-1]).finishMovie(1.0);
             ofAddListener( (*fgMedia[fgMedia.size()-1]).fadeOutEnd, this, &planeApp::allFaded );
         }
-        // else if (segment==scenes[scene].segments-1) {
-        //     // last scene, DIAGRAM SEQUENCE
-        //     fgMedia.push_back(ofPtr<mediaElement>( diagram_sequence[language] ));
-        //     (*fgMedia[fgMedia.size()-1]).setDisplay(projectionW/2,projectionH/2, true);
-        //     (*fgMedia[fgMedia.size()-1]).reset();
-        //     (*fgMedia[fgMedia.size()-1]).autoDestroy(true);
-        //     (*fgMedia[fgMedia.size()-1]).finishMovie(1.0);
-        //     ofAddListener( (*fgMedia[fgMedia.size()-1]).fadeOutEnd, this, &planeApp::allFaded );
-        // }
     }
 
     beginSegment();
