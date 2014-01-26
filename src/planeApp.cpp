@@ -106,10 +106,6 @@ void planeApp::setup(){
 
     hogFlowId = 1;
     hogFlowName = "Actuator";
-    bgsubtractorFlowId = 2; // 1 = hog, 2 = bgs, 3 = nop
-    bgsubtractorCnt = 0;
-    bgsubtractorVel = 0.f;
-    bgsubtractorAvVel = 0.f;
     hogAvVel = 0.f;
 
     followMe = -0.5;
@@ -2220,47 +2216,22 @@ void planeApp::receiveOsc(){
 		if(m.getAddress() == "/blobserver/startFrame"){
 
             currentFlowId = m.getArgAsInt32(1);
-            if (currentFlowId==hogFlowId) ofLogNotice("OSC") << "\t\t" << ofGetFrameNum() << "\t" << "/blobserver/startFrame " << m.getArgAsInt32(0);
-
-            // tcout() << "start frame flow " << flowid << endl;
-            if (currentFlowId==bgsubtractorFlowId) {
-                bgsubtractorCnt = 0;
-                bgsubtractorVel = 0.f;
-                bgsubtractorAvVel = 0.f;
-            }
+            if (currentFlowId==hogFlowId) 
+                ofLogNotice("OSC") << "\t\t" << ofGetFrameNum() << "\t" << "/blobserver/startFrame " << m.getArgAsInt32(0);
 
         } else if(m.getAddress() == "/blobserver/endFrame"){
+
             oscMsgReceived = true;  // ready to process blob data
             currentFlowId = m.getArgAsInt32(1);
-            if (currentFlowId==hogFlowId) ofLogNotice("OSC") << "\t\t" << ofGetFrameNum() << "\t" << "/blobserver/endFrame";
-            // tcout() << "end frame flow " << flowid << endl;
-            if (currentFlowId==bgsubtractorFlowId) {
-                bgsubtractorAvVel = (bgsubtractorCnt>0) ? bgsubtractorVel/bgsubtractorCnt : 0;
-                // tcout() << "bgsubtractorCnt\t" << bgsubtractorCnt << "\tavg vel\t" << (bgsubtractorVel/bgsubtractorCnt) << endl;
-            }
+            if (currentFlowId==hogFlowId) 
+                ofLogNotice("OSC") << "\t\t" << ofGetFrameNum() << "\t" << "/blobserver/endFrame";
 
 		} else if(m.getAddress() == "/blobserver/bgsubtractor"){
-
-
-            // parse incoming elements:  iiiiffii: id x y size vx vy age lost
-            int blobid = m.getArgAsInt32(0);
-            int posx = m.getArgAsInt32(1);
-            int posy = m.getArgAsInt32(2);
-            int size = m.getArgAsInt32(3);
-            float velx = m.getArgAsFloat(4);
-            float vely = m.getArgAsFloat(5);
-            int age = m.getArgAsInt32(6);
-            int lost = m.getArgAsInt32(7);
-
-            bgsubtractorCnt++;
-            bgsubtractorVel += sqrt( pow(velx,2) + pow(vely,2) );
-
-            // tcout() << "bgsubtractor : " << blobid << " " << posx << "/" << posy << " " << size << " " << velx << "/" << vely << " " << age << " " << lost << endl;
-
+            // ignore
 		} else if(m.getAddress() == "/blobserver/stitch"){
-
+            // ignore
         } else if(m.getAddress() == "/blobserver/nop"){
-
+            // ignore
 		} else if(m.getAddress() == "/blobserver/broadcast"){
 
             string var = m.getArgAsString(0);
@@ -2653,8 +2624,6 @@ void planeApp::drawRawData(int x, int y, float scale, bool displayText){
         rawInfo += "\nosc active: \t" + ofToString(oscActive ? "true" : "false");
         rawInfo += "\nosc last msg: \t" + ofToString(oscLastMsgTimer,2) + " sec";
         rawInfo += "\nexposure: \t" + ofToString(cameraExposure,5);
-        // rawInfo += "\nbgs blob cnt: \t" + ofToString(bgsubtractorCnt);
-        // rawInfo += "\nbgs avg vel: \t" + ofToString(bgsubtractorAvVel,2);
         rawInfo += "\nhog velocity: \t" + ofToString(hogAvVel,2);
         ofDrawBitmapStringHighlight(rawInfo, x + 3, y + blobserverH*scale + 15);
     }

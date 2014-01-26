@@ -187,19 +187,14 @@ class planeApp : public ofBaseApp{
 		bool drawBlobDetail;
 
 		int currentFlowId;
-		int bgsubtractorCnt;
-		int bgsubtractorFlowId;
 		int hogFlowId;
 		string hogFlowName;
-		float bgsubtractorVel;
-		float bgsubtractorAvVel;
 		float hogAvVel;
 
 		ofTrueTypeFont fontBg;
 		ofTrueTypeFont fontIdle;
 		ofTrueTypeFont fontSm;
 		ofxPanel gui;
-		// ofxPanel languageGui;
 		ofxPanel stateGui;
 
 		ofParameter<int> guiScene;
