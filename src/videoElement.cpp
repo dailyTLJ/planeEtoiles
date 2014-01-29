@@ -179,7 +179,8 @@ void videoElement::draw(int x, int y, float _scale) {
 }
 
 void videoElement::drawElement(float _scale) {
-    if (mediaLoaded && fullyLoaded) {
+    // if (mediaLoaded && fullyLoaded) {
+    if (mediaLoaded) {
         ofSetColor(255, 255, 255, int(255*opacity*opMax));
         float msc = (scale+addSc) * _scale;
         // if (movie->getCurrentFrame()<1) {
