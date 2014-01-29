@@ -41,7 +41,7 @@ void Blob::setRawPosition(float x, float y) {
 // actual processing of new raw-position (if updated)
 // averages Y position, does perspectiveTransformation, and stores data in position history
 void Blob::processRawPosition(float frameW, float frameH, float stageRadius, int y_mean){
-
+    // ofLogNotice("BLOB") << "\t" << ofGetFrameNum() << "\t" << this->id << " processRawPosition()";
     // this->_rawPos.set(x, y);
 
     if (updated) {
@@ -250,6 +250,7 @@ ofPoint Blob::transformPerspective(ofPoint& v){
 //--------------------------------------------------------------
 // check blob lifetime, and trigger inLost event
 void Blob::update(int minLostTime){
+    // ofLogNotice("BLOB") << "\t" << ofGetFrameNum() << "\t" << this->id << " update()";
 	if(this->updated == false) {
 		this->lifetime--;
 		return;

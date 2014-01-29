@@ -15,7 +15,8 @@ void planeApp::setup(){
     ofSetLogLevel(OF_LOG_NOTICE);
 
     // create a new logfile everytime the application is started
-    ofLogToFile("/home/planeviz/Documents/log/of_log/planeEtoiles_"+ofGetTimestampString()+".log");
+    if (ofGetWindowMode() == OF_FULLSCREEN) 
+        ofLogToFile("/home/planeviz/Documents/log/of_log/planeEtoiles_"+ofGetTimestampString()+".log");
     ofLogNotice("START") << "\t" << ofGetFrameNum() << "\t" << "setup";
 
     // OF_LOG_VERBOSE
@@ -655,6 +656,8 @@ void planeApp::initScenes(){
 //--------------------------------------------------------------
 void planeApp::update(){
 
+    // ofLogNotice("interaction") << "\t" << ofGetFrameNum() << "\t" << "start update()";
+
     // ofGetFrameRate freaks out if at start of application? 
     if (processing) {
 
@@ -692,6 +695,7 @@ void planeApp::update(){
             		++it;
             	}
             }
+            // ofLogNotice("BLOB") << "\t\t" << ofGetFrameNum() << "\t" << "cleand up blobs >> " << blobs.size();
 
             // ANALYSIS
             // store all the blob position in a data structure that can be passed back into all blobs
@@ -713,6 +717,7 @@ void planeApp::update(){
                     b->analyzeNeighbors(blobPositions, distStdDevThr);
                 }
             }
+            // ofLogNotice("BLOB") << "\t\t" << ofGetFrameNum() << "\t" << "analyzed blobs >> " << blobs.size();
 
             // determine how many blobs are on stage, and their average velocity
             blobsOnStage = 0;
@@ -728,12 +733,14 @@ void planeApp::update(){
             hogAvVel = (blobsOnStage>0) ? totalVel/blobsOnStage : 0;
 
             // now all blobs with attached video, shall update the video location
+            // ofLogNotice("TRANSITION") << "\t" << ofGetFrameNum() << "\t" << "update video";
             it = blobs.begin();
             while (it != blobs.end()) {
                 Blob* b = &it->second;
                 b->updateVideo();
                 it++;
             }
+            // ofLogNotice("BLOB") << "\t\t" << ofGetFrameNum() << "\t" << "update blobs video >> " << blobs.size();
         }
 
         // SCHEDULING
@@ -1020,12 +1027,12 @@ void planeApp::update(){
                 (**iter).update(updateRate);
                 if ((**iter).dead) {
                     ofLogNotice("videoElement") << ofGetFrameNum() << "\t" << "delete video " << (**iter).file;
-                    iter = fgMedia.erase(iter);
+                    iter = fgMedia.erase(iter++);
                 } else {
                     ++iter;
                 }
-
             }
+            // ofLogNotice("videoElement") << ofGetFrameNum() << "\t" << "cleand up videos";
         } else ofLogNotice("interaction") << "\t" << ofGetFrameNum() << "\t" << "updateRate crazy: " << updateRate;
 
     }
@@ -1105,7 +1112,7 @@ void planeApp::placeInstruction(int & trans) {
                     break;
             case 1: addY = 0;       // 1 > projectionH/2
         }
-        addY = 100;
+        addY = -100;
         instructionVid->setDisplay(projectionW/2,projectionH/2 + addY, true);
     }
 }
@@ -1252,6 +1259,7 @@ void planeApp::blobSteady(Pair & pair) {
                 fgMedia.push_back(ofPtr<mediaElement>( new videoElement(newVideoName)));
                 (*fgMedia[fgMedia.size()-1]).reset();
                 (*fgMedia[fgMedia.size()-1]).id = distId;
+                (*fgMedia[fgMedia.size()-1]).fadeIn(0.2);
                 (*fgMedia[fgMedia.size()-1]).bridge(b1->id, b2->id);
                 ofNotifyEvent( blobs[pair.blob1].updatePosition, pair.blob1, &blobs[pair.blob1] );
             } else {
@@ -1285,24 +1293,35 @@ void planeApp::blobBreakSteady(Pair & pair) {
     if (!transition && scene==ATTRACTION) {
         ofLogNotice("BLOB") << "\t\t" << ofGetFrameNum() << "\t" << "blobBreakSteady() \t" << pair.blob1 << " + " << pair.blob2;
 
-        ofPtr<mediaElement> vid1 = blobs[pair.blob1].mediaLink;
-        ofPtr<mediaElement> vid2 = blobs[pair.blob2].mediaLink;
+        std::map<int,Blob>::iterator iter1 = blobs.find(pair.blob1);
+        std::map<int,Blob>::iterator iter2 = blobs.find(pair.blob2);
 
-        // replace video with normal star
-        if (vid1 != NULL && !blobs[pair.blob1].steadyRewarded) {
-            string videoFile = "video/2_stars/STAR_" + ofToString((*vid1).id)+"-loop-photoJPEG.mov";
-            if ((*vid1).file != videoFile) {
-                (*vid1).loadMovie("video/2_stars/STAR_" + ofToString((*vid1).id)+"-loop-photoJPEG.mov");
-                (*vid1).reset();
+        if (iter1!=blobs.end()) {
+            ofPtr<mediaElement> vid1 = blobs[pair.blob1].mediaLink;
+
+            // replace video with normal star
+            if (vid1 != NULL && !blobs[pair.blob1].steadyRewarded) {
+                string videoFile = "video/2_stars/STAR_" + ofToString((*vid1).id)+"-loop-photoJPEG.mov";
+                if ((*vid1).file != videoFile) {
+                    (*vid1).loadMovie("video/2_stars/STAR_" + ofToString((*vid1).id)+"-loop-photoJPEG.mov");
+                    (*vid1).reset();
+                }
             }
         }
-        if (vid2 != NULL && !blobs[pair.blob2].steadyRewarded) {
-            string videoFile = "video/2_stars/STAR_" + ofToString((*vid2).id)+"-loop-photoJPEG.mov";
-            if ((*vid2).file != videoFile) {
-                (*vid2).loadMovie("video/2_stars/STAR_" + ofToString((*vid2).id)+"-loop-photoJPEG.mov");
-                (*vid2).reset();
+
+        if (iter2!=blobs.end()) {
+            ofPtr<mediaElement> vid2 = blobs[pair.blob2].mediaLink;
+
+            // replace video with normal star
+            if (vid2 != NULL && !blobs[pair.blob2].steadyRewarded) {
+                string videoFile = "video/2_stars/STAR_" + ofToString((*vid2).id)+"-loop-photoJPEG.mov";
+                if ((*vid2).file != videoFile) {
+                    (*vid2).loadMovie("video/2_stars/STAR_" + ofToString((*vid2).id)+"-loop-photoJPEG.mov");
+                    (*vid2).reset();
+                }
             }
         }
+
 
         bridgeUnlink(pair);
 
@@ -1579,6 +1598,7 @@ void planeApp::videoFollowBlob(int & blobID) {
         // update position
         ofPoint p;
         if (vid != NULL) {
+            // ofLogNotice("BLOB") << "\t\t" << ofGetFrameNum() << "\t" << "videoFollowBlob\t" << blobID;
 
             if (scene==ECLIPSE && segment>13 && segment<16) {
                 // PLANETS aligned on VERTICAL, move up down
@@ -1608,6 +1628,8 @@ void planeApp::videoFollowBlob(int & blobID) {
         }
         // update position of sparkly bridge
         if (!transition && scene==ATTRACTION) {
+
+            // ofLogNotice("BRIDGE") << "\t\t" << ofGetFrameNum() << "\t" << "videoFollowBlob  bridge\t";
             // check if bridge exists
             ofPtr<mediaElement> bridge;
             int blob2ID;
@@ -1704,6 +1726,7 @@ void planeApp::bridgeUnlink(Pair & pair) {
         if ((**it).bridgeVideo && (**it).bridgeBlobID[0]==pair.blob1 && (**it).bridgeBlobID[1]==pair.blob2) {
             string videoFile = "video/2_stars/LINK_0" + ofToString((**it).id) + "-outro-photoJPEG.mov";
             if ((**it).file != videoFile) {
+                found = true;
                 ofLogNotice("BRIDGE") << "\t" << ofGetFrameNum() << "\tunlinked bridge\t" << (**it).bridgeBlobID[0] << " " << (**it).bridgeBlobID[1];
                 int oldW = (**it).w;
                 int oldH = (**it).h;
@@ -1847,6 +1870,10 @@ void planeApp::endedInstructions(int & trans) {
         if (segment==0) {               // 0 - SPIN
             // skip LET GO if there are no more planets on the screen
             if (planetCnt<=0) {
+                // just in case
+                int tmp = -1;
+                fgMediaFadedOut(tmp); 
+
                 ofLogNotice("TRANSITION") << "\t" << ofGetFrameNum() << "\t" << "endSegment()   planetCnt 0 ";
                 segment+=2;
                 sceneChange = true;
@@ -1869,7 +1896,11 @@ void planeApp::endedInstructions(int & trans) {
                         (**it).loadMovie("video/3_revolution/REV_OUT-photoJPEG.mov");
                         (**it).reset(true);
                         (**it).autoDestroy(true);
+                    } else {
+                        ofLogNotice("TRANSITION") << "\t" << ofGetFrameNum() << "\t" << "endSegment()   media = selfdestroy";
                     }
+                } else {
+                    ofLogNotice("TRANSITION") << "\t" << ofGetFrameNum() << "\t" << "endSegment()   media = dead";
                 }
             }
 
@@ -1934,7 +1965,10 @@ void planeApp::endedInstructions(int & trans) {
                 }
             } else {
                 // GOT HERE BECAUSE TIME RAN OUT
-                moveOn = true;
+                instructionVid->mediaLoaded = false;
+                (*fgMedia[0]).fadeOut();
+                ofAddListener( (*fgMedia[fgMedia.size()-1]).fadeOutEnd, this, &planeApp::allFaded );
+                // moveOn = true;
             }
         }
 

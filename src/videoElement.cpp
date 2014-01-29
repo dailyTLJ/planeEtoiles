@@ -178,10 +178,10 @@ void videoElement::drawElement(float _scale) {
     if (mediaLoaded) {
         ofSetColor(255, 255, 255, int(255*opacity*opMax));
         float msc = (scale+addSc) * _scale;
-        if (movie->getCurrentFrame()<1) {
-            // ofLogNotice("videoElement") << ofGetFrameNum() << "\t" << "getCurrentFrame<1  movie->update()" ;
-            movie->update();    // FOR DEBUGGING, update before drawing to prevent glitches??
-        }
+        // if (movie->getCurrentFrame()<1) {
+        //     // ofLogNotice("videoElement") << ofGetFrameNum() << "\t" << "getCurrentFrame<1  movie->update()" ;
+        //     movie->update();    // FOR DEBUGGING, update before drawing to prevent glitches??
+        // }
         if (centered) {
             movie->draw(-w * msc * 0.5, -h * msc * 0.5, w * msc, h * msc);
         } else {
