@@ -31,6 +31,7 @@ videoElement::~videoElement() {
 void videoElement::loadMovie(string filename) {
     this->file = filename;
     ofLogNotice("videoElement") << ofGetFrameNum() << "\t" << "loadMovie\t'" << file << "'";
+    fullyLoaded = false;
     mediaLoaded = movie->loadMovie(filename);
     if (mediaLoaded) {
         movie->update();    // FOR DEBUGGIN, update to avoid glitches
@@ -60,6 +61,9 @@ void videoElement::pause(bool v) {
 
 void videoElement::update(float updateRate) {
     if (mediaLoaded) {
+        if (!fullyLoaded) {
+            if (movie->getCurrentFrame()>1) fullyLoaded = true;
+        }
         mediaElement::update(updateRate);
         if (loadLoopFileNow) {
             ofLogNotice("videoElement") << ofGetFrameNum() << "\t" << "loadLoopFileNow\t" << loopFile;
@@ -175,7 +179,7 @@ void videoElement::draw(int x, int y, float _scale) {
 }
 
 void videoElement::drawElement(float _scale) {
-    if (mediaLoaded) {
+    if (mediaLoaded && fullyLoaded) {
         ofSetColor(255, 255, 255, int(255*opacity*opMax));
         float msc = (scale+addSc) * _scale;
         // if (movie->getCurrentFrame()<1) {

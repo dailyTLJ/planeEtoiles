@@ -33,6 +33,8 @@ class videoElement: public mediaElement
         bool loadLoopFileNow;
         bool setFileDeadNow;
 
+        bool fullyLoaded;
+
 
     protected:
     private:
