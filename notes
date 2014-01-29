@@ -34,5 +34,5 @@ switcher-ctrl -i video to_shmdata 'path/to/the/file'
 
 COPY FILES OVER SSH
 ==============================================
-sudo scp planeviz@10.10.44.21:~/Documents/log/of_log/planeEtoiles_2014-01-26* ~/Documents/log/of_log/
+sudo scp planeviz@10.10.44.21:~/Documents/log/of_log/planeEtoiles_2014-01-28* ~/Documents/log/of_log/
 
