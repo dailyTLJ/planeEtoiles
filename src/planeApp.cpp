@@ -313,14 +313,15 @@ void planeApp::initScenes(){
 
     // ******************* preload videos ********************* //
 
-    nebula = ofPtr<mediaElement>( new videoElement("video/NEBULA_131211-H264.mp4"));
+    // nebula = ofPtr<mediaElement>( new videoElement("video/NEBULA_131211-H264.mp4"));
+    nebula = ofPtr<mediaElement>( new videoElement("video/NEBULA_140130_animation_3fps.mov"));
     nebula->reset(true);
     nebula->opMax = nebulaOpacity/100.f;
     nebulaOpacity.addListener(this,&planeApp::guiNebulaChange);
 
     bgMedia.push_back(ofPtr<mediaElement>( new videoElement("video/IDLE_MODE_11-half-1-H264-10mbps.mp4",false)));       // 0
     bgMedia.push_back(ofPtr<mediaElement>( new videoElement("video/IDLE_MODE_13_blue-anim-H264-10mbps.mp4",false)));    // 1
-    bgMedia.push_back(ofPtr<mediaElement>( new videoElement("video/IDLE_MODE_13_white-anim-H264-10mbps.mp4",false)));   // 2
+    bgMedia.push_back(ofPtr<mediaElement>( new videoElement("video/IDLE_MODE_13_white-anim_animation_15fps.mov",false)));   // 2
     bgMedia.push_back(ofPtr<mediaElement>( new videoElement("video/IDLE_MODE_13_yellow-anim-H264-10mbps.mp4",false)));  // 3
     bgMedia.push_back(ofPtr<mediaElement>( new videoElement("video/BACKGROUND-1_intro-H264_10mpbs.mp4",false)));        // 4
     (*bgMedia[4]).opMax = 0.35;
@@ -826,6 +827,7 @@ void planeApp::update(){
 
 
         float updateRate  = 30.0/ofGetFrameRate();  
+        // float updateRate  = 60.0/ofGetFrameRate();  
         // ofLogNotice("interaction") << "\t" << ofGetFrameNum() << "\t" << "updateRate " << updateRate;
         if (updateRate>0.5 && updateRate<6) {
 
