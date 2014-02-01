@@ -53,7 +53,7 @@ void planeApp::setup(){
 
     // slightly bigger font to draw 'come closer' instruction, in idle scene
     fontIdle.loadFont("CircularStd-Book.otf", 46, true, true);
-    fontIdle.setLineHeight(52.0f);
+    fontIdle.setLineHeight(56.0f);
     fontIdle.setLetterSpacing(1.037);
     fontIdle.setSpaceSize(0.5);
 
@@ -377,16 +377,16 @@ void planeApp::initScenes(){
     idle.no = n;
     idle.segments = 1;
     idle.analysis[0] = "* detection";
-    idle.instructions[0][0] = "Come closer";
-    idle.instructions[1][0] = "Approchez";
-    idle.instructions[2][0] = "Approchez";
-    idle.instructionVid[0][0][0] = ""; // intro
-    idle.instructionVid[0][0][1] = "video/text/COME_CLOSER_7_loop-photoJPEG.mov"; // loop
-    idle.instructionVid[0][0][2] = ""; // outro
+    idle.instructions[0][0] = "Come closer\nStep inside the dancing zone";
+    idle.instructions[1][0] = "Approchez\nEntrez dans la zone de danse";
+    idle.instructions[2][0] = "Approchez\nEntrez dans la zone de danse";
+    // idle.instructionVid[0][0][0] = ""; // intro
+    // idle.instructionVid[0][0][1] = "video/text/COME_CLOSER_7_loop-photoJPEG.mov"; // loop
+    // idle.instructionVid[0][0][2] = ""; // outro
 
-    idle.instructionVid[1][0][0] = ""; // intro
-    idle.instructionVid[1][0][1] = "video/text/COME_CLOSER_7-FR_loop-photoJPEG.mov"; // loop
-    idle.instructionVid[1][0][2] = ""; // outro
+    // idle.instructionVid[1][0][0] = ""; // intro
+    // idle.instructionVid[1][0][1] = "video/text/COME_CLOSER_7-FR_loop-photoJPEG.mov"; // loop
+    // idle.instructionVid[1][0][2] = ""; // outro
     idle.length[0] = -1;
     scenes[n] = idle;
 
@@ -637,11 +637,7 @@ void planeApp::initScenes(){
         ofLogNotice("START") << "\t" << ofGetFrameNum() << "\t" << "restarted at normal position: scene " << scene << " : " << segment;
         scene = 0;
         segment = 0;
-        languageCnt = (languageCnt+1>=languageRatio) ? 0 : languageCnt+1;
-        language = (languageCnt==0) ? 0 : 1;
-        language = 1;
-        ofLogNotice("START") << "\t" << ofGetFrameNum() << "\t" << "change language " << language;
-        stateGui.saveToFile("currentState.xml");
+        languageChange();
     } else {
         ofLogNotice("START") << "\t" << ofGetFrameNum() << "\t" << "untypical termination, restart at: scene " << scene << " : " << segment;
     }
@@ -2073,6 +2069,7 @@ void planeApp::nextSegment() {
         scene = IDLE;
         segment = 0;
         sceneChange = true;
+        languageChange();
     }
 
     if (scene==IDLE) {
@@ -2439,6 +2436,20 @@ void planeApp::drawScreen(int x, int y, float scale){
         if (scene==ECLIPSE && segment==SEG_FOLLOWME) {
             // FOLLOW ME
             instructionTxt.draw(&fontBg, (*fgMedia[0]).position.x - moonPosX, 1742);
+        } else if (scene==IDLE) {
+            // IDLE MODE = INSTRUCTION TEXT PULSES
+            int animCnt = ofGetFrameNum()%120;
+            float dimAlpha = 0.3;
+            float instructionTxtAlpha = 1.;
+            if (animCnt < 30) {
+                instructionTxtAlpha = dimAlpha + (animCnt/30.f)*(1-dimAlpha);
+            } else if (animCnt > 90) {
+                instructionTxtAlpha = 1.0 - ((animCnt-90)/30.f)*(1-dimAlpha);
+            } else {
+                instructionTxtAlpha = 1.;
+            }
+            instructionTxt.opMax = instructionTxtAlpha;
+            instructionTxt.draw(&fontIdle, projectionW/2, 1742);
         } else {
             instructionTxt.draw(&fontBg, projectionW/2, 1742);
         }
@@ -2875,6 +2886,13 @@ void planeApp::configureBlobserver() {
 
 }
 
+void planeApp::languageChange() {
+    languageCnt = (languageCnt+1>languageRatio) ? 0 : languageCnt+1;
+    language = (languageCnt==0) ? 0 : 1;
+    ofLogNotice("TRANSITION") << "\t" << ofGetFrameNum() << "\t" << "change language " << language;
+    stateGui.saveToFile("currentState.xml");
+}
+
 
 void planeApp::exit() {
     // do some destructing here
@@ -2998,8 +3016,7 @@ void planeApp::keyReleased(int key){
         // }
     }
     if (key=='u') {
-        languageCnt = (languageCnt+1>languageRatio) ? 0 : languageCnt+1;
-        language = (languageCnt==0) ? 0 : 1;
+        languageChange();
     }
 
     if (key=='p') {

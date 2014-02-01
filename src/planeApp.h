@@ -118,6 +118,7 @@ class planeApp : public ofBaseApp{
 		void guiNebulaChange(int & v);
 
 		void printDebugInfo();
+		void languageChange();
 
 		std::stringstream coutput;
 		
