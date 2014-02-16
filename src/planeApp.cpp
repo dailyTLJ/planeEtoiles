@@ -2043,13 +2043,8 @@ void planeApp::nextSegment() {
         segment = 0;
         if(scene >= scenes.size()) {
             // terminate program
-            ofLogNotice("TRANSITION") << "\t" << ofGetFrameNum() << "\t" << "force terminate program, so it restarts itself again";
-            // std::exit(1);
+            ofLogNotice("TRANSITION") << "\t" << ofGetFrameNum() << "\t" << "reached end, force terminate program, so it restarts itself again";
             ofExit();
-            // 
-
-            if (blobsOnStage==0) scene = 0;
-            else scene = 1;
         }
     }
 
@@ -2065,11 +2060,18 @@ void planeApp::nextSegment() {
 
     // IF NO ACTIVITY, GO TO IDLE MODE
     if (lastActivity > inactivityTimer && autoplay) {
-        ofLogNotice("TRANSITION") << "\t" << ofGetFrameNum() << "\t" << "no activity since " << lastActivity << "sec, go to IDLE";
-        scene = IDLE;
-        segment = 0;
-        sceneChange = true;
-        languageChange();
+        if (ofGetElapsedTimef() > 1800) {
+            // terminate program, every half hour, for a fresh start
+            ofLogNotice("TRANSITION") << "\t" << ofGetFrameNum() << "\t" << "30min idle, force terminate program, so it restarts itself again";
+            ofExit();
+        } else {
+            ofLogNotice("TRANSITION") << "\t" << ofGetFrameNum() << "\t" << "no activity since " << lastActivity << "sec, go to IDLE";
+            scene = IDLE;
+            segment = 0;
+            sceneChange = true;
+            languageChange();            
+        }
+
     }
 
     if (scene==IDLE) {
@@ -2079,7 +2081,7 @@ void planeApp::nextSegment() {
 
     if (sceneChange)
         ofLogNotice("TRANSITION") << "\t" << ofGetFrameNum() << "\t" << "sceneChange! scene " << scene << ": " << scenes[scene].name;
-    ofLogNotice("TRANSITION") << "\t" << ofGetFrameNum() << "\t" << "---------------------------\t" << scene << " : " << segment;
+    ofLogNotice("TRANSITION") << "\t" << ofGetFrameNum() << "\t" << "---------------------------\t" << scene << " : " << segment << "\t" << ofGetFrameRate() << "FPS\t" << ofGetElapsedTimef() << "sec";
 
     initSegment();
 
