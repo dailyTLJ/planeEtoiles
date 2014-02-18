@@ -36,3 +36,96 @@ COPY FILES OVER SSH
 ==============================================
 sudo scp planeviz@10.10.44.21:~/Documents/log/of_log/planeEtoiles_2014-01-28* ~/Documents/log/of_log/
 
+
+
+
+
+
+
+INSTALL BLOBSERVER AND DEPENDENCIES
+===============================================
+
+Blobserver installation howto:
+
+In a terminal, type the following commands:
+
+  sudo apt-get install help2man gettext automake bison build-essential flex libtool 
+  sudo apt-get install libglib2.0-dev liblo0-dev
+  sudo apt-get install liblcms2-dev libxml2-dev libtbb-dev
+  sudo apt-get install libglib2.0-dev libgstreamer0.10-dev libgstreamer-plugins-base0.10-dev
+  sudo apt-get install libjson-glib-dev liblo-dev
+  sudo apt-get install libcgsi-gsoap-dev
+  sudo apt-get install libgtk2.0-dev pkg-config python-dev
+  
+or all at once:
+  sudo apt-get -y install help2man gettext automake bison build-essential flex libtool libglib2.0-dev liblo0-dev liblcms2-dev libxml2-dev libtbb-dev libglib2.0-dev libgstreamer0.10-dev libgstreamer-plugins-base0.10-dev libjson-glib-dev liblo-dev libcgsi-gsoap-dev libgtk2.0-dev pkg-config python-dev
+  
+
+As a rule of thumb, we get source code in a dedicated directory:
+  mkdir src
+  cd src
+
+We need to install libshmdata, which is used to read/write to shared memories:
+  git clone git://code.sat.qc.ca/libshmdata.git
+  cd libshmdata
+  git checkout develop
+  ./autogen.sh
+  ./configure
+  make -j4
+  sudo make install
+  cd ..
+
+And we need switcher to access GiGE cameras through shared memories:
+  git clone git://code.sat.qc.ca/switcher.git
+  cd switcher
+  git checkout develop
+  ./autogen.sh
+  ./configure
+  make -j4
+  sudo make install
+  cd ..
+
+We also need the latest version of OpenCV, which is not yet packaged for Ubuntu. So:
+  git clone git://code.opencv.org/opencv.git
+  cd opencv
+  git checkout 2.4
+  mkdir build
+  cd build
+  cmake -DCMAKE_BUILD_TYPE=Release -DWITH_TBB=ON ..
+  make -j8
+  sudo make install
+  cd ../..
+
+Atom dependency
+  cd ~/src/
+  git clone git://code.sat.qc.ca/libatom.git
+  cd libatom
+  git checkout develop
+  ./autogen.sh
+  ./configure
+  make
+  sudo make install
+  
+
+--> Aravis support (for GiGe cameras):
+  sudo apt-get install intltool gobject-introspection gtk-doc-tools
+  cd ..
+  git clone git://git.gnome.org/aravis
+  cd aravis
+  ./autogen.sh
+  ./configure --enable-gtk-doc-html --enable-gtk-doc --enable-viewer --enable-gst-plugin 
+  make && sudo make install
+  cd ../blobserver/
+
+Then we can get and install blobserver:
+  git clone git://code.sat.qc.ca/blobserver.git
+  cd blobserver
+  git checkout develop
+  ./autogen.sh
+  ./configure
+  make -j4
+  sudo make install
+  sudo ldconfig
+
+And that's it, you should now be able to run blobserver and blobtrainer. To try it, just run:
+  blobserver

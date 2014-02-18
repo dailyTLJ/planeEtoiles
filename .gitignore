@@ -2,8 +2,8 @@ scripts/models/*
 tmp
 icon.rc
 Makefile
-bin/data/currentState.xml
 bin/data/planets01.xml
+bin/data/currentState.xml
 
 #################  
 ## openFrameworks  
