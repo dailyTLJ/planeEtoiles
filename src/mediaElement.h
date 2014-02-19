@@ -14,6 +14,7 @@ class mediaElement
         virtual void draw(int x, int y, float _scale);
         virtual void drawElement(float _scale);
 
+
         virtual void moveAcross(float vx, float vy, int maxw, int maxh, bool destr);
         virtual void moveAcross(float vx, float vy, int maxw, bool destr);
         virtual void autoDestroy(bool v);

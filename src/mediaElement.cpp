@@ -21,6 +21,7 @@ mediaElement::mediaElement() {
     this->moveElement = false;
     this->velocity.set(0,0);
     this->mediaLoaded = false;
+    rotation = 0.0;
     goal.set(0,0);
     goalDefined = false;
     blend = true;

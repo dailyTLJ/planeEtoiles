@@ -16,6 +16,7 @@ textElement::textElement(string t, string c) {
 void textElement::setText(string t, string c) {
     this->rawText = t;
     this->compText = c;
+    this->hide = false;
 
     textLine = ofSplitString(rawText, "\n");
     compLine = ofSplitString(compText, "\n");
@@ -26,19 +27,23 @@ void textElement::update(float updateRate) {
 }
 
 void textElement::draw(ofTrueTypeFont * font) {
-    ofPushMatrix();
-    ofTranslate(position.x, position.y);
-    ofRotateZ(this->rotation);
-    drawElement(font);
-    ofPopMatrix();
+    if (!hide) {
+        ofPushMatrix();
+        ofTranslate(position.x, position.y);
+        ofRotateZ(this->rotation);
+        drawElement(font);
+        ofPopMatrix();
+    }
 }
 
 void textElement::draw(ofTrueTypeFont * font, int x, int y) {
-    ofPushMatrix();
-    ofTranslate(x + position.x, y + position.y );
-    ofRotateZ(this->rotation);
-    drawElement(font);
-    ofPopMatrix();
+    if (!hide) {
+        ofPushMatrix();
+        ofTranslate(x + position.x, y + position.y );
+        ofRotateZ(this->rotation);
+        drawElement(font);
+        ofPopMatrix();
+    }
 }
 
 void textElement::drawElement(ofTrueTypeFont * font) {

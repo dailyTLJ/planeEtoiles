@@ -69,6 +69,7 @@ class planeApp : public ofBaseApp{
 		void drawScreen(int x, int y, float scale);
 		void drawAnalysis(int x, int y, float scale);
 		void drawControlInfo(int x, int y);
+		void drawInstructions(int x, int y, float scale);
 
 		// to be triggered via blob/media ofEvents
 		void blobOnCreate(int & blobID);
@@ -196,6 +197,7 @@ class planeApp : public ofBaseApp{
 		ofTrueTypeFont fontBg;
 		ofTrueTypeFont fontIdle;
 		ofTrueTypeFont fontSm;
+		ofTrueTypeFont fontInstr;
 		ofxPanel gui;
 		ofxPanel stateGui;
 
@@ -313,6 +315,7 @@ class planeApp : public ofBaseApp{
 		ofImage instructionImg;
 		ofPtr<mediaElement> instructionVid;
 		textElement instructionTxt;
+		std::vector< ofPtr<textElement> > instructionAnim;
 		int bgMediaId;
 
 };
