@@ -25,7 +25,7 @@ videoElement::videoElement(string filename, bool _blend) {
 
 videoElement::~videoElement() {
     movie = ofPtr<ofVideoPlayer>( new ofVideoPlayer() );
-    ofLogNotice("videoElement") << ofGetFrameNum() << "\t" << "destructor " << file;
+    // ofLogNotice("videoElement") << ofGetFrameNum() << "\t" << "destructor " << file;
 }
 
 void videoElement::loadMovie(string filename) {

@@ -35,7 +35,7 @@ mediaElement::mediaElement() {
 }
 
 mediaElement::~mediaElement() {
-    ofLogNotice("mediaElement") << ofGetFrameNum() << "\t" << "destructor " << file;
+    // ofLogNotice("mediaElement") << ofGetFrameNum() << "\t" << "destructor " << file;
 }
 
 
