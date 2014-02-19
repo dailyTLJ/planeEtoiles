@@ -10,7 +10,8 @@ std::ostream& tcout() {
 //--------------------------------------------------------------
 void planeApp::setup(){
 
-    ofSetFrameRate(30);
+    idealFPS = 60;
+    ofSetFrameRate(idealFPS);
     
     ofSetLogLevel(OF_LOG_NOTICE);
 
@@ -822,7 +823,7 @@ void planeApp::update(){
 
 
 
-        float updateRate  = 30.0/ofGetFrameRate();  
+        float updateRate  = idealFPS/ofGetFrameRate();  
         // float updateRate  = 60.0/ofGetFrameRate();  
         // ofLogNotice("interaction") << "\t" << ofGetFrameNum() << "\t" << "updateRate " << updateRate;
         if (updateRate>0.5 && updateRate<6) {
@@ -1468,12 +1469,13 @@ void planeApp::blobOverFreeze(int & blobID) {
 }
 
 void planeApp::blobEnterStage(int & blobID) {
-    // then assign the appropriate ones
+
     if (scene==IDLE && !transition) {
-        // COME CLOSER, recognition of people == time to move on
+        // COME CLOSER, if people enter stage, move on to first Scene
         if (!success) success = true;
 
     } else if (scene==ATTRACTION && !transition) {
+
         // KEEP THE DISTANCE
         ofLogNotice("BLOB") << "\t\t" << ofGetFrameNum() << "\t" << "blobEnterStage()\t\t" << blobID << " (star)";
         int randomStar = ofRandom(3) + 2;
@@ -1485,7 +1487,9 @@ void planeApp::blobEnterStage(int & blobID) {
         (*fgMedia[fgMedia.size()-1]).reset();
         (*fgMedia[fgMedia.size()-1]).fadeIn();
         // (*fgMedia[fgMedia.size()-1]).outroTransformation = &mediaElement::scaleAway;
+
     } else if (scene==ECLIPSE && !transition) {
+
         // PLANETS, not allowed to enter in 'disperse' segment   //  && segment<scenes[scene].segments-1
         ofLogNotice("BLOB") << "\t\t" << ofGetFrameNum() << "\t" << "blobEnterStage()\t\t" << blobID << " (planet)";
         // int planedId[] = { 6, 9, 13, 15, 18, 19,20, 22, 23 };
@@ -1494,7 +1498,7 @@ void planeApp::blobEnterStage(int & blobID) {
         // if (pickPlanet >= planets) pickPlanet = 0;
         if (pickPlanet > 29) pickPlanet = 0;
         // fgMedia.push_back(ofPtr<mediaElement>( new videoElement("video/5_eclipse/P_" + ofToString(planedId[pickPlanet])+"-qtPNG.mov", true)));
-        fgMedia.push_back(ofPtr<mediaElement>( new imageElement("video/5_eclipse/ECLIPSE_planet_" + ofToString(pickPlanet+1)+".png",1)));
+        fgMedia.push_back(ofPtr<mediaElement>( new imageElement("video/eclipse/ECLIPSE_planet_" + ofToString(pickPlanet+1)+".png",1)));
         fgMedia[fgMedia.size()-1]->blend = false;
         // fgMedia.push_back(planet_animated[pickPlanet]);
         blobs[blobID].mediaLink = fgMedia[fgMedia.size()-1];
@@ -1504,11 +1508,14 @@ void planeApp::blobEnterStage(int & blobID) {
         // fgMedia[fgMedia.size()-1]->moveElement = true;
 
         if (segment==0 && segmentClock < alignmentTransition) {   // 
+            // IF AT BEGINNING OF ECLIPSE SCENE, the planets get moved in from the side
             ofLogNotice("BLOB") << "\t\t" << ofGetFrameNum() << "\t" << "moveinfromside";
             (*fgMedia[fgMedia.size()-1]).moveInFromSide(projectionW/2,projectionH/2);
         } else {
+            // ELSE the planets just fade in  (> deactivated because we prever the hard blend)
             // (*fgMedia[fgMedia.size()-1]).fadeIn(0.1);
         }
+
     }
 }
 
@@ -1937,7 +1944,7 @@ void planeApp::endedInstructions(int & trans) {
         } else if (segment==3) {        // 3 - RUN EVERYWHERE
             // get rid of all blue surface videos, before advancing to next segment
             if (fgMedia.size()>1) {
-                for (int i=1; i<fgMedia.size(); i++) {
+                for (unsigned int i=1; i<fgMedia.size(); i++) {
                     fgMedia[i]->dead = true;
                 }
             }
@@ -2202,7 +2209,7 @@ void planeApp::initSegment(){
 
         if (sceneChange) {
             // ECLIPSE. create white/black MAIN PLANET = fgMedia[0]
-            fgMedia.push_back(ofPtr<mediaElement>( new imageElement("video/5_eclipse/WHITE_PLANET.png")));
+            fgMedia.push_back(ofPtr<mediaElement>( new imageElement("video/eclipse/WHITE_PLANET.png")));
             (*fgMedia[fgMedia.size()-1]).setDisplay( projectionW/2 + moonPosX, projectionH/2, true );
             (*fgMedia[fgMedia.size()-1]).reset();
             (*fgMedia[fgMedia.size()-1]).opMax = 0.8;

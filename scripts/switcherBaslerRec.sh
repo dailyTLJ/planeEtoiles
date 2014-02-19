@@ -20,7 +20,8 @@ switcher-ctrl -C uridecodebin video
 switcher-ctrl -s video loop true
 
 # ATTENTION! different videos have different croppings
-switcher-ctrl -s video uri 'file:///home/planeblob/Videos/jan22_44_video.avi'			# trying to track Melissa
+# switcher-ctrl -s video uri 'file:///home/planeblob/Videos/jan22_44_video.avi'			# trying to track Melissa
+switcher-ctrl -s video uri 'file:///home/dailystar/Videos/melissa.avi'			# trying to track Melissa
 # switcher-ctrl -s video uri 'file:///home/planeblob/Videos/melissa.avi'			# trying to track Melissa
 # switcher-ctrl -s video uri 'file:///home/planeblob/Videos/centerline.avi'    # Pierre walking stage diagonal, front to back
 # switcher-ctrl -s video uri 'file:///home/planeblob/Videos/circle.avi'			# 3 people, standing static by 3 steles

@@ -27,7 +27,7 @@ void setup() {
   int dy = 30;
   controlP5.addButton("connect",0,x,y+=dy,80,19);
   y+=dy;
-  controlP5.addSlider("mergeDistance",0,100,45,x,y+=dy,100,h);
+  controlP5.addSlider("mergeDistance",0,100,52,x,y+=dy,100,h);
   controlP5.addSlider("maxTrackDistance",0,200,100,x,y+=dy,100,h);
   controlP5.addSlider("occlusionDistance",0,100,32,x,y+=dy,100,h);
   controlP5.addSlider("lifetime",0,30,10,x,y+=dy,100,h);

@@ -122,6 +122,7 @@ class planeApp : public ofBaseApp{
 
 		std::stringstream coutput;
 		
+		unsigned int idealFPS;
 		bool projectorOn;
 		int projectionW;
         int projectionH;
@@ -176,7 +177,7 @@ class planeApp : public ofBaseApp{
 		int flashMax;
 		int numBridges;
 
-		int shootingPointer;
+		unsigned int shootingPointer;
 
 		bool drawDebugScreen;
 		bool drawBridge;

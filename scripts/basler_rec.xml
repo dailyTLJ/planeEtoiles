@@ -21,11 +21,13 @@
             </Param>
             <Param>
                 <Name>rotation</Name>
-                <Value>-6</Value>
+                <!-- <Value>-6</Value> -->
+                <Value>0</Value>
             </Param>
              <Param>
                 <Name>autoExposure</Name>
-                <Value>192 144 256 128 96 16 0.05</Value>
+                <!-- <Value>192 144 256 128 96 16 0.05</Value> -->
+                <Value>92 104 256 128 96 16 0.05</Value>
             </Param>
             <Param>
                 <Name>gain</Name>
@@ -37,7 +39,8 @@
             </Param>
             <Param>
                 <Name>crop</Name>
-                <Value>100 40 564 320</Value>
+                <Value>0 0 600 300</Value>
+                <!-- <Value>100 40 564 320</Value> -->
                 <!-- <Value>100 22 600 350</Value> -->
                 <!-- <Value>78 16 500 300</Value> -->
             </Param>
@@ -51,7 +54,7 @@
             <Param>
                 <Name>modelFilename</Name>
                 <!-- <Value>models/model_nov29d_cell8_bin9_block1.xml</Value> -->
-                <Value>/home/planeblob/src/planeEtoiles/scripts/models/model_jan21b_cell8_bin9_block1.xml</Value>
+                <Value>/home/dailystar/of/apps/myApps/planeEtoiles/scripts/models/model_jan21b_cell8_bin9_block1.xml</Value>
                 <!-- <Value>models/model_8x8_bw.xml</Value> -->
             </Param>
             <Param>
@@ -177,8 +180,8 @@
             <Type>Actuator_Nop</Type>
         </Actuator>
         <Client>
-            <Address>10.10.44.21</Address>
-            <!-- <Address>192.168.2.39</Address> -->
+            <!-- <Address>10.10.44.21</Address> -->
+            <Address>192.168.2.78</Address>
             <Port>9000</Port>
         </Client>
         <Server>
