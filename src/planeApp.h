@@ -102,8 +102,6 @@ class planeApp : public ofBaseApp{
 		void initSegment();					// 5. initialize the new segment, create new fgvideos
 		void configureBlobserver();
 		void beginSegment();				// 6. after flash, fade in BG
-		// void bgMediaFadedIn(int & trans);	// 7. reinit blobs, introtransformation of videos
-		// void fgMediaFadedIn(int & trans);
 		void unHideSun(int & trans);
 		void placeInstruction(int & trans);
 
@@ -285,20 +283,18 @@ class planeApp : public ofBaseApp{
 		// that are loaded dynamically
 		std::vector< ofPtr<mediaElement> > fgMedia;
 
-		// vector holds bg movies:
-		// 4 different idle mode animations
-		// starry-bg intro, starry-bg loop, sun-intro)
-		std::vector< ofPtr<mediaElement> > bgMedia;
-
 		// nebula movie, that is placed underneath
-		// the bgMedia movies
 		ofPtr<mediaElement> nebula;
+		ofPtr<mediaElement> idleMovie;
+		ofPtr<mediaElement> starryBg;
+		ofPtr<mediaElement> currentBg;	// this one points at either idleMovie or starryBg
 
 
 		// videofiles that should be preloaded, as they are larger:
 		// STARS
 		// ATTRACTION
 		ofPtr<mediaElement> attraction_outro;
+		ofPtr<mediaElement> sun_intro;
 		// REVOLUTIONS
 		// SUN
 		ofPtr<mediaElement> sun_jump;
@@ -316,6 +312,6 @@ class planeApp : public ofBaseApp{
 		ofPtr<mediaElement> instructionVid;
 		textElement instructionTxt;
 		std::vector< ofPtr<textElement> > instructionAnim;
-		int bgMediaId;
+
 
 };
