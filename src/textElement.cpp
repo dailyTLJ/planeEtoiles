@@ -46,6 +46,10 @@ void textElement::draw(ofTrueTypeFont * font, int x, int y) {
     }
 }
 
+void textElement::draw(int x, int y) {
+    draw(mainFont, x, y);
+}
+
 void textElement::drawElement(ofTrueTypeFont * font) {
     ofSetColor(255, 255, 255, int(255*opacity*opMax));
     int i = 0;
@@ -54,4 +58,8 @@ void textElement::drawElement(ofTrueTypeFont * font) {
         font->drawString((*it), -textR.width/2, i*font->getLineHeight());
         i++;
     }
+}
+
+void textElement::setFont(ofTrueTypeFont * font) {
+    mainFont = font;
 }
