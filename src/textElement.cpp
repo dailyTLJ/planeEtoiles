@@ -54,8 +54,10 @@ void textElement::drawElement(ofTrueTypeFont * font) {
     ofSetColor(255, 255, 255, int(255*opacity*opMax));
     int i = 0;
     for (vector<string>::iterator it = textLine.begin() ; it != textLine.end(); ++it) {
-        ofRectangle textR = font->getStringBoundingBox(compLine[i],0, 0);
-        font->drawString((*it), -textR.width/2, i*font->getLineHeight());
+        if (compLine[i].length() > 0) {
+            ofRectangle textR = font->getStringBoundingBox(compLine[i],0, 0);
+            font->drawString((*it), -textR.width/2, i*font->getLineHeight());
+        }
         i++;
     }
 }

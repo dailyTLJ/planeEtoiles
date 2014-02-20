@@ -53,15 +53,15 @@ void planeApp::setup(){
     fontBg.setSpaceSize(0.5);
 
     // font to draw big instruction animations
-    fontInstr1.loadFont("CircularStd-Book.otf", 76, true, true);
-    fontInstr1.setLineHeight(90.0f);
+    fontInstr1.loadFont("CircularStd-Bold.otf", 87, true, true);
+    fontInstr1.setLineHeight(105.0f);
     fontInstr1.setLetterSpacing(1.037);
-    fontInstr1.setSpaceSize(0.5);
+    fontInstr1.setSpaceSize(0.4);
 
-    fontInstr2.loadFont("CircularStd-Book.otf", 200, true, true);
+    fontInstr2.loadFont("CircularStd-Bold.otf", 200, true, true);
     fontInstr2.setLineHeight(180.0f);
     fontInstr2.setLetterSpacing(1.037);
-    fontInstr2.setSpaceSize(0.5);
+    fontInstr2.setSpaceSize(0.4);
 
     // slightly bigger font to draw 'come closer' instruction, in idle scene
     fontIdle.loadFont("CircularStd-Book.otf", 46, true, true);
@@ -242,11 +242,13 @@ void planeApp::setup(){
     }
 
 
+    instructionTxt.setFont(&fontBg);
     instructionTxt.setText("test", "test");
     instructionTxt.opacity = 0.0;
     // instructionImg.loadImage("img/placeholder_letgo.jpg");
     for (int i=0; i<6; i++) {
         instructionAnim.push_back(ofPtr<textElement>( new textElement("hello", "hello")));
+        instructionAnim[i]->hide = true;
     }
 
     // load instruction-video placeholder
@@ -362,7 +364,7 @@ void planeApp::initScenes(){
     // planet_animated.push_back( ofPtr<mediaElement>( new videoElement("video/5_eclipse/P_22-qtPNG.mov")));
     // planet_animated.push_back( ofPtr<mediaElement>( new videoElement("video/5_eclipse/P_23-qtPNG.mov")));
 
-    for (int i=0; i<75; i++) {
+    for (int i=0; i<25; i++) {
         int randomShooter = ofRandom(26) + 1;
         if (randomShooter == 18 || randomShooter==26) randomShooter = 10;
         shooting_stars.push_back(ofPtr<mediaElement>( new videoElement("video/shooting/SSTAR_" + ofToString(randomShooter,2,'0') + "_animation-10fps.mov")));
@@ -2133,19 +2135,25 @@ void planeApp::initSegment(){
     }
     if ((scene==1 && segment==0) || (scene==6 && segment==4)) {
         // TITLE
+        int y = 0;
         for (int i=0; i<6; i++) instructionAnim[i]->setFont(&fontInstr1);
         if (language==0) {
             instructionAnim[0]->setText("Choreographies\nfor Humans & Stars", "Choreographies\nfor Humans & Stars");
+            instructionAnim[0]->setDisplay(0,y-20);
         } else {
-            instructionAnim[0]->setText("Choreographies\nfor Humans & Stars", "Choreographies\nfor Humans & Stars");
+            instructionAnim[0]->setText("Chorégraphies\npour des humains\net des étoiles", "Choregraphies\npour des humains\net des etoiles");
+            instructionAnim[0]->setDisplay(0,y-70);
         }
     } else if (scene==1 && segment==1) {
         // STEP INTO THE ZONE
+        int y = -70;
         for (int i=0; i<6; i++) instructionAnim[i]->setFont(&fontInstr1);
         if (language==0) {
             instructionAnim[0]->setText("Step inside\nthe dancing\nzone", "Step inside\nthe dancing\nzone");
+            instructionAnim[0]->setDisplay(0,y-0);
         } else {
-            instructionAnim[0]->setText("Step inside\nthe dancing\nzone", "Step inside\nthe dancing\nzone");
+            instructionAnim[0]->setText("Entrez\ndans la zone\nde danse", "Entrez\ndans la zone\nde danse");
+            instructionAnim[0]->setDisplay(0,y-10);
         }
     } else if (scene==6 && segment==2) {
         // EXHALE
@@ -2214,9 +2222,9 @@ void planeApp::initSegment(){
             instructionAnim[1]->setDisplay(200,y+400);
         } else {
             for (int i=0; i<6; i++) instructionAnim[i]->setFont(&fontInstr1);
-            instructionAnim[0]->setText("LAISSEZ", "LAISSEZ");
+            instructionAnim[0]->setText("LACHEZ", "LACHEZ");
             instructionAnim[0]->setDisplay(-300,y+400);
-            instructionAnim[1]->setText("TOMBE", "TOMBE");
+            instructionAnim[1]->setText("TOUT", "TOUT");
             instructionAnim[1]->setDisplay(300,y+400);
         }
     }
@@ -2574,9 +2582,9 @@ void planeApp::drawInstructions(int x, int y, float scale) {
 
         // STEP INTO THE ZONE, draw the circles
         ofNoFill(); 
-        float circleR = 400;
+        float circleR = 370;
         float circleA = 0.0;
-        float circleS = 40;
+        float circleS = 25;
         for (int i=0; i<7; i++) {
             circleA = i * (ofDegToRad(360) / 7.0);
             if (segmentTimer > 1.0 + i*0.2) {
