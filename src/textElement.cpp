@@ -53,6 +53,7 @@ void textElement::draw(int x, int y) {
 void textElement::drawElement(ofTrueTypeFont * font) {
     ofSetColor(255, 255, 255, int(255*opacity*opMax));
     int i = 0;
+    // if (compLine[0].length() > 0) ofLogNotice("TRANSITION") << "\t" << ofGetFrameNum() << "\t" << textLine[1];
     for (vector<string>::iterator it = textLine.begin() ; it != textLine.end(); ++it) {
         if (compLine[i].length() > 0) {
             ofRectangle textR = font->getStringBoundingBox(compLine[i],0, 0);

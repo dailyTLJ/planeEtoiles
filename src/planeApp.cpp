@@ -58,10 +58,15 @@ void planeApp::setup(){
     fontInstr1.setLetterSpacing(1.037);
     fontInstr1.setSpaceSize(0.4);
 
-    fontInstr2.loadFont("CircularStd-Bold.otf", 200, true, true);
-    fontInstr2.setLineHeight(180.0f);
+    fontInstr2.loadFont("CircularStd-Bold.otf", 180, true, true);
+    fontInstr2.setLineHeight(155.0f);
     fontInstr2.setLetterSpacing(1.037);
     fontInstr2.setSpaceSize(0.4);
+
+    fontInstr3.loadFont("CircularStd-Bold.otf", 225, true, true);
+    fontInstr3.setLineHeight(155.0f);
+    fontInstr3.setLetterSpacing(1.037);
+    fontInstr3.setSpaceSize(0.4);
 
     // slightly bigger font to draw 'come closer' instruction, in idle scene
     fontIdle.loadFont("CircularStd-Book.otf", 46, true, true);
@@ -2161,55 +2166,59 @@ void planeApp::initSegment(){
         if (language==0) {
             int y = 50;
             instructionAnim[0]->setText("LOOK", "LOOK");
-            instructionAnim[0]->setDisplay(0,y-400);
+            instructionAnim[0]->setDisplay(0,y-358);
             instructionAnim[1]->setText("AT", "AT");
-            instructionAnim[1]->setDisplay(0,y-200);
+            instructionAnim[1]->setDisplay(0,y-175);
             instructionAnim[2]->setText("THE", "THE");
-            instructionAnim[2]->setDisplay(0,y+0);
+            instructionAnim[2]->setDisplay(0,y-6);
             instructionAnim[3]->setText("SKY", "SKY");
-            instructionAnim[3]->setDisplay(0,y+200);
+            instructionAnim[3]->setDisplay(0,y+171);
             instructionAnim[4]->setText("EXHALE", "EXHALE");
-            instructionAnim[4]->setDisplay(0,y+400);
+            instructionAnim[4]->setDisplay(0,y+352);
         } else {
-            int y = 100;
+            int y = 130;
             instructionAnim[0]->setText("REGARDEZ", "REGARDEZ");
-            instructionAnim[0]->setDisplay(0,y-300);
+            instructionAnim[0]->setDisplay(0,y-270);
             instructionAnim[1]->setText("LE", "LE");
-            instructionAnim[1]->setDisplay(0,y-100);
+            instructionAnim[1]->setDisplay(0,y-90);
             instructionAnim[2]->setText("CIEL", "CIEL");
-            instructionAnim[2]->setDisplay(0,y+100);
+            instructionAnim[2]->setDisplay(0,y+90);
             instructionAnim[3]->setText("RESPIREZ", "RESPIREZ");
-            instructionAnim[3]->setDisplay(0,y+300);
+            instructionAnim[3]->setDisplay(0,y+270);
         }
     } else if (scene==4 && (segment==2 || segment==4)) {
         // FREEZE
-        for (int i=0; i<6; i++) instructionAnim[i]->setFont(&fontInstr2);
+        for (int i=0; i<6; i++) instructionAnim[i]->setFont(&fontInstr3);
         if (language==0) {
-            int y = 50;
+            int y = 100;
+            int x = -20;
+            x += 200;
             instructionAnim[0]->setText("F", "F");
-            instructionAnim[0]->setDisplay(-400,y-500);
+            instructionAnim[0]->setDisplay(x-350,y-500);
             instructionAnim[1]->setText("R", "R");
-            instructionAnim[1]->setDisplay(-240,y-300);
+            instructionAnim[1]->setDisplay(x-210,y-300);
             instructionAnim[2]->setText("E", "E");
-            instructionAnim[2]->setDisplay(-80,y-100);
+            instructionAnim[2]->setDisplay(x-70,y-100);
             instructionAnim[3]->setText("E", "E");
-            instructionAnim[3]->setDisplay(80,y+100);
+            instructionAnim[3]->setDisplay(x+70,y+100);
             instructionAnim[4]->setText("Z", "Z");
-            instructionAnim[4]->setDisplay(240,y+300);
+            instructionAnim[4]->setDisplay(x+210,y+300);
             instructionAnim[5]->setText("E", "E");
-            instructionAnim[5]->setDisplay(400,y+500);
+            instructionAnim[5]->setDisplay(x+350,y+500);
         } else {
-            int y = 50;
+            int y = 100;
+            int x = 10;
+            x += 200;
             instructionAnim[0]->setText("S", "S");
-            instructionAnim[0]->setDisplay(-320,y-400);
+            instructionAnim[0]->setDisplay(x-310,y-420);
             instructionAnim[1]->setText("T", "T");
-            instructionAnim[1]->setDisplay(-160,y-200);
+            instructionAnim[1]->setDisplay(x-155,y-210);
             instructionAnim[2]->setText("O", "O");
-            instructionAnim[2]->setDisplay(0,y+0);
+            instructionAnim[2]->setDisplay(x,y+0);
             instructionAnim[3]->setText("P", "P");
-            instructionAnim[3]->setDisplay(160,y+200);
+            instructionAnim[3]->setDisplay(x+155,y+210);
             instructionAnim[4]->setText("!", "!");
-            instructionAnim[4]->setDisplay(320,y+400);
+            instructionAnim[4]->setDisplay(x+310,y+420);
         }
     } else if (scene==3 && segment==1) {
         // LET GO
@@ -2570,11 +2579,8 @@ void planeApp::drawInstructions(int x, int y, float scale) {
         }
     }
 
-    // instructionAnim[0]->draw(&fontInstr, projectionW/2, projectionH/2);
-    for (int i=0; i<6; i++) {
-        instructionAnim[i]->draw(projectionW/2, projectionH/2);
-    }
 
+    // THE ANIMATING
     float segmentTimer = ofGetSystemTimeMicros()/(1000*1000.0) - segmentStart;
 
     if (scene==1 && segment==1) {
@@ -2595,7 +2601,39 @@ void planeApp::drawInstructions(int x, int y, float scale) {
                 ofCircle(projectionW/2 + sin(circleA)*circleR*scale, projectionH/2 - cos(circleA)*circleR*scale, (circleS-5)*scale, (circleS-5)*scale);
             }
         }
+    } else if (scene==4 && (segment==2 || segment==4)) {
+        // FREEZE / STOP!
+
+        float compValue = (segmentTimer-0.3) * 0.5;
+        float theRest = fmod(compValue,1.0);
+        for (int i=0; i<6; i++) {
+            if (!success) {
+                instructionAnim[i]->hide = true;
+            
+                if (theRest < 0.5) {
+                    if (theRest > i*0.05) {                                     // 0....0.3
+                        instructionAnim[i]->hide = false;
+                    }
+                } else {
+                    if (theRest < 0.5 + 0.2 + (0.3-i*0.05)) {                        // 1...0.7
+                        instructionAnim[i]->hide = false;
+                    }
+                }
+            } else {
+                instructionAnim[i]->hide = false;
+            }
+        }
+
     }
+
+    // THE DRAWING
+
+    // instructionAnim[0]->draw(&fontInstr, projectionW/2, projectionH/2);
+    for (int i=0; i<6; i++) {
+        instructionAnim[i]->draw(projectionW/2, projectionH/2);
+    }
+
+
 
     // INSTRUCTION IMAGES, display always, so that they are visible on transition videos (red sun)
     // if (in_img.length() > 2) {

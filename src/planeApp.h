@@ -196,7 +196,8 @@ class planeApp : public ofBaseApp{
 		ofTrueTypeFont fontIdle;
 		ofTrueTypeFont fontSm;
 		ofTrueTypeFont fontInstr1;	// for: Title and Diagram
-		ofTrueTypeFont fontInstr2;	// bigger:  EXHALE, FREEZE, LET GO
+		ofTrueTypeFont fontInstr2;	// bigger:  EXHALE
+		ofTrueTypeFont fontInstr3;	// even bigger:  FREEZE, LET GO
 		ofxPanel gui;
 		ofxPanel stateGui;
 
