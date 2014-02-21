@@ -1,5 +1,40 @@
 
 
+gstreamer 1.0 errors
+=========================================
+(planeEtoiles:24165): GStreamer-CRITICAL **: gst_poll_write_control: assertion 'set != NULL' failed
+
+(planeEtoiles:24165): GStreamer-CRITICAL **: gst_poll_read_control: assertion 'set != NULL' failed
+
+(planeEtoiles:24165): GStreamer-CRITICAL **: gst_poll_read_control: assertion 'set != NULL' failed
+
+(planeEtoiles:24165): GStreamer-CRITICAL **: gst_bus_create_watch: assertion 'bus->priv->poll != NULL' failed
+
+(planeEtoiles:24165): GLib-CRITICAL **: g_source_set_callback: assertion 'source != NULL' failed
+Segmentation fault (core dumped)
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
 IMAGE SEQUENCE > VIDEO
 =============================================
 
@@ -35,6 +70,16 @@ switcher-ctrl -i video to_shmdata 'path/to/the/file'
 COPY FILES OVER SSH
 ==============================================
 sudo scp planeviz@10.10.44.21:~/Documents/log/of_log/planeEtoiles_2014-01-28* ~/Documents/log/of_log/
+
+
+
+
+
+
+
+
+
+
 
 
 

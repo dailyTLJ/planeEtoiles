@@ -72,6 +72,7 @@ void videoElement::update(float updateRate) {
             hide = false;
             loopFile = "";
             play(true);
+            movieEndTrigger = false;
             ofNotifyEvent(playLoop,this->w,this);
         }
         if (setFileDeadNow) {

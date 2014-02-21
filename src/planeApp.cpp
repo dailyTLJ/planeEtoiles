@@ -33,14 +33,14 @@ void planeApp::setup(){
     // ofLogError()
     // ofLogFatalError()
 
-    ofSetLogLevel("BLOB", OF_LOG_ERROR);
-    ofSetLogLevel("KEY", OF_LOG_ERROR);
-    ofSetLogLevel("BRIDGE", OF_LOG_ERROR);
-    ofSetLogLevel("TRANSITION", OF_LOG_ERROR);
-    ofSetLogLevel("OSC", OF_LOG_ERROR);
-    ofSetLogLevel("interaction", OF_LOG_ERROR);
-    ofSetLogLevel("videoElement", OF_LOG_ERROR);
-    ofSetLogLevel("mediaElement", OF_LOG_ERROR);
+    ofSetLogLevel("BLOB", OF_LOG_NOTICE);
+    ofSetLogLevel("KEY", OF_LOG_NOTICE);
+    ofSetLogLevel("BRIDGE", OF_LOG_NOTICE);
+    ofSetLogLevel("TRANSITION", OF_LOG_NOTICE);
+    ofSetLogLevel("OSC", OF_LOG_WARNING);
+    ofSetLogLevel("interaction", OF_LOG_NOTICE);
+    ofSetLogLevel("videoElement", OF_LOG_NOTICE);
+    ofSetLogLevel("mediaElement", OF_LOG_NOTICE);
 
 
 
@@ -52,7 +52,13 @@ void planeApp::setup(){
     fontBg.setLetterSpacing(1.037);
     fontBg.setSpaceSize(0.5);
 
-    // font to draw big instruction animations
+    // slightly bigger font to draw 'come closer' instruction, in idle scene
+    fontIdle.loadFont("CircularStd-Book.otf", 46, true, true);
+    fontIdle.setLineHeight(56.0f);
+    fontIdle.setLetterSpacing(1.037);
+    fontIdle.setSpaceSize(0.5);
+
+    // fonts to draw big instruction animations
     fontInstr1.loadFont("CircularStd-Bold.otf", 87, true, true);
     fontInstr1.setLineHeight(105.0f);
     fontInstr1.setLetterSpacing(1.037);
@@ -72,12 +78,6 @@ void planeApp::setup(){
     fontInstr4.setLineHeight(155.0f);
     fontInstr4.setLetterSpacing(1.037);
     fontInstr4.setSpaceSize(0.4);
-
-    // slightly bigger font to draw 'come closer' instruction, in idle scene
-    fontIdle.loadFont("CircularStd-Book.otf", 46, true, true);
-    fontIdle.setLineHeight(56.0f);
-    fontIdle.setLetterSpacing(1.037);
-    fontIdle.setSpaceSize(0.5);
 
     // font only used for GUI, debug display
     fontSm.loadFont("Mercury Bold.otf", 20, true, true);
