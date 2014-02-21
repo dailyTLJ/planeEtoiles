@@ -13,7 +13,7 @@ void planeApp::setup(){
     idealFPS = 60;
     ofSetFrameRate(idealFPS);
     
-    ofSetLogLevel(OF_LOG_ERROR);
+    ofSetLogLevel(OF_LOG_NOTICE);
 
     // create a new logfile everytime the application is started
     if (ofGetWindowMode() == OF_FULLSCREEN) 
@@ -33,14 +33,14 @@ void planeApp::setup(){
     // ofLogError()
     // ofLogFatalError()
 
-    ofSetLogLevel("BLOB", OF_LOG_WARNING);
-    ofSetLogLevel("KEY", OF_LOG_NOTICE);
-    ofSetLogLevel("BRIDGE", OF_LOG_WARNING);
-    ofSetLogLevel("TRANSITION", OF_LOG_NOTICE);
-    ofSetLogLevel("OSC", OF_LOG_WARNING);
-    ofSetLogLevel("interaction", OF_LOG_NOTICE);
-    ofSetLogLevel("videoElement", OF_LOG_NOTICE);
-    ofSetLogLevel("mediaElement", OF_LOG_NOTICE);
+    ofSetLogLevel("BLOB", OF_LOG_ERROR);
+    ofSetLogLevel("KEY", OF_LOG_ERROR);
+    ofSetLogLevel("BRIDGE", OF_LOG_ERROR);
+    ofSetLogLevel("TRANSITION", OF_LOG_ERROR);
+    ofSetLogLevel("OSC", OF_LOG_ERROR);
+    ofSetLogLevel("interaction", OF_LOG_ERROR);
+    ofSetLogLevel("videoElement", OF_LOG_ERROR);
+    ofSetLogLevel("mediaElement", OF_LOG_ERROR);
 
 
 
@@ -1205,7 +1205,7 @@ void planeApp::blobSteady(Pair & pair) {
             ofPtr<mediaElement> vid2 = blobs[pair.blob2].mediaLink;
 
             if (vid1 != NULL) {
-                string videoFile = "video/2_stars/STAR_"+ofToString((*vid1).id)+"-glow-photoJPEG.mov";
+                string videoFile = "video/stars/STAR_"+ofToString((*vid1).id)+"-glow_animation-30fps.mov";
                 if ((*vid1).file != videoFile) {
                     ofLogNotice("BLOB") << "\t" << ofGetFrameNum() << "\t\t\t" << "make blob " << pair.blob1 << " sparklier";
                     (*vid1).loadMovie(videoFile);
@@ -1213,7 +1213,7 @@ void planeApp::blobSteady(Pair & pair) {
                 }
             }
             if (vid2 != NULL) {
-                string videoFile = "video/2_stars/STAR_"+ofToString((*vid2).id)+"-glow-photoJPEG.mov";
+                string videoFile = "video/stars/STAR_"+ofToString((*vid2).id)+"-glow_animation-30fps.mov";
                 if ((*vid2).file != videoFile) {
                     ofLogNotice("BLOB") << "\t" << ofGetFrameNum() << "\t\t\t" << "make blob " << pair.blob2 << " sparklier";
                     (*vid2).loadMovie(videoFile);
@@ -1239,7 +1239,7 @@ void planeApp::blobSteady(Pair & pair) {
                 int distId = 1;
                 if (distance < 150 ) distId = 2;    // TODO fix LINK_03 vid
                 else if (distance < 300) distId = 2;
-                string newVideoName = "video/2_stars/LINK_0" + ofToString(distId) + "-loop-photoJPEG.mov";
+                string newVideoName = "video/stars/LINK_0" + ofToString(distId) + "-loop_animation-30fps.mov";
                 fgMedia.push_back(ofPtr<mediaElement>( new videoElement(newVideoName)));
                 (*fgMedia[fgMedia.size()-1]).reset();
                 (*fgMedia[fgMedia.size()-1]).id = distId;
@@ -1323,7 +1323,7 @@ void planeApp::blobOnFreeze(int & blobID) {
             if (blobs[blobID].onStage) {
                 // STAND STILL
                 // create star on location of blob
-                int randomStar = ofRandom(3) + 2;
+                int randomStar = ofRandom(2) + 2;
                 fgMedia.push_back(ofPtr<mediaElement>( new videoElement("video/stars/STAR_" + ofToString(randomStar)+"-intro_animation-10fps.mov")));
                 blobs[blobID].mediaLink = fgMedia[fgMedia.size()-1];
                 (*fgMedia[fgMedia.size()-1]).id = randomStar;   // save video-id
@@ -1462,7 +1462,7 @@ void planeApp::blobEnterStage(int & blobID) {
 
         // KEEP THE DISTANCE
         ofLogNotice("BLOB") << "\t\t" << ofGetFrameNum() << "\t" << "blobEnterStage()\t\t" << blobID << " (star)";
-        int randomStar = ofRandom(3) + 2;
+        int randomStar = ofRandom(2) + 2;
         fgMedia.push_back(ofPtr<mediaElement>( new videoElement("video/stars/STAR_" + ofToString(randomStar)+"-loop_animation-10fps.mov")));
         blobs[blobID].mediaLink = fgMedia[fgMedia.size()-1];
         blobs[blobID].videoTrace = true;
@@ -1712,7 +1712,7 @@ void planeApp::bridgeUnlink(Pair & pair) {
     bool found = false;
     for (vector<ofPtr<mediaElement> >::iterator it = fgMedia.begin(); it != fgMedia.end(); it++) {
         if ((**it).bridgeVideo && (**it).bridgeBlobID[0]==pair.blob1 && (**it).bridgeBlobID[1]==pair.blob2) {
-            string videoFile = "video/2_stars/LINK_0" + ofToString((**it).id) + "-outro-photoJPEG.mov";
+            string videoFile = "video/stars/LINK_0" + ofToString((**it).id) + "-outro_animation-30fps.mov";
             if ((**it).file != videoFile) {
                 found = true;
                 ofLogNotice("BRIDGE") << "\t" << ofGetFrameNum() << "\tunlinked bridge\t" << (**it).bridgeBlobID[0] << " " << (**it).bridgeBlobID[1];
