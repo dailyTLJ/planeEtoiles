@@ -173,7 +173,7 @@ class Blob {
         void setVelocity(float dx, float dy);
         void analyze(float freezeMinVel, float freezeMinTime, float freezeMaxTime, float movingThr);
         // void analyzeNeighbors(std::map<int, ofPoint> neighborLocation, float distStdDevThr, int steadyReward);
-        void analyzeNeighbors(std::map<int, tinyNeighbor> neighborLocation, float distStdDevThr);
+        void analyzeNeighbors(std::map<int, tinyNeighbor> neighborLocation, float distStdDevThr, float minSteadyDistance);
         ofPoint transformPerspective(ofPoint& v);
         void update(int minLostTime);
         void updateVideo();

@@ -195,6 +195,7 @@ void planeApp::setup(){
     paramSc6.setName("Sc2 Attraction");
     paramSc6.add(distStdDevThr.set( "Dist StdDev", 10, 0, 70));
     paramSc6.add(movingThr.set( "Movement Thr", 0.1, 0, 3));
+    paramSc6.add(minSteadyDistance.set( "Minimum Distance", 100, 20, 500));
     // paramSc6.add(steadyRewardTime.set( "Dist Reward", 2, 0, 10));
     gui.add(paramSc6);
 
@@ -721,7 +722,7 @@ void planeApp::update(){
             if (scene==ATTRACTION) {
                 for(std::map<int, Blob>::iterator it = blobs.begin(); it != blobs.end(); ++it){
                     Blob* b = &it->second;
-                    b->analyzeNeighbors(blobPositions, distStdDevThr);
+                    b->analyzeNeighbors(blobPositions, distStdDevThr, minSteadyDistance);
                 }
             }
             // ofLogNotice("BLOB") << "\t\t" << ofGetFrameNum() << "\t" << "analyzed blobs >> " << blobs.size();
@@ -832,10 +833,10 @@ void planeApp::update(){
 
 
 
-        float updateRate  = idealFPS/ofGetFrameRate();  
+        float updateRate  = idealFPS/ofGetFrameRate();      // ideal updateRate = 1.0
         // float updateRate  = 60.0/ofGetFrameRate();  
         // ofLogNotice("interaction") << "\t" << ofGetFrameNum() << "\t" << "updateRate " << updateRate;
-        if (updateRate>0.5 && updateRate<6) {
+        if (updateRate>0.5 && updateRate<3) {
 
             // animation relatedspinJT
             if (scene==REVOLUTIONS) {
@@ -1204,6 +1205,25 @@ void planeApp::blobSteady(Pair & pair) {
             ofPtr<mediaElement> vid1 = blobs[pair.blob1].mediaLink;
             ofPtr<mediaElement> vid2 = blobs[pair.blob2].mediaLink;
 
+
+            // DEBUG 1: creating new video object instead of loading new file into old object
+
+            // instead of loading the sparkly video into the loop video, let's delete and create a new videoElement
+            // if (vid1 != NULL) {
+            //     int fileId = (*vid1).id;
+            //     fgMedia.push_back(ofPtr<mediaElement>( new videoElement("video/stars/STAR_" + ofToString(fileId)+"-glow_animation-30fps.mov")));
+            //     blobs[pair.blob1].mediaLink = fgMedia[fgMedia.size()-1];
+            //     blobs[pair.blob1].videoTrace = true;
+            //     (*fgMedia[fgMedia.size()-1]).setDisplay((*vid1).position.x, (*vid1).position.y, true);
+            //     (*fgMedia[fgMedia.size()-1]).id = fileId;
+            //     (*fgMedia[fgMedia.size()-1]).reset();
+            //     (*vid1).dead = true;
+            // }
+
+
+
+
+
             if (vid1 != NULL) {
                 string videoFile = "video/stars/STAR_"+ofToString((*vid1).id)+"-glow_animation-30fps.mov";
                 if ((*vid1).file != videoFile) {
@@ -1224,6 +1244,8 @@ void planeApp::blobSteady(Pair & pair) {
             // LINK_01-loop-photoJPEG.mov
 
             // check if bridge already exists
+
+            // DEBUGGING
             bool exists = false;
             for (vector<ofPtr<mediaElement> >::iterator it = fgMedia.begin(); it != fgMedia.end(); it++) {
                 if ((**it).bridgeVideo && (**it).bridgeBlobID[0]==pair.blob1 && (**it).bridgeBlobID[1]==pair.blob2) {
@@ -1249,6 +1271,8 @@ void planeApp::blobSteady(Pair & pair) {
             } else {
                 ofLogNotice("BLOB") << "\t" << ofGetFrameNum()  << "\t\t\t" << "bridge already exists";
             }
+
+
         }
     }
 }
@@ -1284,6 +1308,19 @@ void planeApp::blobBreakSteady(Pair & pair) {
             ofPtr<mediaElement> vid1 = blobs[pair.blob1].mediaLink;
 
             // replace video with normal star
+
+            // if (vid1 != NULL && !blobs[pair.blob1].steadyRewarded) {
+            //     int fileId = (*vid1).id;
+            //     fgMedia.push_back(ofPtr<mediaElement>( new videoElement("video/stars/STAR_" + ofToString(fileId)+"-loop_animation-10fps.mov")));
+            //     blobs[pair.blob1].mediaLink = fgMedia[fgMedia.size()-1];
+            //     blobs[pair.blob1].videoTrace = true;
+            //     (*fgMedia[fgMedia.size()-1]).setDisplay((*vid1).position.x, (*vid1).position.y, true);
+            //     (*fgMedia[fgMedia.size()-1]).id = fileId;
+            //     (*fgMedia[fgMedia.size()-1]).reset();
+            //     (*vid1).dead = true;
+            // }
+
+
             if (vid1 != NULL && !blobs[pair.blob1].steadyRewarded) {    //STAR_2-intro_animation-10fps.mov
                 string videoFile = "video/stars/STAR_" + ofToString((*vid1).id)+"-loop_animation-10fps.mov";
                 if ((*vid1).file != videoFile) {
@@ -2164,7 +2201,7 @@ void planeApp::initSegment(){
         }
     } else if (scene==1 && segment==1) {
         // STEP INTO THE ZONE
-        int y = -70;
+        int y = -50;
         for (int i=0; i<6; i++) instructionAnim[i]->setFont(&fontInstr1);
         if (language==0) {
             instructionAnim[0]->setText("Step inside\nthe dancing\nzone", "Step inside\nthe dancing\nzone");

@@ -2,9 +2,6 @@
 
 gstreamer 1.0 errors
 =========================================
-(planeEtoiles:24165): GStreamer-CRITICAL **: gst_poll_write_control: assertion 'set != NULL' failed
-
-(planeEtoiles:24165): GStreamer-CRITICAL **: gst_poll_read_control: assertion 'set != NULL' failed
 
 (planeEtoiles:24165): GStreamer-CRITICAL **: gst_poll_read_control: assertion 'set != NULL' failed
 
@@ -14,10 +11,35 @@ gstreamer 1.0 errors
 Segmentation fault (core dumped)
 
 
+NEED TO CALL:
+gst_bus_remove_signal_watch()
+see https://bugs.webkit.org/show_bug.cgi?id=107544
 
 
 
 
+
+
+
+(planeEtoiles:10475): GStreamer-CRITICAL **: gst_poll_read_control: assertion 'set != NULL' failed
+
+(planeEtoiles:10475): GStreamer-CRITICAL **: gst_poll_write_control: assertion 'set != NULL' failed
+
+(planeEtoiles:10475): GStreamer-CRITICAL **: gst_poll_read_control: assertion 'set != NULL' failed
+[ error ] ofGstUtils: startPipeline(): unable to pause pipeline
+[warning] ofGstUtils: getDurationNanos(): couldn't query time duration
+[ error ] ofGstVideoPlayer: allocate(): cannot get pipeline caps
+[ error ] 148 file doesn't exist video/stars/STAR_3-glow_animation-30fps.mov
+[notice ] BLOB:   148     make blob 1507 sparklier
+[notice ] videoElement: 148 loadMovie 'video/stars/STAR_3-glow_animation-30fps.mov'
+
+(planeEtoiles:10475): GStreamer-CRITICAL **: gst_poll_get_read_gpollfd: assertion 'set != NULL' failed
+[ error ] ofGstUtils: startPipeline(): unable to pause pipeline
+[warning] ofGstUtils: getDurationNanos(): couldn't query time duration
+[ error ] ofGstVideoPlayer: allocate(): cannot get pipeline caps
+[ error ] 148 file doesn't exist video/stars/STAR_3-glow_animation-30fps.mov
+[notice ] BLOB:   148     add video bridge
+[notice ] videoElement: 148 loadMovie 'video/stars/LINK_02-loop_animation-30fps.mov'
 
 
 

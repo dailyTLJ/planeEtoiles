@@ -145,7 +145,7 @@ void Blob::analyze(float freezeMaxVel, float freezeMinTime, float freezeMaxTime,
 
 //--------------------------------------------------------------
 // see if a blob is at a steady distance with one of its neighbor blobs
-void Blob::analyzeNeighbors(std::map<int, tinyNeighbor> neighborLocation, float distStdDevThr){
+void Blob::analyzeNeighbors(std::map<int, tinyNeighbor> neighborLocation, float distStdDevThr, float minSteadyDistance){
 
     // set all neighbor-updates to false, to be able to delete inactive ones after
     for(std::map<int, Neighbor>::iterator it = neighbors.begin(); it != neighbors.end(); ++it){
@@ -179,7 +179,7 @@ void Blob::analyzeNeighbors(std::map<int, tinyNeighbor> neighborLocation, float 
             }
             n->updated = true;
             Pair pair = Pair( min(this->id,n->id), max(this->id,n->id) );
-            if (n->distance.size() >= NEIGHBOR_HISTORY && n->getStdDev() < distStdDevThr && movingMean && onStage && tn.movingMean && tn.onStage) {
+            if (n->distance.size() >= NEIGHBOR_HISTORY && n->getStdDev() < distStdDevThr && movingMean && onStage && tn.movingMean && tn.onStage && distance > minSteadyDistance) {
                 if (!n->steadyDistance) {
                     n->steadyDistance = true;
                     n->steadyStart = ofGetUnixTime();

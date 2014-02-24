@@ -235,6 +235,7 @@ class planeApp : public ofBaseApp{
 
 		ofParameter<float> distStdDevThr;
 		ofParameter<float> movingThr;
+		ofParameter<float> minSteadyDistance;
 		ofParameter<int> steadyRewardTime;
 		ofParameter<int> edgeMargin;
 		ofParameter<int> activityColorCh;
