@@ -2422,6 +2422,7 @@ void planeApp::receiveOsc(){
 			int occluded = m.getArgAsInt32(7);
             ofLogNotice("OSC") << "\t\t" << ofGetFrameNum() << "\t" << "/blobserver/hog\tid: " << blobid << "\t lost:" << lost;
 
+            // first look if a object with that ID is already registered
 			std::map<int,Blob>::iterator iter = blobs.find(blobid);
             bool newBlob = false;
 			if( iter != blobs.end() ) {
