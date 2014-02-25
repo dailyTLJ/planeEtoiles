@@ -177,6 +177,10 @@ class planeApp : public ofBaseApp{
 		int numBridges;
 
 		unsigned int shootingPointer;
+		unsigned int starPointer;
+		unsigned int starglowPointer;
+		unsigned int bridgePointer;
+		unsigned int bridgeoutroPointer;
 
 		bool drawDebugScreen;
 		bool drawBridge;
@@ -294,9 +298,17 @@ class planeApp : public ofBaseApp{
 		ofPtr<mediaElement> currentBg;	// this one points at either idleMovie or starryBg
 
 
+		unsigned int pickNextUnusedVideo( std::vector< ofPtr<mediaElement> >* fileVector, unsigned int pointer );
+
 		// videofiles that should be preloaded, as they are larger:
 		// STARS
+		std::vector< ofPtr<mediaElement> > stars_intro;
+		std::vector< ofPtr<mediaElement> > stars_loop;
+		std::vector< ofPtr<mediaElement> > stars_glow;
 		// ATTRACTION
+		// std::vector< ofPtr<mediaElement> > stars_bridge1;
+		std::vector< ofPtr<mediaElement> > bridge_loop;
+		std::vector< ofPtr<mediaElement> > bridge_outro;
 		ofPtr<mediaElement> attraction_outro;
 		ofPtr<mediaElement> sun_intro;
 		// REVOLUTIONS

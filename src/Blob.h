@@ -6,7 +6,7 @@
 #include "videoElement.h"
 
 #define MAX_HISTORY 10
-#define NEIGHBOR_HISTORY 5
+#define NEIGHBOR_HISTORY 10
 #define VELOCITY_HISTORY 5
 
 

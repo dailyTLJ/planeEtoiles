@@ -48,6 +48,7 @@ class mediaElement
         void bounce();
 
         int id;
+        bool inUse; 
         ofPoint position;
         int w;
         int h;

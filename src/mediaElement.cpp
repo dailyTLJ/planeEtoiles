@@ -2,6 +2,7 @@
 
 mediaElement::mediaElement() {
     this->id = -1;
+    this->inUse = false;
     this->hide = false;
     this->position.set(0,0);
     this->scale = 1.0;
