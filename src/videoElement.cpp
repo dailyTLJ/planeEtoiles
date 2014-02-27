@@ -188,10 +188,13 @@ void videoElement::drawElement(float _scale) {
         //     // ofLogNotice("videoElement") << ofGetFrameNum() << "\t" << "getCurrentFrame<1  movie->update()" ;
         //     movie->update();    // FOR DEBUGGING, update before drawing to prevent glitches??
         // }
-        if (centered) {
-            movie->draw(-w * msc * 0.5, -h * msc * 0.5, w * msc, h * msc);
-        } else {
-            movie->draw(0, 0, w * msc, h * msc);
+        string compRev = "video/revolution/REV_0";
+        if (movie->getCurrentFrame()>0 || file.substr(0, compRev.size()) == compRev) {   // to avoid frame 1 glitches? strangly can't play revolution movies
+            if (centered) {
+                movie->draw(-w * msc * 0.5, -h * msc * 0.5, w * msc, h * msc);
+            } else {
+                movie->draw(0, 0, w * msc, h * msc);
+            }
         }
         ofSetColor(255, 255, 255, 255);
     }

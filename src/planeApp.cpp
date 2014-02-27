@@ -1128,7 +1128,7 @@ void planeApp::blobSteady(Pair & pair) {
                 ofLogNotice("BLOB") << "\t" << ofGetFrameNum()  << "\t\t\t" << "add video bridge";
                 float distance = ofDist(b1->position.x, b1->position.y, b2->position.x, b2->position.y);
                 int distId = 1;
-                if (distance < 150 ) distId = 2;    // TODO fix LINK_03 vid
+                if (distance < 150 ) distId = 2;    // TODO fix LINK_03 vid (center)
                 else if (distance < 300) distId = 2;
                 string newVideoName = "video/stars/LINK_0" + ofToString(distId) + "-loop_animation-30fps.mov";
                 fgMedia.push_back(ofPtr<mediaElement>( new videoElement(newVideoName)));
