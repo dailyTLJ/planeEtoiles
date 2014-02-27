@@ -42,8 +42,6 @@ class sceneInfo {
         int segments;
         int length[MAX_SEGMENTS];
         string instructions[3][MAX_SEGMENTS];
-        string instructionImg[2][MAX_SEGMENTS];
-        string instructionVid[2][MAX_SEGMENTS][3];
         string analysis[MAX_SEGMENTS];
 };
 
@@ -69,6 +67,7 @@ class planeApp : public ofBaseApp{
 		void drawScreen(int x, int y, float scale);
 		void drawAnalysis(int x, int y, float scale);
 		void drawControlInfo(int x, int y);
+		void drawInstructions(int x, int y, float scale);
 
 		// to be triggered via blob/media ofEvents
 		void blobOnCreate(int & blobID);
@@ -80,7 +79,6 @@ class planeApp : public ofBaseApp{
 		void bridgeUnlink(int & blobID);
 		void bridgeUnlink(Pair & pair);
 		void blobSteady(Pair & pair);
-		void blobSteadyReward(Pair & pair);
 		void blobBreakSteady(Pair & pair);
 		void videoFollowBlob(int & blobID);
 		void blobEnterStage(int & blobID);
@@ -96,13 +94,11 @@ class planeApp : public ofBaseApp{
 		void endedInstructions(int & trans);// trigger fgMediaFadedOut or moveOn
 		void fgMediaFadedOut(int & trans);  // 2. call outroTransformation calls on FG and BG media
 		void allFaded(int & trans); 		// 3. all elements faded out, moveOn = true
-		void bgMediaSwap(int & trans);		//
 		void nextSegment();					// 4. pick the next segment
+		void bgMediaSwap(int & trans);		//
 		void initSegment();					// 5. initialize the new segment, create new fgvideos
 		void configureBlobserver();
 		void beginSegment();				// 6. after flash, fade in BG
-		// void bgMediaFadedIn(int & trans);	// 7. reinit blobs, introtransformation of videos
-		// void fgMediaFadedIn(int & trans);
 		void unHideSun(int & trans);
 		void placeInstruction(int & trans);
 
@@ -118,13 +114,11 @@ class planeApp : public ofBaseApp{
 		void guiNebulaChange(int & v);
 
 		void printDebugInfo();
+		void languageChange();
 
 		std::stringstream coutput;
-
-		int language;
-		int languageCnt;
-		ofParameter<int> languageRatio;
 		
+		unsigned int idealFPS;
 		bool projectorOn;
 		int projectionW;
         int projectionH;
@@ -177,8 +171,9 @@ class planeApp : public ofBaseApp{
 		bool flash;				// in between transitions, catch attention
 		int flashCnt;
 		int flashMax;
+		int numBridges;
 
-		int shootingPointer;
+		unsigned int shootingPointer;
 
 		bool drawDebugScreen;
 		bool drawBridge;
@@ -190,19 +185,26 @@ class planeApp : public ofBaseApp{
 		bool drawBlobDetail;
 
 		int currentFlowId;
-		int bgsubtractorCnt;
-		int bgsubtractorFlowId;
 		int hogFlowId;
 		string hogFlowName;
-		float bgsubtractorVel;
-		float bgsubtractorAvVel;
 		float hogAvVel;
 
 		ofTrueTypeFont fontBg;
 		ofTrueTypeFont fontIdle;
 		ofTrueTypeFont fontSm;
+		ofTrueTypeFont fontInstr1;	// for: Title and Diagram
+		ofTrueTypeFont fontInstr2;	// bigger:  EXHALE
+		ofTrueTypeFont fontInstr3;	// even bigger:  FREEZE, LET GO
+		ofTrueTypeFont fontInstr4;	// bit smaller:  LACHEZ TOUT
 		ofxPanel gui;
-		ofxPanel languageGui;
+		ofxPanel stateGui;
+
+		ofParameter<int> guiScene;
+		ofParameter<int> guiSegment;
+		ofParameter<int> language;
+		ofParameter<int> languageCnt;
+		ofParameter<int> languageRatio;
+
 		ofParameterGroup paramBasic;
 		ofParameterGroup paramTiming;
 		ofParameterGroup paramSc1;
@@ -230,6 +232,7 @@ class planeApp : public ofBaseApp{
 
 		ofParameter<float> distStdDevThr;
 		ofParameter<float> movingThr;
+		ofParameter<float> minSteadyDistance;
 		ofParameter<int> steadyRewardTime;
 		ofParameter<int> edgeMargin;
 		ofParameter<int> activityColorCh;
@@ -281,20 +284,18 @@ class planeApp : public ofBaseApp{
 		// that are loaded dynamically
 		std::vector< ofPtr<mediaElement> > fgMedia;
 
-		// vector holds bg movies:
-		// 4 different idle mode animations
-		// starry-bg intro, starry-bg loop, sun-intro)
-		std::vector< ofPtr<mediaElement> > bgMedia;
-
 		// nebula movie, that is placed underneath
-		// the bgMedia movies
 		ofPtr<mediaElement> nebula;
+		ofPtr<mediaElement> idleMovie;
+		ofPtr<mediaElement> starryBg;
+		ofPtr<mediaElement> currentBg;	// this one points at either idleMovie or starryBg
 
 
 		// videofiles that should be preloaded, as they are larger:
 		// STARS
 		// ATTRACTION
 		ofPtr<mediaElement> attraction_outro;
+		ofPtr<mediaElement> sun_intro;
 		// REVOLUTIONS
 		// SUN
 		ofPtr<mediaElement> sun_jump;
@@ -308,9 +309,8 @@ class planeApp : public ofBaseApp{
 		std::vector< ofPtr<mediaElement> > title_sequence;			// 2
 		std::vector< ofPtr<mediaElement> > diagram_sequence;		// 2
 
-		ofImage instructionImg;
-		ofPtr<mediaElement> instructionVid;
 		textElement instructionTxt;
-		int bgMediaId;
+		std::vector< ofPtr<textElement> > instructionAnim;
+
 
 };

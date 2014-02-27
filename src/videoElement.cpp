@@ -25,12 +25,13 @@ videoElement::videoElement(string filename, bool _blend) {
 
 videoElement::~videoElement() {
     movie = ofPtr<ofVideoPlayer>( new ofVideoPlayer() );
-    ofLogNotice("videoElement") << ofGetFrameNum() << "\t" << "destructor " << file;
+    // ofLogNotice("videoElement") << ofGetFrameNum() << "\t" << "destructor " << file;
 }
 
 void videoElement::loadMovie(string filename) {
     this->file = filename;
     ofLogNotice("videoElement") << ofGetFrameNum() << "\t" << "loadMovie\t'" << file << "'";
+    fullyLoaded = false;
     mediaLoaded = movie->loadMovie(filename);
     if (mediaLoaded) {
         movie->update();    // FOR DEBUGGIN, update to avoid glitches
@@ -60,6 +61,9 @@ void videoElement::pause(bool v) {
 
 void videoElement::update(float updateRate) {
     if (mediaLoaded) {
+        if (!fullyLoaded) {
+            if (movie->getCurrentFrame()>1) fullyLoaded = true;
+        }
         mediaElement::update(updateRate);
         if (loadLoopFileNow) {
             ofLogNotice("videoElement") << ofGetFrameNum() << "\t" << "loadLoopFileNow\t" << loopFile;
@@ -68,6 +72,7 @@ void videoElement::update(float updateRate) {
             hide = false;
             loopFile = "";
             play(true);
+            movieEndTrigger = false;
             ofNotifyEvent(playLoop,this->w,this);
         }
         if (setFileDeadNow) {
@@ -175,17 +180,21 @@ void videoElement::draw(int x, int y, float _scale) {
 }
 
 void videoElement::drawElement(float _scale) {
+    // if (mediaLoaded && fullyLoaded) {
     if (mediaLoaded) {
         ofSetColor(255, 255, 255, int(255*opacity*opMax));
         float msc = (scale+addSc) * _scale;
-        if (movie->getCurrentFrame()<1) {
-            // ofLogNotice("videoElement") << ofGetFrameNum() << "\t" << "getCurrentFrame<1  movie->update()" ;
-            movie->update();    // FOR DEBUGGING, update before drawing to prevent glitches??
-        }
-        if (centered) {
-            movie->draw(-w * msc * 0.5, -h * msc * 0.5, w * msc, h * msc);
-        } else {
-            movie->draw(0, 0, w * msc, h * msc);
+        // if (movie->getCurrentFrame()<1) {
+        //     // ofLogNotice("videoElement") << ofGetFrameNum() << "\t" << "getCurrentFrame<1  movie->update()" ;
+        //     movie->update();    // FOR DEBUGGING, update before drawing to prevent glitches??
+        // }
+        string compRev = "video/revolution/REV_0";
+        if (movie->getCurrentFrame()>0 || file.substr(0, compRev.size()) == compRev) {   // to avoid frame 1 glitches? strangly can't play revolution movies
+            if (centered) {
+                movie->draw(-w * msc * 0.5, -h * msc * 0.5, w * msc, h * msc);
+            } else {
+                movie->draw(0, 0, w * msc, h * msc);
+            }
         }
         ofSetColor(255, 255, 255, 255);
     }

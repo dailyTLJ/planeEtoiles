@@ -15,10 +15,15 @@ class textElement: public mediaElement
 
         void draw(ofTrueTypeFont * font);
         void draw(ofTrueTypeFont * font, int x, int y);
+        void draw(int x, int y);
         void drawElement(ofTrueTypeFont * font);
+
+        void setFont(ofTrueTypeFont * font);
 
         string rawText;
         string compText;
+
+        ofTrueTypeFont * mainFont;
 
         vector< string > textLine;
         vector< string > compLine;

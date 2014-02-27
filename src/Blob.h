@@ -168,11 +168,12 @@ class Blob {
         Blob();
         ~Blob();
         void init();
-        void follow(float x, float y, float frameW = 500, float frameH = 500, float stageRadius = 200, int y_mean = 5);
+        void setRawPosition(float x, float y);
+        void processRawPosition(float frameW = 500, float frameH = 500, float stageRadius = 200, int y_mean = 5);
         void setVelocity(float dx, float dy);
         void analyze(float freezeMinVel, float freezeMinTime, float freezeMaxTime, float movingThr);
         // void analyzeNeighbors(std::map<int, ofPoint> neighborLocation, float distStdDevThr, int steadyReward);
-        void analyzeNeighbors(std::map<int, tinyNeighbor> neighborLocation, float distStdDevThr);
+        void analyzeNeighbors(std::map<int, tinyNeighbor> neighborLocation, float distStdDevThr, float minSteadyDistance);
         ofPoint transformPerspective(ofPoint& v);
         void update(int minLostTime);
         void updateVideo();

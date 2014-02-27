@@ -21,6 +21,7 @@ mediaElement::mediaElement() {
     this->moveElement = false;
     this->velocity.set(0,0);
     this->mediaLoaded = false;
+    rotation = 0.0;
     goal.set(0,0);
     goalDefined = false;
     blend = true;
@@ -35,7 +36,7 @@ mediaElement::mediaElement() {
 }
 
 mediaElement::~mediaElement() {
-    ofLogNotice("mediaElement") << ofGetFrameNum() << "\t" << "destructor " << file;
+    // ofLogNotice("mediaElement") << ofGetFrameNum() << "\t" << "destructor " << file;
 }
 
 
@@ -207,7 +208,7 @@ void mediaElement::fadeOut(float speed, float op, bool destroy) {
 }
 
 void mediaElement::fadeIn(float speed) {
-    ofLogNotice("mediaElement") << ofGetFrameNum() << "\t"  << "fadeIn at: " << speed;
+    ofLogNotice("mediaElement") << ofGetFrameNum() << "\t"  << "fadeIn at: " << speed << " " << file;
     opacity = 0.0f;
     fade(speed);
 }
