@@ -42,8 +42,6 @@ class sceneInfo {
         int segments;
         int length[MAX_SEGMENTS];
         string instructions[3][MAX_SEGMENTS];
-        string instructionImg[2][MAX_SEGMENTS];
-        string instructionVid[2][MAX_SEGMENTS][3];
         string analysis[MAX_SEGMENTS];
 };
 
@@ -81,7 +79,6 @@ class planeApp : public ofBaseApp{
 		void bridgeUnlink(int & blobID);
 		void bridgeUnlink(Pair & pair);
 		void blobSteady(Pair & pair);
-		void blobSteadyReward(Pair & pair);
 		void blobBreakSteady(Pair & pair);
 		void videoFollowBlob(int & blobID);
 		void blobEnterStage(int & blobID);
@@ -312,8 +309,6 @@ class planeApp : public ofBaseApp{
 		std::vector< ofPtr<mediaElement> > title_sequence;			// 2
 		std::vector< ofPtr<mediaElement> > diagram_sequence;		// 2
 
-		ofImage instructionImg;
-		ofPtr<mediaElement> instructionVid;
 		textElement instructionTxt;
 		std::vector< ofPtr<textElement> > instructionAnim;
 

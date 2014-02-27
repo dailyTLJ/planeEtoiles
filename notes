@@ -15,7 +15,14 @@ NEED TO CALL:
 gst_bus_remove_signal_watch()
 see https://bugs.webkit.org/show_bug.cgi?id=107544
 
+https://github.com/openframeworks/openFrameworks/blob/master/libs/openFrameworks/video/ofGstUtils.cpp
 
+
+  bus = gst_pipeline_get_bus (GST_PIPELINE(gstPipeline));
+
+  if(bus){
+    gst_bus_add_watch (bus, (GstBusFunc) busFunction, this);
+  }
 
 
 
@@ -44,6 +51,28 @@ see https://bugs.webkit.org/show_bug.cgi?id=107544
 
 
 
+[notice ] TRANSITION:   12979 endSegment()   6:4
+[notice ] TRANSITION:   12979 hard cut
+[notice ] TRANSITION:   12979 endedInstructions()
+[notice ] TRANSITION:   12979 nextSegment
+[notice ] TRANSITION:   12979 reached end, force terminate program, so it restarts itself again
+[notice ]       12979 goodbye
+(planeEtoiles:1459): GStreamer-CRITICAL **: gst_mini_object_unref: assertion 'mini_object->refcount > 0' failed
+(planeEtoiles:1459): GStreamer-CRITICAL **: gst_mini_object_unref: assertion 'mini_object->refcount > 0' failed
+(planeEtoiles:1459): GStreamer-CRITICAL **: gst_mini_object_unref: assertion 'mini_object->refcount > 0' failed
+(planeEtoiles:1459): GStreamer-CRITICAL **: gst_mini_object_unref: assertion 'mini_object->refcount > 0' failed
+(planeEtoiles:1459): GStreamer-CRITICAL **: gst_mini_object_unref: assertion 'mini_object->refcount > 0' failed
+(planeEtoiles:1459): GStreamer-CRITICAL **: gst_mini_object_unref: assertion 'mini_object->refcount > 0' failed
+(planeEtoiles:1459): GStreamer-CRITICAL **: gst_mini_object_unref: assertion 'mini_object->refcount > 0' failed
+(planeEtoiles:1459): GStreamer-CRITICAL **: gst_mini_object_unref: assertion 'mini_object->refcount > 0' failed
+(planeEtoiles:1459): GStreamer-CRITICAL **: gst_mini_object_unref: assertion 'mini_object->refcount > 0' failed
+(planeEtoiles:1459): GStreamer-CRITICAL **: gst_mini_object_unref: assertion 'mini_object->refcount > 0' failed
+(planeEtoiles:1459): GStreamer-CRITICAL **: gst_mini_object_unref: assertion 'mini_object->refcount > 0' failed
+(planeEtoiles:1459): GStreamer-CRITICAL **: gst_mini_object_unref: assertion 'mini_object->refcount > 0' failed
+(planeEtoiles:1459): GStreamer-CRITICAL **: gst_mini_object_unref: assertion 'mini_object->refcount > 0' failed
+(planeEtoiles:1459): GStreamer-CRITICAL **: Padname '':sink_0 does not belong to element inputselector80 when removing
+(planeEtoiles:1459): GStreamer-CRITICAL **: gst_mini_object_unref: assertion 'mini_object->refcount > 0' failed
+(planeEtoiles:1459): GStreamer-CRITICAL **: Padname '':sink_0 does not belong to element inputselector5 when removing
 
 
 
@@ -60,7 +89,7 @@ see https://bugs.webkit.org/show_bug.cgi?id=107544
 IMAGE SEQUENCE > VIDEO
 =============================================
 
-sudo gst-launch multifilesrc location=%05d.png caps="image/png, framerate=10/1" ! pngdec ! ffmpegcolorspace ! jpegenc ! avimux ! filesink location=video.avi sync=false
+sudo gst-launch multifilesrc location=%05d.png index=0 caps="image/png, framerate=10/1" ! pngdec ! ffmpegcolorspace ! jpegenc ! avimux ! filesink location=video.avi sync=false
 
 
 
