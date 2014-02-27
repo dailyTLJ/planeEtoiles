@@ -88,6 +88,7 @@ class mediaElement
         ofEvent<int> playLoop;
 
         ofPtr<ofVideoPlayer> movie;
+        bool fullyLoaded;
 
     protected:
     private:

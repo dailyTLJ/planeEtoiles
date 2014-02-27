@@ -325,19 +325,27 @@ void planeApp::initScenes(){
     nebula->reset(true);
     nebula->opMax = nebulaOpacity/100.f;
     nebulaOpacity.addListener(this,&planeApp::guiNebulaChange);
+    nebula->fullyLoaded = true;
 
     idleMovie = ofPtr<mediaElement>( new videoElement("video/idle/IDLE_MODE_13_white-anim_animation_15fps.mov", false));
     (*idleMovie).movieEndTrigger=false;
     (*idleMovie).outroTransformation = &mediaElement::finishMovie;
+    (*idleMovie).fullyLoaded = true;
     ofAddListener( (*idleMovie).fadeOutEnd, this, &planeApp::allFaded );
     starryBg = ofPtr<mediaElement>( new videoElement("video/bg/BACKGROUND 131210-2_loop_animation-10fps.mov", false));
+    starryBg->fullyLoaded = true;
     currentBg = starryBg;
 
     attraction_outro = ofPtr<mediaElement>( new videoElement("video/bg/ATTRACTION_outro_animation-10fps.mov"));
+    attraction_outro->fullyLoaded = true;
     sun_intro = ofPtr<mediaElement>( new videoElement("video/sun/SUN_26-intro_animation-10fps.mov",true));
     sun_jump = ofPtr<mediaElement>( new videoElement("video/sun/SUN_stand_jump-loop_4_animation_alpha-10fps.mov",false));
     sun_run = ofPtr<mediaElement>( new videoElement("video/sun/SUN_run_loop-4_animation_alpha-10fps.mov",false));
     sun_freeze_red.push_back( ofPtr<mediaElement>( new videoElement("video/sun/SUN_freeze_1_animation_alpha-10fps.mov",false)));
+    sun_intro->fullyLoaded = true;
+    sun_jump->fullyLoaded = true;
+    sun_run->fullyLoaded = true;
+    sun_freeze_red[0]->fullyLoaded = true;
 
 
     // PRELOAD BLUE SURFACE VIDS = seems to slow down FPS
@@ -1353,7 +1361,7 @@ void planeApp::blobEnterStage(int & blobID) {
         // int planets = sizeof(planedId) / sizeof(planedId[0]);
         pickPlanet++;
         // if (pickPlanet >= planets) pickPlanet = 0;
-        if (pickPlanet > 29) pickPlanet = 0;
+        if (pickPlanet > 28) pickPlanet = 0;
         fgMedia.push_back(ofPtr<mediaElement>( new imageElement("video/eclipse/ECLIPSE_planet_" + ofToString(pickPlanet+1)+".png",1)));
         fgMedia[fgMedia.size()-1]->blend = false;
         // fgMedia.push_back(planet_animated[pickPlanet]);
