@@ -90,6 +90,7 @@
             <Param>
                 <Name>mergeDistance</Name>
                 <Value>52</Value>
+                <!-- <Value>22</Value> -->
             </Param>
             <Param>
                 <Name>maxTrackDistance</Name>
