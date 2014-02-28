@@ -913,6 +913,7 @@ void planeApp::update(){
                         success = true;
                         // (*fgMedia[1]).fadeIn();
                         (*fgMedia[1]).fadeOut(-0.1, (*fgMedia[1]).opacity, false);
+                        countLineups++;
                     }
                 } else {
                     // (*fgMedia[1]).hide = true;
