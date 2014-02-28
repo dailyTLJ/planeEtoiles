@@ -4,6 +4,7 @@ icon.rc
 Makefile
 bin/data/planets01.xml
 bin/data/currentState.xml
+src/main.cpp
 
 #################  
 ## openFrameworks  
