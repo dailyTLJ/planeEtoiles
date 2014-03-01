@@ -314,6 +314,8 @@ class planeApp : public ofBaseApp{
 
 		ofFile statsFile;
 
+		string statsDate;
+		string statsTime;
 		unsigned int countBlobs;
 		string firstBlob;
 		string lastBlob;

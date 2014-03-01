@@ -66,6 +66,7 @@ class Neighbor {
         bool steadyRewarded;
         bool movingMean;
         bool onStage;
+        bool counted;
 
         Neighbor() {
             steadyStart = 0;

@@ -26,6 +26,7 @@ void Blob::init(){
 	this->onEdge = false;
     this->videoTrace = false;
     this->steadyRewarded = false;
+    this->counted = false;
 }
 
 

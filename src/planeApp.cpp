@@ -101,6 +101,8 @@ void planeApp::setup(){
     moonPosX = 40;
 
     // stats
+    statsDate = ofGetTimestampString("%Y-%m-%d");
+    statsTime = ofGetTimestampString("%H:%M:%S");
     countBlobs = 0;
     firstBlob = "";
     lastBlob = "";
@@ -1359,6 +1361,14 @@ void planeApp::blobOverFreeze(int & blobID) {
 
 void planeApp::blobEnterStage(int & blobID) {
 
+    // stats
+    if (!blobs[blobID].counted) {
+        countBlobs++;
+        if (firstBlob=="") firstBlob = ofGetTimestampString("%H:%M:%S");
+        lastBlob = ofGetTimestampString("%H:%M:%S");
+        blobs[blobID].counted = true;
+    }
+
     if (scene==IDLE && !transition) {
         // COME CLOSER, if people enter stage, move on to first Scene
         if (!success) {
@@ -1962,7 +1972,7 @@ void planeApp::nextSegment() {
             ofLogNotice("TRANSITION") << "\t" << ofGetFrameNum() << "\t" << "30min idle, force terminate program, so it restarts itself again";
             ofExit();
         } else {
-            ofLogNotice("TRANSITION") << "\t" << ofGetFrameNum() << "\t" << "no activity since " << lastActivity << "sec, go to IDLE";
+            ofLogNotice("TRANSITION") << "\t" << ofGetFrameNum() << "\t" << "no activity since " << lastActivity << "sec, go to IDLE, eclapsed time = " << ofGetElapsedTimef();
             scene = IDLE;
             segment = 0;
             sceneChange = true;
@@ -1979,7 +1989,7 @@ void planeApp::nextSegment() {
     if (sceneChange)
         countScene[scene]++;
         ofLogNotice("TRANSITION") << "\t" << ofGetFrameNum() << "\t" << "sceneChange! scene " << scene << ": " << scenes[scene].name;
-    ofLogNotice("TRANSITION") << "\t" << ofGetFrameNum() << "\t" << "---------------------------\t" << scene << " : " << segment << "\t" << ofGetFrameRate() << "FPS\t" << ofGetElapsedTimef() << "sec";
+    ofLogNotice("TRANSITION") << "\t" << ofGetFrameNum() << "\t" << "---------------------------\t" << scene << " : " << segment << "\t" << ofGetFrameRate() << "FPS\t" << ofGetElapsedTimef() << "sec\t" << ofGetTimestampString("%H:%M:%S");
 
     initSegment();
 
@@ -2277,11 +2287,6 @@ void planeApp::receiveOsc(){
                 ofAddListener( blobs[blobid].onBreakSteady, this, &planeApp::blobBreakSteady );
                 ofAddListener( blobs[blobid].onEnterStage, this, &planeApp::blobEnterStage );
                 ofAddListener( blobs[blobid].onLeaveStage, this, &planeApp::blobLeaveStage );
-
-                // stats
-                countBlobs++;
-                if (firstBlob=="") firstBlob = ofGetTimestampString("%H:%M:%S");
-                lastBlob = ofGetTimestampString("%H:%M:%S");
             }
 
             // update blob with new values
@@ -2967,51 +2972,54 @@ void planeApp::exit() {
     // ofLogNotice() << "\t\t\t" << ofGetFrameNum() << "\t" << current_working_dir;
 
     // let's log our statistics
-    string fileName = "stats_" + ofToString(ofGetYear()) + "-" + ofToString(ofGetMonth()) + ".csv";
-    if (!ofFile::doesFileExist(fileName)) {
-        statsFile = ofFile(ofToDataPath(fileName), ofFile::Append);
-        statsFile.create();
-        // TOP LINE
-        statsFile.open(fileName, ofFile::Append);
-        statsFile << "DATE" << "," << "TIME" << "," << "DURATION" << ",";
-        statsFile << "BLOBS" << "," << "FIRST BLOB" << "," << "LAST BLOB" << ",";
-        statsFile << "0.IDLE" << "," << "1.STARS" << "," << "2.ATTR" << ",";
-        statsFile << "3.REV" << "," << "4.SUN" << "," << "5.ECLIPSE" << "," << "6.SHOOT" << ",";
-        statsFile << "IDLE-DUR" << "," << "#STARS" << "," << "#CONST" << ",";
-        statsFile << "#LINK" << "," << "AVG-LINK-DUR" << "," << "#PLANETS" << ",";
-        statsFile << "#HOPS" << "," << "#LINE-UPS" << "," << "#SH-STARS" << "\n";
+    if (ofGetHours() > 17 || ofGetHours() < 4) {
 
-    } else {
-        statsFile.open(fileName, ofFile::Append);
+        string fileName = "stats_" + ofToString(ofGetYear()) + "-" + ofToString(ofGetMonth()) + ".csv";
+        if (!ofFile::doesFileExist(fileName)) {
+            statsFile = ofFile(ofToDataPath(fileName), ofFile::Append);
+            statsFile.create();
+            // TOP LINE
+            statsFile.open(fileName, ofFile::Append);
+            statsFile << "DATE" << "," << "TIME" << "," << "DURATION" << ",";
+            statsFile << "BLOBS" << "," << "FIRST BLOB" << "," << "LAST BLOB" << ",";
+            statsFile << "0.IDLE" << "," << "1.STARS" << "," << "2.ATTR" << ",";
+            statsFile << "3.REV" << "," << "4.SUN" << "," << "5.ECLIPSE" << "," << "6.SHOOT" << ",";
+            statsFile << "IDLE-DUR" << "," << "#STARS" << "," << "#CONST" << ",";
+            statsFile << "#LINK" << "," << "AVG-LINK-DUR" << "," << "#PLANETS" << ",";
+            statsFile << "#HOPS" << "," << "#LINE-UPS" << "," << "#SH-STARS" << "\n";
+
+        } else {
+            statsFile.open(fileName, ofFile::Append);
+        }
+        
+        statsFile << statsDate << ",";   // DATE
+        statsFile << statsTime << ",";   // TIME
+        statsFile << int(ofGetElapsedTimef()/60) << ",";   // DURATION in minutes
+        
+        statsFile << countBlobs << ",";   // BLOBS
+        statsFile << firstBlob << ",";   // FIRST
+        statsFile << lastBlob << ",";   // LAST
+
+        statsFile << countScene[0] << ",";   // 0.IDLE
+        statsFile << countScene[1] << ",";   // 1.STARS
+        statsFile << countScene[2] << ",";   // 2.ATTR
+        statsFile << countScene[3] << ",";   // 3.REV
+        statsFile << countScene[4] << ",";   // 4.SUN
+        statsFile << countScene[5] << ",";   // 5.ECLIPSE
+        statsFile << countScene[6] << ",";   // 6.SHOOT
+        
+        statsFile << idleDuration << ",";   // IDLE-DUR in minutes
+        statsFile << countStars << ",";   // #STARS
+        statsFile << countConst << ",";   // #CONST
+        statsFile << countLinks << ",";   // #LINK
+        statsFile << 0 << ",";   // AVG-LINK-DUR
+        statsFile << countPlanets << ",";   // #PLANETS
+        statsFile << countHops << ",";   // #HOPS
+        statsFile << countLineups << ",";   // #LINE-UPS
+        statsFile << countShooting << "\n";   // #SH-STARS
+
+        statsFile.close(); 
     }
-    
-    statsFile << ofGetTimestampString("%Y-%m-%d") << ",";   // DATE
-    statsFile << ofGetTimestampString("%H:%M:%S") << ",";   // TIME
-    statsFile << int(ofGetElapsedTimef()/60) << ",";   // DURATION in minutes
-    
-    statsFile << countBlobs << ",";   // BLOBS
-    statsFile << firstBlob << ",";   // FIRST
-    statsFile << lastBlob << ",";   // LAST
-
-    statsFile << countScene[0] << ",";   // 0.IDLE
-    statsFile << countScene[1] << ",";   // 1.STARS
-    statsFile << countScene[2] << ",";   // 2.ATTR
-    statsFile << countScene[3] << ",";   // 3.REV
-    statsFile << countScene[4] << ",";   // 4.SUN
-    statsFile << countScene[5] << ",";   // 5.ECLIPSE
-    statsFile << countScene[6] << ",";   // 6.SHOOT
-    
-    statsFile << idleDuration << ",";   // IDLE-DUR in minutes
-    statsFile << countStars << ",";   // #STARS
-    statsFile << countConst << ",";   // #CONST
-    statsFile << countLinks << ",";   // #LINK
-    statsFile << 0 << ",";   // AVG-LINK-DUR
-    statsFile << countPlanets << ",";   // #PLANETS
-    statsFile << countHops << ",";   // #HOPS
-    statsFile << countLineups << ",";   // #LINE-UPS
-    statsFile << countShooting << "\n";   // #SH-STARS
-
-    statsFile.close(); 
 
     ofLogNotice() << "\t\t\t" << ofGetFrameNum() << "\t" << "goodbye";
 }
