@@ -66,7 +66,6 @@ class Neighbor {
         bool steadyRewarded;
         bool movingMean;
         bool onStage;
-        bool counted;
 
         Neighbor() {
             steadyStart = 0;
@@ -128,6 +127,7 @@ class Blob {
         float vel;
         vector<float> velHistory;
         bool onStage;
+        bool counted;
 
         vector<TimedPoint> rawHistory;
     	vector<TimedPoint> history;    // array length of MAX_HISTORY
