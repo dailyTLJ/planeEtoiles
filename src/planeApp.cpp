@@ -2972,7 +2972,7 @@ void planeApp::exit() {
     // ofLogNotice() << "\t\t\t" << ofGetFrameNum() << "\t" << current_working_dir;
 
     // let's log our statistics
-    if (ofGetHours() > 17 || ofGetHours() < 4) {
+    if (ofGetHours() > 16 || ofGetHours() < 5) {
 
         string fileName = "stats_" + ofToString(ofGetYear()) + "-" + ofToString(ofGetMonth()) + ".csv";
         if (!ofFile::doesFileExist(fileName)) {
