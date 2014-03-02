@@ -376,7 +376,8 @@ void planeApp::initScenes(){
         int randomShooter = ofRandom(26) + 1;
         if (randomShooter == 18 || randomShooter==26) randomShooter = 10;
         shooting_stars.push_back(ofPtr<mediaElement>( new videoElement("video/shooting/SSTAR_" + ofToString(randomShooter,2,'0') + "_animation-10fps.mov")));
-    }
+        (*shooting_stars[shooting_stars.size()-1]).fullyLoaded = true;
+    } 
 
     int s = 0;
 
@@ -711,11 +712,11 @@ void planeApp::update(){
         }
         // FAIL SAVE TIME TRIGGER
         if (autoplay && scenes[scene].length[segment] > 0 && segmentClock >= scenes[scene].length[segment]+10) {
-            ofLogError("TRANSITION") << "\t" << ofGetFrameNum() << "\t" << "FORCE transition change, because segmentClock>+15";
+            ofLogError("TRANSITION") << "\t" << ofGetFrameNum() << "\t" << "FORCE transition change, because segmentClock>+10";
             endSegment();        // FOR DEBUGGING
         }
-        if (autoplay && scenes[scene].length[segment] > 0 && segmentClock >= scenes[scene].length[segment]+20) {
-            ofLogError("TRANSITION") << "\t" << ofGetFrameNum() << "\t" << "FORCE transition change, because segmentClock>+20";
+        if (autoplay && scenes[scene].length[segment] > 0 && segmentClock >= scenes[scene].length[segment]+12) {
+            ofLogError("TRANSITION") << "\t" << ofGetFrameNum() << "\t" << "FORCE transition change, because segmentClock>+12";
             moveOn = true;       // FOR DEBUGGING
         }
         // triggered by the end of fading out the bg
@@ -1006,7 +1007,7 @@ void planeApp::allFaded(int & trans) {
 void planeApp::unHideSun(int & trans) {
 
     if (scene==SUN && segment==3) {    // run everywhere
-        ofLogNotice("mediaElement") << "\t" << ofGetFrameNum() << "\t" << "unHideSun";
+        ofLogNotice("mediaElement") << "\t" << ofGetFrameNum() << "\t" << "unHideSun()\t\tfgMedia: " << fgMedia.size();
         if (fgMedia.size()<3) {
             // make sure to uncover yellow sun only, if there was only 1 blue-surface
             fgMedia[0]->hide = false;
@@ -1653,7 +1654,7 @@ void planeApp::beginSegment() {
     ofLogNotice("TRANSITION") << "\t" << ofGetFrameNum() << "\t" << "beginSegment()   blobs-count = " << blobs.size();
 
     instructionTxt.fadeIn(instructionFadeIn);
-    if ((scene==1 && segment<2) || (scene==6 && segment==4)) instructionAnim[0]->fadeIn();
+    if ((scene==STARS && segment<2) || (scene==SHOOTING && segment==4)) instructionAnim[0]->fadeIn();
 
     transition = false;
 
@@ -1690,7 +1691,7 @@ void planeApp::endSegment() {
             ofLogNotice("TRANSITION") << "\t" << ofGetFrameNum() << "\t" << "instructionTxt fade out";
             instructionTxt.fadeOut(instructionFadeOut);
             ofAddListener( instructionTxt.fadeOutEnd, this, &planeApp::endedInstructions );
-        } else if (instructionAnim[0]->rawText != "" && scene==1) {
+        } else if (instructionAnim[0]->rawText != "" && scene==STARS) {
             // that should only happen for: title / diagram?
             ofLogNotice("TRANSITION") << "\t" << ofGetFrameNum() << "\t" << "instructionAnim fade out";
             for (int i=0; i<6; i++) instructionAnim[i]->fadeOut(0.01);
@@ -1833,7 +1834,7 @@ void planeApp::endedInstructions(int & trans) {
                     (*fgMedia[0]).reset();
                     (*fgMedia[0]).finishMovie(1.0);
                     (*fgMedia[0]).movieEndTrigger=true;
-                    ofAddListener( (*fgMedia[fgMedia.size()-1]).fadeOutEnd, this, &planeApp::allFaded );
+                    ofAddListener( (*fgMedia[0]).fadeOutEnd, this, &planeApp::allFaded );
                     ofLogNotice("TRANSITION") << "\t" << ofGetFrameNum() << "\t" << "play sun freeze red movie";
                     transition = true;
                 } else {
@@ -1865,7 +1866,7 @@ void planeApp::endedInstructions(int & trans) {
                     (*fgMedia[0]).reset();
                     (*fgMedia[0]).autoDestroy(true);
                     (*fgMedia[0]).movieEndTrigger=true;
-                    ofAddListener( (*fgMedia[fgMedia.size()-1]).fadeOutEnd, this, &planeApp::allFaded );
+                    ofAddListener( (*fgMedia[0]).fadeOutEnd, this, &planeApp::allFaded );
                     transition = true;
                 } else {
                     moveOn = true;
@@ -2040,7 +2041,7 @@ void planeApp::initSegment(){
         instructionAnim[i]->opMax = 1.0;
         instructionAnim[i]->opacity = 1.0;
     }
-    if ((scene==1 && segment==0) || (scene==6 && segment==4)) {
+    if ((scene==STARS && segment==0) || (scene==SHOOTING && segment==4)) {
         // TITLE
         int y = 0;
         for (int i=0; i<6; i++) instructionAnim[i]->setFont(&fontInstr1);
@@ -2051,7 +2052,7 @@ void planeApp::initSegment(){
             instructionAnim[0]->setText("Chorégraphies\npour des humains\net des étoiles", "Choregraphies\npour des humains\net des etoiles");
             instructionAnim[0]->setDisplay(0,y-70);
         }
-    } else if (scene==1 && segment==1) {
+    } else if (scene==STARS && segment==1) {
         // STEP INTO THE ZONE
         int y = -50;
         for (int i=0; i<6; i++) instructionAnim[i]->setFont(&fontInstr1);
@@ -2062,7 +2063,7 @@ void planeApp::initSegment(){
             instructionAnim[0]->setText("Entrez\ndans la zone\nde danse", "Entrez\ndans la zone\nde danse");
             instructionAnim[0]->setDisplay(0,y-10);
         }
-    } else if (scene==6 && segment==2) {
+    } else if (scene==SHOOTING && segment==2) {
         // EXHALE
         for (int i=0; i<6; i++) instructionAnim[i]->setFont(&fontInstr2);
         int x = 0;
@@ -2090,7 +2091,7 @@ void planeApp::initSegment(){
             instructionAnim[3]->setText("RESPIREZ", "RESPIREZ");
             instructionAnim[3]->setDisplay(x,y+270);
         }
-    } else if (scene==4 && (segment==2 || segment==4)) {
+    } else if (scene==SUN && (segment==2 || segment==4)) {
         // FREEZE
         for (int i=0; i<6; i++) instructionAnim[i]->setFont(&fontInstr3);
         if (language==0) {
@@ -2122,7 +2123,7 @@ void planeApp::initSegment(){
             instructionAnim[4]->setText("!", "!");
             instructionAnim[4]->setDisplay(x+310,y+420);
         }
-    } else if (scene==3 && segment==1) {
+    } else if (scene==REVOLUTIONS && segment==1) {
         // LET GO
         int y = 0;
         if (language==0) {
@@ -2435,7 +2436,7 @@ void planeApp::drawInstructions(int x, int y, float scale) {
     // THE ANIMATING of the big instruction texts
     float segmentTimer = ofGetSystemTimeMicros()/(1000*1000.0) - segmentStart;
 
-    if (scene==1 && segment==1) {
+    if (scene==STARS && segment==1) {
 
         // STEP INTO THE ZONE, draw the circles
         ofNoFill(); 
@@ -2453,7 +2454,7 @@ void planeApp::drawInstructions(int x, int y, float scale) {
             }
         }
 
-    } else if (scene==4 && (segment==2 || segment==4)) {
+    } else if (scene==SUN && (segment==2 || segment==4)) {
 
         // FREEZE / STOP!
         float compValue = (segmentTimer-0.3) * 0.5;
@@ -2476,7 +2477,7 @@ void planeApp::drawInstructions(int x, int y, float scale) {
             }
         }
 
-    } else if (scene==6 && segment==2) {
+    } else if (scene==SHOOTING && segment==2) {
 
         for (int i=0; i<6; i++) instructionAnim[i]->hide = true;
 
@@ -2529,7 +2530,7 @@ void planeApp::drawInstructions(int x, int y, float scale) {
             }
         }
 
-    } else if (scene==3 && segment==1) {
+    } else if (scene==REVOLUTIONS && segment==1) {
 
         // LET GO
         if (segmentTimer < 3 || (segmentTimer>6 && segmentTimer<8)) {
