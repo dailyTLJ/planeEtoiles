@@ -55,7 +55,7 @@
             </Param>
             <Param>
                 <Name>save</Name>
-                <Value>0 1 /home/planeblob/Documents/grabs/tmp/</Value>
+                <Value>1 3600 /home/planeblob/Documents/grabs/tmp/</Value>
             </Param>
         </Source>
         <Actuator>
@@ -165,6 +165,7 @@
         </Actuator>
         <Client>
             <Address>10.10.44.21</Address>
+            <!-- <Address>10.4.44.43</Address> -->
             <!-- <Address>localhost</Address> -->
             <Port>9000</Port>
         </Client>
