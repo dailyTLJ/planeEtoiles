@@ -1,5 +1,4 @@
 
-
 gstreamer 1.0 errors
 =========================================
 
@@ -122,6 +121,7 @@ COPY FILES OVER SSH
 ==============================================
 sudo scp planeviz@10.10.44.21:~/Documents/log/of_log/planeEtoiles_2014-01-28* ~/Documents/log/of_log/
 
+sudo scp planeviz@10.10.44.21:~/src/of_v0.8.0_linux64_release/apps/myApps/planeEtoiles/bin/data/stats* ~/Documents/log/
 
 
 

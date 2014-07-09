@@ -127,6 +127,7 @@ class Blob {
         float vel;
         vector<float> velHistory;
         bool onStage;
+        bool counted;
 
         vector<TimedPoint> rawHistory;
     	vector<TimedPoint> history;    // array length of MAX_HISTORY

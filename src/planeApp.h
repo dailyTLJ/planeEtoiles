@@ -312,5 +312,24 @@ class planeApp : public ofBaseApp{
 		textElement instructionTxt;
 		std::vector< ofPtr<textElement> > instructionAnim;
 
+		ofFile statsFile;
+
+		string statsDate;
+		string statsTime;
+		unsigned int countBlobs;
+		string firstBlob;
+		string lastBlob;
+		unsigned int countScene[7];
+		int idleStart;
+		int idleDuration;
+		unsigned int countStars;
+		unsigned int countConst;
+		unsigned int countLinks;
+		// unsigned int avgLinkDur;
+		unsigned int countPlanets;
+		unsigned int countHops;
+		unsigned int countLineups;
+		unsigned int countShooting;
+
 
 };

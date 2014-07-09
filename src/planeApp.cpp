@@ -100,6 +100,24 @@ void planeApp::setup(){
     lastActivity = 0;
     moonPosX = 40;
 
+    // stats
+    statsDate = ofGetTimestampString("%Y-%m-%d");
+    statsTime = ofGetTimestampString("%H:%M:%S");
+    countBlobs = 0;
+    firstBlob = "";
+    lastBlob = "";
+    // countScene = new unsigned int[7];
+    for (unsigned int i=0; i<7; i++) countScene[i] = 0;
+    idleStart = 0;
+    idleDuration = 0;
+    countStars = 0;
+    countConst = 0;
+    countLinks = 0;
+    countPlanets = 0;
+    countHops = 0;
+    countLineups = 0;
+    countShooting = 0;
+
     success = false;
     successCnt = 0;
     blobsOnStage = 0;
@@ -325,19 +343,27 @@ void planeApp::initScenes(){
     nebula->reset(true);
     nebula->opMax = nebulaOpacity/100.f;
     nebulaOpacity.addListener(this,&planeApp::guiNebulaChange);
+    nebula->fullyLoaded = true;
 
     idleMovie = ofPtr<mediaElement>( new videoElement("video/idle/IDLE_MODE_13_white-anim_animation_15fps.mov", false));
     (*idleMovie).movieEndTrigger=false;
     (*idleMovie).outroTransformation = &mediaElement::finishMovie;
+    (*idleMovie).fullyLoaded = true;
     ofAddListener( (*idleMovie).fadeOutEnd, this, &planeApp::allFaded );
     starryBg = ofPtr<mediaElement>( new videoElement("video/bg/BACKGROUND 131210-2_loop_animation-10fps.mov", false));
+    starryBg->fullyLoaded = true;
     currentBg = starryBg;
 
     attraction_outro = ofPtr<mediaElement>( new videoElement("video/bg/ATTRACTION_outro_animation-10fps.mov"));
+    attraction_outro->fullyLoaded = true;
     sun_intro = ofPtr<mediaElement>( new videoElement("video/sun/SUN_26-intro_animation-10fps.mov",true));
     sun_jump = ofPtr<mediaElement>( new videoElement("video/sun/SUN_stand_jump-loop_4_animation_alpha-10fps.mov",false));
     sun_run = ofPtr<mediaElement>( new videoElement("video/sun/SUN_run_loop-4_animation_alpha-10fps.mov",false));
     sun_freeze_red.push_back( ofPtr<mediaElement>( new videoElement("video/sun/SUN_freeze_1_animation_alpha-10fps.mov",false)));
+    sun_intro->fullyLoaded = true;
+    sun_jump->fullyLoaded = true;
+    sun_run->fullyLoaded = true;
+    sun_freeze_red[0]->fullyLoaded = true;
 
 
     // PRELOAD BLUE SURFACE VIDS = seems to slow down FPS
@@ -350,7 +376,8 @@ void planeApp::initScenes(){
         int randomShooter = ofRandom(26) + 1;
         if (randomShooter == 18 || randomShooter==26) randomShooter = 10;
         shooting_stars.push_back(ofPtr<mediaElement>( new videoElement("video/shooting/SSTAR_" + ofToString(randomShooter,2,'0') + "_animation-10fps.mov")));
-    }
+        (*shooting_stars[shooting_stars.size()-1]).fullyLoaded = true;
+    } 
 
     int s = 0;
 
@@ -685,11 +712,11 @@ void planeApp::update(){
         }
         // FAIL SAVE TIME TRIGGER
         if (autoplay && scenes[scene].length[segment] > 0 && segmentClock >= scenes[scene].length[segment]+10) {
-            ofLogError("TRANSITION") << "\t" << ofGetFrameNum() << "\t" << "FORCE transition change, because segmentClock>+15";
+            ofLogError("TRANSITION") << "\t" << ofGetFrameNum() << "\t" << "FORCE transition change, because segmentClock>+10";
             endSegment();        // FOR DEBUGGING
         }
-        if (autoplay && scenes[scene].length[segment] > 0 && segmentClock >= scenes[scene].length[segment]+20) {
-            ofLogError("TRANSITION") << "\t" << ofGetFrameNum() << "\t" << "FORCE transition change, because segmentClock>+20";
+        if (autoplay && scenes[scene].length[segment] > 0 && segmentClock >= scenes[scene].length[segment]+12) {
+            ofLogError("TRANSITION") << "\t" << ofGetFrameNum() << "\t" << "FORCE transition change, because segmentClock>+12";
             moveOn = true;       // FOR DEBUGGING
         }
         // triggered by the end of fading out the bg
@@ -791,6 +818,7 @@ void planeApp::update(){
                                 (*fgMedia[fgMedia.size()-1]).reset(true);
                                 planetCnt = oldCnt + 1;
                                 ofLogNotice("interaction") << "\t" << ofGetFrameNum() << "\t" << "\tadd a planet, planetCnt " << planetCnt;
+                                countPlanets++;
                             } else {
                                 // TAKE AWAY PLANETS
                                 ofLogNotice("interaction") << "\t" << ofGetFrameNum() << "\t" << "\ttake away planet, planetCnt " << planetCnt;
@@ -888,6 +916,7 @@ void planeApp::update(){
                         success = true;
                         // (*fgMedia[1]).fadeIn();
                         (*fgMedia[1]).fadeOut(-0.1, (*fgMedia[1]).opacity, false);
+                        countLineups++;
                     }
                 } else {
                     // (*fgMedia[1]).hide = true;
@@ -978,7 +1007,7 @@ void planeApp::allFaded(int & trans) {
 void planeApp::unHideSun(int & trans) {
 
     if (scene==SUN && segment==3) {    // run everywhere
-        ofLogNotice("mediaElement") << "\t" << ofGetFrameNum() << "\t" << "unHideSun";
+        ofLogNotice("mediaElement") << "\t" << ofGetFrameNum() << "\t" << "unHideSun()\t\tfgMedia: " << fgMedia.size();
         if (fgMedia.size()<3) {
             // make sure to uncover yellow sun only, if there was only 1 blue-surface
             fgMedia[0]->hide = false;
@@ -1051,6 +1080,7 @@ void planeApp::blobOnLost(int & blobID) {
                 (*fgMedia[fgMedia.size()-1]).reset();
                 (*fgMedia[fgMedia.size()-1]).autoDestroy(true);
                 // if (segment==2) (*fgMedia[0]).bounce(); // sun video = [0]
+                countHops++;
             }
         } else if (scene==SHOOTING && !blobs[blobID].occluded) {
             // SHOOTING STARS
@@ -1062,6 +1092,7 @@ void planeApp::blobOnLost(int & blobID) {
                 (*fgMedia[fgMedia.size()-1]).moveAcross( blobs[blobID].velocity.x, blobs[blobID].velocity.y, projectionW, projectionH, false);
                 (*fgMedia[fgMedia.size()-1]).autoDestroy(true);
                 (*fgMedia[fgMedia.size()-1]).movie->setSpeed(0.5);
+                countShooting++;
             } else if (segment==1) {
                 float randdeg = ofRandom(-5.f, 5.f);
                 for (int i=0; i<10; i++) {
@@ -1073,6 +1104,7 @@ void planeApp::blobOnLost(int & blobID) {
                     (*fgMedia[fgMedia.size()-1]).autoDestroy(true);
                     (*fgMedia[fgMedia.size()-1]).movie->setSpeed(0.5);
                 }
+                countShooting++;
             }
         }
     }
@@ -1137,6 +1169,7 @@ void planeApp::blobSteady(Pair & pair) {
                 (*fgMedia[fgMedia.size()-1]).fadeIn(0.2);
                 (*fgMedia[fgMedia.size()-1]).bridge(b1->id, b2->id);
                 ofNotifyEvent( blobs[pair.blob1].updatePosition, pair.blob1, &blobs[pair.blob1] );
+                countLinks++;
             } else {
                 ofLogNotice("BLOB") << "\t" << ofGetFrameNum()  << "\t\t\t" << "bridge already exists";
             }
@@ -1207,6 +1240,7 @@ void planeApp::blobOnFreeze(int & blobID) {
                 (*fgMedia[fgMedia.size()-1]).finishMovie(1.0);
                 // (*fgMedia[fgMedia.size()-1]).outroTransformation = &mediaElement::scaleAway;
                 if (segment==SEG_CONSTELLATIONS) successCnt++;
+                countStars++;
             }
         }
     }
@@ -1320,6 +1354,7 @@ void planeApp::blobOverFreeze(int & blobID) {
                 (*fgMedia[fgMedia.size()-1]).autoDestroy(true);
 
                 this->blobUnlink(blobID);
+                countConst++;
             }
         }
     }
@@ -1327,9 +1362,21 @@ void planeApp::blobOverFreeze(int & blobID) {
 
 void planeApp::blobEnterStage(int & blobID) {
 
+    // stats
+    if (!blobs[blobID].counted) {
+        countBlobs++;
+        if (firstBlob=="") firstBlob = ofGetTimestampString("%H:%M:%S");
+        lastBlob = ofGetTimestampString("%H:%M:%S");
+        blobs[blobID].counted = true;
+    }
+
     if (scene==IDLE && !transition) {
         // COME CLOSER, if people enter stage, move on to first Scene
-        if (!success) success = true;
+        if (!success) {
+            success = true;
+            int idleClock = ofGetUnixTime() - idleStart;
+            idleDuration += int(idleClock/60);
+        }
 
     } else if (scene==ATTRACTION && !transition) {
 
@@ -1353,7 +1400,7 @@ void planeApp::blobEnterStage(int & blobID) {
         // int planets = sizeof(planedId) / sizeof(planedId[0]);
         pickPlanet++;
         // if (pickPlanet >= planets) pickPlanet = 0;
-        if (pickPlanet > 29) pickPlanet = 0;
+        if (pickPlanet > 28) pickPlanet = 0;
         fgMedia.push_back(ofPtr<mediaElement>( new imageElement("video/eclipse/ECLIPSE_planet_" + ofToString(pickPlanet+1)+".png",1)));
         fgMedia[fgMedia.size()-1]->blend = false;
         // fgMedia.push_back(planet_animated[pickPlanet]);
@@ -1607,7 +1654,7 @@ void planeApp::beginSegment() {
     ofLogNotice("TRANSITION") << "\t" << ofGetFrameNum() << "\t" << "beginSegment()   blobs-count = " << blobs.size();
 
     instructionTxt.fadeIn(instructionFadeIn);
-    if ((scene==1 && segment<2) || (scene==6 && segment==4)) instructionAnim[0]->fadeIn();
+    if ((scene==STARS && segment<2) || (scene==SHOOTING && segment==4)) instructionAnim[0]->fadeIn();
 
     transition = false;
 
@@ -1644,7 +1691,7 @@ void planeApp::endSegment() {
             ofLogNotice("TRANSITION") << "\t" << ofGetFrameNum() << "\t" << "instructionTxt fade out";
             instructionTxt.fadeOut(instructionFadeOut);
             ofAddListener( instructionTxt.fadeOutEnd, this, &planeApp::endedInstructions );
-        } else if (instructionAnim[0]->rawText != "" && scene==1) {
+        } else if (instructionAnim[0]->rawText != "" && scene==STARS) {
             // that should only happen for: title / diagram?
             ofLogNotice("TRANSITION") << "\t" << ofGetFrameNum() << "\t" << "instructionAnim fade out";
             for (int i=0; i<6; i++) instructionAnim[i]->fadeOut(0.01);
@@ -1787,7 +1834,7 @@ void planeApp::endedInstructions(int & trans) {
                     (*fgMedia[0]).reset();
                     (*fgMedia[0]).finishMovie(1.0);
                     (*fgMedia[0]).movieEndTrigger=true;
-                    ofAddListener( (*fgMedia[fgMedia.size()-1]).fadeOutEnd, this, &planeApp::allFaded );
+                    ofAddListener( (*fgMedia[0]).fadeOutEnd, this, &planeApp::allFaded );
                     ofLogNotice("TRANSITION") << "\t" << ofGetFrameNum() << "\t" << "play sun freeze red movie";
                     transition = true;
                 } else {
@@ -1819,7 +1866,7 @@ void planeApp::endedInstructions(int & trans) {
                     (*fgMedia[0]).reset();
                     (*fgMedia[0]).autoDestroy(true);
                     (*fgMedia[0]).movieEndTrigger=true;
-                    ofAddListener( (*fgMedia[fgMedia.size()-1]).fadeOutEnd, this, &planeApp::allFaded );
+                    ofAddListener( (*fgMedia[0]).fadeOutEnd, this, &planeApp::allFaded );
                     transition = true;
                 } else {
                     moveOn = true;
@@ -1887,6 +1934,7 @@ void planeApp::jumpToScene(int s) {
     transition = true;
     initSegment();
     int tmp = -2;
+    if (scene!=oldScene) countScene[scene]++;
     if (scene==IDLE) bgMediaSwap(scene);
     else if (oldScene==0 && scene>0) bgMediaSwap(tmp);
 }
@@ -1925,7 +1973,7 @@ void planeApp::nextSegment() {
             ofLogNotice("TRANSITION") << "\t" << ofGetFrameNum() << "\t" << "30min idle, force terminate program, so it restarts itself again";
             ofExit();
         } else {
-            ofLogNotice("TRANSITION") << "\t" << ofGetFrameNum() << "\t" << "no activity since " << lastActivity << "sec, go to IDLE";
+            ofLogNotice("TRANSITION") << "\t" << ofGetFrameNum() << "\t" << "no activity since " << lastActivity << "sec, go to IDLE, eclapsed time = " << ofGetElapsedTimef();
             scene = IDLE;
             segment = 0;
             sceneChange = true;
@@ -1940,8 +1988,9 @@ void planeApp::nextSegment() {
     }
 
     if (sceneChange)
+        countScene[scene]++;
         ofLogNotice("TRANSITION") << "\t" << ofGetFrameNum() << "\t" << "sceneChange! scene " << scene << ": " << scenes[scene].name;
-    ofLogNotice("TRANSITION") << "\t" << ofGetFrameNum() << "\t" << "---------------------------\t" << scene << " : " << segment << "\t" << ofGetFrameRate() << "FPS\t" << ofGetElapsedTimef() << "sec";
+    ofLogNotice("TRANSITION") << "\t" << ofGetFrameNum() << "\t" << "---------------------------\t" << scene << " : " << segment << "\t" << ofGetFrameRate() << "FPS\t" << ofGetElapsedTimef() << "sec\t" << ofGetTimestampString("%H:%M:%S");
 
     initSegment();
 
@@ -1956,7 +2005,7 @@ void planeApp::initSegment(){
     guiScene = scene;
     guiSegment = segment;
     stateGui.saveToFile("currentState.xml");
-
+    
 
 
     configureBlobserver();
@@ -1972,6 +2021,7 @@ void planeApp::initSegment(){
     if (segment==0) planetCnt = 0;
     // flash = true;       //
     segmentStart = ofGetUnixTime();
+    if (scene==IDLE) idleStart = ofGetUnixTime();
     segmentClock = 0;
 
     string instruction = scenes[scene].instructions[language][segment];
@@ -1991,7 +2041,7 @@ void planeApp::initSegment(){
         instructionAnim[i]->opMax = 1.0;
         instructionAnim[i]->opacity = 1.0;
     }
-    if ((scene==1 && segment==0) || (scene==6 && segment==4)) {
+    if ((scene==STARS && segment==0) || (scene==SHOOTING && segment==4)) {
         // TITLE
         int y = 0;
         for (int i=0; i<6; i++) instructionAnim[i]->setFont(&fontInstr1);
@@ -2002,7 +2052,7 @@ void planeApp::initSegment(){
             instructionAnim[0]->setText("Chorégraphies\npour des humains\net des étoiles", "Choregraphies\npour des humains\net des etoiles");
             instructionAnim[0]->setDisplay(0,y-70);
         }
-    } else if (scene==1 && segment==1) {
+    } else if (scene==STARS && segment==1) {
         // STEP INTO THE ZONE
         int y = -50;
         for (int i=0; i<6; i++) instructionAnim[i]->setFont(&fontInstr1);
@@ -2013,7 +2063,7 @@ void planeApp::initSegment(){
             instructionAnim[0]->setText("Entrez\ndans la zone\nde danse", "Entrez\ndans la zone\nde danse");
             instructionAnim[0]->setDisplay(0,y-10);
         }
-    } else if (scene==6 && segment==2) {
+    } else if (scene==SHOOTING && segment==2) {
         // EXHALE
         for (int i=0; i<6; i++) instructionAnim[i]->setFont(&fontInstr2);
         int x = 0;
@@ -2041,7 +2091,7 @@ void planeApp::initSegment(){
             instructionAnim[3]->setText("RESPIREZ", "RESPIREZ");
             instructionAnim[3]->setDisplay(x,y+270);
         }
-    } else if (scene==4 && (segment==2 || segment==4)) {
+    } else if (scene==SUN && (segment==2 || segment==4)) {
         // FREEZE
         for (int i=0; i<6; i++) instructionAnim[i]->setFont(&fontInstr3);
         if (language==0) {
@@ -2073,7 +2123,7 @@ void planeApp::initSegment(){
             instructionAnim[4]->setText("!", "!");
             instructionAnim[4]->setDisplay(x+310,y+420);
         }
-    } else if (scene==3 && segment==1) {
+    } else if (scene==REVOLUTIONS && segment==1) {
         // LET GO
         int y = 0;
         if (language==0) {
@@ -2386,7 +2436,7 @@ void planeApp::drawInstructions(int x, int y, float scale) {
     // THE ANIMATING of the big instruction texts
     float segmentTimer = ofGetSystemTimeMicros()/(1000*1000.0) - segmentStart;
 
-    if (scene==1 && segment==1) {
+    if (scene==STARS && segment==1) {
 
         // STEP INTO THE ZONE, draw the circles
         ofNoFill(); 
@@ -2404,7 +2454,7 @@ void planeApp::drawInstructions(int x, int y, float scale) {
             }
         }
 
-    } else if (scene==4 && (segment==2 || segment==4)) {
+    } else if (scene==SUN && (segment==2 || segment==4)) {
 
         // FREEZE / STOP!
         float compValue = (segmentTimer-0.3) * 0.5;
@@ -2427,7 +2477,7 @@ void planeApp::drawInstructions(int x, int y, float scale) {
             }
         }
 
-    } else if (scene==6 && segment==2) {
+    } else if (scene==SHOOTING && segment==2) {
 
         for (int i=0; i<6; i++) instructionAnim[i]->hide = true;
 
@@ -2480,7 +2530,7 @@ void planeApp::drawInstructions(int x, int y, float scale) {
             }
         }
 
-    } else if (scene==3 && segment==1) {
+    } else if (scene==REVOLUTIONS && segment==1) {
 
         // LET GO
         if (segmentTimer < 3 || (segmentTimer>6 && segmentTimer<8)) {
@@ -2917,6 +2967,61 @@ void planeApp::languageChange() {
 void planeApp::exit() {
     // do some destructing here
     // sendOscMsg("signOut", MYIP); // don't send disconnect, else blobserver terminates!!
+
+    // char current_working_dir[1024];
+    // getcwd( current_working_dir, 1024 );
+    // ofLogNotice() << "\t\t\t" << ofGetFrameNum() << "\t" << current_working_dir;
+
+    // let's log our statistics
+    if (ofGetHours() > 16 || ofGetHours() < 5) {
+
+        string fileName = "stats_" + ofToString(ofGetYear()) + "-" + ofToString(ofGetMonth()) + ".csv";
+        if (!ofFile::doesFileExist(fileName)) {
+            statsFile = ofFile(ofToDataPath(fileName), ofFile::Append);
+            statsFile.create();
+            // TOP LINE
+            statsFile.open(fileName, ofFile::Append);
+            statsFile << "DATE" << "," << "TIME" << "," << "DURATION" << ",";
+            statsFile << "BLOBS" << "," << "FIRST BLOB" << "," << "LAST BLOB" << ",";
+            statsFile << "0.IDLE" << "," << "1.STARS" << "," << "2.ATTR" << ",";
+            statsFile << "3.REV" << "," << "4.SUN" << "," << "5.ECLIPSE" << "," << "6.SHOOT" << ",";
+            statsFile << "IDLE-DUR" << "," << "#STARS" << "," << "#CONST" << ",";
+            statsFile << "#LINK" << "," << "AVG-LINK-DUR" << "," << "#PLANETS" << ",";
+            statsFile << "#HOPS" << "," << "#LINE-UPS" << "," << "#SH-STARS" << "\n";
+
+        } else {
+            statsFile.open(fileName, ofFile::Append);
+        }
+        
+        statsFile << statsDate << ",";   // DATE
+        statsFile << statsTime << ",";   // TIME
+        statsFile << int(ofGetElapsedTimef()/60) << ",";   // DURATION in minutes
+        
+        statsFile << countBlobs << ",";   // BLOBS
+        statsFile << firstBlob << ",";   // FIRST
+        statsFile << lastBlob << ",";   // LAST
+
+        statsFile << countScene[0] << ",";   // 0.IDLE
+        statsFile << countScene[1] << ",";   // 1.STARS
+        statsFile << countScene[2] << ",";   // 2.ATTR
+        statsFile << countScene[3] << ",";   // 3.REV
+        statsFile << countScene[4] << ",";   // 4.SUN
+        statsFile << countScene[5] << ",";   // 5.ECLIPSE
+        statsFile << countScene[6] << ",";   // 6.SHOOT
+        
+        statsFile << idleDuration << ",";   // IDLE-DUR in minutes
+        statsFile << countStars << ",";   // #STARS
+        statsFile << countConst << ",";   // #CONST
+        statsFile << countLinks << ",";   // #LINK
+        statsFile << 0 << ",";   // AVG-LINK-DUR
+        statsFile << countPlanets << ",";   // #PLANETS
+        statsFile << countHops << ",";   // #HOPS
+        statsFile << countLineups << ",";   // #LINE-UPS
+        statsFile << countShooting << "\n";   // #SH-STARS
+
+        statsFile.close(); 
+    }
+
     ofLogNotice() << "\t\t\t" << ofGetFrameNum() << "\t" << "goodbye";
 }
 
@@ -2927,6 +3032,7 @@ void planeApp::keyPressed(int key){
 }
 
 void planeApp::guiNebulaChange(int & v) {
+
     ofLogNotice() << "\t\t" << ofGetFrameNum() << "\t" << "guiNebulaChange() " << v;
     nebula->opMax = nebulaOpacity/100.f;
 }
