@@ -3,7 +3,7 @@ planeEtoiles
 
 openFrameworks code for dailyTLJ's [Choreographies for Humans & Stars](http://www.dailytouslesjours.com/project/choregraphies-pour-des-humains-et-des-etoiles/), a permanent interactive outdoor installation developed for Montreal's Planetarium in 2014.
 
-![Choreographies for Humans & Stars](https://openframeworks.cc/ofBook/images/project_eva/images/revolutionsatplane.jpg)
+![Choreographies for Humans & Stars](https://raw.githubusercontent.com/evsc/planeEtoiles/master/revolutionsatplane.jpg)
 
 The software generates visuals and integrates with data received from [blobserver](https://github.com/paperManu/blobserver).
 
